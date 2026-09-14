@@ -16,7 +16,7 @@ import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from missions import check_mission
+from missions import check_mission, MISSIONS
 from sandbox import run_sandboxed
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -93,6 +93,20 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/progress":
             self._send_json(200, _load_progress())
+            return
+        if self.path == "/missions":
+            missions = [
+                {
+                    "id": mission_id,
+                    "title": m["title"],
+                    "stage": m["stage"],
+                    "tier": m["tier"],
+                    "concept": m["concept"],
+                    "briefing": m["briefing"],
+                }
+                for mission_id, m in MISSIONS.items()
+            ]
+            self._send_json(200, missions)
             return
         self._serve_static(self.path)
 
