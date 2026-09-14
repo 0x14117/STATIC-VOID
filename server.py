@@ -103,6 +103,7 @@ class Handler(BaseHTTPRequestHandler):
                     "tier": m["tier"],
                     "concept": m["concept"],
                     "briefing": m["briefing"],
+                    "inputs": m.get("inputs") or [],
                 }
                 for mission_id, m in MISSIONS.items()
             ]
@@ -148,7 +149,12 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "code must be a string."})
             return
 
-        result = run_sandboxed(code)
+        mission = MISSIONS.get(mission_id)
+        if mission is None:
+            self._send_json(404, {"error": "That mission doesn't exist."})
+            return
+
+        result = run_sandboxed(code, input_values=mission.get("inputs"))
 
         if result["blocked"]:
             self._send_json(200, {

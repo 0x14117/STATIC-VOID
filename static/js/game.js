@@ -72,7 +72,11 @@
     if (!mission) return;
     currentMissionId = id;
     missionTitle.textContent = "MISSION: " + mission.title;
-    briefing.textContent = mission.briefing;
+    if (mission.inputs && mission.inputs.length > 0) {
+      briefing.textContent = mission.briefing + "\n\n[TEST INPUT VALUES, IN ORDER: " + mission.inputs.join(", ") + "]";
+    } else {
+      briefing.textContent = mission.briefing;
+    }
     codeEditor.value = "";
     outputEl.textContent = "";
     cipherReaction.textContent = "";

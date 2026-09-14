@@ -771,6 +771,257 @@ MISSIONS = {
             code_requires=["+", "-", "*", "/", "//", "%", "**", "round("],
         ),
     },
+
+    # =====================================================================
+    # STAGE 4 — USER INPUT
+    # input(), int(), float(), type conversion
+    #
+    # There's no real interactive stdin from the browser, so input() is
+    # fed pre-scripted values per mission ("inputs" below), same as the
+    # Master Document's own "input() patched to return 'TestAgent' for
+    # automated testing" approach. The frontend shows the player these
+    # exact values in order so they know what their input() calls will
+    # receive.
+    # =====================================================================
+
+    # ---------------------------------------------------------------- EASY
+
+    "s4e1": {
+        "title": "Signal Check-In",
+        "stage": 4, "tier": "easy", "concept": "input()",
+        "briefing": "Read a name with input() and print f'WELCOME: {name}'.",
+        "inputs": ["Nova"],
+        "check": make_checker(
+            expected_output="WELCOME: Nova",
+            success_line="Signal received. WELCOME: Nova, confirmed.",
+            missing_hint="I don't see 'WELCOME: Nova' in the output. Read the name with input().",
+            mismatch_hint="Check your label and spacing.",
+            code_requires=["input("],
+        ),
+    },
+
+    "s4e2": {
+        "title": "Age Verification",
+        "stage": 4, "tier": "easy", "concept": "int(input())",
+        "briefing": "Read a number with input(), convert it with int(), add 1, and print the result.",
+        "inputs": ["25"],
+        "check": make_checker(
+            expected_output="26",
+            success_line="26. int() turned that text into a real number you could do math on.",
+            missing_hint="I don't see 26 in the output. Convert the input with int() before adding.",
+            mismatch_hint="Check your conversion — int(input()) + 1 should be 26.",
+            code_requires=["int(input("],
+        ),
+    },
+
+    "s4e3": {
+        "title": "Height Scan",
+        "stage": 4, "tier": "easy", "concept": "float(input())",
+        "briefing": "Read a number with input(), convert it with float(), and print it.",
+        "inputs": ["5.9"],
+        "check": make_checker(
+            expected_output="5.9",
+            success_line="5.9. float() handles the decimal, int() would have crashed.",
+            missing_hint="I don't see 5.9 in the output. Convert the input with float().",
+            mismatch_hint="Check your conversion — float(input()) should print 5.9.",
+            code_requires=["float(input("],
+        ),
+    },
+
+    "s4e4": {
+        "title": "Access Code Entry",
+        "stage": 4, "tier": "easy", "concept": "input()",
+        "briefing": "Read a code with input() and print f'CODE ENTERED: {code}'.",
+        "inputs": ["ALPHA7"],
+        "check": make_checker(
+            expected_output="CODE ENTERED: ALPHA7",
+            success_line="CODE ENTERED: ALPHA7. Logged.",
+            missing_hint="I don't see 'CODE ENTERED: ALPHA7' in the output.",
+            mismatch_hint="Check your label and spacing.",
+            code_requires=["input("],
+        ),
+    },
+
+    "s4e5": {
+        "title": "Signal Doubler",
+        "stage": 4, "tier": "easy", "concept": "int(input())",
+        "briefing": "Read a number with input(), convert it with int(), and print it doubled.",
+        "inputs": ["9"],
+        "check": make_checker(
+            expected_output="18",
+            success_line="18. Doubled, clean conversion.",
+            missing_hint="I don't see 18 in the output.",
+            mismatch_hint="Check your conversion and math — int(input()) * 2 should be 18.",
+            code_requires=["int(input("],
+        ),
+    },
+
+    # -------------------------------------------------------------- MEDIUM
+
+    "s4m1": {
+        "title": "Two-Input Sum",
+        "stage": 4, "tier": "medium", "concept": "int(input()) twice",
+        "briefing": "Read two numbers with input(), convert both with int(), and print f'SUM: {a + b}'.",
+        "inputs": ["4", "9"],
+        "check": make_checker(
+            expected_output="SUM: 13",
+            success_line="13. Two inputs, one sum.",
+            missing_hint="I don't see 'SUM: 13' in the output.",
+            mismatch_hint="Check both conversions — int(input()) twice, then add.",
+            code_requires=["int(input("],
+        ),
+    },
+
+    "s4m2": {
+        "title": "Agent Intake",
+        "stage": 4, "tier": "medium", "concept": "input() + int(input())",
+        "briefing": "Read a name with input(), then an age with int(input()). Print f'AGENT: {name} | AGE: {age}'.",
+        "inputs": ["Ghost", "30"],
+        "check": make_checker(
+            expected_output="AGENT: Ghost | AGE: 30",
+            success_line="AGENT: Ghost | AGE: 30. Full intake, correctly typed.",
+            missing_hint="I don't see the full agent line in the output.",
+            mismatch_hint="Check field order and that age was converted with int().",
+            code_requires=["input(", "int(input("],
+        ),
+    },
+
+    "s4m3": {
+        "title": "Price Lookup",
+        "stage": 4, "tier": "medium", "concept": "float(input()) + int(input())",
+        "briefing": "Read a price with float(input()), then a quantity with int(input()). Print f'TOTAL: {price * qty}'.",
+        "inputs": ["2.5", "4"],
+        "check": make_checker(
+            expected_output="TOTAL: 10.0",
+            success_line="TOTAL: 10.0. Both conversions correct, math checks out.",
+            missing_hint="I don't see 'TOTAL: 10.0' in the output.",
+            mismatch_hint="Check your conversions — price as float, quantity as int.",
+            code_requires=["float(input(", "int(input("],
+        ),
+    },
+
+    "s4m4": {
+        "title": "Signal Length Check",
+        "stage": 4, "tier": "medium", "concept": "input() + len()",
+        "briefing": "Read text with input() and print f'LENGTH: {len(text)}'.",
+        "inputs": ["PROTOCOL"],
+        "check": make_checker(
+            expected_output="LENGTH: 8",
+            success_line="LENGTH: 8. PROTOCOL, measured correctly.",
+            missing_hint="I don't see 'LENGTH: 8' in the output.",
+            mismatch_hint="Check that you're using len() on the input text.",
+            code_requires=["input(", "len("],
+        ),
+    },
+
+    "s4m5": {
+        "title": "Number Report",
+        "stage": 4, "tier": "medium", "concept": "int(input()) + math",
+        "briefing": "Read a number with int(input()). Print f'DOUBLE: {num * 2}' then f'SQUARE: {num ** 2}'.",
+        "inputs": ["6"],
+        "check": make_checker(
+            expected_output="DOUBLE: 12\nSQUARE: 36",
+            success_line="12 and 36. Both correct, one input.",
+            missing_hint="I need both the DOUBLE and SQUARE lines.",
+            mismatch_hint="Check your math — double and square of 6.",
+            code_requires=["int(input("],
+        ),
+    },
+
+    # ---------------------------------------------------------------- HARD
+
+    "s4h1": {
+        "title": "Full Registration Intake",
+        "stage": 4, "tier": "hard", "concept": "input() + int(input()), several fields",
+        "briefing": (
+            "Read name (input), clearance (int(input())), division (input), in that order. Print:\n"
+            "f'AGENT: {name}'\nf'CLEARANCE: {clearance}'\nf'DIVISION: {division}'\n"
+            "f'CLEARANCE X2: {clearance * 2}'"
+        ),
+        "inputs": ["Viper", "7", "NULL SECTOR"],
+        "check": make_checker(
+            expected_output="AGENT: Viper\nCLEARANCE: 7\nDIVISION: NULL SECTOR\nCLEARANCE X2: 14",
+            success_line="Full intake, correctly typed, math confirmed. That's a real registration form.",
+            missing_hint="Your output doesn't match. Check field order and types.",
+            mismatch_hint="Check exact wording, order, and that clearance was converted with int().",
+            code_requires=["input(", "int(input("],
+        ),
+    },
+
+    "s4h2": {
+        "title": "Area From Input",
+        "stage": 4, "tier": "hard", "concept": "float(input()) twice + math",
+        "briefing": (
+            "Read width and height with float(input()) each. Compute area = width * height. Print:\n"
+            "f'WIDTH: {width}'\nf'HEIGHT: {height}'\nf'AREA: {round(area, 2)}'"
+        ),
+        "inputs": ["6.5", "3.0"],
+        "check": make_checker(
+            expected_output="WIDTH: 6.5\nHEIGHT: 3.0\nAREA: 19.5",
+            success_line="19.5. Both inputs converted, area correct.",
+            missing_hint="I need all three lines — WIDTH, HEIGHT, and AREA.",
+            mismatch_hint="Check both float conversions and your area formula.",
+            code_requires=["float(input(", "round("],
+        ),
+    },
+
+    "s4h3": {
+        "title": "Score Report",
+        "stage": 4, "tier": "hard", "concept": "int(input()) three times + math",
+        "briefing": (
+            "Read three scores with int(input()) each. Compute total and average. Print:\n"
+            "f'TOTAL: {total}'\nf'AVERAGE: {round(average, 2)}'"
+        ),
+        "inputs": ["80", "90", "70"],
+        "check": make_checker(
+            expected_output="TOTAL: 240\nAVERAGE: 80.0",
+            success_line="240 total, 80.0 average. Every score converted and counted correctly.",
+            missing_hint="I need both the TOTAL and AVERAGE lines.",
+            mismatch_hint="Check that all three scores were read as int and averaged correctly.",
+            code_requires=["int(input(", "round("],
+        ),
+    },
+
+    "s4h4": {
+        "title": "Temperature Converter",
+        "stage": 4, "tier": "hard", "concept": "float(input()) + formula",
+        "briefing": (
+            "Read a Celsius temperature with float(input()). Compute "
+            "fahrenheit = celsius * 9 / 5 + 32. Print:\n"
+            "f'CELSIUS: {celsius}'\nf'FAHRENHEIT: {round(fahrenheit, 1)}'"
+        ),
+        "inputs": ["20"],
+        "check": make_checker(
+            expected_output="CELSIUS: 20.0\nFAHRENHEIT: 68.0",
+            success_line="20.0C is 68.0F. Formula and conversion both correct.",
+            missing_hint="I need both the CELSIUS and FAHRENHEIT lines.",
+            mismatch_hint="Check your formula — celsius * 9 / 5 + 32.",
+            code_requires=["float(input("],
+        ),
+    },
+
+    "s4h5": {
+        "title": "BOSS — Full Intake Terminal",
+        "stage": 4, "tier": "hard", "concept": "everything from Stage 4, combined",
+        "briefing": (
+            "Final Stage 4 test. Read, in order: name (input), principal (float(input())), "
+            "rate (float(input())), years (int(input())). Compute "
+            "final = principal * (1 + rate) ** years. Print:\n"
+            "f'AGENT: {name}'\nf'PRINCIPAL: {principal}'\nf'RATE: {rate}'\nf'YEARS: {years}'\n"
+            "f'FINAL: {round(final, 2)}'\nfinally print 'REPORT COMPLETE.'"
+        ),
+        "inputs": ["Nova", "500", "0.04", "5"],
+        "check": make_checker(
+            expected_output=(
+                "AGENT: Nova\nPRINCIPAL: 500.0\nRATE: 0.04\nYEARS: 5\n"
+                "FINAL: 608.33\nREPORT COMPLETE."
+            ),
+            success_line="Full intake terminal, every field typed correctly, math confirmed. Stage Four complete.",
+            missing_hint="Your report doesn't match. Check each line, in order, including types.",
+            mismatch_hint="Check exact wording and order, and that each field used the right conversion.",
+            code_requires=["input(", "float(input(", "int(input(", "round("],
+        ),
+    },
 }
 
 
