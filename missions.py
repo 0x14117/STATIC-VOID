@@ -542,6 +542,235 @@ MISSIONS = {
             code_requires=[".strip()", ".upper()", ".title()", ".replace(", ".count(", "len("],
         ),
     },
+
+    # =====================================================================
+    # STAGE 3 — NUMBERS & MATH
+    # int, float, + - * / // % **, round()
+    # =====================================================================
+
+    # ---------------------------------------------------------------- EASY
+
+    "s3e1": {
+        "title": "Sum Check",
+        "stage": 3, "tier": "easy", "concept": "+",
+        "briefing": "Store 12 in a variable a and 7 in a variable b. Print a + b.",
+        "check": make_checker(
+            expected_output="19",
+            success_line="19. Addition doesn't lie.",
+            missing_hint="I don't see 19 in the output. Add the two variables.",
+            mismatch_hint="Check your math — 12 + 7 should be 19.",
+            code_requires=["+"],
+        ),
+    },
+
+    "s3e2": {
+        "title": "Difference Check",
+        "stage": 3, "tier": "easy", "concept": "-",
+        "briefing": "Store 12 in a variable a and 7 in a variable b. Print a - b.",
+        "check": make_checker(
+            expected_output="5",
+            success_line="5. Subtraction confirmed.",
+            missing_hint="I don't see 5 in the output. Subtract b from a.",
+            mismatch_hint="Check your math — 12 - 7 should be 5.",
+            code_requires=["-"],
+        ),
+    },
+
+    "s3e3": {
+        "title": "Product Check",
+        "stage": 3, "tier": "easy", "concept": "*",
+        "briefing": "Store 6 in a variable a and 7 in a variable b. Print a * b.",
+        "check": make_checker(
+            expected_output="42",
+            success_line="42. Multiplication checks out.",
+            missing_hint="I don't see 42 in the output. Multiply the two variables.",
+            mismatch_hint="Check your math — 6 * 7 should be 42.",
+            code_requires=["*"],
+        ),
+    },
+
+    "s3e4": {
+        "title": "Division Check",
+        "stage": 3, "tier": "easy", "concept": "/",
+        "briefing": "Store 20 in a variable a and 4 in a variable b. Print a / b.",
+        "check": make_checker(
+            expected_output="5.0",
+            success_line="5.0. / always gives you a float, even when it divides evenly.",
+            missing_hint="I don't see 5.0 in the output. Divide a by b with /.",
+            mismatch_hint="Check your math — 20 / 4 should print as 5.0, not 5.",
+            code_requires=["/"],
+        ),
+    },
+
+    "s3e5": {
+        "title": "Power Check",
+        "stage": 3, "tier": "easy", "concept": "**",
+        "briefing": "Store 2 in a variable a and 5 in a variable b. Print a ** b.",
+        "check": make_checker(
+            expected_output="32",
+            success_line="32. 2 to the 5th, confirmed.",
+            missing_hint="I don't see 32 in the output. Use ** for exponents.",
+            mismatch_hint="Check your math — 2 ** 5 should be 32.",
+            code_requires=["**"],
+        ),
+    },
+
+    # -------------------------------------------------------------- MEDIUM
+
+    "s3m1": {
+        "title": "Average Calculator",
+        "stage": 3, "tier": "medium", "concept": "/ + f-strings",
+        "briefing": "Store total=47 and count=5. Print f'AVERAGE: {total / count}'.",
+        "check": make_checker(
+            expected_output="AVERAGE: 9.4",
+            success_line="9.4. That's the real average, not the rounded-off version.",
+            missing_hint="I don't see 'AVERAGE: 9.4' in the output.",
+            mismatch_hint="Check your division — 47 / 5 should be 9.4.",
+            code_requires=["/"],
+        ),
+    },
+
+    "s3m2": {
+        "title": "Time Split",
+        "stage": 3, "tier": "medium", "concept": "// and %",
+        "briefing": "Store seconds=145. Print f'MINUTES: {seconds // 60}' and f'REMAINDER: {seconds % 60}'.",
+        "check": make_checker(
+            expected_output="MINUTES: 2\nREMAINDER: 25",
+            success_line="2 minutes, 25 seconds left over. // and % split it clean.",
+            missing_hint="I need both the MINUTES and REMAINDER lines.",
+            mismatch_hint="Check your math — 145 seconds is 2 minutes and 25 seconds.",
+            code_requires=["//", "%"],
+        ),
+    },
+
+    "s3m3": {
+        "title": "Price Rounder",
+        "stage": 3, "tier": "medium", "concept": "round()",
+        "briefing": "Store price=19.999. Print f'PRICE: {round(price, 2)}'.",
+        "check": make_checker(
+            expected_output="PRICE: 20.0",
+            success_line="20.0. round() doesn't keep trailing zeros you didn't ask for.",
+            missing_hint="I don't see 'PRICE: 20.0' in the output. Use round(price, 2).",
+            mismatch_hint="Check your rounding — round(19.999, 2) is 20.0, not 19.999 or 20.00.",
+            code_requires=["round("],
+        ),
+    },
+
+    "s3m4": {
+        "title": "Split Result",
+        "stage": 3, "tier": "medium", "concept": "// and %",
+        "briefing": "Store a=9, b=2. Print f'QUOTIENT: {a // b}' and f'REMAINDER: {a % b}'.",
+        "check": make_checker(
+            expected_output="QUOTIENT: 4\nREMAINDER: 1",
+            success_line="4 remainder 1. That's integer division, exactly as it should work.",
+            missing_hint="I need both the QUOTIENT and REMAINDER lines.",
+            mismatch_hint="Check your math — 9 // 2 is 4, 9 % 2 is 1.",
+            code_requires=["//", "%"],
+        ),
+    },
+
+    "s3m5": {
+        "title": "Exponent Report",
+        "stage": 3, "tier": "medium", "concept": "**",
+        "briefing": "Store base=3, exp=4. Store the result of base ** exp in a variable and print f'RESULT: {result}'.",
+        "check": make_checker(
+            expected_output="RESULT: 81",
+            success_line="81. 3 to the 4th, right on target.",
+            missing_hint="I don't see 'RESULT: 81' in the output.",
+            mismatch_hint="Check your math — 3 ** 4 should be 81.",
+            code_requires=["**"],
+        ),
+    },
+
+    # ---------------------------------------------------------------- HARD
+
+    "s3h1": {
+        "title": "Area Calculator",
+        "stage": 3, "tier": "hard", "concept": "* + round() + f-strings",
+        "briefing": (
+            "Store width=12.5, height=4.0. Compute area = width * height. Print:\n"
+            "f'WIDTH: {width}'\nf'HEIGHT: {height}'\nf'AREA: {round(area, 2)}'"
+        ),
+        "check": make_checker(
+            expected_output="WIDTH: 12.5\nHEIGHT: 4.0\nAREA: 50.0",
+            success_line="50.0 square units. Area calculator confirmed accurate.",
+            missing_hint="I need all three lines — WIDTH, HEIGHT, and AREA.",
+            mismatch_hint="Check your math — 12.5 * 4.0 should round to 50.0.",
+            code_requires=["*", "round("],
+        ),
+    },
+
+    "s3h2": {
+        "title": "Time Converter",
+        "stage": 3, "tier": "hard", "concept": "// and % chained",
+        "briefing": (
+            "Store total_seconds=3725. Compute hours, minutes, and remaining seconds using "
+            "// and %. Print:\nf'HOURS: {hours}'\nf'MINUTES: {minutes}'\nf'SECONDS: {seconds}'"
+        ),
+        "check": make_checker(
+            expected_output="HOURS: 1\nMINUTES: 2\nSECONDS: 5",
+            success_line="1 hour, 2 minutes, 5 seconds. Clean conversion, no leftover time unaccounted for.",
+            missing_hint="I need all three lines — HOURS, MINUTES, and SECONDS.",
+            mismatch_hint="Check your math — 3725 seconds is 1:02:05.",
+            code_requires=["//", "%"],
+        ),
+    },
+
+    "s3h3": {
+        "title": "Compound Interest",
+        "stage": 3, "tier": "hard", "concept": "** + round()",
+        "briefing": (
+            "Store principal=1000, rate=0.05, years=3. Compute "
+            "final = principal * (1 + rate) ** years. Print:\n"
+            "f'PRINCIPAL: {principal}'\nf'FINAL: {round(final, 2)}'"
+        ),
+        "check": make_checker(
+            expected_output="PRINCIPAL: 1000\nFINAL: 1157.63",
+            success_line="1157.63. Compound interest, calculated correctly.",
+            missing_hint="I need both the PRINCIPAL and FINAL lines.",
+            mismatch_hint="Check your formula — principal * (1 + rate) ** years, rounded to 2 places.",
+            code_requires=["**", "round("],
+        ),
+    },
+
+    "s3h4": {
+        "title": "Receipt Generator",
+        "stage": 3, "tier": "hard", "concept": "* + + round()",
+        "briefing": (
+            "Store items=7, price_each=2.5. Compute subtotal = items * price_each, "
+            "tax = subtotal * 0.1, total = subtotal + tax. Print, all rounded to 2 places:\n"
+            "f'SUBTOTAL: {...}'\nf'TAX: {...}'\nf'TOTAL: {...}'"
+        ),
+        "check": make_checker(
+            expected_output="SUBTOTAL: 17.5\nTAX: 1.75\nTOTAL: 19.25",
+            success_line="17.5, 1.75, 19.25. That receipt balances.",
+            missing_hint="I need all three lines — SUBTOTAL, TAX, and TOTAL.",
+            mismatch_hint="Check your formula — subtotal, then 10% tax, then the total.",
+            code_requires=["*", "+", "round("],
+        ),
+    },
+
+    "s3h5": {
+        "title": "BOSS — Full Threat Calculator",
+        "stage": 3, "tier": "hard", "concept": "everything from Stage 3, combined",
+        "briefing": (
+            "Final Stage 3 test. Store a=17, b=5. Compute and print, in order, all rounded "
+            "results to 2 places where they're not whole numbers:\n"
+            "f'SUM: {a + b}'\nf'DIFF: {a - b}'\nf'PRODUCT: {a * b}'\n"
+            "f'DIVISION: {round(a / b, 2)}'\nf'FLOOR DIV: {a // b}'\nf'MOD: {a % b}'\n"
+            "f'POWER: {a ** 2}'\nfinally print 'CALCULATION COMPLETE.'"
+        ),
+        "check": make_checker(
+            expected_output=(
+                "SUM: 22\nDIFF: 12\nPRODUCT: 85\nDIVISION: 3.4\n"
+                "FLOOR DIV: 3\nMOD: 2\nPOWER: 289\nCALCULATION COMPLETE."
+            ),
+            success_line="Every operator, every result correct. Stage Three complete.",
+            missing_hint="Your calculator output doesn't match. Check each of the seven lines in order.",
+            mismatch_hint="Check exact wording and order — sum, diff, product, division, floor div, mod, power, then CALCULATION COMPLETE.",
+            code_requires=["+", "-", "*", "/", "//", "%", "**", "round("],
+        ),
+    },
 }
 
 
