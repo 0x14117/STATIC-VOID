@@ -106,12 +106,15 @@ REFERENCE_SOLUTIONS = {
 }
 
 
+STAGE1_IDS = [mid for mid in MISSIONS if mid.startswith("s1")]
+
+
 def main():
-    # every mission has a reference solution
+    # every Stage 1 mission has a reference solution
     check(
-        "reference solutions cover all missions",
-        set(REFERENCE_SOLUTIONS.keys()) == set(MISSIONS.keys()),
-        "missing: {}".format(set(MISSIONS.keys()) - set(REFERENCE_SOLUTIONS.keys())),
+        "reference solutions cover all Stage 1 missions",
+        set(REFERENCE_SOLUTIONS.keys()) == set(STAGE1_IDS),
+        "missing: {}".format(set(STAGE1_IDS) - set(REFERENCE_SOLUTIONS.keys())),
     )
 
     # every reference solution passes its own mission, through the real sandbox
