@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NULL SECTOR</title>
+<link rel="stylesheet" href="/css/game.css">
+</head>
+<body>
+
+<div id="register-screen" class="screen">
+  <div class="panel">
+    <h1 class="glow">NULL SECTOR</h1>
+    <p class="subtitle">// TRAINING TERMINAL //</p>
+    <p id="cipher-line" class="cipher-line">Cipher: State your codename, recruit.</p>
+    <input id="codename-input" type="text" placeholder="codename" autocomplete="off">
+    <button id="register-btn">REGISTER</button>
+  </div>
+</div>
+
+<div id="game-screen" class="screen" hidden>
+  <div class="topbar">
+    <span id="agent-name"></span>
+    <span id="mission-title"></span>
+  </div>
+  <div class="grid">
+    <div class="panel cipher-panel">
+      <div id="cipher-avatar" class="mood-calm">[ === CIPHER === ]</div>
+      <p id="briefing"></p>
+      <p id="cipher-reaction" class="cipher-line"></p>
+    </div>
+    <div class="panel editor-panel">
+      <textarea id="code-editor" spellcheck="false"></textarea>
+      <button id="run-btn">RUN (Ctrl+Enter)</button>
+    </div>
+    <div class="panel output-panel">
+      <h3>OUTPUT</h3>
+      <pre id="output"></pre>
+    </div>
+  </div>
+</div>
+
+<script src="/js/game.js"></script>
+</body>
+</html>
