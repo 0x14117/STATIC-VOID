@@ -1,56 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>STATIC VOID</title>
-<link rel="stylesheet" href="/css/game.css">
+<link rel="stylesheet" href="/css/app.css">
+<!-- Inline so the browser stops asking for /favicon.ico and logging a 404,
+     which looks like a real error when you are debugging something else. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%231b5e9c%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 font-family=%27monospace%27 fill=%27white%27 text-anchor=%27middle%27%3EJ%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
-<div id="register-screen" class="screen">
-  <div class="panel">
-    <h1 class="glow">STATIC VOID</h1>
-    <p class="subtitle">// TRAINING TERMINAL //</p>
-    <p id="cipher-line" class="cipher-line">Cipher: State your codename, recruit.</p>
-    <input id="codename-input" type="text" placeholder="codename" autocomplete="off">
-    <button id="register-btn">REGISTER</button>
+<div id="start" class="centre">
+  <div class="card">
+    <h1>STATIC VOID</h1>
+    <p class="muted">Java practice, built around defensive security work.</p>
+    <label for="name">What should I call you?</label>
+    <input id="name" type="text" autocomplete="off" placeholder="your name">
+    <button id="start-btn">Start</button>
   </div>
 </div>
 
-<div id="game-screen" class="screen" hidden>
-  <div class="topbar">
-    <span id="agent-name"></span>
-    <span id="mission-title"></span>
-  </div>
-  <div class="grid">
-    <div class="panel mission-list-panel">
-      <h3>MISSIONS</h3>
-      <div id="mission-list"></div>
-    </div>
-    <div class="panel cipher-panel">
-      <div id="cipher-avatar" class="mood-calm">[ === CIPHER === ]</div>
-      <h4 class="block-heading">CIPHER TEACHES</h4>
-      <pre id="teach-text" class="teach-text"></pre>
-      <h4 class="block-heading">OBJECTIVE</h4>
-      <p id="briefing"></p>
-      <div class="hint-row">
-        <button id="hint-btn">SHOW HINT</button>
-        <p id="hint-text" class="cipher-line"></p>
+<div id="app" hidden>
+
+  <header>
+    <strong>STATIC VOID</strong>
+    <span id="who" class="muted"></span>
+  </header>
+
+  <div class="layout">
+
+    <nav id="nav"></nav>
+
+    <main>
+      <div id="lab-head">
+        <p class="muted" id="lab-chapter"></p>
+        <h2 id="lab-title"></h2>
+        <p id="lab-idea" class="idea"></p>
       </div>
-      <p id="cipher-reaction" class="cipher-line"></p>
-    </div>
-    <div class="panel editor-panel">
-      <textarea id="code-editor" spellcheck="false"></textarea>
-      <button id="run-btn">RUN (Ctrl+Enter)</button>
-    </div>
-    <div class="panel output-panel">
-      <h3>OUTPUT</h3>
-      <pre id="output"></pre>
-    </div>
+
+      <details id="reading" open>
+        <summary>Read this first</summary>
+        <div class="reading-body">
+          <h3>What you will learn</h3>
+          <p id="lab-learn"></p>
+          <h3>Why it matters</h3>
+          <p id="lab-matters"></p>
+          <h3>Explain</h3>
+          <pre id="lab-explain" class="prose"></pre>
+          <h3>Example</h3>
+          <pre id="lab-example" class="prose"></pre>
+        </div>
+      </details>
+
+      <section id="task">
+        <div class="task-head">
+          <h3 id="task-title"></h3>
+          <span id="task-role" class="tag"></span>
+        </div>
+        <pre id="task-brief" class="prose"></pre>
+        <p id="task-inputs" class="muted" hidden></p>
+
+        <textarea id="editor" spellcheck="false"></textarea>
+
+        <div class="controls">
+          <button id="run">Run  <span class="muted">(Ctrl+Enter)</span></button>
+          <button id="hint" class="secondary">Show a hint</button>
+          <button id="reset" class="secondary">Reset code</button>
+        </div>
+
+        <div id="hints"></div>
+
+        <h4>Output</h4>
+        <pre id="output" class="output"></pre>
+
+        <div id="feedback"></div>
+        <div id="explanation" hidden>
+          <h4>What just happened</h4>
+          <p id="explanation-text"></p>
+          <button id="next" class="primary">Next task</button>
+        </div>
+      </section>
+
+      <details id="recap-box">
+        <summary>What you now know</summary>
+        <ul id="lab-recap"></ul>
+      </details>
+    </main>
   </div>
 </div>
 
-<script src="/js/game.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>

@@ -1,19 +1,17 @@
 """
-STATIC VOID — game server (Java edition).
+STATIC VOID — server.
 
-The server itself is still pure Python stdlib (no Flask, no pip
-requirements) — only the language being TAUGHT changed to Java, to
-match the player's actual university module. Player code is compiled
-and run via the real javac/java toolchain (java_sandbox.py); this
-server just orchestrates. Requires a JDK on PATH (javac + java) in
-addition to Python 3.11+.
+Pure Python standard library: no Flask, nothing to pip install. Learner code is
+compiled and run by the real javac/java toolchain via java_sandbox.py; this
+server only orchestrates. Needs a JDK on PATH in addition to Python 3.11+.
 
-  POST /register   {codename}            -> save agent, return greeting
-  GET  /progress                         -> current save
-  GET  /missions                         -> mission list incl. teaching content
-  POST /run         {mission_id, code}   -> compile+run + mission check
+  POST /register  {name}                        -> save the learner's name
+  GET  /progress                                -> which tasks are done
+  GET  /labs                                    -> all labs and their tasks
+  POST /run       {lab_id, task_id, code}       -> compile, run, grade, explain
 
-Run: python3 server.py [port]   (default port 5000)
+Run: python3 server.py [port]      (default 5000)
+     py server.py [port]           (Windows)
 """
 
 import json
@@ -21,14 +19,15 @@ import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from missions import check_mission, MISSIONS
 from java_sandbox import run_java
+from labs import LABS, get_task
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 SAVES_DIR = os.path.join(BASE_DIR, "saves")
 SAVE_FILE = os.path.join(SAVES_DIR, "progress.json")
-MAX_CODE_LENGTH = 20_000  # generous for any mission in this game; guards against pathological pastes
+
+MAX_CODE_LENGTH = 20_000  # generous for any task here; stops pathological pastes
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -41,21 +40,58 @@ CONTENT_TYPES = {
 def _load_progress():
     if os.path.exists(SAVE_FILE):
         try:
-            with open(SAVE_FILE, "r") as f:
+            with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (json.JSONDecodeError, OSError):
             pass
-    return {"codename": None, "completed_missions": []}
+    return {"name": None, "completed": []}
 
 
 def _save_progress(data):
     os.makedirs(SAVES_DIR, exist_ok=True)
-    with open(SAVE_FILE, "w") as f:
+    with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 
+def _public_labs():
+    """Build the browser's view of the labs field by field.
+
+    Deliberately not a dict comprehension over the lab: `solution` and
+    `explanation` must never reach the browser before they are earned, and
+    listing the safe fields explicitly means a field added to a lab later
+    cannot leak by default.
+    """
+    out = []
+    for lab_id, lab in LABS.items():
+        out.append({
+            "id": lab_id,
+            "chapter": lab["chapter"],
+            "chapter_title": lab["chapter_title"],
+            "title": lab["title"],
+            "idea": lab["idea"],
+            "learn": lab["learn"],
+            "matters": lab["matters"],
+            "explain": lab["explain"],
+            "example": lab["example"],
+            "recap": lab["recap"],
+            "tasks": [
+                {
+                    "id": task["id"],
+                    "role": task["role"],
+                    "brief": task["brief"],
+                    "starter": task["starter"],
+                    "hints": task["hints"],
+                    "inputs": task.get("inputs") or [],
+                }
+                for task in lab["tasks"]
+            ],
+        })
+    out.sort(key=lambda lab: (lab["chapter"], lab["id"]))
+    return out
+
+
 class Handler(BaseHTTPRequestHandler):
-    server_version = "StaticVoid/0.1"
+    server_version = "StaticVoid/2.0"
 
     def _send_json(self, status, payload):
         body = json.dumps(payload).encode("utf-8")
@@ -69,29 +105,28 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         if length == 0:
             return {}
-        raw = self.rfile.read(length)
-        return json.loads(raw.decode("utf-8"))
+        return json.loads(self.rfile.read(length).decode("utf-8"))
 
     def _serve_static(self, path):
         if path == "/":
             path = "/index.html"
 
-        # Resolve against STATIC_DIR and refuse to leave it (path traversal guard).
-        safe_rel = path.lstrip("/")
-        full_path = os.path.realpath(os.path.join(STATIC_DIR, safe_rel))
-        if not full_path.startswith(os.path.realpath(STATIC_DIR) + os.sep) and full_path != os.path.realpath(STATIC_DIR):
+        # Resolve under STATIC_DIR and refuse to leave it (path traversal guard).
+        full_path = os.path.realpath(os.path.join(STATIC_DIR, path.lstrip("/")))
+        root = os.path.realpath(STATIC_DIR)
+        if not full_path.startswith(root + os.sep) and full_path != root:
             self.send_error(403, "Forbidden")
             return
         if not os.path.isfile(full_path):
             self.send_error(404, "Not Found")
             return
 
-        ext = os.path.splitext(full_path)[1]
-        content_type = CONTENT_TYPES.get(ext, "application/octet-stream")
         with open(full_path, "rb") as f:
             body = f.read()
         self.send_response(200)
-        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Type",
+                         CONTENT_TYPES.get(os.path.splitext(full_path)[1],
+                                           "application/octet-stream"))
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -99,26 +134,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/progress":
             self._send_json(200, _load_progress())
-            return
-        if self.path == "/missions":
-            missions = [
-                {
-                    "id": mission_id,
-                    "title": m["title"],
-                    "topic": m["topic"],
-                    "topic_name": m["topic_name"],
-                    "concept": m["concept"],
-                    "teach": m["teach"],
-                    "briefing": m["briefing"],
-                    "hints": m.get("hints") or [],
-                    "boilerplate": m.get("boilerplate", ""),
-                    "inputs": m.get("inputs") or [],
-                }
-                for mission_id, m in MISSIONS.items()
-            ]
-            self._send_json(200, missions)
-            return
-        self._serve_static(self.path)
+        elif self.path == "/labs":
+            self._send_json(200, _public_labs())
+        else:
+            self._serve_static(self.path)
 
     def do_POST(self):
         try:
@@ -135,62 +154,37 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404, "Not Found")
 
     def _handle_register(self, body):
-        codename = str(body.get("codename", "")).strip()
-        if not codename:
-            self._send_json(400, {"error": "Codename required."})
+        name = str(body.get("name", "")).strip()
+        if not name:
+            self._send_json(400, {"error": "Name required."})
             return
         progress = _load_progress()
-        progress["codename"] = codename
+        progress["name"] = name
         _save_progress(progress)
-        self._send_json(200, {
-            "codename": codename,
-            "cipher": "Agent {} — NeoCorp database has no record of you. Good. Let's keep it that way.".format(codename),
-        })
+        self._send_json(200, {"name": name})
 
     def _handle_run(self, body):
-        mission_id = body.get("mission_id")
+        lab_id = body.get("lab_id")
+        task_id = body.get("task_id")
         code = body.get("code", "")
 
-        if not mission_id:
-            self._send_json(400, {"error": "mission_id required."})
-            return
         if not isinstance(code, str):
             self._send_json(400, {"error": "code must be a string."})
             return
         if len(code) > MAX_CODE_LENGTH:
-            self._send_json(400, {"error": "Code too long ({} chars, max {}).".format(len(code), MAX_CODE_LENGTH)})
+            self._send_json(400, {
+                "error": "Code too long ({} characters, limit {}).".format(
+                    len(code), MAX_CODE_LENGTH)})
             return
 
-        mission = MISSIONS.get(mission_id)
-        if mission is None:
-            self._send_json(404, {"error": "That mission doesn't exist."})
+        lab, task = get_task(lab_id, task_id)
+        if task is None:
+            self._send_json(404, {"error": "That task does not exist."})
             return
 
-        result = run_java(
-            code,
-            input_values=mission.get("inputs"),
-            seed_files=mission.get("seed_files"),
-        )
-
-        if result["blocked"]:
-            self._send_json(200, {
-                "ok": False,
-                "passed": False,
-                "output": "",
-                "error": result["error"],
-                "cipher": result["error"]["message"],
-            })
-            return
-
-        if result["timeout"]:
-            self._send_json(200, {
-                "ok": False,
-                "passed": False,
-                "output": "",
-                "error": result["error"],
-                "cipher": result["error"]["message"],
-            })
-            return
+        result = run_java(code,
+                          input_values=task.get("inputs"),
+                          seed_files=task.get("seed_files"))
 
         if not result["ok"]:
             self._send_json(200, {
@@ -198,15 +192,18 @@ class Handler(BaseHTTPRequestHandler):
                 "passed": False,
                 "output": result["output"],
                 "error": result["error"],
-                "cipher": "{}: {}".format(result["error"]["type"], result["error"]["message"]),
+                "feedback": result["error"]["message"],
+                "explanation": None,
             })
             return
 
-        passed, reason = check_mission(mission_id, code, result["output"], result.get("files"))
+        passed, feedback = task["check"](code, result["output"], result.get("files"))
+
         if passed:
             progress = _load_progress()
-            if mission_id not in progress["completed_missions"]:
-                progress["completed_missions"].append(mission_id)
+            key = "{}/{}".format(lab_id, task_id)
+            if key not in progress["completed"]:
+                progress["completed"].append(key)
                 _save_progress(progress)
 
         self._send_json(200, {
@@ -214,7 +211,9 @@ class Handler(BaseHTTPRequestHandler):
             "passed": passed,
             "output": result["output"],
             "error": None,
-            "cipher": reason,
+            "feedback": feedback,
+            # Withheld until earned — sending it early would give the answer away.
+            "explanation": task["explanation"] if passed else None,
         })
 
     def log_message(self, fmt, *args):
@@ -223,11 +222,14 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
+    tasks = sum(len(lab["tasks"]) for lab in LABS.values())
+    print("STATIC VOID — {} labs, {} tasks".format(len(LABS), tasks))
+    print("Open http://localhost:{}".format(port))
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print("STATIC VOID server running at http://localhost:{}".format(port))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
+        print("\nStopped.")
         server.shutdown()
 
 

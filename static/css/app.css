@@ -1,0 +1,259 @@
+/* Plain and readable on purpose. The learner is here to read explanations and
+   write Java, so the design gets out of the way: high contrast, generous line
+   height, a real reading measure, and monospace only where it means something. */
+
+:root {
+  --bg: #f7f7f5;
+  --panel: #ffffff;
+  --ink: #1c1c1a;
+  --muted: #62625d;
+  --line: #dcdcd6;
+  --accent: #1b5e9c;
+  --ok: #1a7f37;
+  --bad: #b3261e;
+  --code-bg: #f2f2ee;
+}
+
+* { box-sizing: border-box; }
+
+/* An author-set display beats the browser's [hidden] rule, so a hidden element
+   with display:flex stays on screen. Without this the start card remains
+   visible above the app after you press Start. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+h1, h2, h3, h4 { line-height: 1.25; margin: 0 0 .4em; }
+h1 { font-size: 1.7rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; margin-top: 1.4em; }
+h4 { font-size: .95rem; margin-top: 1.4em; }
+
+p { margin: 0 0 1em; }
+.muted { color: var(--muted); font-size: .9rem; }
+
+/* ---------- start screen ---------- */
+
+.centre {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+}
+
+label { display: block; margin-bottom: 6px; font-size: .9rem; }
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  background: #fff;
+  color: var(--ink);
+}
+
+/* ---------- shell ---------- */
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+nav {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  position: sticky;
+  top: 70px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.nav-chapter {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+.nav-chapter:first-child { margin-top: 0; }
+
+.nav-lab { font-weight: 600; margin: 8px 0 4px; font-size: .95rem; }
+
+.nav-task {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: .9rem;
+  color: var(--ink);
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.nav-task:hover { background: var(--code-bg); }
+.nav-task.active { background: #e4eef7; color: var(--accent); font-weight: 600; }
+.nav-task .tick { color: var(--ok); font-weight: 700; }
+
+main {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+  min-width: 0;
+}
+
+.idea { color: var(--muted); font-style: italic; }
+
+/* ---------- reading ---------- */
+
+details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 20px 0;
+  background: #fcfcfa;
+}
+summary { cursor: pointer; font-weight: 600; }
+.reading-body { max-width: 68ch; padding-top: 6px; }
+
+.prose {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-size: .88rem;
+  line-height: 1.6;
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 14px;
+  margin: 0 0 1em;
+  overflow-x: auto;
+}
+
+/* ---------- task ---------- */
+
+.task-head { display: flex; align-items: center; gap: 12px; }
+
+.tag {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: #eceae4;
+  color: var(--muted);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 300px;
+  font-family: "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-size: .9rem;
+  line-height: 1.55;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  resize: vertical;
+  tab-size: 4;
+}
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+
+button {
+  font: inherit;
+  font-size: .95rem;
+  padding: 9px 16px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { filter: brightness(1.08); }
+button:disabled { opacity: .5; cursor: default; }
+
+button.secondary { background: #fff; color: var(--accent); }
+
+button .muted { color: rgba(255, 255, 255, .75); }
+
+.hint {
+  background: #fff8e1;
+  border-left: 3px solid #d6a300;
+  padding: 10px 14px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 10px;
+  font-size: .93rem;
+}
+
+.output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: "SF Mono", Consolas, "Liberation Mono", monospace;
+  font-size: .88rem;
+  background: #1c1c1a;
+  color: #e8e8e2;
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 60px;
+  margin: 0;
+  overflow-x: auto;
+}
+
+.result { padding: 12px 16px; border-radius: 8px; margin-top: 14px; font-size: .95rem; }
+.result.pass { background: #e7f5ea; border-left: 4px solid var(--ok); color: #14532d; }
+.result.fail { background: #fdeceb; border-left: 4px solid var(--bad); color: #7a1d17; }
+
+#explanation {
+  margin-top: 18px;
+  padding: 18px 20px;
+  background: #eef4fa;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  max-width: 68ch;
+}
+#explanation h4 { margin-top: 0; }
+#explanation p { white-space: pre-wrap; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  nav { position: static; max-height: none; }
+}

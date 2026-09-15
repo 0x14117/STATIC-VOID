@@ -57,8 +57,8 @@ Your progress is saved to `saves/progress.json` and is not committed.
 Run the verifier — it compiles and runs a reference solution for every mission
 through the real sandbox and grades it with that mission's own checker:
 
-    python3 tests/test_all_missions.py          # every topic
-    python3 tests/test_all_missions.py 6        # just topic 6
+    python3 tests/test_all_labs.py              # every lab
+    python3 tests/test_all_labs.py 3            # just chapter 3
 
     python3 tests/test_teaching_claims.py       # checks the teaching text's
                                                 # claims about Java are true
@@ -73,42 +73,45 @@ through the real sandbox and grades it with that mission's own checker:
 If those pass and the game still misbehaves, the problem is in the browser or
 the server rather than the mission content.
 
+## What you get right now
+
+**One lab is built: `ch03-lab02 — Comparing Passwords Safely`.** Five tasks,
+from a warm-up to a repair job, teaching `==` versus `.equals()` as a login
+check. It is the reference lab — the one the format is being judged by before
+the rest are written.
+
+The design, the rules and the full chapter map are in `docs/`. Start with
+`docs/05-SAMPLE-LAB.md`, which is that lab written out as you read it.
+
 ## The curriculum
 
-250 missions, 25 per topic, mapped onto the module syllabus:
+Chapter order comes from **Head First Java**. You read a chapter in the book,
+then do that chapter's labs here. Roughly 87 labs are planned, each with 4 to 6
+graded tasks. Full map, including the chapters the sandbox cannot run and what
+is done instead: `docs/01-CURRICULUM.md`.
 
-| # | Topic | Missions |
-|---|-------|----------|
-| 1 | Language & IDE Basic Elements | 25 |
-| 2 | Variables & Constants | 25 |
-| 3 | Operators, Expressions & Statements | 25 |
-| 4 | Methods, Parameters and the Stack | 25 |
-| 5 | Basic I/O & File I/O | 25 |
-| 6 | Selection | in progress |
-| 7 | Iteration | to come |
-| 8 | Collections | to come |
-| 9 | Classes | to come |
-| 10 | Exceptions & Event Handling | to come |
+A lab is one idea:
 
-Within a topic the missions run in taught order. Missions 5, 10, 15 and 20 are
-BOSS checkpoints and mission 25 is the FINAL BOSS; those start from an empty
-editor, so you write the class and `main()` yourself.
+    WHAT YOU WILL LEARN  ->  WHY IT MATTERS  ->  EXPLAIN  ->  EXAMPLE
+    ->  TASK 1..5 (each with hints, and an explanation after you pass)
+    ->  WHAT YOU NOW KNOW
 
-A mission never uses a concept before it has been taught. Topic 4's recursion
-uses the ternary operator for its base case because `if` is not introduced
-until Topic 6 — the teach block says so, and shows the `if` version you will
-meet later.
+Every task builds a piece of one real tool: a log analyser that reads
+authentication logs and works out who is being attacked. See
+`docs/04-SECURITY-THREAD.md`.
 
 ## How the project fits together
 
     server.py          HTTP server: serves the UI, runs and grades submissions
-    java_sandbox.py    compiles and runs player code in a throwaway temp dir
-    missions/          mission content, one module per topic
-      common.py        shared checker factories and boilerplate constants
-      topic01.py ...   the missions themselves
+    java_sandbox.py    compiles and runs your code in a throwaway temp dir
+    labs/              lab content, one module per book chapter
+      common.py        shared checker factories and starter-code constants
+      chapter03.py     the labs themselves
     static/            the browser UI
     tests/             the verifiers described above
+    docs/              the design, the rules, the chapter map
+    missions/          the previous format, kept until the new one is proven
 
-Every mission carries its own reference solution and its deliberately wrong
-submissions, right next to its checker, which is what lets one test grade the
+Every task carries its own reference solution and its deliberately wrong
+submissions, right next to its checker. That is what lets one test grade the
 whole curriculum.
