@@ -65,6 +65,20 @@ BROKEN = '''public class Main {
 }'''
 r = run_java(BROKEN)
 check("compile errors reported cleanly", r["ok"] is False and r["error"]["type"] == "CompileError", r)
+check("compile error message has no leaked server temp-dir path", "/tmp/" not in r["error"]["message"] and "nullsector_java_" not in r["error"]["message"], r)
+check("compile error message references Main.java directly", r["error"]["message"].startswith("Main.java:"), r)
+
+# 4b. Reassigning a final variable is a real compile error (this is what the
+# Java version's Topic 2 teaching content claims — verify it's actually true)
+REASSIGN_FINAL = '''public class Main {
+    public static void main(String[] args) {
+        final int X = 1;
+        X = 2;
+        System.out.println(X);
+    }
+}'''
+r = run_java(REASSIGN_FINAL)
+check("reassigning a final variable fails to compile", r["ok"] is False and r["error"]["type"] == "CompileError" and "final" in r["error"]["message"], r)
 
 # 5. Wrong class name gets a friendly hint, not a raw javac dump
 WRONG_CLASS = '''public class Foo {

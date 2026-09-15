@@ -53,12 +53,26 @@ def inspect_code(source):
     return None
 
 
+def _clean_stderr_lines(stderr):
+    """Strip JVM/launcher diagnostic noise that isn't the actual error —
+    e.g. "Picked up JAVA_TOOL_OPTIONS: ..." printed whenever that env var
+    is set (common behind a proxy, e.g. a school lab or corporate laptop).
+    Without this, that noise — which can include internal proxy config —
+    would be mistaken for the real compiler/runtime error. Also strips the
+    server's own temp-directory path off the front of javac's file
+    references, leaving just "Main.java:4:" — the player never sees our
+    filesystem layout, only their own file and line number."""
+    lines = stderr.strip().splitlines()
+    lines = [line for line in lines if not line.startswith("Picked up ")]
+    return [re.sub(r"^/\S*/Main\.java:", "Main.java:", line) for line in lines]
+
+
 def _friendly_compile_error(stderr):
     if "class Main is public, should be declared in a file named" in stderr or \
        re.search(r"class \w+ is public, should be declared", stderr):
         return "Your top-level class must be exactly 'public class Main' — Java requires the class name to match the file."
-    first_line = stderr.strip().splitlines()[0] if stderr.strip() else "Compilation failed."
-    return first_line
+    lines = _clean_stderr_lines(stderr)
+    return lines[0] if lines else "Compilation failed."
 
 
 def run_java(source, input_values=None, run_args=None):
@@ -127,10 +141,11 @@ def run_java(source, input_values=None, run_args=None):
             }
 
         if run_result.returncode != 0:
-            stderr_first_line = run_result.stderr.strip().splitlines()[0] if run_result.stderr.strip() else "Runtime error."
+            clean_lines = _clean_stderr_lines(run_result.stderr)
+            message = clean_lines[0] if clean_lines else "Runtime error."
             return {
                 "ok": False, "blocked": False, "timeout": False, "output": run_result.stdout,
-                "error": {"type": "RuntimeError", "message": stderr_first_line},
+                "error": {"type": "RuntimeError", "message": message},
             }
 
         return {
