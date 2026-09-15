@@ -1,5 +1,5 @@
 """
-NULL SECTOR — game server (Java edition).
+STATIC VOID — game server (Java edition).
 
 The server itself is still pure Python stdlib (no Flask, no pip
 requirements) — only the language being TAUGHT changed to Java, to
@@ -55,7 +55,7 @@ def _save_progress(data):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "NullSector/0.1"
+    server_version = "StaticVoid/0.1"
 
     def _send_json(self, status, payload):
         body = json.dumps(payload).encode("utf-8")
@@ -166,7 +166,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(404, {"error": "That mission doesn't exist."})
             return
 
-        result = run_java(code, input_values=mission.get("inputs"))
+        result = run_java(
+            code,
+            input_values=mission.get("inputs"),
+            seed_files=mission.get("seed_files"),
+        )
 
         if result["blocked"]:
             self._send_json(200, {
@@ -220,7 +224,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print("NULL SECTOR server running at http://localhost:{}".format(port))
+    print("STATIC VOID server running at http://localhost:{}".format(port))
     try:
         server.serve_forever()
     except KeyboardInterrupt:

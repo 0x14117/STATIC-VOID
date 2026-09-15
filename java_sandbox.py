@@ -174,7 +174,7 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
         if violation.get("kind") == "path":
             message = "File paths must be simple filenames like \"data.txt\" — no absolute paths or \"..\" allowed. Found: \"{}\"".format(violation["pattern"])
         else:
-            message = "'{}' is blocked. Null Sector code runs sandboxed — no system access.".format(violation["pattern"])
+            message = "'{}' is blocked. STATIC VOID code runs sandboxed — no system access.".format(violation["pattern"])
         return {
             "ok": False,
             "blocked": True,

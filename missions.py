@@ -1,6 +1,6 @@
 """
 Server-side mission content and validation, for the Java rewrite of
-Null Sector, mapped topic-for-topic onto the player's actual LJMU
+STATIC VOID, mapped topic-for-topic onto the player's actual LJMU
 module syllabus (Language & IDE Basics -> Variables & Constants ->
 Operators/Expressions/Statements -> Methods/Parameters/Stack ->
 Basic I/O & File I/O -> Selection -> Iteration -> Collections ->
@@ -214,7 +214,7 @@ MISSIONS = {
         "briefing": (
             "Final Topic 1 test. Write the full program yourself — class, main(), everything. "
             "Print, in order:\n"
-            ">>> NULL SECTOR BOOT SEQUENCE <<<\n"
+            ">>> STATIC VOID BOOT SEQUENCE <<<\n"
             "STATUS: ONLINE\n"
             "AGENT: NOVA\n"
             "BOOT COMPLETE.\n"
@@ -227,7 +227,7 @@ MISSIONS = {
         "boilerplate": "",
         "check": make_checker(
             expected_output=(
-                ">>> NULL SECTOR BOOT SEQUENCE <<<\n"
+                ">>> STATIC VOID BOOT SEQUENCE <<<\n"
                 "STATUS: ONLINE\n"
                 "AGENT: NOVA\n"
                 "BOOT COMPLETE."

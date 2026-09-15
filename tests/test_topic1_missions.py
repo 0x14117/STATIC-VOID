@@ -57,7 +57,7 @@ REFERENCE_SOLUTIONS = {
     "t1m5": '''public class Main {
     public static void main(String[] args) {
         // boot sequence
-        System.out.println(">>> NULL SECTOR BOOT SEQUENCE <<<");
+        System.out.println(">>> STATIC VOID BOOT SEQUENCE <<<");
         System.out.println("STATUS: ONLINE");
         System.out.println("AGENT: NOVA");
         System.out.println("BOOT COMPLETE.");
