@@ -6,7 +6,7 @@ not multi-tenant, never expose this to untrusted network input) but a
 different mechanism, because Java has no exec()/ast equivalent:
 
   1. A source-text scan (inspect_code) rejects dangerous APIs before
-     anything compiles — Runtime, ProcessBuilder, file/network access,
+     anything compiles — Runtime, ProcessBuilder, network access,
      reflection — with a Cipher-style message. There is no Java parser
      in the Python stdlib, so this is a substring/regex scan rather
      than a real AST walk (same spirit as the Python version's AST
@@ -17,6 +17,21 @@ different mechanism, because Java has no exec()/ast equivalent:
      timeout and a JVM heap cap (-Xmx), so a slip past 1 can't hang or
      memory-bomb the server. This process isolation + timeout is the
      real backstop, same as the Python sandbox.
+
+File I/O (java.io.File, FileReader/Writer, BufferedReader/Writer) is
+ALLOWED, not blocked — the LJMU syllabus this game follows has a whole
+topic on it, so blocking it outright would leave a real course gap.
+The safety story instead: every run happens inside a fresh, unique
+temp directory that's deleted the moment the run finishes (see
+run_java's finally block), so relative filenames like "data.txt" can
+only ever touch that ephemeral sandbox. What's blocked is any string
+literal that looks like it's trying to leave that directory — an
+absolute path (starts with / or a drive letter) or a ".." traversal
+segment — via _has_dangerous_path_literal below. This is a text scan
+on string literals, same caveat as the BLOCKED_PATTERNS scan: it's
+defense in depth, not a guarantee, and process isolation (a fresh
+directory that's wiped after every run either way) is still the real
+backstop even if a literal-obfuscation trick slipped past it.
 """
 
 import re
@@ -35,11 +50,26 @@ MAX_OUTPUT_CHARS = 200_000  # generous for any real mission (a few hundred bytes
 # a student's variable named e.g. "runtime").
 BLOCKED_PATTERNS = [
     "Runtime", "ProcessBuilder", "System.exit", "System.load", "System.getenv",
-    "java.io.File", "FileReader", "FileWriter", "FileInputStream", "FileOutputStream",
     "java.nio", "java.net", "Socket", "URLConnection", "URLClassLoader",
     "reflect", "Class.forName", "ClassLoader", "sun.misc.Unsafe", "Unsafe",
     "ScriptEngine", "ProcessHandle",
 ]
+
+# Matches Java string literals (handles \" escapes inside them).
+_STRING_LITERAL_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
+
+
+def _find_dangerous_path_literal(source):
+    """Return the first string literal that looks like it's trying to
+    leave the sandboxed working directory (absolute path or ".."
+    traversal), or None. File I/O is allowed, but only within the
+    per-run temp directory — no legitimate mission needs a literal
+    like "/etc/passwd" or "../../secrets.txt"."""
+    for match in _STRING_LITERAL_RE.finditer(source):
+        literal = match.group(1)
+        if literal.startswith("/") or literal.startswith("~") or ".." in literal or re.match(r"^[A-Za-z]:[\\/]", literal):
+            return literal
+    return None
 
 
 class JavaSandboxError(Exception):
@@ -51,6 +81,9 @@ def inspect_code(source):
     for pattern in BLOCKED_PATTERNS:
         if pattern in source:
             return {"pattern": pattern}
+    dangerous_path = _find_dangerous_path_literal(source)
+    if dangerous_path is not None:
+        return {"pattern": dangerous_path, "kind": "path"}
     return None
 
 
@@ -92,29 +125,40 @@ def _friendly_compile_error(stderr):
     return lines[0] if lines else "Compilation failed."
 
 
-def run_java(source, input_values=None, run_args=None):
+def run_java(source, input_values=None, run_args=None, seed_files=None):
     """Compile and run player Java source. Returns a dict:
       {ok, blocked, timeout, output, error}
     error is None on success, else {'type', 'message'}.
 
     source is written verbatim to Main.java, so it must define
     `public class Main` with a `public static void main(String[] args)`.
+
+    seed_files, if given, is a {filename: contents} dict written into the
+    same per-run temp directory before compiling — used by File I/O
+    missions that ask the player to read a file that needs to already
+    exist. Filenames must be simple (no path separators), since they land
+    directly in the sandboxed workdir.
     """
     violation = inspect_code(source)
     if violation:
+        if violation.get("kind") == "path":
+            message = "File paths must be simple filenames like \"data.txt\" — no absolute paths or \"..\" allowed. Found: \"{}\"".format(violation["pattern"])
+        else:
+            message = "'{}' is blocked. Null Sector code runs sandboxed — no system access.".format(violation["pattern"])
         return {
             "ok": False,
             "blocked": True,
             "timeout": False,
             "output": "",
-            "error": {
-                "type": "SecurityViolation",
-                "message": "'{}' is blocked. Null Sector code runs sandboxed — no system access.".format(violation["pattern"]),
-            },
+            "error": {"type": "SecurityViolation", "message": message},
         }
 
     workdir = tempfile.mkdtemp(prefix="nullsector_java_")
     try:
+        for filename, contents in (seed_files or {}).items():
+            with open(os.path.join(workdir, filename), "w") as f:
+                f.write(contents)
+
         source_path = os.path.join(workdir, "Main.java")
         with open(source_path, "w") as f:
             f.write(source)
