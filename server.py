@@ -17,6 +17,7 @@ Run: python3 server.py [port]      (default 5000)
 import json
 import os
 import sys
+import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from java_sandbox import missing_toolchain, run_java
@@ -38,13 +39,41 @@ CONTENT_TYPES = {
 
 
 def _load_progress():
+    """Always return the current shape, whatever is actually on disk.
+
+    A save file that merely parses is not a save file in the right shape. This
+    project's earlier version wrote {"codename", "completed_missions"}, so
+    anyone who ran that version has a file whose keys are all wrong — and
+    reading it straight through meant the first successful submission died
+    with KeyError: 'completed' AFTER the task had been graded and passed. The
+    learner solved it and got a broken connection instead of their
+    explanation.
+
+    So every field is rebuilt here rather than trusted: missing file, corrupt
+    JSON, JSON that is not an object, an older schema, or a value of the wrong
+    type all come back as a usable default.
+    """
+    data = {}
     if os.path.exists(SAVE_FILE):
         try:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, OSError):
+                loaded = json.load(f)
+            if isinstance(loaded, dict):
+                data = loaded
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
             pass
-    return {"name": None, "completed": []}
+
+    completed = data.get("completed")
+    if not isinstance(completed, list):
+        # Old saves recorded mission ids like "t3m2". Those name nothing in the
+        # lab format, so they are dropped rather than migrated into ids that
+        # would mark unrelated tasks as done.
+        completed = []
+
+    return {
+        "name": data.get("name") or data.get("codename"),
+        "completed": [entry for entry in completed if isinstance(entry, str)],
+    }
 
 
 def _save_progress(data):
@@ -132,6 +161,11 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if self.path.startswith("/.well-known/"):
+            self.send_response(404)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if self.path == "/progress":
             self._send_json(200, _load_progress())
         elif self.path == "/labs":
@@ -146,12 +180,32 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(400, {"error": "Invalid JSON body."})
             return
 
-        if self.path == "/register":
-            self._handle_register(body)
-        elif self.path == "/run":
-            self._handle_run(body)
-        else:
-            self.send_error(404, "Not Found")
+        # A bug in here used to kill the connection and print a traceback, so
+        # the browser said only "could not reach the server" and the real
+        # message was buried in the terminal. Answer with something readable
+        # instead, and still log the detail for whoever is debugging.
+        try:
+            if self.path == "/register":
+                self._handle_register(body)
+            elif self.path == "/run":
+                self._handle_run(body)
+            else:
+                self.send_error(404, "Not Found")
+        except Exception:                                   # noqa: BLE001
+            detail = traceback.format_exc()
+            sys.stderr.write(detail)
+            self._send_json(500, {
+                "ok": False,
+                "passed": False,
+                "output": "",
+                "error": {"type": "ServerError", "message": "Something broke in the server."},
+                "feedback": (
+                    "Something broke in the server, not in your code. The details are "
+                    "in the terminal window running the server. This is a bug worth "
+                    "reporting."
+                ),
+                "explanation": None,
+            })
 
     def _handle_register(self, body):
         name = str(body.get("name", "")).strip()
