@@ -45,6 +45,19 @@ MISSIONS = {
             "int total = 47; then System.out.println(total); — don't forget the semicolons.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int total = 47;
+        System.out.println(total);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println(47);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="47",
             success_line="47, declared and printed. Type, name, value — that's the whole pattern.",
@@ -79,6 +92,19 @@ MISSIONS = {
             "String codename = \"Viper\"; then System.out.println(codename);",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        String codename = "Viper";
+        System.out.println(codename);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("Ghost");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="Viper",
             success_line="Viper, logged. Capital S, double quotes — that's a String.",
@@ -115,6 +141,22 @@ MISSIONS = {
             "Print them in order: System.out.println(price); then System.out.println(inStock);",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        double price = 19.99;
+        boolean inStock = false;
+        System.out.println(price);
+        System.out.println(inStock);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("19.99");
+        System.out.println("false");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="19.99\nfalse",
             success_line="19.99, then false. Both types printed exactly as they should.",
@@ -150,6 +192,20 @@ MISSIONS = {
             "System.out.println(\"CLEARANCE: \" + CLEARANCE_LEVEL); — the + joins the text and the number together.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        final int CLEARANCE_LEVEL = 9;
+        System.out.println("CLEARANCE: " + CLEARANCE_LEVEL);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        int clearanceLevel = 9;
+        System.out.println("CLEARANCE: " + clearanceLevel);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="CLEARANCE: 9",
             success_line="Locked at 9. That's a real constant — try to reassign it and the compiler stops you.",
@@ -184,6 +240,27 @@ MISSIONS = {
             "Every line follows the same shape: System.out.println(\"LABEL: \" + variable);",
         ],
         "boilerplate": "",
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        String agent = "Viper";
+        int clearance = 7;
+        double rating = 8.5;
+        boolean active = true;
+        final int MAX_CLEARANCE = 10;
+        System.out.println("AGENT: " + agent);
+        System.out.println("CLEARANCE: " + clearance);
+        System.out.println("RATING: " + rating);
+        System.out.println("ACTIVE: " + active);
+        System.out.println("MAX CLEARANCE: " + MAX_CLEARANCE);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("wrong");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output=(
                 "AGENT: Viper\nCLEARANCE: 7\nRATING: 8.5\nACTIVE: true\nMAX CLEARANCE: 10"

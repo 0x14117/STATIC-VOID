@@ -53,6 +53,22 @@ MISSIONS = {
             "Print with concatenation: System.out.println(\"CLEARANCE: \" + clearance);",
         ],
         "boilerplate": SCANNER_BOILERPLATE,
+        "solution": '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int clearance = sc.nextInt();
+        System.out.println("CLEARANCE: " + clearance);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("CLEARANCE: 7");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="CLEARANCE: 7",
             success_line="Channel open, value received. Your program can hear the outside world now.",
@@ -88,6 +104,26 @@ MISSIONS = {
             "System.out.println(\"RATING: \" + rating);",
         ],
         "boilerplate": SCANNER_BOILERPLATE,
+        "solution": '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        double rating = sc.nextDouble();
+        System.out.println("RATING: " + rating);
+    }
+}''',
+        "wrong": [
+            '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String rating = sc.nextLine();
+        System.out.println("RATING: " + rating);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="RATING: 8.5",
             success_line="8.5, read precisely. Right method for the right type.",
@@ -123,6 +159,26 @@ MISSIONS = {
             "System.out.println(\"MESSAGE: \" + message);",
         ],
         "boilerplate": SCANNER_BOILERPLATE,
+        "solution": '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String message = sc.nextLine();
+        System.out.println("MESSAGE: " + message);
+    }
+}''',
+        "wrong": [
+            '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String message = sc.next();
+        System.out.println("MESSAGE: " + message);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="MESSAGE: breach detected at tower",
             success_line="Whole line captured, spaces intact. That's what nextLine() is for.",
@@ -159,6 +215,26 @@ MISSIONS = {
             "System.out.println(\"FIRST WORD: \" + first); — should print only Ghost.",
         ],
         "boilerplate": SCANNER_BOILERPLATE,
+        "solution": '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String first = sc.next();
+        System.out.println("FIRST WORD: " + first);
+    }
+}''',
+        "wrong": [
+            '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String first = sc.nextLine();
+        System.out.println("FIRST WORD: " + first);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="FIRST WORD: Ghost",
             success_line="Just the first token. next() stopped dead at the space, exactly as designed.",
@@ -203,6 +279,18 @@ MISSIONS = {
             "int clearance = sc.nextInt(); then sc.nextLine(); then String codename = sc.nextLine();",
         ],
         "boilerplate": SCANNER_BOILERPLATE,
+        "solution": '''import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int clearance = sc.nextInt();
+        sc.nextLine();
+        String codename = sc.nextLine();
+        System.out.println("CLEARANCE: " + clearance);
+        System.out.println("CODENAME: " + codename);
+    }
+}''',
         "check": make_checker(
             expected_output="CLEARANCE: 7\nCODENAME: Ghost Protocol",
             success_line="Trap avoided. You'll hit this bug again in real coursework — now you'll recognise it in seconds.",

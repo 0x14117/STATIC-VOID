@@ -59,6 +59,22 @@ MISSIONS = {
             "    }\n"
             "}"
         ),
+        "solution": '''public class Main {
+    public static void greet() {
+        System.out.println("SIGNAL RECEIVED");
+    }
+
+    public static void main(String[] args) {
+        greet();
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("SIGNAL RECEIVED");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="SIGNAL RECEIVED",
             success_line="Method defined, method called. You just wrote reusable code.",
@@ -101,6 +117,22 @@ MISSIONS = {
             "    }\n"
             "}"
         ),
+        "solution": '''public class Main {
+    public static void announce(String name) {
+        System.out.println("AGENT: " + name);
+    }
+
+    public static void main(String[] args) {
+        announce("Viper");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("AGENT: Viper");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="AGENT: Viper",
             success_line="AGENT: Viper. Same method, any name you pass it — that's the point of a parameter.",
@@ -144,6 +176,23 @@ MISSIONS = {
             "    }\n"
             "}"
         ),
+        "solution": '''public class Main {
+    public static int square(int n) {
+        return n * n;
+    }
+
+    public static void main(String[] args) {
+        int result = square(6);
+        System.out.println(result);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println(36);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="36",
             success_line="36. The method computed it and handed it straight back.",
@@ -200,6 +249,26 @@ MISSIONS = {
             "    }\n"
             "}"
         ),
+        "solution": '''public class Main {
+    public static int add(int a, int b) {
+        return a + b;
+    }
+
+    public static void main(String[] args) {
+        int sum = add(4, 9);
+        System.out.println(sum);
+        int sum2 = add(sum, 100);
+        System.out.println(sum2);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println(13);
+        System.out.println(113);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="13\n113",
             success_line="13, then 113. Two calls, two independent stack frames, correct both times.",
@@ -237,6 +306,34 @@ MISSIONS = {
             "combine(15, 27) is 42. label(\"TOTAL\", 42) builds the string for you — you just print what it returns.",
         ],
         "boilerplate": "",
+        "solution": '''public class Main {
+    public static void header() {
+        System.out.println(">>> MISSION REPORT <<<");
+    }
+
+    public static int combine(int a, int b) {
+        return a + b;
+    }
+
+    public static String label(String name, int value) {
+        return name + ": " + value;
+    }
+
+    public static void main(String[] args) {
+        header();
+        int total = combine(15, 27);
+        System.out.println(label("TOTAL", total));
+        int doubled = combine(total, total);
+        System.out.println(label("DOUBLED", doubled));
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("wrong");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output=(
                 ">>> MISSION REPORT <<<\nTOTAL: 42\nDOUBLED: 84"

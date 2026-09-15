@@ -48,6 +48,20 @@ MISSIONS = {
             "No quotes around a + b — you want the calculated result, not literal text.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int a = 12;
+        int b = 7;
+        System.out.println(a + b);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println(19);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="19",
             success_line="19. Straightforward arithmetic — no surprises here.",
@@ -88,6 +102,24 @@ MISSIONS = {
             "System.out.println(a / b); then System.out.println(a % b); — division result, then remainder.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int a = 17;
+        int b = 5;
+        System.out.println(a / b);
+        System.out.println(a % b);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        int a = 17;
+        int b = 5;
+        double result = (double) a / b;
+        System.out.println(result);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="3\n2",
             success_line="3, then 2. That's exactly what int division gives you — truncated, not rounded.",
@@ -127,6 +159,21 @@ MISSIONS = {
             "System.out.println(result); should print 3.4, not 3.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int wholeNumber = 17;
+        double result = (double) wholeNumber / 5;
+        System.out.println(result);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        int wholeNumber = 17;
+        System.out.println(wholeNumber / 5);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="3.4",
             success_line="3.4 — the real answer, not the truncated one. That's what casting buys you.",
@@ -161,6 +208,22 @@ MISSIONS = {
             "score += 3; then System.out.println(score); — should end at 18.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int score = 10;
+        score = score + 5;
+        score += 3;
+        System.out.println(score);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        int score = 10;
+        System.out.println(score);
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="18",
             success_line="18. Long form and shorthand, same result — += is just less typing.",
@@ -196,6 +259,29 @@ MISSIONS = {
             "Five println lines total, each built with + concatenation for the labels — same pattern as every mission so far.",
         ],
         "boilerplate": "",
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        int base = 3;
+        int bonus = 4;
+        int total = base * 2 + bonus * 3;
+        System.out.println("BASE: " + base);
+        System.out.println("BONUS: " + bonus);
+        System.out.println("TOTAL: " + total);
+        int wholeAvg = 17;
+        double avg = (double) wholeAvg / 5;
+        System.out.println("AVERAGE: " + avg);
+        int counter = 1;
+        counter += 9;
+        System.out.println("COUNTER: " + counter);
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("wrong");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output=(
                 "BASE: 3\nBONUS: 4\nTOTAL: 18\nAVERAGE: 3.4\nCOUNTER: 10"

@@ -45,6 +45,18 @@ MISSIONS = {
             "Don't forget the semicolon at the end of the line — Java won't compile without it.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("ACCESS GRANTED");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("access granted");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="ACCESS GRANTED",
             success_line="Clean. System.out.println() and a string — that's the whole trick.",
@@ -74,6 +86,20 @@ MISSIONS = {
             "System.out.print(\"NULL\"); then System.out.print(\"SECTOR\"); — two calls, no println.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        System.out.print("NULL");
+        System.out.print("SECTOR");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("NULL");
+        System.out.println("SECTOR");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="NULLSECTOR",
             success_line="Fused clean. print() doesn't add anything between calls — that's the whole difference from println().",
@@ -102,6 +128,19 @@ MISSIONS = {
             "The comment's content doesn't matter — Cipher just needs to see // somewhere in your code, plus the correct printed output.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        // this line is a comment
+        System.out.println("SIGNAL LOCKED");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("SIGNAL LOCKED");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="SIGNAL LOCKED",
             success_line="Logged and annotated. Comments don't run — they're for the next person reading this.",
@@ -132,6 +171,21 @@ MISSIONS = {
             "Order matters — whatever you write first executes first, top to bottom.",
         ],
         "boilerplate": BASIC_BOILERPLATE,
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("STEP 1");
+        System.out.println("STEP 2");
+        System.out.println("STEP 3");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("STEP 1");
+        System.out.println("STEP 3");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output="STEP 1\nSTEP 2\nSTEP 3",
             success_line="Three steps, correct order, no skips.",
@@ -169,6 +223,22 @@ MISSIONS = {
             "Four println() calls in order, a // comment anywhere, then close both braces }} at the end.",
         ],
         "boilerplate": "",
+        "solution": '''public class Main {
+    public static void main(String[] args) {
+        // boot sequence
+        System.out.println(">>> STATIC VOID BOOT SEQUENCE <<<");
+        System.out.println("STATUS: ONLINE");
+        System.out.println("AGENT: NOVA");
+        System.out.println("BOOT COMPLETE.");
+    }
+}''',
+        "wrong": [
+            '''public class Main {
+    public static void main(String[] args) {
+        System.out.println("wrong");
+    }
+}''',
+        ],
         "check": make_checker(
             expected_output=(
                 ">>> STATIC VOID BOOT SEQUENCE <<<\n"
