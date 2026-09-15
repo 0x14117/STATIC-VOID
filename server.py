@@ -198,7 +198,7 @@ class Handler(BaseHTTPRequestHandler):
             })
             return
 
-        passed, reason = check_mission(mission_id, code, result["output"])
+        passed, reason = check_mission(mission_id, code, result["output"], result.get("files"))
         if passed:
             progress = _load_progress()
             if mission_id not in progress["completed_missions"]:

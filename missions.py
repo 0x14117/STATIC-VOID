@@ -36,7 +36,7 @@ def make_checker(expected_output, success_line, missing_hint, mismatch_hint,
     appear in the submitted code) or a tuple/list of alternatives (at
     least one must appear)."""
 
-    def check(code, output):
+    def check(code, output, files=None):
         if code_requires:
             for token in code_requires:
                 if isinstance(token, (list, tuple)):
@@ -850,8 +850,13 @@ MISSIONS = {
 }
 
 
-def check_mission(mission_id, code, output):
+def check_mission(mission_id, code, output, files=None):
+    """files is the {filename: contents} dict of whatever the player's
+    code wrote to the sandboxed run directory (see java_sandbox), so
+    File I/O missions can verify real written content instead of
+    trusting a printed success message. Missions that don't involve
+    files simply ignore it."""
     mission = MISSIONS.get(mission_id)
     if mission is None:
         return False, "That mission doesn't exist."
-    return mission["check"](code, output)
+    return mission["check"](code, output, files or {})

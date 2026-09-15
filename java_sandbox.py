@@ -27,7 +27,7 @@ run_java's finally block), so relative filenames like "data.txt" can
 only ever touch that ephemeral sandbox. What's blocked is any string
 literal that looks like it's trying to leave that directory — an
 absolute path (starts with / or a drive letter) or a ".." traversal
-segment — via _has_dangerous_path_literal below. This is a text scan
+segment — via _find_dangerous_path_literal below. This is a text scan
 on string literals, same caveat as the BLOCKED_PATTERNS scan: it's
 defense in depth, not a guarantee, and process isolation (a fresh
 directory that's wiped after every run either way) is still the real
@@ -117,6 +117,33 @@ def _cap_output(text):
     return text[:MAX_OUTPUT_CHARS], True
 
 
+def _capture_workdir_files(workdir):
+    """Read back the files sitting in the run's temp directory after
+    execution, so a File I/O mission's checker can verify what the
+    player's code actually WROTE — not just what it claimed on stdout.
+    Without this, a "write ACCESS GRANTED to a file" mission could be
+    passed by printing a success message and never touching FileWriter.
+    Main.java and the compiled .class files are excluded (they're ours,
+    not the player's output)."""
+    files = {}
+    try:
+        names = os.listdir(workdir)
+    except OSError:
+        return files
+    for name in names:
+        if name == "Main.java" or name.endswith(".class"):
+            continue
+        path = os.path.join(workdir, name)
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, "r", errors="replace") as f:
+                files[name] = f.read()
+        except OSError:
+            pass
+    return files
+
+
 def _friendly_compile_error(stderr):
     if "class Main is public, should be declared in a file named" in stderr or \
        re.search(r"class \w+ is public, should be declared", stderr):
@@ -127,8 +154,11 @@ def _friendly_compile_error(stderr):
 
 def run_java(source, input_values=None, run_args=None, seed_files=None):
     """Compile and run player Java source. Returns a dict:
-      {ok, blocked, timeout, output, error}
-    error is None on success, else {'type', 'message'}.
+      {ok, blocked, timeout, output, files, error}
+    error is None on success, else {'type', 'message'}. files is a
+    {filename: contents} dict of whatever the player's code left in the
+    run directory, so File I/O missions can verify what was actually
+    written rather than trusting a printed success message.
 
     source is written verbatim to Main.java, so it must define
     `public class Main` with a `public static void main(String[] args)`.
@@ -150,6 +180,7 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
             "blocked": True,
             "timeout": False,
             "output": "",
+            "files": {},
             "error": {"type": "SecurityViolation", "message": message},
         }
 
@@ -173,13 +204,13 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
             )
         except subprocess.TimeoutExpired:
             return {
-                "ok": False, "blocked": False, "timeout": True, "output": "",
+                "ok": False, "blocked": False, "timeout": True, "output": "", "files": {},
                 "error": {"type": "TimeoutError", "message": "Compilation took too long."},
             }
 
         if compile_result.returncode != 0:
             return {
-                "ok": False, "blocked": False, "timeout": False, "output": "",
+                "ok": False, "blocked": False, "timeout": False, "output": "", "files": {},
                 "error": {"type": "CompileError", "message": _friendly_compile_error(compile_result.stderr)},
             }
 
@@ -197,23 +228,26 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
             )
         except subprocess.TimeoutExpired:
             return {
-                "ok": False, "blocked": False, "timeout": True, "output": "",
+                "ok": False, "blocked": False, "timeout": True, "output": "", "files": {},
                 "error": {"type": "TimeoutError", "message": "Execution exceeded {} seconds. That loop has no exit.".format(RUN_TIMEOUT_SECONDS)},
             }
 
         stdout, truncated = _cap_output(run_result.stdout)
+        workdir_files = _capture_workdir_files(workdir)
 
         if run_result.returncode != 0:
             clean_lines = _clean_stderr_lines(run_result.stderr)
             message = clean_lines[0] if clean_lines else "Runtime error."
             return {
                 "ok": False, "blocked": False, "timeout": False, "output": stdout,
+                "files": workdir_files,
                 "error": {"type": "RuntimeError", "message": message},
             }
 
         if truncated:
             return {
                 "ok": False, "blocked": False, "timeout": False, "output": stdout,
+                "files": workdir_files,
                 "error": {
                     "type": "OutputTooLarge",
                     "message": "Your program printed way more than any mission needs ({}+ characters). Check for a loop that never stops printing.".format(MAX_OUTPUT_CHARS),
@@ -222,7 +256,7 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
 
         return {
             "ok": True, "blocked": False, "timeout": False,
-            "output": stdout, "error": None,
+            "output": stdout, "files": workdir_files, "error": None,
         }
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
