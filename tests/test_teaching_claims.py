@@ -29,6 +29,84 @@ def program(body, imports="", header="public class Main {\n    public static voi
 
 
 CLAIMS = [
+    # ---- Topic 1 / Chapter 1: structure, printing, if, while -----------
+    {
+        "topic": 1,
+        "name": "a semicolon after if(test) detaches the block, which then always runs",
+        "code": program('        int failures = 1;\n'
+                        '        if (failures > 5);\n'
+                        '        {\n'
+                        '            System.out.println("ALERT");\n'
+                        '        }\n'
+                        '        System.out.println("DONE");'),
+        "expect_output": "ALERT\nDONE",
+    },
+    {
+        "topic": 1,
+        "name": "removing that semicolon makes the block obey the test",
+        "code": program('        int failures = 1;\n'
+                        '        if (failures > 5) {\n'
+                        '            System.out.println("ALERT");\n'
+                        '        }\n'
+                        '        System.out.println("DONE");'),
+        "expect_output": "DONE",
+    },
+    {
+        "topic": 1,
+        "name": "a while loop whose counter never changes does not end",
+        "code": program('        int scan = 1;\n'
+                        '        while (scan <= 3) {\n'
+                        '            System.out.println("SCANNING " + scan);\n'
+                        '        }'),
+        "expect_timeout": True,
+    },
+    {
+        "topic": 1,
+        "name": "count++ does the same thing as count = count + 1",
+        "code": program('        int a = 5;\n'
+                        '        int b = 5;\n'
+                        '        a++;\n'
+                        '        b = b + 1;\n'
+                        '        System.out.println(a + " " + b);'),
+        "expect_output": "6 6",
+    },
+    {
+        "topic": 1,
+        "name": "+ joins text and adds no space of its own",
+        "code": program('        System.out.println("USER:" + "jsmith");'),
+        "expect_output": "USER:jsmith",
+    },
+    {
+        "topic": 1,
+        "name": "print does not move to the next line, println does",
+        "code": program('        System.out.print("HOST: ");\n'
+                        '        System.out.println("gateway-02");'),
+        "expect_output": "HOST: gateway-02",
+    },
+    {
+        "topic": 1,
+        "name": "lowercase system does not compile",
+        "code": program('        system.out.println("hello");'),
+        "expect_compile_error": True,
+    },
+    {
+        "topic": 1,
+        "name": "printLine is not a method and does not compile",
+        "code": program('        System.out.printLine("hello");'),
+        "expect_compile_error": True,
+    },
+    {
+        "topic": 1,
+        "name": "a loop tested with < stops one short of a loop tested with <=",
+        "code": program('        int i = 1;\n'
+                        '        int countLess = 0;\n'
+                        '        while (i < 5) { countLess++; i++; }\n'
+                        '        int j = 1;\n'
+                        '        int countUpTo = 0;\n'
+                        '        while (j <= 5) { countUpTo++; j++; }\n'
+                        '        System.out.println(countLess + " " + countUpTo);'),
+        "expect_output": "4 5",
+    },
     # ---- Topic 2: constants -------------------------------------------
     {
         "topic": 2,
@@ -125,6 +203,12 @@ def verify(claim):
         ok = (result["error"] is not None
               and claim["expect_runtime_error"] in result["error"]["message"])
         return [(name, ok, result.get("error"))]
+
+    if claim.get("expect_timeout"):
+        # "The loop never ends" can only be proved by letting one not end. The
+        # sandbox's wall-clock timeout is what stops it, which is also what the
+        # lab promises the learner will happen.
+        return [(name, result["timeout"] is True, result.get("error"))]
 
     if not result["ok"]:
         return [(name, False, result.get("error"))]

@@ -31,8 +31,14 @@ WORKERS = int(os.environ.get("STATIC_VOID_TEST_WORKERS", "8"))
 
 LAB_FIELDS = ("chapter", "chapter_title", "title", "idea",
               "learn", "matters", "explain", "example", "recap", "tasks")
-TASK_FIELDS = ("id", "role", "brief", "starter", "hints",
+TASK_FIELDS = ("id", "role", "brief", "hints",
                "check", "solution", "explanation")
+
+# `starter` is required to EXIST but may be empty: a task that asks the learner
+# to write the class and main from nothing has no starter code by design. An
+# empty starter cannot compile, so it can never pass on its own either way.
+FROM_SCRATCH_PHRASES = ("no starter code", "empty editor", "yourself this time",
+                        "write the class and main")
 
 REQUIRED_ROLES_MIN = 4
 
@@ -48,13 +54,24 @@ def check(name, condition, detail=""):
         failures.append((name, detail))
 
 
+# Java ceremony that every program contains. The example-vs-solution overlap
+# check is about whether the interesting lines were copied, not about the
+# scaffolding — and a spec that requires examples to be complete, runnable
+# programs guarantees the scaffolding is shared.
+BOILERPLATE = re.compile(
+    r"^(package |import |public class |class |public static void main\(String\[\] args\)"
+    r"|\}|\{|// |/\*|\*)"
+)
+
+
 def code_lines(text):
     """Non-trivial lines of code, for the example-vs-solution overlap check."""
     lines = []
     for raw in text.split("\n"):
         line = raw.strip()
-        if len(line) > 25 and not line.startswith("//") and not line.startswith("*"):
-            lines.append(line)
+        if len(line) <= 25 or BOILERPLATE.match(line):
+            continue
+        lines.append(line)
     return set(lines)
 
 
@@ -101,6 +118,16 @@ def structural_checks(chapters):
             if task_missing:
                 continue
 
+            check("{} declares its starter code".format(label),
+                  "starter" in task, "the key is missing entirely")
+            if not task.get("starter"):
+                # An empty starter has to be a decision, not an oversight, so
+                # the brief must tell the learner they are starting from
+                # nothing.
+                check("{} says it starts from an empty editor".format(label),
+                      any(phrase in task["brief"].lower() for phrase in FROM_SCRATCH_PHRASES),
+                      "empty starter, but the brief does not say so")
+
             check("{} has exactly 2 hints".format(label),
                   len(task["hints"]) == 2 and all(h.strip() for h in task["hints"]),
                   "got {}".format(len(task["hints"])))
@@ -139,7 +166,8 @@ def jobs_for(chapters):
             jobs.append(("solution", lab_id, task["id"], task["solution"]))
             for index, wrong in enumerate(task.get("wrong") or []):
                 jobs.append(("wrong{}".format(index + 1), lab_id, task["id"], wrong))
-            jobs.append(("starter", lab_id, task["id"], task["starter"]))
+            if task.get("starter"):
+                jobs.append(("starter", lab_id, task["id"], task["starter"]))
     return jobs
 
 
