@@ -1,9 +1,10 @@
 (function () {
   "use strict";
 
-  var missions = [];        // [{id, title, stage, tier, concept, briefing}]
+  var missions = [];        // [{id, title, topic, topic_name, concept, teach, briefing, hints, boilerplate, inputs}]
   var completed = [];       // mission ids
   var currentMissionId = null;
+  var hintsShown = 0;       // how many hints revealed for the current mission
 
   var registerScreen = document.getElementById("register-screen");
   var gameScreen = document.getElementById("game-screen");
@@ -11,7 +12,10 @@
   var registerBtn = document.getElementById("register-btn");
   var agentName = document.getElementById("agent-name");
   var missionTitle = document.getElementById("mission-title");
+  var teachText = document.getElementById("teach-text");
   var briefing = document.getElementById("briefing");
+  var hintBtn = document.getElementById("hint-btn");
+  var hintText = document.getElementById("hint-text");
   var codeEditor = document.getElementById("code-editor");
   var runBtn = document.getElementById("run-btn");
   var outputEl = document.getElementById("output");
@@ -44,18 +48,22 @@
 
   function renderMissionList() {
     missionListEl.innerHTML = "";
-    var tiers = ["easy", "medium", "hard"];
-    var byTier = { easy: [], medium: [], hard: [] };
-    missions.forEach(function (m) { byTier[m.tier].push(m); });
+    var topics = [];
+    var byTopic = {};
+    missions.forEach(function (m) {
+      if (!byTopic[m.topic]) { byTopic[m.topic] = []; topics.push(m.topic); }
+      byTopic[m.topic].push(m);
+    });
+    topics.sort(function (a, b) { return a - b; });
 
-    tiers.forEach(function (tier) {
-      if (byTier[tier].length === 0) return;
+    topics.forEach(function (topicNum) {
+      var group = byTopic[topicNum];
       var heading = document.createElement("div");
       heading.className = "tier-heading";
-      heading.textContent = tier.toUpperCase();
+      heading.textContent = "TOPIC " + topicNum + ": " + group[0].topic_name.toUpperCase();
       missionListEl.appendChild(heading);
 
-      byTier[tier].forEach(function (m) {
+      group.forEach(function (m) {
         var btn = document.createElement("button");
         btn.className = "mission-btn";
         btn.textContent = m.title;
@@ -67,19 +75,43 @@
     });
   }
 
+  function updateHintButton() {
+    var mission = missionById(currentMissionId);
+    var hints = (mission && mission.hints) || [];
+    if (hintsShown >= hints.length) {
+      hintBtn.disabled = true;
+      hintBtn.textContent = hints.length === 0 ? "NO HINTS FOR THIS ONE" : "NO MORE HINTS";
+    } else {
+      hintBtn.disabled = false;
+      hintBtn.textContent = hintsShown === 0 ? "SHOW HINT" : "SHOW NEXT HINT";
+    }
+  }
+
+  hintBtn.addEventListener("click", function () {
+    var mission = missionById(currentMissionId);
+    if (!mission || hintsShown >= mission.hints.length) return;
+    hintText.textContent += (hintsShown > 0 ? "\n" : "") + "HINT " + (hintsShown + 1) + ": " + mission.hints[hintsShown];
+    hintsShown++;
+    updateHintButton();
+  });
+
   function loadMission(id) {
     var mission = missionById(id);
     if (!mission) return;
     currentMissionId = id;
     missionTitle.textContent = "MISSION: " + mission.title;
+    teachText.textContent = mission.teach || "";
     if (mission.inputs && mission.inputs.length > 0) {
       briefing.textContent = mission.briefing + "\n\n[TEST INPUT VALUES, IN ORDER: " + mission.inputs.join(", ") + "]";
     } else {
       briefing.textContent = mission.briefing;
     }
-    codeEditor.value = "";
+    codeEditor.value = mission.boilerplate || "";
     outputEl.textContent = "";
     cipherReaction.textContent = "";
+    hintsShown = 0;
+    hintText.textContent = "";
+    updateHintButton();
     setMood("calm");
     renderMissionList();
     codeEditor.focus();

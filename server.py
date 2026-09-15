@@ -1,12 +1,17 @@
 """
-NULL SECTOR — game server.
+NULL SECTOR — game server (Java edition).
 
-Pure stdlib, per the Master Document's open-source constraint (no Flask,
-no pip requirements). Serves the static frontend and exposes:
+The server itself is still pure Python stdlib (no Flask, no pip
+requirements) — only the language being TAUGHT changed to Java, to
+match the player's actual university module. Player code is compiled
+and run via the real javac/java toolchain (java_sandbox.py); this
+server just orchestrates. Requires a JDK on PATH (javac + java) in
+addition to Python 3.11+.
 
   POST /register   {codename}            -> save agent, return greeting
   GET  /progress                         -> current save
-  POST /run         {mission_id, code}   -> sandboxed execution + mission check
+  GET  /missions                         -> mission list incl. teaching content
+  POST /run         {mission_id, code}   -> compile+run + mission check
 
 Run: python3 server.py [port]   (default port 5000)
 """
@@ -17,7 +22,7 @@ import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from missions import check_mission, MISSIONS
-from sandbox import run_sandboxed
+from java_sandbox import run_java
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -99,10 +104,13 @@ class Handler(BaseHTTPRequestHandler):
                 {
                     "id": mission_id,
                     "title": m["title"],
-                    "stage": m["stage"],
-                    "tier": m["tier"],
+                    "topic": m["topic"],
+                    "topic_name": m["topic_name"],
                     "concept": m["concept"],
+                    "teach": m["teach"],
                     "briefing": m["briefing"],
+                    "hints": m.get("hints") or [],
+                    "boilerplate": m.get("boilerplate", ""),
                     "inputs": m.get("inputs") or [],
                 }
                 for mission_id, m in MISSIONS.items()
@@ -154,7 +162,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json(404, {"error": "That mission doesn't exist."})
             return
 
-        result = run_sandboxed(code, input_values=mission.get("inputs"))
+        result = run_java(code, input_values=mission.get("inputs"))
 
         if result["blocked"]:
             self._send_json(200, {
