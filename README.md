@@ -8,23 +8,47 @@ to disk.
 
 ## Getting it running
 
-You need two things installed:
+You need two things installed, both on your PATH:
 
-- **Python 3.11 or newer** — `python3 --version`
-- **A JDK** (Java 17 or newer) — `javac -version` and `java -version`
+- **Python 3.11 or newer**
+- **A JDK, Java 17 or newer** — the full JDK, not just a JRE, because the
+  game compiles your code with `javac`
 
-Both must be on your PATH. There is nothing to `pip install` — the server is
-pure Python standard library.
+There is nothing to `pip install`; the server is pure Python standard library.
+
+Check what you have:
+
+    python --version        # Windows      (or: py --version)
+    python3 --version       # macOS/Linux
+    javac -version
+    java -version
+
+If `python` on Windows prints *"Python was not found; run without arguments to
+install from the Microsoft Store"*, that is Windows' placeholder stub, not
+Python. Install the real thing from <https://www.python.org/downloads/> and
+**tick "Add python.exe to PATH"** on the first screen of the installer, then
+open a new terminal.
+
+If `javac` is not found but you have IntelliJ or Eclipse installed, you do have
+a JDK — it just is not on your PATH. Installing one from
+<https://adoptium.net/> is quicker than repairing the PATH by hand.
+
+### Run it
 
     git clone https://github.com/0x14117/STATIC-VOID.git
     cd STATIC-VOID
     git checkout claude/mission-practice-steps-2oh6pn
-    python3 server.py
+
+    py server.py            # Windows
+    python3 server.py       # macOS/Linux
 
 Then open <http://localhost:5000> in your browser, enter a codename, and the
 first mission loads.
 
-Use a different port with `python3 server.py 8080`.
+Use a different port with `py server.py 8080` if something already has 5000.
+
+Windows note: `python3` is usually not a command. Use `py`, which the
+python.org installer always provides, or `python`.
 
 Your progress is saved to `saves/progress.json` and is not committed.
 
@@ -41,6 +65,10 @@ through the real sandbox and grades it with that mission's own checker:
 
     python3 tests/test_java_sandbox.py          # the sandbox itself
     python3 tests/test_java_sandbox_fileio.py
+    python3 tests/test_error_paths.py           # compile errors name YOUR
+                                                # file, not the server's
+
+(On Windows, `py` in place of `python3` throughout.)
 
 If those pass and the game still misbehaves, the problem is in the browser or
 the server rather than the mission content.

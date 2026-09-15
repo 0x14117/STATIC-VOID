@@ -95,10 +95,17 @@ def _clean_stderr_lines(stderr):
     would be mistaken for the real compiler/runtime error. Also strips the
     server's own temp-directory path off the front of javac's file
     references, leaving just "Main.java:4:" — the player never sees our
-    filesystem layout, only their own file and line number."""
+    filesystem layout, only their own file and line number.
+
+    The path pattern has to cover Windows as well as Unix: there javac
+    reports C:\\Users\\...\\AppData\\Local\\Temp\\nullsector_java_x\\Main.java:4:,
+    which a Unix-only pattern leaves completely untouched — so every
+    compile error a Windows player saw came with the server's temp
+    directory attached. Hence [/\\\\] for either separator, and .* rather
+    than \\S* because a Windows home directory can contain spaces."""
     lines = stderr.strip().splitlines()
     lines = [line for line in lines if not line.startswith("Picked up ")]
-    return [re.sub(r"^/\S*/Main\.java:", "Main.java:", line) for line in lines]
+    return [re.sub(r"^.*[/\\]Main\.java:", "Main.java:", line) for line in lines]
 
 
 def _cap_output(text):
