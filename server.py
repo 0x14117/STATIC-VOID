@@ -19,7 +19,7 @@ import os
 import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from java_sandbox import run_java
+from java_sandbox import missing_toolchain, run_java
 from labs import LABS, get_task
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -224,6 +224,22 @@ def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 5000
     tasks = sum(len(lab["tasks"]) for lab in LABS.values())
     print("STATIC VOID — {} labs, {} tasks".format(len(LABS), tasks))
+
+    # Say this at startup rather than letting the first submission fail. The
+    # server is still worth starting — the explanations and examples are
+    # readable without a JDK — but nothing can be RUN until Java is installed,
+    # and finding that out after writing your first answer is a waste of time.
+    toolchain_error = missing_toolchain()
+    if toolchain_error is not None:
+        print("")
+        print("!" * 68)
+        print(toolchain_error["message"])
+        print("")
+        print("The site will still open and you can read the labs, but Running")
+        print("your code will not work until this is fixed.")
+        print("!" * 68)
+        print("")
+
     print("Open http://localhost:{}".format(port))
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     try:

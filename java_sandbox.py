@@ -72,6 +72,38 @@ def _find_dangerous_path_literal(source):
     return None
 
 
+MISSING_TOOLCHAIN_MESSAGE = (
+    "Java is not set up on this computer: {} could not be found.\n"
+    "\n"
+    "STATIC VOID compiles your code with a real Java compiler, so you need a\n"
+    "JDK installed and on your PATH. A JRE is not enough — it can run Java but\n"
+    "cannot compile it.\n"
+    "\n"
+    "Install a JDK (Java 17 or newer) from https://adoptium.net/ and choose the\n"
+    "option to add it to PATH. Then CLOSE this terminal, open a new one, and\n"
+    "start the server again.\n"
+    "\n"
+    "To check it worked, run:  javac -version"
+)
+
+
+def missing_toolchain():
+    """Return an error dict when javac or java is not on PATH, else None.
+
+    Without this the first submission dies inside subprocess with
+    FileNotFoundError: [WinError 2], a raw traceback in the server console and
+    nothing useful in the browser. Someone who has just installed Python and
+    not yet installed Java has no way to read that as "install a JDK".
+    """
+    missing = [tool for tool in ("javac", "java") if shutil.which(tool) is None]
+    if not missing:
+        return None
+    return {
+        "type": "NoJavaToolchain",
+        "message": MISSING_TOOLCHAIN_MESSAGE.format(" and ".join(missing)),
+    }
+
+
 class JavaSandboxError(Exception):
     pass
 
@@ -176,6 +208,13 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
     exist. Filenames must be simple (no path separators), since they land
     directly in the sandboxed workdir.
     """
+    toolchain_error = missing_toolchain()
+    if toolchain_error is not None:
+        return {
+            "ok": False, "blocked": False, "timeout": False, "output": "",
+            "files": {}, "error": toolchain_error,
+        }
+
     violation = inspect_code(source)
     if violation:
         if violation.get("kind") == "path":
@@ -214,6 +253,12 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
                 "ok": False, "blocked": False, "timeout": True, "output": "", "files": {},
                 "error": {"type": "TimeoutError", "message": "Compilation took too long."},
             }
+        except FileNotFoundError:
+            return {
+                "ok": False, "blocked": False, "timeout": False, "output": "", "files": {},
+                "error": {"type": "NoJavaToolchain",
+                          "message": MISSING_TOOLCHAIN_MESSAGE.format("javac")},
+            }
 
         if compile_result.returncode != 0:
             return {
@@ -237,6 +282,12 @@ def run_java(source, input_values=None, run_args=None, seed_files=None):
             return {
                 "ok": False, "blocked": False, "timeout": True, "output": "", "files": {},
                 "error": {"type": "TimeoutError", "message": "Execution exceeded {} seconds. That loop has no exit.".format(RUN_TIMEOUT_SECONDS)},
+            }
+        except FileNotFoundError:
+            return {
+                "ok": False, "blocked": False, "timeout": False, "output": "", "files": {},
+                "error": {"type": "NoJavaToolchain",
+                          "message": MISSING_TOOLCHAIN_MESSAGE.format("java")},
             }
 
         stdout, truncated = _cap_output(run_result.stdout)

@@ -29,9 +29,18 @@ Python. Install the real thing from <https://www.python.org/downloads/> and
 **tick "Add python.exe to PATH"** on the first screen of the installer, then
 open a new terminal.
 
-If `javac` is not found but you have IntelliJ or Eclipse installed, you do have
-a JDK — it just is not on your PATH. Installing one from
-<https://adoptium.net/> is quicker than repairing the PATH by hand.
+If `javac` is not found, you need a JDK. Install one from
+<https://adoptium.net/> (Temurin 17 or newer) and choose the option to add it
+to PATH, then **close the terminal and open a new one** — PATH changes only
+apply to new terminals.
+
+Note a JRE is not enough. A JRE runs Java; only a JDK can compile it, and this
+project compiles your code on every Run.
+
+If you have IntelliJ or Eclipse you already have a JDK somewhere, but it is
+probably not on your PATH. Installing Temurin is quicker than finding it.
+
+The server tells you at startup if Java is missing, and says what to do.
 
 ### Run it
 
