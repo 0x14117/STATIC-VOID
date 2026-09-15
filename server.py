@@ -28,6 +28,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 SAVES_DIR = os.path.join(BASE_DIR, "saves")
 SAVE_FILE = os.path.join(SAVES_DIR, "progress.json")
+MAX_CODE_LENGTH = 20_000  # generous for any mission in this game; guards against pathological pastes
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -155,6 +156,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not isinstance(code, str):
             self._send_json(400, {"error": "code must be a string."})
+            return
+        if len(code) > MAX_CODE_LENGTH:
+            self._send_json(400, {"error": "Code too long ({} chars, max {}).".format(len(code), MAX_CODE_LENGTH)})
             return
 
         mission = MISSIONS.get(mission_id)

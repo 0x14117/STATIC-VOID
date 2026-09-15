@@ -28,6 +28,7 @@ import os
 COMPILE_TIMEOUT_SECONDS = 15
 RUN_TIMEOUT_SECONDS = 8
 MAX_HEAP = "128m"
+MAX_OUTPUT_CHARS = 200_000  # generous for any real mission (a few hundred bytes); guards a print-flood loop
 
 # Substring scan, not a real parser — case-sensitive on purpose (these
 # are all real API names, lowercase versions won't false-positive on
@@ -65,6 +66,22 @@ def _clean_stderr_lines(stderr):
     lines = stderr.strip().splitlines()
     lines = [line for line in lines if not line.startswith("Picked up ")]
     return [re.sub(r"^/\S*/Main\.java:", "Main.java:", line) for line in lines]
+
+
+def _cap_output(text):
+    """Truncate captured stdout so a print-flood loop (e.g. `while(true)
+    System.out.println("A");`) can't send megabytes back to the browser or
+    balloon the mission-check string comparison. This runs AFTER
+    subprocess.run() has already buffered the full output in this
+    process's memory — it protects downstream consumers (HTTP payload,
+    JSON, the browser), not peak memory during the run itself. That's an
+    acceptable gap for this game's threat model (a single local player on
+    their own machine, bounded by RUN_TIMEOUT_SECONDS either way); a truly
+    adversarial/multi-tenant setting would need a streaming read with an
+    early kill instead."""
+    if len(text) <= MAX_OUTPUT_CHARS:
+        return text, False
+    return text[:MAX_OUTPUT_CHARS], True
 
 
 def _friendly_compile_error(stderr):
@@ -140,17 +157,28 @@ def run_java(source, input_values=None, run_args=None):
                 "error": {"type": "TimeoutError", "message": "Execution exceeded {} seconds. That loop has no exit.".format(RUN_TIMEOUT_SECONDS)},
             }
 
+        stdout, truncated = _cap_output(run_result.stdout)
+
         if run_result.returncode != 0:
             clean_lines = _clean_stderr_lines(run_result.stderr)
             message = clean_lines[0] if clean_lines else "Runtime error."
             return {
-                "ok": False, "blocked": False, "timeout": False, "output": run_result.stdout,
+                "ok": False, "blocked": False, "timeout": False, "output": stdout,
                 "error": {"type": "RuntimeError", "message": message},
+            }
+
+        if truncated:
+            return {
+                "ok": False, "blocked": False, "timeout": False, "output": stdout,
+                "error": {
+                    "type": "OutputTooLarge",
+                    "message": "Your program printed way more than any mission needs ({}+ characters). Check for a loop that never stops printing.".format(MAX_OUTPUT_CHARS),
+                },
             }
 
         return {
             "ok": True, "blocked": False, "timeout": False,
-            "output": run_result.stdout, "error": None,
+            "output": stdout, "error": None,
         }
     finally:
         shutil.rmtree(workdir, ignore_errors=True)

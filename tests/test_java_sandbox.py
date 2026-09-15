@@ -105,6 +105,20 @@ for pattern, snippet in [
     r = run_java(code)
     check("blocks `{}`".format(pattern), r["blocked"] is True and "should not run" not in r["output"], r)
 
+# 6b. A finite but huge-output program (completes well within the timeout,
+# so this exercises the output cap, not the timeout path) gets its output
+# truncated instead of forwarding hundreds of KB back to the browser
+FLOOD = '''public class Main {
+    public static void main(String[] args) {
+        for (int i = 0; i < 5000; i++) {
+            System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        }
+    }
+}'''
+r = run_java(FLOOD)
+check("finite huge-output program's output is capped", len(r["output"]) <= 200_000 + 1000, "len={}".format(len(r["output"])))
+check("capped output is reported as a normal failure, not a crash", r["ok"] is False and r["error"]["type"] == "OutputTooLarge", r)
+
 # 7. Infinite loop times out instead of hanging the server
 INFINITE = '''public class Main {
     public static void main(String[] args) {
