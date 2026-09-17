@@ -8,10 +8,11 @@ Lab ids are "chNN-labNN" and task ids are "tN" within a lab, so a task is
 addressed globally as "ch03-lab02/t4".
 """
 
-from . import chapter01, chapter03
+from . import chapter01, chapter02, chapter03
 
 CHAPTER_MODULES = [
     chapter01,
+    chapter02,
     chapter03,
 ]
 

@@ -107,6 +107,114 @@ CLAIMS = [
                         '        System.out.println(countLess + " " + countUpTo);'),
         "expect_output": "4 5",
     },
+    # ---- Topic 2 / Chapter 2: classes and objects ----------------------
+    {
+        "topic": 2,
+        "name": "int fields start at 0 and boolean fields at false, without being set",
+        "code": ("class Rec { int count; boolean flag; String text; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec r = new Rec();\n"
+                 "        System.out.println(r.count + \" \" + r.flag + \" \" + r.text);\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "0 false null",
+    },
+    {
+        "topic": 2,
+        "name": "declaring an object variable without new does not compile",
+        "code": ("class Rec { String name; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec r;\n"
+                 "        r.name = \"x\";\n"
+                 "        System.out.println(r.name);\n"
+                 "    }\n"
+                 "}"),
+        "expect_compile_error": True,
+    },
+    {
+        "topic": 2,
+        "name": "b = a makes both names reach ONE object, so a change shows through both",
+        "code": ("class Rec { int score; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec a = new Rec();\n"
+                 "        Rec b = a;\n"
+                 "        b.score = 9;\n"
+                 "        System.out.println(a.score);\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "9",
+    },
+    {
+        "topic": 2,
+        "name": "two separate new calls give genuinely independent objects",
+        "code": ("class Rec { int score; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec a = new Rec();\n"
+                 "        Rec b = new Rec();\n"
+                 "        b.score = 9;\n"
+                 "        System.out.println(a.score + \" \" + b.score);\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "0 9",
+    },
+    {
+        "topic": 2,
+        "name": "one method gives different answers per object, reading that object's fields",
+        "code": ("class Rec {\n"
+                 "    String name;\n"
+                 "    void show() { System.out.println(name); }\n"
+                 "}\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec a = new Rec(); a.name = \"alpha\";\n"
+                 "        Rec b = new Rec(); b.name = \"bravo\";\n"
+                 "        a.show();\n"
+                 "        b.show();\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "alpha\nbravo",
+    },
+    {
+        "topic": 2,
+        "name": "a method declared inside main does not compile",
+        "code": ("class Rec { String name; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec r = new Rec();\n"
+                 "        void show() { System.out.println(\"x\"); }\n"
+                 "        r.show();\n"
+                 "    }\n"
+                 "}"),
+        "expect_compile_error": True,
+    },
+    {
+        "topic": 2,
+        "name": "if (flag) works on a boolean field with no comparison",
+        "code": ("class Rec { boolean failed; }\n\n"
+                 "public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        Rec r = new Rec();\n"
+                 "        r.failed = true;\n"
+                 "        if (r.failed) { System.out.println(\"HIGH\"); } else { System.out.println(\"INFO\"); }\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "HIGH",
+    },
+    {
+        "topic": 2,
+        "name": "a boundary rule written > instead of >= misses the exact value",
+        "code": ("public class Main {\n"
+                 "    public static void main(String[] args) {\n"
+                 "        int failures = 3;\n"
+                 "        System.out.println((failures > 3) + \" \" + (failures >= 3));\n"
+                 "    }\n"
+                 "}"),
+        "expect_output": "false true",
+    },
     # ---- Topic 2: constants -------------------------------------------
     {
         "topic": 2,
