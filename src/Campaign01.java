@@ -5378,5 +5378,1050 @@ public class Campaign01 {
                 + "quietly.")
             .next("Next: asking whether a String contains, starts with or "
                 + "ends with something."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "Yes or No Questions About Text", 3)
+            .brief(
+                "The mail gateway quarantines attachments that are programs. "
+                + "Its rule is simple: if the file name ends with .exe, hold "
+                + "it.\n\n"
+                + "This morning Payroll.PDF.EXE went straight through. The rule "
+                + "was asking the right question the wrong way.")
+            .willLearn("contains()", "startsWith() and endsWith()",
+                       "Methods that answer true or false")
+            .whyUseful(
+                "Matching text - an indicator in a log, a dangerous extension, "
+                + "a URL scheme - is the most basic detection there is. These "
+                + "three methods do it, and their answers are booleans ready "
+                + "for the decisions of Campaign 02.")
+            .concept("contains, startsWith, endsWith",
+                "Three methods that answer a yes/no question about a String. "
+                + "Each hands back a boolean:\n"
+                + "\n"
+                + "    s.contains(\"x\")      does x appear anywhere?\n"
+                + "    s.startsWith(\"x\")    does s begin with x?\n"
+                + "    s.endsWith(\"x\")      does s finish with x?\n"
+                + "\n"
+                + "    String url = \"https://northstar.example/login\";\n"
+                + "    url.startsWith(\"https://\")    true\n"
+                + "    url.contains(\"login\")         true\n"
+                + "    url.endsWith(\".exe\")          false\n"
+                + "\n"
+                + "The answer can be stored in a boolean or printed, like any "
+                + "other boolean:\n"
+                + "\n"
+                + "    boolean secure = url.startsWith(\"https://\");\n"
+                + "\n"
+                + "All three are CASE-SENSITIVE. \"FILE.EXE\".endsWith(\".exe\") "
+                + "is false. When case should not matter - and for file "
+                + "names on Windows it does not - lower-case first, then "
+                + "ask:\n"
+                + "\n"
+                + "    name.toLowerCase().endsWith(\".exe\")\n"
+                + "\n"
+                + "contains matches ANYWHERE, including inside other words. "
+                + "\"sysadmin\".contains(\"admin\") is true. That makes it "
+                + "easy to use and easy to over-match.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"Payroll.PDF.EXE\";",
+                "        String lower = name.toLowerCase();",
+                "        System.out.println(\"RAW .exe?   \" + name.endsWith(\".exe\"));",
+                "        System.out.println(\"LOWER .exe? \" + lower.endsWith(\".exe\"));",
+                "        System.out.println(\"HAS .pdf?   \" + lower.contains(\".pdf\"));",
+                "    }",
+                "}")
+            .exampleOutput("RAW .exe?   false", "LOWER .exe? true", "HAS .pdf?   true")
+            .lineByLine(
+                new String[]{"name.endsWith(\".exe\")",
+                    "false. The name ends .EXE in capitals, and the match is "
+                    + "case-sensitive. This is the gateway's bug."},
+                new String[]{"lower.endsWith(\".exe\")",
+                    "true. Lower-case first, then ask, and the program is "
+                    + "caught."},
+                new String[]{"lower.contains(\".pdf\")",
+                    "true as well - which is exactly what the attacker was "
+                    + "counting on a person noticing."},
+                new String[]{"The answers",
+                    "Booleans. Printed here; stored and acted on once you have "
+                    + "if statements."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String line = \"FAILED login for jsmith\";",
+                    "System.out.println(line.contains(\"login\"));")
+                .accept("true")
+                .hints("Does login appear anywhere in the line?",
+                       "It does not have to be at the start.")
+                .explain("true. contains looks anywhere in the String.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String file = \"report.EXE\";",
+                    "System.out.println(file.endsWith(\".exe\"));")
+                .accept("false")
+                .hints(
+                    "Compare the letters exactly, capitals included.",
+                    "Is .EXE the same text as .exe?")
+                .explain(
+                    "false. .EXE and .exe are different text, and endsWith "
+                    + "compares exactly. Windows will still run it. This is "
+                    + "the whole bypass.")
+                .xp(20))
+            .objective(
+                "Fix the attachment check so capitals cannot slip past it.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"Payroll.PDF.EXE\";",
+                "        // decide whether it is a program here",
+                "        System.out.println(\"QUARANTINE: \" + executable);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare a boolean called executable that is true when name "
+                + "ends with .exe in ANY mix of capitals. Do it in one line by "
+                + "chaining.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare executable: does name end with .exe, ignoring case?")
+                .accept("boolean executable = name.toLowerCase().endsWith(\".exe\");",
+                        "boolean executable = name.toLowerCase().endsWith(\".exe\")")
+                .hints(
+                    "The answer is true or false, so the type is boolean.",
+                    "Lower-case the name first, then ask endsWith on the result.",
+                    "boolean executable = name.toLowerCase().endsWith(\".exe\");")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String name = \"Payroll.PDF.EXE\";",
+                    "        boolean executable = name.toLowerCase().endsWith(\".exe\");",
+                    "        System.out.println(\"QUARANTINE: \" + executable);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "toLowerCase() hands back \"payroll.pdf.exe\", and endsWith "
+                    + "is asked of that. Every spelling - .EXE, .Exe, .eXe - "
+                    + "becomes .exe before the question, so there is only one "
+                    + "spelling left to match.\n"
+                    + "\n"
+                    + "Chaining in the other order, name.endsWith(\".exe\")"
+                    + ".toLowerCase(), does not even compile: endsWith gives a "
+                    + "boolean, and a boolean has no toLowerCase. The order is "
+                    + "the logic - normalise, then test.")
+                .explain(
+                    "Normalise the case, then ask the question.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Matching without normalising case",
+                    "An attacker picks the capitals. Lower-case first, then "
+                    + "compare with a lower-case pattern."},
+                new String[]{"contains where you meant endsWith",
+                    "contains(\".exe\") also flags readme.exe.txt, which is a "
+                    + "text file. Ask the question you mean."},
+                new String[]{"Forgetting over-matching",
+                    "contains(\"admin\") is true for sysadmin, badminton and "
+                    + "administrator."})
+            .cyber(
+                "Text matching is the front line of detection - antivirus "
+                + "signatures, mail filters, web firewall rules, SIEM searches "
+                + "- and the first thing attackers probe is how exactly it "
+                + "matches.\n"
+                + "\n"
+                + "Change the capitals. Add a second extension. Put a space or "
+                + "a dot at the end, which Windows quietly strips. Encode a "
+                + "character. Each is a way of making text mean the same thing "
+                + "to the system that acts on it while looking different to "
+                + "the check that guards it.\n"
+                + "\n"
+                + "The rule that defeats most of them: bring the input to one "
+                + "canonical form first - trimmed, one case, decoded - and "
+                + "only then compare. Checking a raw value against a pattern "
+                + "is checking the attacker's choice of spelling.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String url = \"http://northstar.example\";",
+                    "System.out.println(url.startsWith(\"https://\"));")
+                .accept("false")
+                .hints(
+                    "Compare the first eight characters carefully.",
+                    "Is there an s?")
+                .explain(
+                    "false. The URL begins http://, without the s. startsWith "
+                    + "needs every character of the pattern to match.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"sysadmin\".contains(\"admin\"));")
+                .accept("true")
+                .hints("contains matches anywhere.",
+                       "Look at the last five letters of sysadmin.")
+                .explain(
+                    "true. admin sits inside sysadmin. A rule meant to spot "
+                    + "the admin account would fire on this one too - false "
+                    + "positives like that are why alert rules get tuned.")
+                .xp(15))
+            .recap(
+                "    s.contains(x)      anywhere\n"
+                + "    s.startsWith(x)    at the beginning\n"
+                + "    s.endsWith(x)      at the end\n"
+                + "\n"
+                + "Each answers with a boolean. All are case-sensitive.\n"
+                + "\n"
+                + "Normalise first, then match:\n"
+                + "\n"
+                + "    name.toLowerCase().endsWith(\".exe\")")
+            .next("Next: swapping one piece of text for another - and "
+                + "stopping forged log lines."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "Forged Lines in the Log", 3)
+            .brief(
+                "The authentication log shows a failed login for 'guest', "
+                + "followed immediately by a successful admin login. Nobody "
+                + "logged in as admin.\n\n"
+                + "Both lines were written by one failed attempt. The username "
+                + "had a line break inside it.")
+            .willLearn("replace()", "Log injection", "Neutralising input")
+            .whyUseful(
+                "Swapping text is how input is cleaned before it is written "
+                + "anywhere that trusts its shape: logs, reports, other "
+                + "programs. replace is the simplest cleaning tool Java has.")
+            .concept("replace()",
+                "replace hands back a copy with EVERY occurrence of one piece "
+                + "of text swapped for another:\n"
+                + "\n"
+                + "    \"10-0-4-17\".replace(\"-\", \".\")    \"10.0.4.17\"\n"
+                + "\n"
+                + "Every one, not just the first. Replacing with the empty "
+                + "String deletes:\n"
+                + "\n"
+                + "    \"10.0.4.17\".replace(\".\", \"\")     \"100417\"\n"
+                + "\n"
+                + "It is case-sensitive, and like every String method it leaves "
+                + "the original alone - store the result.\n"
+                + "\n"
+                + "LOG INJECTION. A log is a file of lines, and a program "
+                + "reading it trusts that each line is one event. Remember \\n "
+                + "from Campaign 00: a line break inside a String. If a "
+                + "username contains one, then\n"
+                + "\n"
+                + "    \"WARN login failed for \" + username\n"
+                + "\n"
+                + "writes TWO lines, and the second one says whatever the "
+                + "attacker chose. It looks exactly like a real entry.\n"
+                + "\n"
+                + "The defence is to make line breaks in input harmless before "
+                + "writing them:\n"
+                + "\n"
+                + "    String safe = username.replace(\"\\n\", \"\\\\n\");\n"
+                + "\n"
+                + "That swaps each real line break for the two visible "
+                + "characters \\ and n. The whole attempt stays on one line, "
+                + "and an analyst can SEE that something odd was typed - which "
+                + "is better than silently deleting the evidence.\n"
+                + "\n"
+                + "Real logs also meet \\r, the carriage return, which some "
+                + "viewers treat as a line break too. A careful logger "
+                + "neutralises both.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String username = \"guest\\nINFO login ok for admin\";",
+                "        System.out.println(\"WARN login failed for \" + username);",
+                "        String safe = username.replace(\"\\n\", \"\\\\n\");",
+                "        System.out.println(\"WARN login failed for \" + safe);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "WARN login failed for guest",
+                "INFO login ok for admin",
+                "WARN login failed for guest\\nINFO login ok for admin")
+            .lineByLine(
+                new String[]{"The username",
+                    "What an attacker typed into the login form, line break "
+                    + "and all."},
+                new String[]{"The first println",
+                    "Writes two lines. The second is a forged entry that any "
+                    + "log reader will believe."},
+                new String[]{"replace(\"\\n\", \"\\\\n\")",
+                    "\"\\n\" is a real line break. \"\\\\n\" is a backslash "
+                    + "followed by n - two visible characters."},
+                new String[]{"The second println",
+                    "One line. The attempt is recorded, visibly strange, and "
+                    + "cannot pretend to be anything else."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"10-0-4-17\".replace(\"-\", \".\"));")
+                .accept("10.0.4.17")
+                .hints("Every dash is swapped, not just the first.",
+                       "Three dashes, three dots.")
+                .explain("10.0.4.17. replace changes every occurrence.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String host = \"web-01\";",
+                    "host.replace(\"web\", \"db\");",
+                    "System.out.println(host);")
+                .accept("web-01")
+                .hints(
+                    "Was the result of line 2 stored?",
+                    "A String never changes.")
+                .explain(
+                    "web-01. Line 2 built \"db-01\" and threw it away. The same "
+                    + "trap as mission 17, and in security code it is worse: a "
+                    + "sanitising call whose result is ignored sanitises "
+                    + "nothing, while looking as if it does.")
+                .xp(20))
+            .objective(
+                "Make a username safe to write into the authentication log.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String username = \"guest\\nINFO login ok for admin\";",
+                "        // neutralise the line breaks here",
+                "        System.out.println(\"WARN login failed for \" + safe);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare a String called safe holding username with every line "
+                + "break replaced by a single space, so the whole attempt lands "
+                + "on one line.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare safe: username with each \\n replaced by a space.")
+                .accept("String safe = username.replace(\"\\n\", \" \");",
+                        "String safe = username.replace(\"\\n\", \" \")",
+                        "String safe = username.replace('\\n', ' ');",
+                        "String safe = username.replace('\\n', ' ')")
+                .hints(
+                    "replace(what to find, what to put instead).",
+                    "A line break is written \\n inside quotes. A space is "
+                    + "written \" \".",
+                    "String safe = username.replace(\"\\n\", \" \");")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String username = \"guest\\nINFO login ok for admin\";",
+                    "        String safe = username.replace(\"\\n\", \" \");",
+                    "        System.out.println(\"WARN login failed for \" + safe);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "replace finds every real line break in username and puts a "
+                    + "space in its place, and the result is stored in safe. "
+                    + "Printed, the whole thing is one line: WARN login failed "
+                    + "for guest INFO login ok for admin.\n"
+                    + "\n"
+                    + "It still reads oddly - and that is fine. The attack "
+                    + "depended on creating a SEPARATE line that looked "
+                    + "genuine. Inside the WARN line, the text is plainly part "
+                    + "of a username somebody typed, and plainly suspicious. "
+                    + "Replacing with \\\\n instead of a space, as in the "
+                    + "example, makes the evidence even clearer.")
+                .explain(
+                    "Replace the line break, store the result, write the safe "
+                    + "copy.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Not storing the result",
+                    "username.replace(...); alone changes nothing. The log gets "
+                    + "the raw input."},
+                new String[]{"Only handling \\n",
+                    "\\r is a line break to many log viewers too. Neutralise "
+                    + "both."},
+                new String[]{"Deleting instead of neutralising",
+                    "replace(\"\\n\", \"\") hides the attempt. Making it "
+                    + "visible preserves evidence."})
+            .cyber(
+                "Log injection - log forging - is a catalogued weakness "
+                + "(CWE-117), and it attacks the thing investigators rely on "
+                + "most. Forged lines can invent logins that never happened, "
+                + "bury a real event under noise, or break the parser that "
+                + "feeds the SIEM so that everything after them is lost.\n"
+                + "\n"
+                + "The general rule it teaches is one of the most important in "
+                + "the course: data that crosses into another format must be "
+                + "made safe for THAT format. A line break is harmless in a "
+                + "variable and dangerous in a log. A quote is harmless in a "
+                + "log and dangerous in a database query. An angle bracket is "
+                + "harmless in a database and dangerous in a web page. Same "
+                + "idea, every time - and replace is the first tool for it.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"a.b.c\".replace(\".\", \"\"));")
+                .accept("abc")
+                .hints("Replacing with the empty String deletes.",
+                       "Every dot goes.")
+                .explain("abc. Each dot was replaced with nothing.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "How many matches does replace change?")
+                .choices("Only the first", "Only the last", "Every one",
+                         "One per line")
+                .accept("3", "c")
+                .hints("Think back to 10-0-4-17.",
+                       "All three dashes changed.")
+                .explain(
+                    "Every one. replace goes through the whole String.")
+                .xp(10))
+            .recap(
+                "    s.replace(find, putInstead)   a new String, every match\n"
+                + "\n"
+                + "Store the result. Case-sensitive.\n"
+                + "\n"
+                + "A line break in input can forge a log entry. Neutralise it "
+                + "before writing:\n"
+                + "\n"
+                + "    username.replace(\"\\n\", \"\\\\n\")")
+            .next("Next: printing tidy, aligned reports."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "A Report Worth Reading", 3)
+            .brief(
+                "The morning summary joins its values with + and spaces. "
+                + "Every host name is a different length, so the columns "
+                + "stagger down the page and nobody reads past the third "
+                + "line.\n\n"
+                + "Java has a way to print values into a fixed layout.")
+            .willLearn("printf", "Format specifiers", "String.format")
+            .whyUseful(
+                "Aligned columns and fixed decimal places turn a stream of "
+                + "values into something a tired analyst can scan in seconds. "
+                + "Every report you write from now on can use it.")
+            .concept("printf",
+                "printf prints a TEMPLATE with gaps, and fills the gaps with "
+                + "values listed after it:\n"
+                + "\n"
+                + "    System.out.printf(\"%s has %d failures%n\", user, n);\n"
+                + "\n"
+                + "Each gap is a FORMAT SPECIFIER starting with %:\n"
+                + "\n"
+                + "    %s     a String\n"
+                + "    %d     a whole number - int or long\n"
+                + "    %f     a double\n"
+                + "    %.1f   a double, rounded to 1 decimal place\n"
+                + "    %n     a line break\n"
+                + "\n"
+                + "Values fill the gaps in order. printf does NOT move to a "
+                + "new line by itself, like print - end with %n.\n"
+                + "\n"
+                + "A number between % and the letter sets a WIDTH, padding with "
+                + "spaces:\n"
+                + "\n"
+                + "    %5d     right-aligned in 5 columns     \"   42\"\n"
+                + "    %-8s    left-aligned in 8 columns      \"WEB-01  \"\n"
+                + "\n"
+                + "Numbers usually align right, names left. Widths are what "
+                + "make columns.\n"
+                + "\n"
+                + "The type must match. %d given a double compiles, and then "
+                + "CRASHES when it runs - the compiler does not check the "
+                + "template against the values.\n"
+                + "\n"
+                + "String.format takes the same template and hands the result "
+                + "back as a String instead of printing it:\n"
+                + "\n"
+                + "    String row = String.format(\"%-8s %5d\", host, n);")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.printf(\"%-8s %5d %6.1f%n\", \"WEB-01\", 12, 7.46);",
+                "        System.out.printf(\"%-8s %5d %6.1f%n\", \"DC-01\", 3, 9.8);",
+                "    }",
+                "}")
+            .exampleOutput("WEB-01      12    7.5", "DC-01        3    9.8")
+            .lineByLine(
+                new String[]{"%-8s",
+                    "The host name, left-aligned in 8 columns. Both names start "
+                    + "at the margin and the next column starts in the same "
+                    + "place."},
+                new String[]{"%5d",
+                    "The count, right-aligned in 5, so the units line up under "
+                    + "each other."},
+                new String[]{"%6.1f",
+                    "The score in 6 columns, one decimal place. 7.46 is rounded "
+                    + "to 7.5 for display - the variable is not changed."},
+                new String[]{"%n",
+                    "Ends the line. Without it both rows would run together."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.printf(\"PORT %d OPEN%n\", 443);")
+                .accept("PORT 443 OPEN")
+                .hints("The %d gap is filled with 443.",
+                       "%n ends the line and prints nothing visible.")
+                .explain("PORT 443 OPEN. The value slots into the gap.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.printf(\"%.2f%n\", 2.0 / 3);")
+                .accept("0.67")
+                .hints(
+                    "2.0 / 3 is 0.6666...",
+                    "%.2f shows two decimal places, rounded.")
+                .explain(
+                    "0.67. Rounded to two places for display. Compare mission "
+                    + "24's Math.round(x * 100) / 100.0 - printf is the easy "
+                    + "way when you only need to SHOW the rounded value.")
+                .xp(20))
+            .objective(
+                "Print one line of the failed-login summary.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String user = \"contractor\";",
+                "        int failures = 9;",
+                "        // print: contractor has 9 failures",
+                "    }",
+                "}")
+            .yourTask(
+                "Use printf to print  contractor has 9 failures  followed by a "
+                + "line break. Use placeholders for BOTH values - do not type "
+                + "them into the template.")
+            .mainTask(new Task(Task.WRITE,
+                    "printf the line, with %s and %d, ending in %n.")
+                .accept("System.out.printf(\"%s has %d failures%n\", user, failures);",
+                        "System.out.printf(\"%s has %d failures%n\", user, failures)")
+                .hints(
+                    "The template is the fixed text with a gap for each value.",
+                    "user is a String (%s), failures is an int (%d), then %n.",
+                    "System.out.printf(\"%s has %d failures%n\", user, failures);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String user = \"contractor\";",
+                    "        int failures = 9;",
+                    "        System.out.printf(\"%s has %d failures%n\", user, failures);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The template holds everything that never changes. %s is "
+                    + "filled with user and %d with failures, in that order, and "
+                    + "%n ends the line.\n"
+                    + "\n"
+                    + "Putting the values in the right order matters as much as "
+                    + "the specifiers: swap user and failures and %s gets an int "
+                    + "(which it tolerates) while %d gets a String, which "
+                    + "crashes. The template and the list are two halves of one "
+                    + "statement, and Java only checks that they agree when the "
+                    + "line runs.")
+                .explain(
+                    "One gap per value, in order, and %n to finish.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Forgetting %n",
+                    "printf never adds a line break. The next output joins "
+                    + "straight onto this line."},
+                new String[]{"The wrong specifier",
+                    "%d with a double compiles and then crashes when it runs. "
+                    + "Use %f for doubles."},
+                new String[]{"Values in the wrong order",
+                    "Gaps are filled strictly left to right."})
+            .cyber(
+                "Most of what a security analyst reads is output from tools, "
+                + "and most of it is read under time pressure. A report that "
+                + "lines up lets the eye run down a column and stop at the one "
+                + "value that is out of place. A ragged one gets skimmed, and "
+                + "skimmed reports are where the one important line is "
+                + "missed.\n"
+                + "\n"
+                + "One caution, carried from the last mission. Format templates "
+                + "should always be written by you, never taken from input. "
+                + "In some languages a user-supplied template is a serious "
+                + "vulnerability in its own right, able to read or even write "
+                + "memory. In Java it is mostly a way to crash the program - "
+                + "but the habit to build is the same: input fills the gaps, "
+                + "it never supplies the template.")
+            .check(new Task(Task.CHOICE,
+                    "Which specifier shows a double with one decimal place?")
+                .choices("%d", "%1d", "%.1f", "%s1")
+                .accept("3", "c")
+                .hints("Doubles use f.", "The .1 sets the decimal places.")
+                .explain(
+                    "%.1f - f for a floating-point number, .1 for one place.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String row = String.format(\"[%5s]\", \"DB\");",
+                    "System.out.println(row);")
+                .accept("[   DB]")
+                .hints(
+                    "%5s pads to 5 columns, on the left.",
+                    "DB is 2 characters, so 3 spaces come first.")
+                .explain(
+                    "[   DB] - three spaces then DB, five columns in all. "
+                    + "Without a minus sign, padding goes on the left.")
+                .xp(20))
+            .recap(
+                "    System.out.printf(template, values...);\n"
+                + "\n"
+                + "    %s  String    %d  whole number    %f  double\n"
+                + "    %.1f  one decimal place    %n  line break\n"
+                + "    %5d  right-aligned    %-8s  left-aligned\n"
+                + "\n"
+                + "Values fill gaps in order. A mismatch crashes at run time.\n"
+                + "\n"
+                + "String.format builds the same text without printing it.")
+            .next("Next: taking a whole log line apart, using everything so "
+                + "far."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "Taking a Log Line Apart", 5)
+            .brief(
+                "The firewall writes one line per blocked connection:\n\n"
+                + "    BLOCK 10.0.4.17 443\n\n"
+                + "an action, a source address and a port, separated by single "
+                + "spaces. The address is a different length on every line, so "
+                + "fixed positions will not work.\n\n"
+                + "Everything needed to take it apart properly, you already "
+                + "have.")
+            .willLearn("Parsing a log line", "indexOf with a starting point",
+                       "Combining String methods")
+            .whyUseful(
+                "Turning a line of text into separate, typed values is the "
+                + "first step of every log tool, SIEM parser and detection "
+                + "rule. This mission is that step, written by you.")
+            .concept("Parsing by separators",
+                "The plan: find each space, cut between them, convert what "
+                + "should be a number.\n"
+                + "\n"
+                + "One new detail. indexOf can start searching from a position "
+                + "you choose:\n"
+                + "\n"
+                + "    s.indexOf(\" \", from)\n"
+                + "\n"
+                + "That finds the first space AT OR AFTER index from. To find "
+                + "the second space, search from just past the first:\n"
+                + "\n"
+                + "    String line = \"BLOCK 10.0.4.17 443\";\n"
+                + "    int first  = line.indexOf(\" \");\n"
+                + "    int second = line.indexOf(\" \", first + 1);\n"
+                + "\n"
+                + "    index    0    5         15\n"
+                + "    line     BLOCK 10.0.4.17 443\n"
+                + "\n"
+                + "first is 5 and second is 15. Now cut:\n"
+                + "\n"
+                + "    line.substring(0, first)             \"BLOCK\"\n"
+                + "    line.substring(first + 1, second)    \"10.0.4.17\"\n"
+                + "    line.substring(second + 1)           \"443\"\n"
+                + "\n"
+                + "Each + 1 steps over a space. The port is still text, so "
+                + "convert it:\n"
+                + "\n"
+                + "    int port = Integer.parseInt(line.substring(second + 1));\n"
+                + "\n"
+                + "Nothing here depends on how long the address is. A line with "
+                + "192.168.100.200 in it moves both spaces, and indexOf finds "
+                + "them wherever they are.\n"
+                + "\n"
+                + "What this parser does NOT survive: a missing field, a double "
+                + "space, a port that is not a number. Each is -1 or a crash "
+                + "waiting to happen. Checking for them is Campaign 02; "
+                + "recovering from them is Campaign 10. Knowing they exist is "
+                + "today.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"BLOCK 10.0.4.17 443\";",
+                "        int first = line.indexOf(\" \");",
+                "        int second = line.indexOf(\" \", first + 1);",
+                "        String action = line.substring(0, first);",
+                "        String source = line.substring(first + 1, second);",
+                "        int port = Integer.parseInt(line.substring(second + 1));",
+                "        System.out.printf(\"%s from %s on port %d%n\",",
+                "                action, source, port);",
+                "    }",
+                "}")
+            .exampleOutput("BLOCK from 10.0.4.17 on port 443")
+            .lineByLine(
+                new String[]{"line.indexOf(\" \")",
+                    "The first space, after BLOCK: index 5."},
+                new String[]{"line.indexOf(\" \", first + 1)",
+                    "Searching from 6 onward skips the first space and finds "
+                    + "the second: 15."},
+                new String[]{"substring(first + 1, second)",
+                    "From just after the first space up to the second. The "
+                    + "address, whatever its length."},
+                new String[]{"Integer.parseInt(...)",
+                    "The last field was text. Now it is an int you could "
+                    + "compare or count with."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"a b c\";",
+                    "System.out.println(s.indexOf(\" \", 2));")
+                .accept("3", "three")
+                .hints(
+                    "Spaces are at 1 and 3.",
+                    "The search starts at index 2, so the space at 1 is "
+                    + "skipped.")
+                .explain(
+                    "3. Searching begins at index 2, so the space at 1 is never "
+                    + "seen; the next one is at 3.")
+                .xp(20))
+            .practice(new Task(Task.CHOICE,
+                    "With first and second holding the two space positions, "
+                    + "which gives the MIDDLE field?")
+                .choices(
+                    "line.substring(first, second)",
+                    "line.substring(first + 1, second)",
+                    "line.substring(first + 1, second + 1)",
+                    "line.substring(first, second - 1)")
+                .accept("2", "b")
+                .hints(
+                    "The field starts one after the first space.",
+                    "The end is not included, so ending AT the second space "
+                    + "stops just before it.")
+                .explain(
+                    "substring(first + 1, second). Start one past the first "
+                    + "space; end at the second, which is excluded. Option A "
+                    + "includes the leading space, C includes the trailing one, "
+                    + "and D does both wrong.")
+                .xp(25))
+            .objective(
+                "Pull the attempt count off the end of an authentication line.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"FAIL m.reyes 7\";",
+                "        int first = line.indexOf(\" \");",
+                "        int second = line.indexOf(\" \", first + 1);",
+                "        // take the attempt count here",
+                "        System.out.println(\"NEXT WOULD BE \" + (attempts + 1));",
+                "    }",
+                "}")
+            .yourTask(
+                "The count is everything after the second space. Declare an int "
+                + "called attempts holding it as a number, in one line.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare attempts: the text after second, as an int.")
+                .accept("int attempts = Integer.parseInt(line.substring(second + 1));",
+                        "int attempts = Integer.parseInt(line.substring(second + 1))")
+                .hints(
+                    "Two steps: cut the text out, then convert it.",
+                    "line.substring(second + 1) gives the text after the space.",
+                    "int attempts = Integer.parseInt(line.substring(second + 1));")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String line = \"FAIL m.reyes 7\";",
+                    "        int first = line.indexOf(\" \");",
+                    "        int second = line.indexOf(\" \", first + 1);",
+                    "        int attempts = Integer.parseInt(line.substring(second + 1));",
+                    "        System.out.println(\"NEXT WOULD BE \" + (attempts + 1));",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The inner call runs first: substring(second + 1) cuts \"7\" "
+                    + "off the end, skipping the space. parseInt turns that into "
+                    + "the int 7, and attempts + 1 is 8 - a sum, not \"71\".\n"
+                    + "\n"
+                    + "Without the + 1, the text would be \" 7\" with its "
+                    + "leading space, and parseInt would crash. Six missions "
+                    + "of detail - indexes, the excluded end, conversion, "
+                    + "what crashes it - all had to be right at once for this "
+                    + "line to work. That is what parsing is.")
+                .explain(
+                    "Cut the text after the space, then convert it.")
+                .xp(40))
+            .mistakes(
+                new String[]{"Searching from first instead of first + 1",
+                    "indexOf(\" \", first) finds the first space again, because "
+                    + "the search includes its starting index."},
+                new String[]{"Keeping the separator",
+                    "substring(second) includes the space, and parseInt "
+                    + "crashes on it."},
+                new String[]{"Trusting the shape",
+                    "A line with a missing field makes indexOf return -1. The "
+                    + "parser does not notice; its output is just wrong."})
+            .cyber(
+                "Every SIEM, log shipper and detection pipeline starts by doing "
+                + "what you just did: turning a line of text into named, typed "
+                + "fields. Parsers are therefore some of the most attacked code "
+                + "in security tooling, because they are the first thing to "
+                + "touch data an attacker may control.\n"
+                + "\n"
+                + "A field containing an extra space shifts everything after "
+                + "it, so the username lands where the address should be. A "
+                + "missing field returns -1 and the whole line lands in one "
+                + "variable. A number that is not a number crashes the "
+                + "pipeline. Real parsers survive these by checking each step - "
+                + "and by treating any line that does not fit as an event worth "
+                + "reporting in itself.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String line = \"ALLOW 192.168.1.20 22\";",
+                    "int first = line.indexOf(\" \");",
+                    "int second = line.indexOf(\" \", first + 1);",
+                    "System.out.println(line.substring(first + 1, second));")
+                .accept("192.168.1.20")
+                .hints(
+                    "This is the middle field.",
+                    "Between the two spaces.")
+                .explain(
+                    "192.168.1.20. A longer address than the example, and the "
+                    + "same code found it - that is the point of searching for "
+                    + "separators rather than counting positions.")
+                .xp(20))
+            .check(new Task(Task.PREDICT,
+                    "The same parser meets a line with a field missing. What "
+                    + "does this print?")
+                .code(
+                    "String line = \"BLOCK 10.0.4.17\";",
+                    "int first = line.indexOf(\" \");",
+                    "int second = line.indexOf(\" \", first + 1);",
+                    "System.out.println(second);")
+                .accept("-1")
+                .hints(
+                    "How many spaces are in this line?",
+                    "What does indexOf give when it finds nothing?")
+                .explain(
+                    "-1. There is no second space. Any substring built from "
+                    + "second from here on is wrong or a crash - which is why "
+                    + "Campaign 02 starts by teaching the program to check.")
+                .xp(20))
+            .recap(
+                "    int first  = line.indexOf(\" \");\n"
+                + "    int second = line.indexOf(\" \", first + 1);\n"
+                + "\n"
+                + "    line.substring(0, first)            field 1\n"
+                + "    line.substring(first + 1, second)   field 2\n"
+                + "    line.substring(second + 1)          field 3\n"
+                + "\n"
+                + "Find separators, cut between them, convert what is "
+                + "numeric. A missing separator is -1, silently.")
+            .next("Next: the JAVA ZERO checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "JAVA ZERO COMPLETE", 5)
+            .brief(
+                "Thirty missions ago the audit tool could only print text "
+                + "typed into it. Now it reads input, stores and converts "
+                + "values, does arithmetic without losing data, and takes "
+                + "text apart.\n\n"
+                + "This checkpoint mixes all of it. No new Java - only whether "
+                + "the old Java stuck.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Each mission taught one idea on its own. Real code uses a "
+                + "dozen at once, and the mistakes live where they meet: a "
+                + "cast in the wrong place, a String method result not kept, "
+                + "an index off by one inside a substring.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "TYPES\n"
+                + "    int  long  double  boolean  char  String\n"
+                + "    count with int, measure with double, huge with long\n"
+                + "    final for values that must not change\n"
+                + "\n"
+                + "ARITHMETIC\n"
+                + "    * / % before + -    brackets to be sure\n"
+                + "    int / int throws the fraction away\n"
+                + "    (double) a / b keeps it    (int) x cuts it off\n"
+                + "    Math.round rounds, and hands back a long\n"
+                + "    past Integer.MAX_VALUE wraps round, silently\n"
+                + "\n"
+                + "STRINGS - never change, so store what methods return\n"
+                + "    length()  charAt(i)  substring(a, b)\n"
+                + "    indexOf(x)  -1 when missing\n"
+                + "    trim()  toLowerCase()  replace(a, b)\n"
+                + "    contains  startsWith  endsWith - give booleans\n"
+                + "    indexes run from 0 to length() - 1\n"
+                + "\n"
+                + "INPUT AND OUTPUT\n"
+                + "    input.nextLine() - always a String, never trusted\n"
+                + "    Integer.parseInt - crashes on anything not a number\n"
+                + "    printf with %s %d %.1f %n\n"
+                + "\n"
+                + "SECURITY HABITS\n"
+                + "    normalise, then compare\n"
+                + "    clamp numbers from outside\n"
+                + "    neutralise line breaks before logging\n"
+                + "    wrong answers that do not crash are the dangerous ones")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        final int LOCKOUT = 5;",
+                "        String raw = \"  JSmith \";",
+                "        String user = raw.trim().toLowerCase();",
+                "        int failures = 7;",
+                "        int over = failures - LOCKOUT;",
+                "        double perHour = (double) failures / 2;",
+                "        System.out.printf(\"%s: %d failures, %d over, %.1f/hour%n\",",
+                "                user, failures, over, perHour);",
+                "    }",
+                "}")
+            .exampleOutput("jsmith: 7 failures, 2 over, 3.5/hour")
+            .lineByLine(
+                new String[]{"final int LOCKOUT = 5;",
+                    "Mission 8. A policy value that nothing may move."},
+                new String[]{"raw.trim().toLowerCase()",
+                    "Missions 17 and 18. Normalised, and stored."},
+                new String[]{"(double) failures / 2",
+                    "Missions 10 and 14. The cast on an operand saves the .5."},
+                new String[]{"printf",
+                    "Mission 28. One template, four values, in order. A "
+                    + "statement may carry on across lines - the semicolon "
+                    + "ends it, not the line break."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int a = 7;",
+                    "int b = 2;",
+                    "System.out.println(a / b + a % b);")
+                .accept("4", "four")
+                .hints(
+                    "/ and % run before +.",
+                    "7 / 2 in ints, then 7 % 2, then add.")
+                .explain(
+                    "4. 7 / 2 is 3 (fraction discarded), 7 % 2 is 1, and 3 + 1 "
+                    + "is 4.")
+                .xp(20))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "String host = \"WEB-01\";",
+                    "char first = host.charAt(0);",
+                    "int size = host.length;",
+                    "System.out.println(first + \" \" + size);")
+                .accept("3", "line 3")
+                .hints(
+                    "Every String method needs something at the end.",
+                    "Look for missing brackets.")
+                .explain(
+                    "Line 3. length is a method, so it needs brackets: "
+                    + "host.length(). Without them Java looks for a variable "
+                    + "called length and finds none.")
+                .xp(20))
+            .objective(
+                "Accept a page size from a caller, safely.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String text = \"250\";",
+                "        final int MAX = 100;",
+                "        // convert and cap here",
+                "        System.out.println(\"PAGE SIZE: \" + limit);",
+                "    }",
+                "}")
+            .yourTask(
+                "text came from outside. In ONE line, declare an int called "
+                + "limit: text converted to a number, and never more than MAX.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare limit: text as an int, capped at MAX.")
+                .accept("int limit = Math.min(Integer.parseInt(text), MAX);",
+                        "int limit = Math.min(Integer.parseInt(text), MAX)",
+                        "int limit = Math.min(MAX, Integer.parseInt(text));",
+                        "int limit = Math.min(MAX, Integer.parseInt(text))")
+                .hints(
+                    "Two jobs: convert, then cap. The conversion goes inside.",
+                    "A ceiling is Math.min. Converting is Integer.parseInt.",
+                    "int limit = Math.min(Integer.parseInt(text), MAX);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String text = \"250\";",
+                    "        final int MAX = 100;",
+                    "        int limit = Math.min(Integer.parseInt(text), MAX);",
+                    "        System.out.println(\"PAGE SIZE: \" + limit);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The innermost call runs first: Integer.parseInt(text) "
+                    + "turns \"250\" into 250. Math.min then compares 250 with "
+                    + "MAX and keeps the smaller, 100.\n"
+                    + "\n"
+                    + "Two missions' ideas in one line, and the order is the "
+                    + "logic: you cannot cap text, so conversion has to come "
+                    + "first. The line still trusts that text is a number; "
+                    + "'lots' would crash it. Making that decision safely is "
+                    + "the first thing the next campaign teaches.")
+                .explain(
+                    "Convert inside, cap outside: you cannot take the smaller "
+                    + "of two values until both are numbers.")
+                .xp(40))
+            .mistakes(
+                new String[]{"Forgetting to store a String result",
+                    "s.trim(); s.toLowerCase(); s.replace(...); - all do "
+                    + "nothing unless kept."},
+                new String[]{"Losing a fraction",
+                    "Integer division, a cast on the result, a missing .0 - "
+                    + "three routes to the same silent loss."},
+                new String[]{"Off by one",
+                    "Indexes start at 0. The end of substring is excluded. "
+                    + "The last index is length() - 1."})
+            .cyber(
+                "Look back at the security lessons in this campaign and one "
+                + "pattern repeats: the dangerous bugs were the quiet ones. "
+                + "Integer division, overflow, truncation, ignored String "
+                + "results, -1 used as a position. None of them crashed. Each "
+                + "produced a believable wrong answer, and a believable wrong "
+                + "answer in a security tool is a decision made on false "
+                + "information.\n"
+                + "\n"
+                + "The other pattern: input decides. What someone types, or "
+                + "sends, or puts in a file name, can crash a parser, forge a "
+                + "log line or slip past a filter - unless it is normalised, "
+                + "bounded and neutralised first.\n"
+                + "\n"
+                + "Both patterns need the same missing tool: the ability to "
+                + "look at a value and DECIDE. That is Campaign 02.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"Admin\";",
+                    "s.toLowerCase();",
+                    "System.out.println(s.length() + s.substring(1, 3));")
+                .accept("5dm")
+                .hints(
+                    "Line 2 did not store anything.",
+                    "An int + a String joins.")
+                .explain(
+                    "5dm. s is still \"Admin\", length 5. substring(1, 3) is "
+                    + "\"dm\". An int joined to a String gives \"5dm\" - three "
+                    + "missions' traps in one line.")
+                .xp(25))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println((int) 9.9 + Math.round(9.9));")
+                .accept("19", "nineteen")
+                .hints(
+                    "The cast truncates. Math.round rounds.",
+                    "9 + 10.")
+                .explain(
+                    "19. (int) 9.9 is 9, Math.round(9.9) is 10, and both are "
+                    + "whole numbers, so + adds.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "Which value is most likely to overflow an int?")
+                .choices(
+                    "Failed logins for one account today",
+                    "Open ports on a host",
+                    "Bytes sent by a file server this month",
+                    "The lockout threshold")
+                .accept("3", "c")
+                .hints(
+                    "An int tops out around 2.1 billion.",
+                    "Which one grows without a natural limit?")
+                .explain(
+                    "Bytes sent this month. 2.1 billion bytes is about 2 GB, "
+                    + "which a file server passes in minutes. That is a long.")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 01 - JAVA ZERO complete.\n"
+                + "\n"
+                + "You can store, convert, calculate, read input, take text "
+                + "apart and write tidy reports - and you know where each of "
+                + "those goes quietly wrong.\n"
+                + "\n"
+                + "What your programs cannot do yet is choose. Every line runs, "
+                + "every time, whatever the data says.")
+            .next("Next: CAMPAIGN 02 - CONDITIONAL. Programs that decide."));
     }
 }

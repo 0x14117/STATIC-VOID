@@ -48,7 +48,7 @@ against the whole plan rather than pretending the plan is only as large as
 what exists.
 
     CAMPAIGN 00 - INIT              10 missions    BUILT
-    CAMPAIGN 01 - JAVA ZERO         30 missions    20 BUILT
+    CAMPAIGN 01 - JAVA ZERO         30 missions    BUILT
     CAMPAIGN 02 - CONDITIONAL       30 missions
     CAMPAIGN 03 - LOOP//CONTROL     30 missions
     CAMPAIGN 04 - METHODS           30 missions
