@@ -1,4 +1,7 @@
-# Compiled Java class files. These are built from src/ by javac, so there is
-# no reason to keep them in the repository — anyone can rebuild them.
+# Compiled class files, rebuilt from src/ by javac.
 out/
+check/
 *.class
+
+# Your progress. Personal, and different on every machine.
+cyberops-save.txt
