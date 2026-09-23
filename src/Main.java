@@ -59,7 +59,7 @@ public class Main {
 
     private static void mainLoop() {
         while (true) {
-            Mission next = MissionLibrary.nextFor(player);
+            Mission next = CampaignIndex.nextFor(player);
             showDashboard(next);
 
             String choice = Terminal.ask("  Select: ");
@@ -73,7 +73,7 @@ public class Main {
             } else if (choice.equals("4")) {
                 KnowledgeIndex.show(player);
             } else if (choice.equals("5")) {
-                World.showInventory();
+                CampaignIndex.showTree(player);
             } else if (choice.equals("6")) {
                 progress();
             } else if (choice.equals("7")) {
@@ -108,21 +108,22 @@ public class Main {
                 + "   " + xpBar(player.getXpIntoLevel()) + "  "
                 + player.getXp() + " XP");
         Terminal.line("  Missions  : " + player.getCompletedMissions().size()
-                + " of " + MissionLibrary.all().size() + " complete");
+                + " of " + CampaignIndex.builtTotal() + " built"
+                + "   (" + CampaignIndex.plannedTotal() + " planned)");
         Terminal.blank();
 
         if (next == null) {
             Terminal.line("  Active Mission: none - every mission is complete.");
         } else {
             Terminal.line("  Active Mission: " + next.getId() + "  " + next.getTitle());
-            Terminal.line("                  " + next.getCampaign()
+            Terminal.line("                  " + next.getCampaign().getLabel()
                     + "   difficulty " + next.getDifficulty() + "/10");
         }
 
         Terminal.blank();
         Terminal.rule('+', '-');
         Terminal.blank();
-        Terminal.line("   1. View Mission        5. Inventory");
+        Terminal.line("   1. View Mission        5. Campaign Map");
         Terminal.line("   2. Start Mission       6. Progress");
         Terminal.line("   3. Training            7. Settings");
         Terminal.line("   4. Java Knowledge      8. Exit");
@@ -152,19 +153,16 @@ public class Main {
         Terminal.centred(mission.getId() + "  " + mission.getTitle());
         Terminal.rule('+', '=');
         Terminal.blank();
-        Terminal.line("  CAMPAIGN   : " + mission.getCampaign());
+        Terminal.line("  CAMPAIGN   : " + mission.getCampaign().getLabel());
         Terminal.line("  DIFFICULTY : " + MissionRunner.difficultyBar(mission.getDifficulty())
                 + "  " + mission.getDifficulty() + "/10");
-        Terminal.line("  JAVA       : " + String.join(", ", mission.getJavaConcepts()));
-        if (mission.getCyberConcepts().length > 0) {
-            Terminal.line("  SECURITY   : " + String.join(", ", mission.getCyberConcepts()));
-        }
-        Terminal.line("  TASKS      : " + mission.getTasks().size());
+        Terminal.line("  TEACHES    : " + String.join(", ", mission.getWillLearn()));
+        Terminal.line("  QUESTIONS  : " + mission.allTasks().size());
         Terminal.line("  REWARD     : " + mission.totalXp() + " XP");
         Terminal.blank();
-        Terminal.heading("BRIEFING");
+        Terminal.heading("MISSION BRIEF");
         Terminal.blank();
-        Terminal.wrapped(mission.getBriefing(), "  ");
+        Terminal.wrapped(mission.getBrief(), "  ");
         Terminal.blank();
         Terminal.pause();
     }
@@ -186,19 +184,18 @@ public class Main {
         Terminal.rule('+', '=');
         Terminal.blank();
 
-        List<Mission> missions = MissionLibrary.all();
-        String campaign = "";
-        for (int i = 0; i < missions.size(); i++) {
-            Mission mission = missions.get(i);
-            if (!mission.getCampaign().equals(campaign)) {
-                campaign = mission.getCampaign();
-                Terminal.blank();
-                Terminal.heading(campaign.toUpperCase());
+        for (Campaign campaign : CampaignIndex.all()) {
+            if (!campaign.isBuilt()) {
+                continue;
             }
-            String done = player.hasCompleted(mission.getId()) ? "[x]" : "[ ]";
-            Terminal.line("  " + done + " " + Terminal.pad(mission.getId(), 10)
-                    + Terminal.pad(mission.getTitle(), 32)
-                    + "d" + mission.getDifficulty());
+            Terminal.blank();
+            Terminal.heading(campaign.getLabel());
+            for (Mission mission : campaign.getMissions()) {
+                String done = player.hasCompleted(mission.getId()) ? "[x]" : "[ ]";
+                Terminal.line("  " + done + " " + Terminal.pad(mission.getId(), 11)
+                        + Terminal.pad(mission.getTitle(), 30)
+                        + "d" + mission.getDifficulty());
+            }
         }
 
         Terminal.blank();
@@ -207,7 +204,7 @@ public class Main {
             return;
         }
 
-        Mission chosen = MissionLibrary.byId(choice);
+        Mission chosen = CampaignIndex.byId(choice);
         if (chosen == null) {
             Terminal.line("  No mission with that ID.");
             Terminal.pause();
@@ -231,7 +228,8 @@ public class Main {
         Terminal.line("  XP this level  : " + player.getXpIntoLevel() + " / 100");
         Terminal.blank();
         Terminal.line("  Missions done  : " + player.getCompletedMissions().size()
-                + " of " + MissionLibrary.all().size());
+                + " of " + CampaignIndex.builtTotal() + " built"
+                + ", " + CampaignIndex.plannedTotal() + " planned");
         Terminal.line("  Topics learned : " + player.getLearnedTopics().size());
         Terminal.line("  Hints used     : " + player.getHintsUsed());
         Terminal.line("  Wrong answers  : " + player.getWrongAnswers());
@@ -249,7 +247,7 @@ public class Main {
             Terminal.line("  None yet.");
         } else {
             for (String id : player.getCompletedMissions()) {
-                Mission mission = MissionLibrary.byId(id);
+                Mission mission = CampaignIndex.byId(id);
                 if (mission != null) {
                     Terminal.line("  " + Terminal.pad(id, 10) + mission.getTitle());
                 }
@@ -268,7 +266,8 @@ public class Main {
         Terminal.line("   1. Change analyst name");
         Terminal.line("   2. Reset all progress");
         Terminal.line("   3. Where is my save file?");
-        Terminal.line("   4. Back");
+        Terminal.line("   4. NORTHSTAR inventory");
+        Terminal.line("   5. Back");
         Terminal.blank();
 
         String choice = Terminal.ask("  Select: ");
@@ -296,6 +295,8 @@ public class Main {
                 Terminal.line("  Cancelled. Nothing was changed.");
             }
             Terminal.pause();
+        } else if (choice.equals("4")) {
+            World.showInventory();
         } else if (choice.equals("3")) {
             Terminal.blank();
             Terminal.wrapped("Your progress is in cyberops-save.txt, in the folder "

@@ -33,19 +33,57 @@ It is plain text; you can open it and read exactly what the game remembers.
 
 ## What is in it
 
-    13 missions, 53 tasks, 985 XP
+Twenty campaigns are planned, 510 missions in total. They are written one at
+a time so each can be tested properly, and the game shows honest progress
+against the whole plan rather than pretending the plan is only as large as
+what exists.
 
-    AUTHENTICATION   banners, variables, the password check, counting
-                     failures, lockout policy and its boundary
-    LOG ANALYSIS     log events as objects, rules as methods, arrays,
-                     the growing watchlist
-    ACCESS CONTROL   least privilege, encapsulation as a control,
-                     surviving malformed input
-    BOSS             a full compromised-account investigation
+    CAMPAIGN 00 - INIT              10 missions    BUILT
+    CAMPAIGN 01 - JAVA ZERO         30 missions
+    CAMPAIGN 02 - CONDITIONAL       30 missions
+    CAMPAIGN 03 - LOOP//CONTROL     30 missions
+    CAMPAIGN 04 - METHODS           30 missions
+    CAMPAIGN 05 - DATA              30 missions
+    CAMPAIGN 06 - DEBUG             30 missions
+    CAMPAIGN 07 - OBJECTS           30 missions
+    CAMPAIGN 08 - OOP               30 missions
+    CAMPAIGN 09 - COLLECTIONS       30 missions
+    CAMPAIGN 10 - EXCEPTIONS        25 missions
+    CAMPAIGN 11 - FILES             25 missions
+    CAMPAIGN 12 - ALGORITHMS        25 missions
+    CAMPAIGN 13 - SECURE CODE       25 missions
+    CAMPAIGN 14 - CYBER OPS         25 missions
+    CAMPAIGN 15 - SOC               25 missions
+    CAMPAIGN 16 - NETWORK           20 missions
+    CAMPAIGN 17 - CRYPTO            20 missions
+    CAMPAIGN 18 - INCIDENT RESPONSE 20 missions
+    CAMPAIGN 19 - FINAL SOC         20 missions
 
-Each mission teaches its concept before asking anything, gives progressive
-hints when you ask for them, and explains the answer afterwards. Hints cost
-a little XP, so you try first.
+## How a mission teaches
+
+Every mission follows the same shape, and never asks for something it has not
+explained first:
+
+    MISSION BRIEF          the security situation, in plain language
+    WHAT YOU WILL LEARN    the concepts, and why they are worth knowing
+    JAVA CONCEPT           the explanation itself
+    SMALL EXAMPLE          short, runnable, with its output shown
+    LINE BY LINE           each important line, explained separately
+    PREDICT THE OUTPUT     you answer before you are told
+    YOUR FIRST PRACTICE    a small question on the same idea
+    MISSION OBJECTIVE      what the program needs to do
+    STARTER CODE           partially written, never finished
+    YOUR TASK              you complete it
+    HINTS                  progressive, and each costs a little XP
+    SOLUTION               only when you ask, and always with the reasoning
+    COMMON MISTAKES        the specific ones for this concept
+    CYBERSECURITY CONNECTION   why this matters for security work
+    KNOWLEDGE CHECK        two to four short questions
+    MISSION RECAP          what you learned, and what comes next
+
+Typing SOLUTION never gives you code on its own. It gives the code and an
+explanation of why it works, because code without the reasoning teaches
+copying.
 
 ## The code
 

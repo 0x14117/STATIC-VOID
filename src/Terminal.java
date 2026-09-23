@@ -132,6 +132,24 @@ public class Terminal {
         System.out.println(currentLine);
     }
 
+    /**
+     * Prints a teaching block: prose is wrapped to the window, but any line
+     * the author indented is code laid out on purpose and is printed exactly
+     * as written. Rewrapping those would destroy the shape that makes them
+     * readable.
+     */
+    public static void teachingText(String text, String indent) {
+        for (String line : text.split("\n")) {
+            if (line.trim().isEmpty()) {
+                System.out.println();
+            } else if (line.startsWith(" ")) {
+                System.out.println(indent + line);
+            } else {
+                wrapped(line, indent);
+            }
+        }
+    }
+
     /** Java source shown to the player, with line numbers for bug hunting. */
     public static void code(String[] lines) {
         blank();

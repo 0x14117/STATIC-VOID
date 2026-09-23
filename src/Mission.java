@@ -2,65 +2,152 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * One mission: a briefing, the concepts it teaches, and its tasks.
+ * One mission, laid out as the teaching template.
+ *
+ * The order of the fields here is the order the player meets them:
+ * brief, what you will learn, the concept, a small example explained line by
+ * line, a prediction, a practice, then the mission itself with hints, then
+ * why it worked, the mistakes to avoid, the security connection, a knowledge
+ * check and a recap.
+ *
+ * A mission is not allowed to ask for anything it has not taught.
  */
 public class Mission {
 
     private final String id;
     private final String title;
-    private final String campaign;
     private final int difficulty;
+    private Campaign campaign;
 
-    private String briefing = "";
-    private String[] javaConcepts = new String[0];
-    private String[] cyberConcepts = new String[0];
-    private String[] objectives = new String[0];
-    private String[] commonMistakes = new String[0];
-    private String teaching = "";
-    private final List<Task> tasks = new ArrayList<>();
+    // --- teach ---------------------------------------------------------
+    private String brief = "";
+    private String[] willLearn = new String[0];
+    private String whyUseful = "";
+    private String conceptName = "";
+    private String explanation = "";
+    private String[] example = new String[0];
+    private String[] exampleOutput = new String[0];
+    private String[][] lineByLine = new String[0][];
 
-    public Mission(String id, String title, String campaign, int difficulty) {
+    // --- try -----------------------------------------------------------
+    private Task predict;
+    private Task practice;
+
+    // --- do ------------------------------------------------------------
+    private String objective = "";
+    private String[] starter = new String[0];
+    private String yourTask = "";
+    private Task mainTask;
+
+    // --- close ---------------------------------------------------------
+    private String[][] commonMistakes = new String[0][];
+    private String cyberConnection = "";
+    private final List<Task> knowledgeCheck = new ArrayList<>();
+    private String recap = "";
+    private String nextConcept = "";
+
+    public Mission(String id, String title, int difficulty) {
         this.id = id;
         this.title = title;
-        this.campaign = campaign;
         this.difficulty = difficulty;
     }
 
-    public Mission briefing(String text) {
-        this.briefing = text;
+    // --- builders ------------------------------------------------------
+
+    public Mission brief(String text) {
+        this.brief = text;
         return this;
     }
 
-    /** The concept lesson, shown before the tasks when it is a new idea. */
-    public Mission teaching(String text) {
-        this.teaching = text;
+    public Mission willLearn(String... concepts) {
+        this.willLearn = concepts;
         return this;
     }
 
-    public Mission java(String... concepts) {
-        this.javaConcepts = concepts;
+    public Mission whyUseful(String text) {
+        this.whyUseful = text;
         return this;
     }
 
-    public Mission cyber(String... concepts) {
-        this.cyberConcepts = concepts;
+    public Mission concept(String name, String text) {
+        this.conceptName = name;
+        this.explanation = text;
         return this;
     }
 
-    public Mission objectives(String... items) {
-        this.objectives = items;
+    public Mission example(String... lines) {
+        this.example = lines;
         return this;
     }
 
-    public Mission mistakes(String... items) {
-        this.commonMistakes = items;
+    public Mission exampleOutput(String... lines) {
+        this.exampleOutput = lines;
         return this;
     }
 
-    public Mission task(Task task) {
-        tasks.add(task);
+    /** Pairs of {code fragment, what it means}. */
+    public Mission lineByLine(String[]... pairs) {
+        this.lineByLine = pairs;
         return this;
     }
+
+    public Mission predict(Task task) {
+        this.predict = task;
+        return this;
+    }
+
+    public Mission practice(Task task) {
+        this.practice = task;
+        return this;
+    }
+
+    public Mission objective(String text) {
+        this.objective = text;
+        return this;
+    }
+
+    public Mission starter(String... lines) {
+        this.starter = lines;
+        return this;
+    }
+
+    public Mission yourTask(String text) {
+        this.yourTask = text;
+        return this;
+    }
+
+    public Mission mainTask(Task task) {
+        this.mainTask = task;
+        return this;
+    }
+
+    /** Pairs of {the mistake, why it happens and what it does}. */
+    public Mission mistakes(String[]... pairs) {
+        this.commonMistakes = pairs;
+        return this;
+    }
+
+    public Mission cyber(String text) {
+        this.cyberConnection = text;
+        return this;
+    }
+
+    public Mission check(Task task) {
+        knowledgeCheck.add(task);
+        return this;
+    }
+
+    public Mission recap(String text) {
+        this.recap = text;
+        return this;
+    }
+
+    public Mission next(String text) {
+        this.nextConcept = text;
+        return this;
+    }
+
+    // --- readers -------------------------------------------------------
 
     public String getId() {
         return id;
@@ -70,46 +157,113 @@ public class Mission {
         return title;
     }
 
-    public String getCampaign() {
-        return campaign;
-    }
-
     public int getDifficulty() {
         return difficulty;
     }
 
-    public String getBriefing() {
-        return briefing;
+    public Campaign getCampaign() {
+        return campaign;
     }
 
-    public String getTeaching() {
-        return teaching;
+    public void setCampaign(Campaign campaign) {
+        this.campaign = campaign;
     }
 
-    public String[] getJavaConcepts() {
-        return javaConcepts;
+    public String getBrief() {
+        return brief;
     }
 
-    public String[] getCyberConcepts() {
-        return cyberConcepts;
+    public String[] getWillLearn() {
+        return willLearn;
     }
 
-    public String[] getObjectives() {
-        return objectives;
+    public String getWhyUseful() {
+        return whyUseful;
     }
 
-    public String[] getCommonMistakes() {
+    public String getConceptName() {
+        return conceptName;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public String[] getExample() {
+        return example;
+    }
+
+    public String[] getExampleOutput() {
+        return exampleOutput;
+    }
+
+    public String[][] getLineByLine() {
+        return lineByLine;
+    }
+
+    public Task getPredict() {
+        return predict;
+    }
+
+    public Task getPractice() {
+        return practice;
+    }
+
+    public String getObjective() {
+        return objective;
+    }
+
+    public String[] getStarter() {
+        return starter;
+    }
+
+    public String getYourTask() {
+        return yourTask;
+    }
+
+    public Task getMainTask() {
+        return mainTask;
+    }
+
+    public String[][] getCommonMistakes() {
         return commonMistakes;
     }
 
-    public List<Task> getTasks() {
+    public String getCyberConnection() {
+        return cyberConnection;
+    }
+
+    public List<Task> getKnowledgeCheck() {
+        return knowledgeCheck;
+    }
+
+    public String getRecap() {
+        return recap;
+    }
+
+    public String getNextConcept() {
+        return nextConcept;
+    }
+
+    /** Every gradeable question in the mission, in the order they are asked. */
+    public List<Task> allTasks() {
+        List<Task> tasks = new ArrayList<>();
+        if (predict != null) {
+            tasks.add(predict);
+        }
+        if (practice != null) {
+            tasks.add(practice);
+        }
+        if (mainTask != null) {
+            tasks.add(mainTask);
+        }
+        tasks.addAll(knowledgeCheck);
         return tasks;
     }
 
-    /** Total XP available, used for the mission list and the debrief. */
     public int totalXp() {
         int total = 0;
-        for (Task task : tasks) {
+        for (Task task : allTasks()) {
             total = total + task.getXp();
         }
         return total;

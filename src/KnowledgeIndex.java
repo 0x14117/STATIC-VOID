@@ -157,8 +157,8 @@ public class KnowledgeIndex {
 
     private static List<String> missionsTeaching(String topic) {
         List<String> found = new ArrayList<>();
-        for (Mission mission : MissionLibrary.all()) {
-            for (String concept : mission.getJavaConcepts()) {
+        for (Mission mission : CampaignIndex.allMissions()) {
+            for (String concept : mission.getWillLearn()) {
                 if (concept.equalsIgnoreCase(topic)) {
                     found.add(mission.getId() + "  " + mission.getTitle());
                 }

@@ -22,6 +22,8 @@ public class Task {
     private String[] accepted = new String[0];
     private String[] hints = new String[0];
     private String explanation = "";
+    private String[] solution = new String[0];
+    private String whyItWorks = "";
     private int xp = 10;
 
     public Task(String type, String prompt) {
@@ -58,6 +60,33 @@ public class Task {
     public Task xp(int amount) {
         this.xp = amount;
         return this;
+    }
+
+    /** The finished code, shown only when the player asks for SOLUTION. */
+    public Task solution(String... lines) {
+        this.solution = lines;
+        return this;
+    }
+
+    /**
+     * Why the solution is correct, in terms of what happens when it runs.
+     * Handing over code without this teaches copying, not programming.
+     */
+    public Task whyItWorks(String text) {
+        this.whyItWorks = text;
+        return this;
+    }
+
+    public String[] getSolution() {
+        return solution;
+    }
+
+    public String getWhyItWorks() {
+        return whyItWorks;
+    }
+
+    public boolean hasSolution() {
+        return solution.length > 0;
     }
 
     public String getType() {
