@@ -23,10 +23,19 @@ Nothing else. No libraries, no build tool, no internet.
 
 ## Play
 
+On Windows, double-click **play.bat** - or from a terminal:
+
+    .\play.bat
+
+On Mac or Linux:
+
+    ./play.sh
+
+That compiles the game and starts it. If you would rather do the two steps
+yourself:
+
     javac -d out src/*.java
     java -cp out Main
-
-On Windows, use `src\*.java` if your shell objects to the forward slash.
 
 Your progress is saved to `cyberops-save.txt` in the folder you run from.
 It is plain text; you can open it and read exactly what the game remembers.
