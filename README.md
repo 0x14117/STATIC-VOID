@@ -49,7 +49,7 @@ what exists.
 
     CAMPAIGN 00 - INIT              10 missions    BUILT
     CAMPAIGN 01 - JAVA ZERO         30 missions    BUILT
-    CAMPAIGN 02 - CONDITIONAL       30 missions
+    CAMPAIGN 02 - CONDITIONAL       30 missions    10 BUILT
     CAMPAIGN 03 - LOOP//CONTROL     30 missions
     CAMPAIGN 04 - METHODS           30 missions
     CAMPAIGN 05 - DATA              30 missions
@@ -111,6 +111,7 @@ the game tells you so. Choice letters and line numbers can be typed any way.
     src/CampaignIndex.java    all twenty campaigns, built or planned
     src/Campaign00.java       CAMPAIGN 00 - INIT
     src/Campaign01.java       CAMPAIGN 01 - JAVA ZERO
+    src/Campaign02.java       CAMPAIGN 02 - CONDITIONAL
     src/MissionRunner.java    plays a mission and scores it
     src/KnowledgeIndex.java   the Java topics you have earned
     src/World.java            NORTHSTAR SYSTEMS: hosts and accounts
