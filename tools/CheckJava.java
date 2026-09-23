@@ -38,7 +38,7 @@ public class CheckJava {
     static Path work;
 
     /** Lines the wrapper puts above a snippet, so errors map to task lines. */
-    static final int WRAP_OFFSET = 2;
+    static final int WRAP_OFFSET = 3;
 
     public static void main(String[] args) throws Exception {
         String only = args.length > 0 ? args[0] : "";
@@ -56,7 +56,7 @@ public class CheckJava {
                 String tag = id + "/" + t.getType();
 
                 if (t.hasSolution() && isProgram(t.getSolution())) {
-                    Result sol = run(t.getSolution());
+                    Result sol = run(t.getSolution(), t.getInput());
                     check(tag + " solution compiles and runs",
                           sol.compiled && sol.ran, sol.errors);
                 }
@@ -67,7 +67,8 @@ public class CheckJava {
 
                 if (t.getType().equals(Task.DEBUG) && t.getCode().length > 0) {
                     boolean whole = isProgram(t.getCode());
-                    Result d = run(whole ? t.getCode() : wrap(t.getCode()));
+                    Result d = run(whole ? t.getCode() : wrap(t.getCode()),
+                                   t.getInput());
                     if (d.compiled) {
                         check(tag + " snippet really fails to compile", false,
                               "it compiled");
@@ -107,7 +108,8 @@ public class CheckJava {
             return;
         }
 
-        Result ex = run(isProgram(code) ? code : wrap(code));
+        String[] typed = m.getExampleInput();
+        Result ex = run(isProgram(code) ? code : wrap(code), typed);
 
         if (first.startsWith("(") && first.contains("does not compile")) {
             check(id + " example really does not compile", !ex.compiled,
@@ -116,7 +118,9 @@ public class CheckJava {
         }
         check(id + " example compiles", ex.compiled, ex.errors);
         if (ex.compiled) {
-            String want = String.join("\n", claimed);
+            // The mission shows the screen, where typed text appears. The
+            // program's own output does not contain it, so take it out.
+            String want = removeTyped(String.join("\n", claimed), typed);
             String got = expandTabs(ex.output);
             check(id + " example prints what it claims", got.equals(want),
                   "\n      claims [" + want + "]\n      prints [" + got + "]");
@@ -126,7 +130,7 @@ public class CheckJava {
     static void checkPredict(String tag, Task t) throws Exception {
         String[] code = t.getCode();
         String prompt = t.getPrompt().toLowerCase();
-        Result p = run(isProgram(code) ? code : wrap(code));
+        Result p = run(isProgram(code) ? code : wrap(code), t.getInput());
         if (!p.compiled) {
             check(tag + " snippet compiles", false, p.errors);
             return;
@@ -147,6 +151,28 @@ public class CheckJava {
         check(tag + " answer is what Java prints", t.matches(joined),
               "Java prints [" + joined + "], task expects ["
               + t.getFirstAccepted() + "]");
+    }
+
+    /**
+     * Each typed line ends where the person pressed ENTER, so it sits at the
+     * end of a screen line. Removing it and its line break, in order, leaves
+     * exactly what the program itself wrote.
+     */
+    static String removeTyped(String screen, String[] typed) {
+        int from = 0;
+        for (String line : typed) {
+            int at = screen.indexOf(line + "\n", from);
+            if (at < 0 && screen.endsWith(line)) {
+                at = screen.length() - line.length();
+            }
+            if (at < 0) {
+                return screen + "   (typed \"" + line + "\" is not on screen)";
+            }
+            int end = Math.min(screen.length(), at + line.length() + 1);
+            screen = screen.substring(0, at) + screen.substring(end);
+            from = at;
+        }
+        return screen;
     }
 
     static boolean isShell(String[] lines) {
@@ -196,6 +222,7 @@ public class CheckJava {
 
     static String[] wrap(String[] snippet) {
         List<String> out = new ArrayList<>();
+        out.add("import java.util.Scanner;");
         out.add("public class Main {");
         out.add("    public static void main(String[] args) {");
         for (String line : snippet) {
@@ -217,7 +244,8 @@ public class CheckJava {
 
     static int counter = 0;
 
-    static Result run(String[] program) throws IOException, InterruptedException {
+    static Result run(String[] program, String[] typed)
+            throws IOException, InterruptedException {
         Result r = new Result();
         Path dir = work.resolve("p" + (counter++));
         Files.createDirectories(dir);
@@ -239,6 +267,9 @@ public class CheckJava {
 
         Process java = new ProcessBuilder("java", "-cp", ".", "Main")
                 .directory(dir.toFile()).redirectErrorStream(true).start();
+        for (String line : typed) {
+            java.getOutputStream().write((line + "\n").getBytes(StandardCharsets.UTF_8));
+        }
         java.getOutputStream().close();
         if (!java.waitFor(20, TimeUnit.SECONDS)) {
             java.destroyForcibly();

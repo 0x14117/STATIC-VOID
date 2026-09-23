@@ -27,6 +27,7 @@ public class Mission {
     private String explanation = "";
     private String[] example = new String[0];
     private String[] exampleOutput = new String[0];
+    private String[] exampleInput = new String[0];
     private String[][] lineByLine = new String[0][];
 
     // --- try -----------------------------------------------------------
@@ -82,6 +83,16 @@ public class Mission {
 
     public Mission exampleOutput(String... lines) {
         this.exampleOutput = lines;
+        return this;
+    }
+
+    /**
+     * What the person at the keyboard types while the example runs, one entry
+     * per line. The example output is then shown as the screen would look,
+     * typed text included.
+     */
+    public Mission exampleInput(String... lines) {
+        this.exampleInput = lines;
         return this;
     }
 
@@ -195,6 +206,10 @@ public class Mission {
 
     public String[] getExampleOutput() {
         return exampleOutput;
+    }
+
+    public String[] getExampleInput() {
+        return exampleInput;
     }
 
     public String[][] getLineByLine() {

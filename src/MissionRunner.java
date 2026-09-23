@@ -127,7 +127,13 @@ public class MissionRunner {
             Terminal.heading("SMALL EXAMPLE");
             Terminal.code(mission.getExample());
             if (mission.getExampleOutput().length > 0) {
-                Terminal.line("  This prints:");
+                if (mission.getExampleInput().length > 0) {
+                    Terminal.wrapped("Run it and type "
+                            + String.join(", then ", mission.getExampleInput())
+                            + " when it waits, and the screen shows:", "  ");
+                } else {
+                    Terminal.line("  This prints:");
+                }
                 Terminal.blank();
                 for (String out : mission.getExampleOutput()) {
                     Terminal.line("      " + out);

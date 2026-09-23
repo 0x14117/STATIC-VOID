@@ -4317,5 +4317,1066 @@ public class Campaign01 {
                 + "An end past length() crashes at run time.")
             .next("Next: reading what the analyst types, instead of fixing "
                 + "every value in the code."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "Asking the Analyst", 3)
+            .brief(
+                "Every value in the audit tool so far has been typed into the "
+                + "code. To check a different host, someone edits the program "
+                + "and compiles it again.\n\n"
+                + "A tool worth using asks. This mission lets the program wait "
+                + "for the analyst to type something, and use what they typed.")
+            .willLearn("Scanner", "Reading a line of input", "import")
+            .whyUseful(
+                "Input is where a program stops being a fixed script and "
+                + "starts being a tool. It is also where data from outside - "
+                + "data you did not write and cannot trust - first enters your "
+                + "code.")
+            .concept("Reading input with Scanner",
+                "Reading the keyboard takes three lines. Learn them as a "
+                + "recipe for now; each part is explained properly later.\n"
+                + "\n"
+                + "1. Above the class, say where Scanner lives:\n"
+                + "\n"
+                + "    import java.util.Scanner;\n"
+                + "\n"
+                + "Scanner is not built into every program the way String "
+                + "is. It lives in a library package called java.util, and "
+                + "import tells Java to fetch it. Without this line, every "
+                + "mention of Scanner is 'cannot find symbol'.\n"
+                + "\n"
+                + "2. Inside main, make one Scanner attached to the keyboard:\n"
+                + "\n"
+                + "    Scanner input = new Scanner(System.in);\n"
+                + "\n"
+                + "System.out is the screen; System.in is the keyboard. The "
+                + "word new builds something - Campaign 07 is about exactly "
+                + "that. input is just a variable name.\n"
+                + "\n"
+                + "3. Each time you want a line, ask for one:\n"
+                + "\n"
+                + "    String host = input.nextLine();\n"
+                + "\n"
+                + "The program STOPS on this line and waits. When the "
+                + "person presses ENTER, everything they typed on that line "
+                + "comes back as a String. The ENTER itself is not included; "
+                + "spaces they typed are.\n"
+                + "\n"
+                + "What comes back is ALWAYS a String - even if they type 42. "
+                + "Turning it into a number is the next mission.\n"
+                + "\n"
+                + "Make one Scanner and reuse it for every line. There is no "
+                + "reason to make a second.\n"
+                + "\n"
+                + "Print a prompt with print, not println, so the typing "
+                + "happens on the same line as the question.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Host: \");",
+                "        String host = input.nextLine();",
+                "        System.out.println(\"Scanning \" + host);",
+                "    }",
+                "}")
+            .exampleInput("WEB-01")
+            .exampleOutput("Host: WEB-01", "Scanning WEB-01")
+            .lineByLine(
+                new String[]{"import java.util.Scanner;",
+                    "Goes above the class, not inside it. Tells Java where "
+                    + "Scanner comes from."},
+                new String[]{"Scanner input = new Scanner(System.in);",
+                    "One Scanner, reading from the keyboard. Made once, used as "
+                    + "often as you like."},
+                new String[]{"System.out.print(\"Host: \");",
+                    "print, so the cursor waits on this line. The trailing "
+                    + "space keeps the typing from touching the colon."},
+                new String[]{"input.nextLine()",
+                    "The program pauses here until ENTER, then hands back what "
+                    + "was typed, as a String."})
+            .predict(new Task(Task.PREDICT,
+                    "The analyst types a.okafor and presses ENTER. What does "
+                    + "this print?")
+                .code(
+                    "Scanner in = new Scanner(System.in);",
+                    "String name = in.nextLine();",
+                    "System.out.println(\"HELLO \" + name.toUpperCase());")
+                .input("a.okafor")
+                .accept("HELLO A.OKAFOR")
+                .hints(
+                    "name holds exactly what was typed.",
+                    "Then it is joined on in capitals.")
+                .explain(
+                    "HELLO A.OKAFOR. Once nextLine hands the text back, it is "
+                    + "an ordinary String - every method you have learned works "
+                    + "on it.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "This program does not compile. Which line does javac "
+                    + "report?")
+                .code(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner in = new Scanner(System.in);",
+                    "        String host = in.nextLine();",
+                    "        System.out.println(host);",
+                    "    }",
+                    "}")
+                .accept("3", "line 3")
+                .hints(
+                    "Something that should be above the class is missing.",
+                    "The error lands on the first line that uses the missing "
+                    + "name.")
+                .explain(
+                    "Line 3: 'cannot find symbol - class Scanner'. The import "
+                    + "is missing, so Java has never heard of Scanner.\n\n"
+                    + "Notice the error is reported where Scanner is USED, not "
+                    + "where the import should have been. Compiler errors point "
+                    + "at where Java got confused, which is often not where the "
+                    + "fix goes.")
+                .xp(25))
+            .objective(
+                "Let the analyst type which host to check.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Host: \");",
+                "        // read the host here",
+                "        System.out.println(\"CHECKING \" + host);",
+                "    }",
+                "}")
+            .yourTask(
+                "The Scanner is ready and the prompt is printed. Declare a "
+                + "String called host holding the line the analyst types.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare host holding the next line typed.")
+                .input("DB-01")
+                .accept("String host = input.nextLine();", "String host = input.nextLine()")
+                .hints(
+                    "Input always arrives as a String.",
+                    "Ask the Scanner called input for the next line.",
+                    "String host = input.nextLine();")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        System.out.print(\"Host: \");",
+                    "        String host = input.nextLine();",
+                    "        System.out.println(\"CHECKING \" + host);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "input.nextLine() stops the program until the analyst "
+                    + "presses ENTER, then hands back what they typed. It is a "
+                    + "String, so it goes into a String box.\n"
+                    + "\n"
+                    + "The program now does something the last twenty could "
+                    + "not: produce a different result each time it runs, "
+                    + "without being edited. That is also the moment it starts "
+                    + "trusting someone else. Whatever is typed flows straight "
+                    + "into host and on into everything that uses it.")
+                .explain(
+                    "nextLine() waits for ENTER and hands back a String.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Forgetting the import",
+                    "Every use of Scanner becomes 'cannot find symbol'. The "
+                    + "import goes on the very first line, above the class."},
+                new String[]{"Expecting a number",
+                    "int n = input.nextLine(); does not compile. nextLine "
+                    + "always gives a String."},
+                new String[]{"Using println for the prompt",
+                    "It works, but the answer is typed on the line below the "
+                    + "question. print keeps them together."})
+            .cyber(
+                "The line with nextLine on it is a TRUST BOUNDARY: everything "
+                + "above it is your code, everything that comes through it is "
+                + "somebody else's.\n"
+                + "\n"
+                + "Here the somebody is an analyst at a keyboard. In real tools "
+                + "it is a web form, a network packet, a file uploaded by a "
+                + "stranger - and the program cannot tell a mistake from an "
+                + "attack. The typed line may be empty, four thousand "
+                + "characters long, full of line breaks, or deliberately built "
+                + "to break whatever reads it next.\n"
+                + "\n"
+                + "Nearly every injection vulnerability that exists comes from "
+                + "a program that took input at a boundary like this and used "
+                + "it as if it had written it itself. Every mission from here "
+                + "treats input that way: untrusted until checked.")
+            .check(new Task(Task.PREDICT,
+                    "The analyst types jsmith followed by ONE space, then ENTER. "
+                    + "What does this print?")
+                .code(
+                    "Scanner in = new Scanner(System.in);",
+                    "String user = in.nextLine();",
+                    "System.out.println(user.length());")
+                .input("jsmith ")
+                .accept("7", "seven")
+                .hints(
+                    "nextLine keeps everything typed except the ENTER.",
+                    "Is a space a character?")
+                .explain(
+                    "7. The space was typed, so it is in the String. The ENTER "
+                    + "was not kept. This is exactly why input is usually "
+                    + "trimmed before anything else happens to it.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "What type does nextLine() hand back?")
+                .choices("int", "char", "String", "It depends what was typed")
+                .accept("3", "c")
+                .hints(
+                    "Typing 42 and typing jsmith come back the same way.",
+                    "It is the type for text.")
+                .explain(
+                    "Always a String, whatever was typed. \"42\" is two "
+                    + "characters until something converts it.")
+                .xp(10))
+            .recap(
+                "Above the class:\n"
+                + "\n"
+                + "    import java.util.Scanner;\n"
+                + "\n"
+                + "Once, inside main:\n"
+                + "\n"
+                + "    Scanner input = new Scanner(System.in);\n"
+                + "\n"
+                + "Each time you need a line:\n"
+                + "\n"
+                + "    String line = input.nextLine();\n"
+                + "\n"
+                + "nextLine waits for ENTER and always hands back a String.\n"
+                + "\n"
+                + "Input crosses a trust boundary. Treat it as untrusted.")
+            .next("Next: turning typed text into a number you can do "
+                + "arithmetic with."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Text That Looks Like a Number", 3)
+            .brief(
+                "The analyst types how many failed logins to allow before "
+                + "lockout. They type 5. The tool adds one for the warning "
+                + "level and reports 51.\n\n"
+                + "Typed input is text, and + on text joins. Before the tool "
+                + "can count with it, the text has to become a number.")
+            .willLearn("Integer.parseInt", "Double.parseDouble", "Bad input crashes")
+            .whyUseful(
+                "Numbers arrive as text constantly: typed in, read from files, "
+                + "cut out of log lines with substring. Converting them is "
+                + "routine - and it is also where hostile or broken input "
+                + "first gets the chance to stop your program.")
+            .concept("Converting text to numbers",
+                "\"443\" and 443 are different things. One is three "
+                + "characters, the other is a number:\n"
+                + "\n"
+                + "    \"443\" + 1    \"4431\"   joins\n"
+                + "    443 + 1      444      adds\n"
+                + "\n"
+                + "To convert:\n"
+                + "\n"
+                + "    int port = Integer.parseInt(\"443\");\n"
+                + "    double score = Double.parseDouble(\"7.5\");\n"
+                + "\n"
+                + "(Long.parseLong exists too, for longs.)\n"
+                + "\n"
+                + "These methods belong to Integer and Double themselves, not "
+                + "to a particular value, so you call them on the type's name. "
+                + "The text goes in the brackets; the number comes back.\n"
+                + "\n"
+                + "The text must be EXACTLY a number. Anything else crashes "
+                + "the program at run time with a NumberFormatException:\n"
+                + "\n"
+                + "    Integer.parseInt(\"42\")     42\n"
+                + "    Integer.parseInt(\"-7\")     -7\n"
+                + "    Integer.parseInt(\" 42\")    CRASH - a space\n"
+                + "    Integer.parseInt(\"4.2\")    CRASH - not whole\n"
+                + "    Integer.parseInt(\"ten\")    CRASH\n"
+                + "    Integer.parseInt(\"\")       CRASH - nothing there\n"
+                + "\n"
+                + "The space one catches people most, because typed input "
+                + "often has one. trim() first:\n"
+                + "\n"
+                + "    int n = Integer.parseInt(text.trim());\n"
+                + "\n"
+                + "That fixes stray spaces. It does not fix 'ten'. Checking "
+                + "whether text is a valid number before converting needs "
+                + "decisions, which is Campaign 02, and recovering from the "
+                + "crash is Campaign 10. For now, know exactly what crashes "
+                + "and why.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String portText = \"8080\";",
+                "        int port = Integer.parseInt(portText);",
+                "        System.out.println(portText + 1);",
+                "        System.out.println(port + 1);",
+                "    }",
+                "}")
+            .exampleOutput("80801", "8081")
+            .lineByLine(
+                new String[]{"String portText = \"8080\";",
+                    "Four characters that happen to be digits."},
+                new String[]{"Integer.parseInt(portText)",
+                    "Reads the characters and builds the int 8080."},
+                new String[]{"portText + 1",
+                    "Text plus anything joins. 80801 - a port that does not "
+                    + "exist."},
+                new String[]{"port + 1",
+                    "An int plus an int adds. 8081."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String a = \"20\";",
+                    "String b = \"5\";",
+                    "System.out.println(a + b);")
+                .accept("205")
+                .hints(
+                    "What type are a and b?",
+                    "+ on two Strings joins them.")
+                .explain(
+                    "205. They look like numbers but they are Strings, so + "
+                    + "joins them. Nothing in the output warns you that this "
+                    + "was not the sum you meant.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which of these makes Integer.parseInt crash?")
+                .choices("\"42\"", "\"-7\"", "\" 42\"", "\"0\"")
+                .accept("3", "c")
+                .hints(
+                    "Negative numbers and zero are fine.",
+                    "Look at the very first character of each.")
+                .explain(
+                    "\" 42\" - the leading space. parseInt accepts digits and "
+                    + "an optional sign and nothing else, so the space alone is "
+                    + "enough to crash it. Trim first.")
+                .xp(20))
+            .objective(
+                "Turn the typed lockout threshold into a number.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Lockout after: \");",
+                "        String text = input.nextLine();",
+                "        // convert text here",
+                "        System.out.println(\"WARN AT: \" + (limit - 1));",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare an int called limit holding the number in text. The "
+                + "analyst may have typed a stray space, so remove the edges "
+                + "before converting.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare limit as the int value of text, trimmed first.")
+                .input(" 5")
+                .accept("int limit = Integer.parseInt(text.trim());",
+                        "int limit = Integer.parseInt(text.trim())")
+                .hints(
+                    "Integer.parseInt turns text into an int.",
+                    "trim() the text before handing it over, inside the "
+                    + "brackets.",
+                    "int limit = Integer.parseInt(text.trim());")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        System.out.print(\"Lockout after: \");",
+                    "        String text = input.nextLine();",
+                    "        int limit = Integer.parseInt(text.trim());",
+                    "        System.out.println(\"WARN AT: \" + (limit - 1));",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "text.trim() runs first and removes any spaces at the ends. "
+                    + "Its result goes straight into Integer.parseInt, which "
+                    + "builds the int. limit is a real number, so limit - 1 "
+                    + "subtracts.\n"
+                    + "\n"
+                    + "Without trim, an analyst who typed ' 5' would crash the "
+                    + "tool - not because they typed something wrong, but "
+                    + "because the program was stricter than it needed to be. "
+                    + "Trimming makes the tool forgiving of harmless mistakes. "
+                    + "It does not make it safe against 'five', and that "
+                    + "distinction matters: forgiveness and validation are "
+                    + "different jobs.")
+                .explain(
+                    "trim, then parseInt, in one line.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Doing arithmetic on the text",
+                    "\"5\" + 1 is \"51\". Convert first, then calculate."},
+                new String[]{"Not trimming",
+                    "A single stray space crashes parseInt. Trim typed input "
+                    + "before converting it."},
+                new String[]{"parseInt on a decimal",
+                    "Integer.parseInt(\"4.5\") crashes. Use Double.parseDouble "
+                    + "for text with a point."})
+            .cyber(
+                "A program that crashes on bad input has handed the off switch "
+                + "to whoever supplies the input.\n"
+                + "\n"
+                + "Monitoring tools read numbers out of logs all day: ports, "
+                + "sizes, status codes, durations. If one malformed field - "
+                + "a truncated line, a corrupt entry, or one crafted on purpose "
+                + "- crashes the parser, the tool stops watching. An attacker "
+                + "who knows that can blind your monitoring with a single "
+                + "carefully broken log line before doing the thing they "
+                + "actually came to do.\n"
+                + "\n"
+                + "Knowing precisely which inputs crash parseInt is the first "
+                + "step to making sure none of them reach it unchecked.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "double score = Double.parseDouble(\"7.5\");",
+                    "System.out.println(score * 2);")
+                .accept("15.0")
+                .hints(
+                    "After conversion it is an ordinary double.",
+                    "A double result prints with a decimal point.")
+                .explain(
+                    "15.0. The text became the double 7.5, and doubling a "
+                    + "double gives a double.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What happens when Integer.parseInt(\"ten\") runs?")
+                .choices(
+                    "It returns 10",
+                    "It returns 0",
+                    "The program crashes with NumberFormatException",
+                    "It does not compile")
+                .accept("3", "c")
+                .hints(
+                    "The compiler cannot know what text will be there when the "
+                    + "program runs.",
+                    "parseInt only understands digits.")
+                .explain(
+                    "It crashes when that line runs. It compiles fine, because "
+                    + "the compiler only sees a String going in - it has no idea "
+                    + "what the String will contain.")
+                .xp(15))
+            .recap(
+                "    Integer.parseInt(\"443\")      443\n"
+                + "    Double.parseDouble(\"7.5\")    7.5\n"
+                + "\n"
+                + "Text must be exactly a number. Spaces, words, a decimal "
+                + "point for parseInt, or nothing at all: crash at run time.\n"
+                + "\n"
+                + "Trim typed text before converting it.")
+            .next("Next: tools for keeping a number inside safe limits."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "Keeping Numbers in Bounds", 3)
+            .brief(
+                "The audit API lets the caller say how many records they want "
+                + "per request. Somebody asked for five million. The server "
+                + "tried to give them.\n\n"
+                + "A number from outside needs limits. Java has ready-made "
+                + "tools for the commonest ones.")
+            .willLearn("Math methods", "Math.max and Math.min", "Math.abs")
+            .whyUseful(
+                "Capping a value, finding the larger of two readings, measuring "
+                + "a difference regardless of direction - all everyday jobs, "
+                + "all one method call.")
+            .concept("Math.max, Math.min, Math.abs",
+                "Math is a class of ready-made calculations. Like "
+                + "Integer.parseInt, you call them on the class name. No "
+                + "import needed - Math is always available.\n"
+                + "\n"
+                + "    Math.max(a, b)    the larger of the two\n"
+                + "    Math.min(a, b)    the smaller of the two\n"
+                + "    Math.abs(x)       x without its minus sign\n"
+                + "\n"
+                + "    Math.max(3, 9)     9\n"
+                + "    Math.min(3, 9)     3\n"
+                + "    Math.abs(-6)       6\n"
+                + "    Math.abs(6)        6\n"
+                + "\n"
+                + "Two values go into max and min, separated by a comma. The "
+                + "result's type follows the usual rules: two ints give an int, "
+                + "and if either is a double the answer is a double.\n"
+                + "\n"
+                + "The name trips people up. To put a CEILING on a value - "
+                + "never more than 100 - you use MIN:\n"
+                + "\n"
+                + "    int allowed = Math.min(requested, 100);\n"
+                + "\n"
+                + "Whatever was asked for, the smaller of it and 100 wins, so "
+                + "the answer is never above 100. Likewise a FLOOR - never "
+                + "less than 1 - uses max.\n"
+                + "\n"
+                + "One sharp edge, straight from mission 15: Integer.MIN_VALUE "
+                + "has no positive partner in an int. Math.abs of it overflows "
+                + "and gives back the same negative number.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int requested = 5000000;",
+                "        final int MAX_PAGE = 100;",
+                "        int allowed = Math.min(requested, MAX_PAGE);",
+                "        System.out.println(\"REQUESTED: \" + requested);",
+                "        System.out.println(\"ALLOWED:   \" + allowed);",
+                "    }",
+                "}")
+            .exampleOutput("REQUESTED: 5000000", "ALLOWED:   100")
+            .lineByLine(
+                new String[]{"final int MAX_PAGE = 100;",
+                    "The policy, as a constant. One place to change it."},
+                new String[]{"Math.min(requested, MAX_PAGE)",
+                    "The smaller of five million and 100 is 100. A ceiling "
+                    + "uses min."},
+                new String[]{"If requested were 20",
+                    "Math.min(20, 100) is 20. Reasonable requests pass through "
+                    + "untouched."},
+                new String[]{"requested afterwards",
+                    "Still five million. Keep it - it belongs in the audit "
+                    + "log."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Math.max(3, 9));")
+                .accept("9", "nine")
+                .hints("max gives the larger.", "Which is larger, 3 or 9?")
+                .explain(
+                    "9. max hands back whichever of the two values is larger, "
+                    + "whatever order they are given in.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "Two clocks disagree. What does this print?")
+                .code(
+                    "int drift = 4 - 10;",
+                    "System.out.println(Math.abs(drift));")
+                .accept("6", "six")
+                .hints(
+                    "Work out drift first.",
+                    "abs removes the minus sign.")
+                .explain(
+                    "6. drift is -6, and abs gives the size of the difference "
+                    + "without caring which clock is ahead. That is usually "
+                    + "the question you are actually asking.")
+                .xp(15))
+            .objective(
+                "Cap the number of records a caller can pull in one request.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int requested = 800;",
+                "        final int MAX_PAGE = 50;",
+                "        // cap the request here",
+                "        System.out.println(\"SENDING \" + pageSize);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare an int called pageSize holding requested, but never "
+                + "more than MAX_PAGE.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare pageSize: requested, capped at MAX_PAGE.")
+                .accept("int pageSize = Math.min(requested, MAX_PAGE);",
+                        "int pageSize = Math.min(requested, MAX_PAGE)",
+                        "int pageSize = Math.min(MAX_PAGE, requested);",
+                        "int pageSize = Math.min(MAX_PAGE, requested)")
+                .hints(
+                    "A ceiling means the answer can never be bigger than the "
+                    + "limit.",
+                    "Which gives the smaller of two values - max or min?",
+                    "int pageSize = Math.min(requested, MAX_PAGE);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int requested = 800;",
+                    "        final int MAX_PAGE = 50;",
+                    "        int pageSize = Math.min(requested, MAX_PAGE);",
+                    "        System.out.println(\"SENDING \" + pageSize);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Math.min hands back whichever is smaller. 800 against 50 "
+                    + "gives 50, so the ceiling holds. A request for 20 would "
+                    + "give 20, so honest callers are unaffected.\n"
+                    + "\n"
+                    + "Math.max would have done the opposite: sent 800, or "
+                    + "more, for any request above the limit - a ceiling that "
+                    + "only ever lets bigger numbers through. It compiles, it "
+                    + "runs, and it is backwards. When capping, say it aloud: "
+                    + "'the smaller of what they asked and what we allow'.")
+                .explain(
+                    "A ceiling is a min: the smaller of what was asked for and "
+                    + "what is allowed.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Using max for a ceiling",
+                    "Math.max(requested, 100) is never LESS than 100. For a "
+                    + "ceiling you want min."},
+                new String[]{"Forgetting the class name",
+                    "min(a, b) on its own is 'cannot find symbol'. It is "
+                    + "Math.min."},
+                new String[]{"Trusting abs to always be positive",
+                    "Math.abs(Integer.MIN_VALUE) is still negative. Overflow "
+                    + "has no exceptions."})
+            .cyber(
+                "Unbounded numbers from outside are a classic denial-of-service "
+                + "route. A page size of five million makes the server load "
+                + "five million records into memory. A retry count of a "
+                + "billion ties up a worker forever. A requested timeout of "
+                + "a year keeps a connection open for a year.\n"
+                + "\n"
+                + "The fix is the same every time: decide the largest value you "
+                + "are willing to honour, and clamp to it before using the "
+                + "number for anything. It costs one line, it does not reject "
+                + "legitimate callers, and it turns an attacker's five million "
+                + "into a harmless hundred. Keep the original value too - a "
+                + "request for five million records is itself worth an alert.")
+            .check(new Task(Task.CHOICE,
+                    "To make sure attempts is never MORE than 10, which do you "
+                    + "use?")
+                .choices("Math.max(attempts, 10)", "Math.min(attempts, 10)",
+                         "Math.abs(attempts)", "Math.max(10, attempts)")
+                .accept("2", "b")
+                .hints(
+                    "Never more than 10 is a ceiling.",
+                    "A ceiling picks the smaller value.")
+                .explain(
+                    "Math.min(attempts, 10). If attempts is 15, the smaller is "
+                    + "10. If it is 3, the smaller is 3. Both max options do the "
+                    + "reverse.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Math.max(2, 2.5));")
+                .accept("2.5")
+                .hints(
+                    "One of the two values is a double.",
+                    "Mixed arithmetic rules apply: the answer is a double.")
+                .explain(
+                    "2.5. 2 is promoted to 2.0, and the larger is 2.5. With a "
+                    + "double in either slot, the result is a double.")
+                .xp(20))
+            .recap(
+                "    Math.max(a, b)    larger\n"
+                + "    Math.min(a, b)    smaller\n"
+                + "    Math.abs(x)       distance from zero\n"
+                + "\n"
+                + "A ceiling uses MIN. A floor uses MAX.\n"
+                + "\n"
+                + "Clamp every number that comes from outside before you use "
+                + "it.")
+            .next("Next: rounding properly, as promised back in mission 14."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "Rounding on Purpose", 3)
+            .brief(
+                "Mission 14 showed that (int) chops the fraction off: 99.7% "
+                + "uptime reported as 99. Sometimes that is right. Usually, "
+                + "for a report, what you meant was the NEAREST whole number.\n\n"
+                + "That is a different operation, with a surprise in its return "
+                + "type.")
+            .willLearn("Math.round", "Rounding against truncating",
+                       "Rounding to decimal places")
+            .whyUseful(
+                "Every report, dashboard and alert shows rounded numbers. "
+                + "Choosing between rounding and truncating - and rounding to "
+                + "the right number of places - decides what the reader "
+                + "believes.")
+            .concept("Math.round",
+                "Math.round gives the nearest whole number. A half rounds "
+                + "UP:\n"
+                + "\n"
+                + "    Math.round(2.4)     2\n"
+                + "    Math.round(2.5)     3\n"
+                + "    Math.round(2.6)     3\n"
+                + "    Math.round(99.7)    100\n"
+                + "\n"
+                + "'Up' means towards the larger number, so negative halves go "
+                + "towards zero:\n"
+                + "\n"
+                + "    Math.round(-2.5)    -2\n"
+                + "\n"
+                + "Compare the cast, which never rounds:\n"
+                + "\n"
+                + "    (int) 99.7          99\n"
+                + "    Math.round(99.7)    100\n"
+                + "\n"
+                + "THE SURPRISE. Given a double, Math.round hands back a LONG, "
+                + "not an int. So this does not compile:\n"
+                + "\n"
+                + "    int r = Math.round(7.6);\n"
+                + "\n"
+                + "'possible lossy conversion from long to int'. Store it in a "
+                + "long, or cast the result if you know it fits:\n"
+                + "\n"
+                + "    long r = Math.round(7.6);\n"
+                + "    int r = (int) Math.round(7.6);\n"
+                + "\n"
+                + "ROUNDING TO DECIMAL PLACES. Math.round only rounds to whole "
+                + "numbers, but you can shift the point first:\n"
+                + "\n"
+                + "    Math.round(7.46 * 10) / 10.0\n"
+                + "\n"
+                + "    7.46 * 10      74.6\n"
+                + "    round          75\n"
+                + "    75 / 10.0      7.5\n"
+                + "\n"
+                + "The 10.0 matters - dividing by plain 10 would be integer "
+                + "division and give 7. Everything from mission 10 still "
+                + "applies.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        double uptime = 99.7;",
+                "        System.out.println(\"CAST:  \" + (int) uptime);",
+                "        System.out.println(\"ROUND: \" + Math.round(uptime));",
+                "        double score = 7.46;",
+                "        System.out.println(\"1 DP:  \" + Math.round(score * 10) / 10.0);",
+                "    }",
+                "}")
+            .exampleOutput("CAST:  99", "ROUND: 100", "1 DP:  7.5")
+            .lineByLine(
+                new String[]{"(int) uptime",
+                    "Truncates. 99.7 loses its .7 and becomes 99."},
+                new String[]{"Math.round(uptime)",
+                    "Nearest whole number. 99.7 is closer to 100."},
+                new String[]{"score * 10",
+                    "Moves the point one place right: 74.6."},
+                new String[]{"/ 10.0",
+                    "Rounds to 75, then moves the point back. The .0 keeps the "
+                    + "division decimal."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Math.round(4.5));")
+                .accept("5", "five")
+                .hints("Exactly half.", "Halves round up.")
+                .explain("5. A half rounds up, towards the larger number.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What are the TWO lines of output?")
+                .code(
+                    "double load = 8.9;",
+                    "System.out.println((int) load);",
+                    "System.out.println(Math.round(load));")
+                .accept("8 9", "8, 9", "8 and 9")
+                .hints(
+                    "One line truncates and one rounds.",
+                    "8.9 is much nearer 9 than 8.")
+                .explain(
+                    "    8\n"
+                    + "    9\n"
+                    + "\n"
+                    + "The cast cut off the .9. Math.round went to the nearest. "
+                    + "Almost a whole unit apart, from the same value.")
+                .xp(20))
+            .objective(
+                "Report a severity score as its nearest whole number.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        double severity = 6.7;",
+                "        // round severity here",
+                "        System.out.println(\"SEVERITY \" + rounded);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare rounded holding severity rounded to the nearest whole "
+                + "number. Choose a type that Math.round's result will fit "
+                + "into without a cast.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare rounded as severity rounded to the nearest whole.")
+                .accept("long rounded = Math.round(severity);",
+                        "long rounded = Math.round(severity)",
+                        "int rounded = (int) Math.round(severity);",
+                        "int rounded = (int) Math.round(severity)")
+                .hints(
+                    "Rounding, not truncating, so not a cast on severity.",
+                    "Math.round of a double hands back a long.",
+                    "long rounded = Math.round(severity);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        double severity = 6.7;",
+                    "        long rounded = Math.round(severity);",
+                    "        System.out.println(\"SEVERITY \" + rounded);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Math.round(6.7) is 7 - nearer 7 than 6 - and it arrives "
+                    + "as a long, so a long box takes it directly.\n"
+                    + "\n"
+                    + "(int) severity would have said 6 and compiled happily. "
+                    + "On a scale where 7.0 is where 'high' begins, that single "
+                    + "choice decides whether the finding is filed as medium "
+                    + "or high. Neither is a bug in Java; one of them is a "
+                    + "bug in the report.")
+                .explain(
+                    "Math.round for nearest, into a long.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Storing the result in an int",
+                    "int r = Math.round(x); does not compile - it hands back a "
+                    + "long. Use long, or cast the result."},
+                new String[]{"Dividing by 10 instead of 10.0",
+                    "Math.round(x * 10) / 10 is integer division. The decimal "
+                    + "place you just rounded to is thrown away."},
+                new String[]{"Using a cast when you meant to round",
+                    "(int) 9.99 is 9. If the nearest number is what you mean, "
+                    + "say so with Math.round."})
+            .cyber(
+                "Which rounding to use is not always yours to choose. CVSS, the "
+                + "standard behind most vulnerability scores, defines its own "
+                + "rule: scores are always rounded UP to one decimal place. A "
+                + "raw 7.01 is published as 7.1.\n"
+                + "\n"
+                + "A tool that recomputes scores with Math.round gives 7.0 "
+                + "instead - different from every scanner and advisory the "
+                + "team compares against. Nobody can reconcile the numbers, "
+                + "trust in the tool drops, and people go back to reading "
+                + "the advisory by hand. The lesson is not 'always use "
+                + "Math.round'. It is that rounding is a decision, and when a "
+                + "standard has already made it, you follow the standard.")
+            .check(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "double s = 6.7;",
+                    "int r = Math.round(s);",
+                    "System.out.println(r);")
+                .accept("2", "line 2")
+                .hints(
+                    "What type does Math.round give back for a double?",
+                    "Can that type go into an int box without a cast?")
+                .explain(
+                    "Line 2. Math.round of a double is a long, and a long does "
+                    + "not fit an int without a cast. 'possible lossy conversion "
+                    + "from long to int'.")
+                .xp(20))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Math.round(3.14159 * 100) / 100.0);")
+                .accept("3.14")
+                .hints(
+                    "Shift the point two places, round, shift it back.",
+                    "314.159 rounds to 314.")
+                .explain(
+                    "3.14. Multiplying by 100 moves the point two places, "
+                    + "rounding gives 314, and dividing by 100.0 moves it back. "
+                    + "Two decimal places.")
+                .xp(20))
+            .recap(
+                "    Math.round(2.5)    3     nearest, halves go up\n"
+                + "    (int) 2.9          2     cut off, never rounded\n"
+                + "\n"
+                + "Math.round of a double hands back a long.\n"
+                + "\n"
+                + "    Math.round(x * 10) / 10.0    one decimal place\n"
+                + "\n"
+                + "Rounding is a decision. Make it deliberately.")
+            .next("Next: finding where something is inside a String."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "Finding Your Place", 3)
+            .brief(
+                "Mission 20 cut fields out of a log line by fixed positions. "
+                + "Email addresses do not have fixed positions: the @ is "
+                + "wherever the name ends.\n\n"
+                + "Before you can cut, you need to find.")
+            .willLearn("indexOf()", "lastIndexOf()", "-1 means not found")
+            .whyUseful(
+                "Real data is rarely fixed-width. Finding a separator and "
+                + "cutting around it is how addresses, key=value pairs, URLs "
+                + "and file names get taken apart.")
+            .concept("indexOf()",
+                "indexOf searches a String and hands back the index where "
+                + "the text FIRST appears:\n"
+                + "\n"
+                + "    String email = \"jsmith@northstar.example\";\n"
+                + "    email.indexOf(\"@\")    6\n"
+                + "\n"
+                + "It returns an int - a position, counted from 0 as always. "
+                + "The search is case-sensitive, and you can search for "
+                + "longer text too:\n"
+                + "\n"
+                + "    \"FAILED login\".indexOf(\"login\")    7\n"
+                + "\n"
+                + "If the text is NOT there, the answer is -1. Not an error, "
+                + "not a crash - just -1, because no real index is negative.\n"
+                + "\n"
+                + "lastIndexOf searches from the other end and gives the LAST "
+                + "place the text appears. Handy for file extensions:\n"
+                + "\n"
+                + "    \"report.pdf.exe\".lastIndexOf(\".\")    10\n"
+                + "\n"
+                + "FIND, THEN CUT. Combined with substring:\n"
+                + "\n"
+                + "    int at = email.indexOf(\"@\");\n"
+                + "    String user   = email.substring(0, at);\n"
+                + "    String domain = email.substring(at + 1);\n"
+                + "\n"
+                + "The @ is at index at. Everything before it is the user. "
+                + "at + 1 skips past the @ itself.\n"
+                + "\n"
+                + "THE DANGER. If there is no @, at is -1, and at + 1 is 0. "
+                + "substring(0) is the WHOLE String. No crash - the 'domain' "
+                + "is quietly the entire input. Checking for -1 first needs a "
+                + "decision, which is exactly what Campaign 02 is for.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String email = \"a.okafor@northstar.example\";",
+                "        int at = email.indexOf(\"@\");",
+                "        System.out.println(\"AT:     \" + at);",
+                "        System.out.println(\"USER:   \" + email.substring(0, at));",
+                "        System.out.println(\"DOMAIN: \" + email.substring(at + 1));",
+                "    }",
+                "}")
+            .exampleOutput("AT:     8", "USER:   a.okafor", "DOMAIN: northstar.example")
+            .lineByLine(
+                new String[]{"email.indexOf(\"@\")",
+                    "a.okafor is eight characters, indexes 0 to 7, so the @ is "
+                    + "at 8."},
+                new String[]{"substring(0, at)",
+                    "From 0 up to, but not including, the @."},
+                new String[]{"substring(at + 1)",
+                    "From just after the @ to the end."},
+                new String[]{"Nothing is counted by hand",
+                    "A longer or shorter name moves the @, and indexOf finds "
+                    + "it wherever it is."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String ip = \"10.0.4.17\";",
+                    "System.out.println(ip.indexOf(\".\"));")
+                .accept("2", "two")
+                .hints("The FIRST dot.", "1 is at 0, 0 is at 1...")
+                .explain(
+                    "2. There are three dots; indexOf reports the first one it "
+                    + "meets.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String user = \"jsmith\";",
+                    "System.out.println(user.indexOf(\"@\"));")
+                .accept("-1")
+                .hints(
+                    "Is there an @ in jsmith?",
+                    "What does indexOf say when it finds nothing?")
+                .explain(
+                    "-1. There is no @, so there is no position to report. -1 "
+                    + "is the agreed signal for 'not found', precisely because "
+                    + "it can never be a real index.")
+                .xp(20))
+            .objective(
+                "Split a key=value setting at its equals sign.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String entry = \"user=m.reyes\";",
+                "        // find the = here",
+                "        String value = entry.substring(eq + 1);",
+                "        System.out.println(\"VALUE: \" + value);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare an int called eq holding the position of the = sign "
+                + "in entry. Let Java find it; do not count.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare eq as the index of \"=\" in entry.")
+                .accept("int eq = entry.indexOf(\"=\");", "int eq = entry.indexOf(\"=\")",
+                        "int eq = entry.indexOf('=');", "int eq = entry.indexOf('=')")
+                .hints(
+                    "A position is an int.",
+                    "indexOf, called on entry, with the text to find in the "
+                    + "brackets.",
+                    "int eq = entry.indexOf(\"=\");")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String entry = \"user=m.reyes\";",
+                    "        int eq = entry.indexOf(\"=\");",
+                    "        String value = entry.substring(eq + 1);",
+                    "        System.out.println(\"VALUE: \" + value);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "indexOf finds the = at index 4. substring(eq + 1) starts "
+                    + "one past it, so value is m.reyes.\n"
+                    + "\n"
+                    + "Because the position is found rather than typed, the "
+                    + "same two lines split host=DB-01, level=critical or any "
+                    + "other pair. And they share the danger in this "
+                    + "mission's concept: feed them a line with no = and eq is "
+                    + "-1, value is the whole line, and nothing complains.")
+                .explain(
+                    "indexOf finds the separator wherever it is.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Forgetting the + 1",
+                    "substring(at) includes the separator itself: @northstar."},
+                new String[]{"Treating -1 as a real position",
+                    "substring(-1 + 1) is the whole String. No crash, wrong "
+                    + "answer."},
+                new String[]{"Expecting it to ignore case",
+                    "\"LOGIN\".indexOf(\"login\") is -1. Lower-case both sides "
+                    + "first if case should not matter."})
+            .cyber(
+                "File names are a favourite place to hide. Windows hides known "
+                + "extensions by default, so invoice.pdf.exe is shown as "
+                + "invoice.pdf - with a PDF icon, if the attacker embedded "
+                + "one. The file is a program.\n"
+                + "\n"
+                + "A check that uses indexOf(\".\") finds the FIRST dot and "
+                + "decides the extension is .pdf.exe, or cuts out pdf and "
+                + "decides the file is a document. lastIndexOf finds the dot "
+                + "that actually decides what Windows will do with the file. "
+                + "Picking the right one is the difference between a filter "
+                + "and a decoration.")
+            .check(new Task(Task.PREDICT,
+                    "There is no @ in this address. What does this print?")
+                .code(
+                    "String email = \"no-at-sign\";",
+                    "System.out.println(email.substring(email.indexOf(\"@\") + 1));")
+                .accept("no-at-sign")
+                .hints(
+                    "Work out indexOf first. What is it when nothing is found?",
+                    "-1 + 1 is 0. What does substring(0) give?")
+                .explain(
+                    "no-at-sign - the whole thing. indexOf gave -1, the + 1 made "
+                    + "it 0, and substring(0) is everything. The code meant to "
+                    + "extract a domain, and returned the entire input without "
+                    + "a murmur.")
+                .xp(25))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String file = \"invoice.pdf.exe\";",
+                    "System.out.println(file.substring(file.lastIndexOf(\".\")));")
+                .accept(".exe")
+                .hints(
+                    "lastIndexOf finds the LAST dot.",
+                    "substring from there runs to the end.")
+                .explain(
+                    ".exe - from the last dot to the end, which is the extension "
+                    + "that actually decides what the file does.")
+                .xp(20))
+            .recap(
+                "    s.indexOf(\"@\")        first position, or -1\n"
+                + "    s.lastIndexOf(\".\")    last position, or -1\n"
+                + "\n"
+                + "Find, then cut:\n"
+                + "\n"
+                + "    s.substring(0, at)    before\n"
+                + "    s.substring(at + 1)   after\n"
+                + "\n"
+                + "-1 is not a position. Used as one, it gives wrong answers "
+                + "quietly.")
+            .next("Next: asking whether a String contains, starts with or "
+                + "ends with something."));
     }
 }

@@ -24,6 +24,7 @@ public class Task {
     private String explanation = "";
     private String[] solution = new String[0];
     private String whyItWorks = "";
+    private String[] input = new String[0];
     private int xp = 10;
 
     public Task(String type, String prompt) {
@@ -72,6 +73,20 @@ public class Task {
      * Why the solution is correct, in terms of what happens when it runs.
      * Handing over code without this teaches copying, not programming.
      */
+    /**
+     * What is typed at the keyboard when this task's code or solution runs,
+     * one entry per line. Used by tools/CheckJava; the prompt must tell the
+     * player the same thing in words.
+     */
+    public Task input(String... lines) {
+        this.input = lines;
+        return this;
+    }
+
+    public String[] getInput() {
+        return input;
+    }
+
     public Task whyItWorks(String text) {
         this.whyItWorks = text;
         return this;
