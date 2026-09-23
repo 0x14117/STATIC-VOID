@@ -163,6 +163,18 @@ public class CheckAll {
                     check(tag + " rejects nonsense", !t.matches("zzqqxx"),
                           "accepted junk");
                     check(tag + " rejects an empty answer", !t.matches(""), "");
+                    if (t.isCaseExact()) {
+                        String first = t.getFirstAccepted();
+                        String shouted = first.toUpperCase();
+                        boolean listed = false;
+                        for (String a : t.getAccepted()) {
+                            listed = listed || a.equals(shouted);
+                        }
+                        if (!shouted.equals(first) && !listed) {
+                            check(tag + " rejects wrong capitals",
+                                  !t.matches(shouted), "accepted " + shouted);
+                        }
+                    }
                     check(tag + " has hints", t.getHints().length >= 2,
                           "got " + t.getHints().length);
                     check(tag + " explains the answer",
@@ -175,10 +187,51 @@ public class CheckAll {
             }
         }
 
-        // Answers must survive the sloppiness a real person types with.
+        // --- the knowledge index and the missions agree -------------------
+        // Every mission ticks at least one topic, except a campaign's closing
+        // checkpoint, which reviews rather than introduces. And once a
+        // campaign is complete, every topic promised for it has been taught.
+        java.util.Set<String> indexed = new java.util.HashSet<>();
+        for (String[] topic : KnowledgeIndex.topics()) {
+            indexed.add(topic[1].toLowerCase());
+        }
+        for (Campaign campaign : CampaignIndex.all()) {
+            java.util.List<Mission> built = campaign.getMissions();
+            boolean complete = built.size() == campaign.getPlannedMissions();
+            java.util.Set<String> taught = new java.util.HashSet<>();
+            for (int i = 0; i < built.size(); i++) {
+                Mission m = built.get(i);
+                boolean ticks = false;
+                for (String concept : m.getWillLearn()) {
+                    taught.add(concept.toLowerCase());
+                    ticks = ticks || indexed.contains(concept.toLowerCase());
+                }
+                boolean closing = complete && i == built.size() - 1;
+                if (!closing) {
+                    check(m.getId() + " ticks a knowledge topic", ticks,
+                          "none of its willLearn entries is in KnowledgeIndex");
+                }
+            }
+            if (complete) {
+                for (String[] topic : KnowledgeIndex.topics()) {
+                    if (topic[0].equals(String.valueOf(campaign.getNumber()))) {
+                        check(campaign.getLabel() + " teaches " + topic[1],
+                              taught.contains(topic[1].toLowerCase()), "");
+                    }
+                }
+            }
+        }
+
+        // Answers must survive the sloppiness a real person types with...
         Task probe = CampaignIndex.byId("C00-M001").getPredict();
-        check("matching ignores case", probe.matches("B") || probe.matches("2"), "");
-        check("matching ignores padding", probe.matches("  2  "), "");
+        check("matching ignores padding", probe.matches("  2  ")
+              || probe.matches("  b  "), "");
+        // ...but not a wrong capital where Java itself would care.
+        Task exact = CampaignIndex.byId("C01-M001").getPractice();
+        check("output is graded case-exact", exact.matches("openPorts")
+              && !exact.matches("openports"), "openports accepted");
+        check("a wrong capital is recognised as nearly right",
+              exact.matchesIgnoringCase("OPENPORTS"), "");
 
         System.out.println();
         System.out.println("campaigns planned : " + CampaignIndex.all().size());

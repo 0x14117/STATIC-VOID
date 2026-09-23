@@ -121,7 +121,7 @@ public class Campaign00 {
                 + "Type the whole command you would use to compile Main.java.")
             .mainTask(new Task(Task.WRITE,
                     "Type the command that compiles Main.java.")
-                .accept("javac Main.java", "javac main.java")
+                .accept("javac Main.java")
                 .hints(
                     "The compiler's name is javac.",
                     "You give it the name of the source file, including .java")
@@ -499,7 +499,7 @@ public class Campaign00 {
                 + "Remember: here you name the class, not a file.")
             .mainTask(new Task(Task.WRITE,
                     "Type the command that runs the program.")
-                .accept("java -cp out Main", "java -cp out main")
+                .accept("java -cp out Main")
                 .hints(
                     "The tool is java, not javac - you are running, not compiling.",
                     "-cp out tells it where to look for the class files.",
@@ -586,7 +586,7 @@ public class Campaign00 {
                 + "The analyst who wrote it left two years ago.\n\n"
                 + "Comments are how code explains itself to the next person, who "
                 + "is very often you in three weeks.")
-            .willLearn("Line comments", "Block comments", "Commenting out code")
+            .willLearn("Comments", "Line and block comments", "Commenting out code")
             .whyUseful(
                 "Code says WHAT it does. Only a comment can say WHY. In security "
                 + "work the why is usually the important part: why this threshold, "
@@ -1172,11 +1172,11 @@ public class Campaign00 {
             .example(
                 "System.out.println(\"USER\\tRESULT\");",
                 "System.out.println(\"jsmith\\tFAIL\");",
-                "System.out.println(\"Cipher said \\\"locked\\\"\");")
+                "System.out.println(\"DC-01 reported \\\"locked\\\"\");")
             .exampleOutput(
                 "USER    RESULT",
                 "jsmith  FAIL",
-                "Cipher said \"locked\"")
+                "DC-01 reported \"locked\"")
             .lineByLine(
                 new String[]{"\\t",
                     "A tab. It jumps to the next tab stop, which is how the two "

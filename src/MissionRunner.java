@@ -263,7 +263,13 @@ public class MissionRunner {
 
             player.countWrongAnswer();
             Terminal.blank();
-            Terminal.line("  Not quite. Try again, or type HINT.");
+            if (task.matchesIgnoringCase(answer)) {
+                Terminal.wrapped("Nearly. The letters are right but the capitals "
+                        + "are not, and Java treats those as different. Try "
+                        + "again.", "  ");
+            } else {
+                Terminal.line("  Not quite. Try again, or type HINT.");
+            }
             Terminal.blank();
         }
     }

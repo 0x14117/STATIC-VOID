@@ -48,7 +48,7 @@ against the whole plan rather than pretending the plan is only as large as
 what exists.
 
     CAMPAIGN 00 - INIT              10 missions    BUILT
-    CAMPAIGN 01 - JAVA ZERO         30 missions
+    CAMPAIGN 01 - JAVA ZERO         30 missions    20 BUILT
     CAMPAIGN 02 - CONDITIONAL       30 missions
     CAMPAIGN 03 - LOOP//CONTROL     30 missions
     CAMPAIGN 04 - METHODS           30 missions
@@ -94,25 +94,53 @@ Typing SOLUTION never gives you code on its own. It gives the code and an
 explanation of why it works, because code without the reasoning teaches
 copying.
 
+Answers are judged the way Java would judge them. Extra spaces and
+surrounding quotes do not matter. Capital letters do, when you are writing
+code or predicting output: `system.out.println` is not Java, and a program
+that prints `jsmith` did not print `JSmith`. If only your capitals are wrong,
+the game tells you so. Choice letters and line numbers can be typed any way.
+
 ## The code
 
     src/Terminal.java         all screen drawing and keyboard input
     src/Player.java           name, XP, level, what you have completed
     src/SaveFile.java         reads and writes the plain-text save
     src/Task.java             one question and how its answer is judged
-    src/Mission.java          a mission: briefing, concepts, tasks
-    src/MissionLibrary.java   every mission in the game
+    src/Mission.java          a mission: the whole teaching template
+    src/Campaign.java         one campaign and its missions
+    src/CampaignIndex.java    all twenty campaigns, built or planned
+    src/Campaign00.java       CAMPAIGN 00 - INIT
+    src/Campaign01.java       CAMPAIGN 01 - JAVA ZERO
     src/MissionRunner.java    plays a mission and scores it
     src/KnowledgeIndex.java   the Java topics you have earned
     src/World.java            NORTHSTAR SYSTEMS: hosts and accounts
     src/Main.java             the terminal, the menu, the game loop
 
-    tools/CheckAll.java       verifies every mission and task
+    tools/CheckAll.java       verifies every mission is complete
+    tools/CheckJava.java      verifies the Java in every mission is true
 
 ## Checking the content
+
+Two checks, for two different kinds of mistake.
+
+**Is every mission complete?** Fast; run it after any change.
 
     javac -d check src/*.java tools/CheckAll.java
     java -cp check CheckAll
 
-It confirms every task has an accepted answer, hints, an explanation, that
-each task accepts its own answer, and that none of them accept nonsense.
+Every template section is filled, every task accepts its own answer and
+rejects nonsense and wrong capitals, every line fits the terminal, and the
+Java Knowledge index agrees with what the missions teach.
+
+**Is everything the missions claim actually true?** Slow - it runs the real
+compiler and JVM on every snippet - so run it after changing mission content.
+
+    javac -d check src/*.java tools/CheckJava.java
+    java -cp check CheckJava            every mission
+    java -cp check CheckJava C01        one campaign
+
+Every example compiles and prints exactly the output the mission shows.
+Every solution compiles and runs. Every "what does this print" answer is
+what Java really prints. Every "which line does not compile" snippet really
+fails, on the line the task names. A beginner takes all of that on trust, so
+none of it is left to trust.

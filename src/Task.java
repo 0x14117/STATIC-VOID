@@ -117,6 +117,10 @@ public class Task {
         return xp;
     }
 
+    public String[] getAccepted() {
+        return accepted;
+    }
+
     public String getFirstAccepted() {
         if (accepted.length == 0) {
             return "";
@@ -127,25 +131,47 @@ public class Task {
     /**
      * Is this answer right?
      *
-     * Comparison is deliberately forgiving about things that are not the
-     * point: capitals, extra spaces, and surrounding quotes. It is NOT
-     * forgiving about the answer itself.
+     * Comparison is forgiving about things that are not the point: extra
+     * spaces and surrounding quotes. Capitals depend on the question. Java
+     * source and program output are both case sensitive - System and system
+     * are different words, and a program that prints jsmith did not print
+     * JSmith - so PREDICT and WRITE answers must match exactly. A choice
+     * letter or a line number means the same whatever its case.
      */
     public boolean matches(String answer) {
-        String given = normalise(answer);
+        return matchesWith(answer, !isCaseExact());
+    }
+
+    /**
+     * Right apart from capital letters. Lets the game say precisely what is
+     * wrong rather than a flat "not quite".
+     */
+    public boolean matchesIgnoringCase(String answer) {
+        return matchesWith(answer, true);
+    }
+
+    public boolean isCaseExact() {
+        return type.equals(PREDICT) || type.equals(WRITE);
+    }
+
+    private boolean matchesWith(String answer, boolean ignoreCase) {
+        String given = normalise(answer, ignoreCase);
         if (given.isEmpty()) {
             return false;
         }
         for (String candidate : accepted) {
-            if (normalise(candidate).equals(given)) {
+            if (normalise(candidate, ignoreCase).equals(given)) {
                 return true;
             }
         }
         return false;
     }
 
-    private String normalise(String text) {
-        String out = text.trim().toLowerCase();
+    private String normalise(String text, boolean ignoreCase) {
+        String out = text.trim();
+        if (ignoreCase) {
+            out = out.toLowerCase();
+        }
         // Collapse runs of whitespace so "a   +  b" matches "a + b".
         out = out.replaceAll("\\s+", " ");
         // A player may or may not wrap their answer in quotes. Neither is wrong.

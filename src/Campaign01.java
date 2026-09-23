@@ -428,7 +428,7 @@ public class Campaign01 {
                 + "is no use for that.\n\n"
                 + "A variable is not carved in stone. It is a box, and what is in "
                 + "it can be replaced.")
-            .willLearn("Assignment", "Reassignment", "Using a variable's own value")
+            .willLearn("Reassignment", "Assignment", "Using a variable's own value")
             .whyUseful(
                 "A monitoring tool spends its whole life updating values: counts "
                 + "going up, scores being recalculated, status being replaced. "
@@ -1124,24 +1124,24 @@ public class Campaign01 {
                     + "are not part of the value.")
                 .xp(10))
             .practice(new Task(Task.DEBUG,
-                    "Two of these three lines do not compile. Give the line number "
-                    + "of the FIRST one that fails.")
+                    "This does not compile. Which line is wrong?")
                 .code(
                     "char a = 'I';",
                     "char b = \"W\";",
-                    "char c = 'ER';")
+                    "char c = 'E';")
                 .accept("2", "line 2")
                 .hints(
-                    "Line 1 is correct - use it as your reference.",
-                    "Compare the quote marks on line 2, then count the characters "
-                    + "on line 3.")
+                    "Lines 1 and 3 are correct - use them as your reference.",
+                    "Compare the quote marks.")
                 .explain(
-                    "Line 2 fails first: \"W\" in double quotes is a String, and a "
-                    + "String does not fit in a char.\n\n"
-                    + "Line 3 is wrong too - 'ER' is two characters and a char "
-                    + "holds one. Both are errors, and the question asked for the "
-                    + "first, which is how a compiler reports them: top to bottom.")
-                .xp(25))
+                    "Line 2. \"W\" in double quotes is a String, and a String "
+                    + "does not fit in a char, even one that is a single letter "
+                    + "long. 'incompatible types: String cannot be converted to "
+                    + "char'.\n\n"
+                    + "The value looks right, which is exactly why this one gets "
+                    + "past people. Java goes by the quote marks, not by how "
+                    + "many letters are inside them.")
+                .xp(20))
             .objective(
                 "Mark a log line as an error.")
             .starter(
@@ -2181,5 +2181,2141 @@ public class Campaign01 {
                 + "divide ints, decide what happens to the remainder.")
             .next("Next: the shorthand Java gives you for changing a variable "
                 + "by a small amount."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(11), "Shorthand for a Running Total", 2)
+            .brief(
+                "The audit tool keeps a running total of failures across every "
+                + "host it checks. Each host adds its count to the total.\n\n"
+                + "You already know how to write that. Java also has a shorter "
+                + "way, and you will see it in almost every program you read.")
+            .willLearn("Compound assignment", "+= and -=", "*= and /=")
+            .whyUseful(
+                "Running totals, scores that go up and down, budgets being spent "
+                + "- all of them are a variable changed by an amount. The short "
+                + "form is what real code uses, so you need to read it fluently.")
+            .concept("Compound assignment",
+                "You met this shape in mission 3:\n"
+                + "\n"
+                + "    total = total + webFailures;\n"
+                + "\n"
+                + "The name appears twice. Java lets you write it once:\n"
+                + "\n"
+                + "    total += webFailures;\n"
+                + "\n"
+                + "Both lines do EXACTLY the same thing. += means 'add this to "
+                + "what is already there'. There is one for each operator:\n"
+                + "\n"
+                + "    x += 5;    same as    x = x + 5;\n"
+                + "    x -= 5;    same as    x = x - 5;\n"
+                + "    x *= 5;    same as    x = x * 5;\n"
+                + "    x /= 5;    same as    x = x / 5;\n"
+                + "\n"
+                + "The two characters are written together with no space. + = "
+                + "with a gap does not compile.\n"
+                + "\n"
+                + "Everything you learned still applies. /= on an int is still "
+                + "integer division, so the fraction still vanishes.\n"
+                + "\n"
+                + "+= works on Strings too, where it joins:\n"
+                + "\n"
+                + "    String report = \"FAILED:\";\n"
+                + "    report += \" jsmith\";\n"
+                + "\n"
+                + "report now holds FAILED: jsmith.\n"
+                + "\n"
+                + "One trap. The order of the two symbols matters:\n"
+                + "\n"
+                + "    total += 5;    adds 5 to total\n"
+                + "    total =+ 5;    sets total to +5\n"
+                + "\n"
+                + "The second one compiles. Java reads it as total = +5, a "
+                + "positive five, and your running total is wiped.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 0;",
+                "        total += 12;",
+                "        total += 7;",
+                "        total -= 4;",
+                "        System.out.println(\"OPEN FAILURES: \" + total);",
+                "    }",
+                "}")
+            .exampleOutput("OPEN FAILURES: 15")
+            .lineByLine(
+                new String[]{"int total = 0;",
+                    "A running total starts at zero, before anything has been "
+                    + "counted."},
+                new String[]{"total += 12;",
+                    "Adds 12 to what is there. 0 becomes 12."},
+                new String[]{"total += 7;",
+                    "12 becomes 19. Same line shape, different result, because "
+                    + "the starting value changed."},
+                new String[]{"total -= 4;",
+                    "Four were resolved, so take them off. 19 becomes 15."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int score = 10;",
+                    "score += 5;",
+                    "score -= 3;",
+                    "System.out.println(score);")
+                .accept("12", "twelve")
+                .hints(
+                    "Trace the box after each line.",
+                    "10, then 15, then...")
+                .explain(
+                    "12. 10 plus 5 is 15, then 15 minus 3 is 12. Each line works "
+                    + "from whatever the previous line left behind.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "The same shorthand on text. What does this print?")
+                .code(
+                    "String log = \"LOGIN\";",
+                    "log += \" FAILED\";",
+                    "log += \" jsmith\";",
+                    "System.out.println(log);")
+                .accept("LOGIN FAILED jsmith")
+                .hints(
+                    "On a String, += joins rather than adds.",
+                    "Each piece brings its own leading space.")
+                .explain(
+                    "LOGIN FAILED jsmith. On a String, += joins the new text onto "
+                    + "the end. The spaces are there because each added piece "
+                    + "starts with one - += adds nothing of its own, just like "
+                    + "+.")
+                .xp(20))
+            .objective(
+                "Add the database server's failures to the running total.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 9;",
+                "        int dbFailures = 4;",
+                "        // add dbFailures to total here",
+                "        System.out.println(\"TOTAL: \" + total);",
+                "    }",
+                "}")
+            .yourTask(
+                "total already holds the web server's 9. Add dbFailures to it "
+                + "using the shorthand from this mission.")
+            .mainTask(new Task(Task.WRITE,
+                    "Add dbFailures to total using the shorthand operator.")
+                .accept("total += dbFailures;", "total += dbFailures")
+                .hints(
+                    "You are changing total, so total goes on the left.",
+                    "The operator is + and = written together, in that order.",
+                    "total += and then the variable being added, and a semicolon.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int total = 9;",
+                    "        int dbFailures = 4;",
+                    "        total += dbFailures;",
+                    "        System.out.println(\"TOTAL: \" + total);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "total += dbFailures means total = total + dbFailures. Java "
+                    + "reads the current total, 9, adds 4, and stores 13 back in "
+                    + "total. dbFailures is read, not changed.\n"
+                    + "\n"
+                    + "The long form would have been just as correct. The short "
+                    + "form exists because the variable being updated is named "
+                    + "once, so there is no way to update one variable while "
+                    + "accidentally reading from a similarly named one - total "
+                    + "= totals + dbFailures is a bug the shorthand cannot "
+                    + "contain.")
+                .explain(
+                    "The variable being changed goes on the left, the amount on "
+                    + "the right.")
+                .xp(25))
+            .mistakes(
+                new String[]{"=+ instead of +=",
+                    "total =+ 5; compiles and sets total to 5, throwing away the "
+                    + "running total. The + comes first."},
+                new String[]{"A space between the symbols",
+                    "total + = 5; does not compile. The two characters are one "
+                    + "operator and must touch."},
+                new String[]{"Forgetting /= is integer division",
+                    "int n = 7; n /= 2; leaves 3. The shorthand does not change "
+                    + "the rules of the operator inside it."})
+            .cyber(
+                "Almost every metric on a security dashboard is a running total: "
+                + "bytes out per host, alerts per rule, failed logins per source. "
+                + "They are updated thousands of times, each update a += of some "
+                + "small amount.\n"
+                + "\n"
+                + "That volume is why the =+ typo is worth remembering. A total "
+                + "that is reset on every update always looks small and calm. "
+                + "An exfiltration of gigabytes, recorded as 'the size of the "
+                + "last packet', never crosses a threshold. The program runs, "
+                + "the dashboard is green, and the attack is invisible because "
+                + "of a pair of characters written the wrong way round.")
+            .check(new Task(Task.CHOICE,
+                    "Which line is the same as  hosts = hosts * 2;")
+                .choices("hosts =* 2;", "hosts *= 2;", "hosts * = 2;", "hosts ** 2;")
+                .accept("2", "b")
+                .hints(
+                    "The operator comes first, then the =.",
+                    "No space between the two symbols.")
+                .explain(
+                    "hosts *= 2; - operator then =, touching. hosts =* 2 does not "
+                    + "compile, hosts * = 2 does not compile, and ** is not a Java "
+                    + "operator at all.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int budget = 20;",
+                    "budget /= 3;",
+                    "System.out.println(budget);")
+                .accept("6", "six")
+                .hints(
+                    "budget /= 3 means budget = budget / 3.",
+                    "Both sides are ints. What happens to the fraction?")
+                .explain(
+                    "6. 20 / 3 is 6.66..., but both sides are ints so the "
+                    + "fraction is thrown away. The shorthand follows exactly the "
+                    + "same rules as the long form.")
+                .xp(20))
+            .recap(
+                "    x += 5;    x = x + 5\n"
+                + "    x -= 5;    x = x - 5\n"
+                + "    x *= 5;    x = x * 5\n"
+                + "    x /= 5;    x = x / 5    still integer division\n"
+                + "\n"
+                + "On a String, += joins.\n"
+                + "\n"
+                + "Operator first, then =, touching. x =+ 5 compiles and sets x "
+                + "to 5.")
+            .next("Next: the even shorter way to count by one."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(12), "Counting by One", 2)
+            .brief(
+                "Most counting in a security tool goes up by exactly one. One "
+                + "more failed login. One more alert. One more blocked "
+                + "connection.\n\n"
+                + "It happens so often that Java gives it its own operator.")
+            .willLearn("++", "--", "Counting by one")
+            .whyUseful(
+                "Counting one event at a time is the most common operation in "
+                + "detection code. ++ is how it is written everywhere, and you "
+                + "will be reading it from now until the end of the course.")
+            .concept("++ and --",
+                "Three ways to add one, all doing the same thing:\n"
+                + "\n"
+                + "    failedLogins = failedLogins + 1;\n"
+                + "    failedLogins += 1;\n"
+                + "    failedLogins++;\n"
+                + "\n"
+                + "++ means 'add one'. -- means 'take one away':\n"
+                + "\n"
+                + "    activeSessions--;\n"
+                + "\n"
+                + "These are called INCREMENT and DECREMENT.\n"
+                + "\n"
+                + "They work on number variables. They do not work on a String "
+                + "or a boolean, and they do not work on a final variable, since "
+                + "they are a kind of assignment.\n"
+                + "\n"
+                + "They do not work on a plain number either. 5++ means nothing, "
+                + "because there is no box to put the answer in.\n"
+                + "\n"
+                + "For now, always write ++ and -- as a statement on their own "
+                + "line, exactly as above. They can also appear inside a larger "
+                + "expression, where they behave in a way that surprises almost "
+                + "everyone. That comes much later, once you have the tools to "
+                + "see what is happening. On its own line there is no surprise: "
+                + "the variable goes up by one.\n"
+                + "\n"
+                + "A tempting alternative that does NOT work:\n"
+                + "\n"
+                + "    failedLogins + 1;\n"
+                + "\n"
+                + "That works out a value and then does nothing with it. Java "
+                + "refuses it: 'not a statement'. Adding one to a number is not "
+                + "the same as storing the result.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int alerts = 0;",
+                "        alerts++;",
+                "        alerts++;",
+                "        alerts++;",
+                "        alerts--;",
+                "        System.out.println(\"OPEN ALERTS: \" + alerts);",
+                "    }",
+                "}")
+            .exampleOutput("OPEN ALERTS: 2")
+            .lineByLine(
+                new String[]{"int alerts = 0;",
+                    "Counters start at zero."},
+                new String[]{"alerts++; three times",
+                    "Three alerts arrive. 0, 1, 2, 3."},
+                new String[]{"alerts--;",
+                    "One is closed. Back to 2."},
+                new String[]{"No = anywhere after the declaration",
+                    "++ and -- store the result themselves. That is the whole "
+                    + "point of them."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int blocked = 5;",
+                    "blocked++;",
+                    "blocked++;",
+                    "blocked--;",
+                    "System.out.println(blocked);")
+                .accept("6", "six")
+                .hints(
+                    "Two up, one down.",
+                    "5, 6, 7, then back one.")
+                .explain(
+                    "6. Up to 6, up to 7, down to 6. Each line works on the value "
+                    + "the one before left behind.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line stops this compiling?")
+                .code(
+                    "final int MAX_SESSIONS = 3;",
+                    "int sessions = 0;",
+                    "sessions++;",
+                    "MAX_SESSIONS++;")
+                .accept("4", "line 4")
+                .hints(
+                    "++ is a kind of assignment.",
+                    "Which variable promised never to be assigned again?")
+                .explain(
+                    "Line 4. ++ changes the variable it is attached to, and "
+                    + "MAX_SESSIONS is final - it cannot be changed by any means, "
+                    + "shorthand included. 'cannot assign a value to final "
+                    + "variable MAX_SESSIONS'.")
+                .xp(20))
+            .objective(
+                "Record one more failed login.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int failedLogins = 4;",
+                "        // one more failure has arrived",
+                "        System.out.println(failedLogins);",
+                "    }",
+                "}")
+            .yourTask(
+                "Add one to failedLogins using the shortest form Java has.")
+            .mainTask(new Task(Task.WRITE,
+                    "Increase failedLogins by one with the increment operator.")
+                .accept("failedLogins++;", "failedLogins++")
+                .hints(
+                    "It is shorter than += 1.",
+                    "Two plus signs.",
+                    "The variable's name, then ++, then a semicolon.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int failedLogins = 4;",
+                    "        failedLogins++;",
+                    "        System.out.println(failedLogins);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "failedLogins++ reads the value, adds one, and stores the "
+                    + "result back, all in one step. 4 becomes 5 and the println "
+                    + "shows 5.\n"
+                    + "\n"
+                    + "It is exactly failedLogins = failedLogins + 1 written in "
+                    + "the form every Java programmer recognises at a glance. "
+                    + "When you read a detection rule and see a ++, you now know "
+                    + "one event has just been counted.")
+                .explain(
+                    "Name, then ++. It adds one and stores the result.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Writing x + 1; on its own",
+                    "It works out a value and throws it away. Java rejects it as "
+                    + "'not a statement'. Use x++ or x = x + 1."},
+                new String[]{"++ on a final variable",
+                    "It is an assignment, so it is refused just like any other "
+                    + "assignment to a final."},
+                new String[]{"Using ++ inside a bigger expression",
+                    "Legal, but it has a twist you have not learned yet. Keep it "
+                    + "on its own line for now."})
+            .cyber(
+                "Brute-force detection is, at bottom, a ++ and a comparison. "
+                + "Each failure increments a counter for that account or source "
+                + "address; something checks whether the counter has reached "
+                + "the threshold.\n"
+                + "\n"
+                + "Where the ++ sits is a security decision. Count per account "
+                + "and an attacker trying one password against ten thousand "
+                + "accounts - password spraying - never pushes any single "
+                + "counter above 1. Count per source address and they spread "
+                + "across a botnet. The increment itself is trivial; choosing "
+                + "what it counts is the actual design work.")
+            .check(new Task(Task.CHOICE,
+                    "Which of these does NOT add one to count?")
+                .choices("count++;", "count += 1;", "count = count + 1;", "count + 1;")
+                .accept("4", "d")
+                .hints(
+                    "Three of these store a result. One does not.",
+                    "Where does the answer go in each one?")
+                .explain(
+                    "count + 1; works out a value and has nowhere to put it, so "
+                    + "Java refuses it as 'not a statement'. The other three all "
+                    + "store count plus one back into count.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int sessions = 3;",
+                    "sessions--;",
+                    "sessions--;",
+                    "sessions--;",
+                    "System.out.println(sessions);")
+                .accept("0", "zero")
+                .hints(
+                    "Three takeaways from three.",
+                    "Count down one line at a time.")
+                .explain(
+                    "0. Three decrements from 3. Nothing stops it going further "
+                    + "- a fourth -- would give -1, and Java would not object, "
+                    + "because it has no idea a session count cannot be negative. "
+                    + "Only you know that.")
+                .xp(15))
+            .recap(
+                "    count++;    add one\n"
+                + "    count--;    take one away\n"
+                + "\n"
+                + "Same as count = count + 1, just shorter.\n"
+                + "\n"
+                + "Numbers only, never on a final, never on a plain number.\n"
+                + "\n"
+                + "Keep it on its own line for now.")
+            .next("Next: what happens when an int and a double meet in the "
+                + "same calculation."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(13), "When Whole Meets Decimal", 3)
+            .brief(
+                "The tool reports alerts per hour. The alert count is a whole "
+                + "number. The time window is 2.5 hours. What type is the "
+                + "answer?\n\n"
+                + "Java has a rule for this, and it is the key to fixing the "
+                + "division problem from mission 10.")
+            .willLearn("Mixed arithmetic", "Type promotion")
+            .whyUseful(
+                "Rates, averages and ratios nearly always mix a count with a "
+                + "measurement. Knowing what type the result will be tells you "
+                + "whether a fraction survives or is silently lost.")
+            .concept("Mixed arithmetic",
+                "When an operator has an int on one side and a double on the "
+                + "other, Java first turns the int into a double, then does the "
+                + "sum in decimals:\n"
+                + "\n"
+                + "    5 * 1.5     5 becomes 5.0, answer 7.5\n"
+                + "    7 / 2.0     7 becomes 7.0, answer 3.5\n"
+                + "    3 + 0.0     3 becomes 3.0, answer 3.0\n"
+                + "\n"
+                + "This is called PROMOTION. It always goes towards the type that "
+                + "can hold more, so nothing is lost. The int is never harmed by "
+                + "becoming a double.\n"
+                + "\n"
+                + "The rule applies one operator at a time, in precedence order. "
+                + "Each step looks only at its own two sides:\n"
+                + "\n"
+                + "    10 / 4 * 2.0\n"
+                + "\n"
+                + "    step 1   10 / 4     both ints, so 2\n"
+                + "    step 2   2 * 2.0    one double, so 4.0\n"
+                + "\n"
+                + "The double arrived too late. By the time it appeared, the "
+                + "division had already happened in ints and the .5 was gone. "
+                + "Whether a fraction survives depends on WHEN the double joins "
+                + "the calculation, not whether it is somewhere in the line.\n"
+                + "\n"
+                + "And the result of mixed arithmetic is a double, even when it "
+                + "happens to be whole:\n"
+                + "\n"
+                + "    int result = 2 * 1.5;    does NOT compile\n"
+                + "\n"
+                + "2 * 1.5 is 3.0, a double, and Java will not put a double in an "
+                + "int box. It checks the TYPE of the expression, not whether "
+                + "this particular value would fit.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int alerts = 7;",
+                "        double hours = 2.0;",
+                "        double rate = alerts / hours;",
+                "        System.out.println(\"ALERTS/HOUR: \" + rate);",
+                "    }",
+                "}")
+            .exampleOutput("ALERTS/HOUR: 3.5")
+            .lineByLine(
+                new String[]{"int alerts = 7;",
+                    "A count - whole, so an int."},
+                new String[]{"double hours = 2.0;",
+                    "A measurement - could be 2.5 tomorrow, so a double."},
+                new String[]{"alerts / hours",
+                    "One side is a double, so 7 is promoted to 7.0 and the "
+                    + "division is done in decimals. 3.5."},
+                new String[]{"double rate",
+                    "The result is a double, so it needs a double box. An int "
+                    + "here would not compile."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int hosts = 3;",
+                    "double load = 1.5;",
+                    "System.out.println(hosts * load);")
+                .accept("4.5")
+                .hints(
+                    "One side is a double.",
+                    "3 becomes 3.0, then multiply.")
+                .explain(
+                    "4.5. hosts is promoted to 3.0, and 3.0 * 1.5 is 4.5. The "
+                    + "result is a double.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "Take this one step at a time. What does it print?")
+                .code("System.out.println(10 / 4 * 2.0);")
+                .accept("4.0")
+                .hints(
+                    "/ and * have the same precedence, so they run left to "
+                    + "right.",
+                    "Step 1 is 10 / 4. What types are on each side of it?")
+                .explain(
+                    "4.0, not 5.0.\n"
+                    + "\n"
+                    + "    step 1   10 / 4    both ints   2\n"
+                    + "    step 2   2 * 2.0   mixed       4.0\n"
+                    + "\n"
+                    + "The .5 was lost in step 1, before any double was involved. "
+                    + "Promotion only helps the operator it takes part in. "
+                    + "Writing 10 / 4.0 * 2 instead would give 5.0, because the "
+                    + "double joins at the division.")
+                .xp(30))
+            .objective(
+                "Work out the alert rate across a window measured in hours.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int alerts = 9;",
+                "        double hours = 2.0;",
+                "        // work out the rate here",
+                "        System.out.println(rate);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare rate holding alerts divided by hours.\n\n"
+                + "Pick the type that can hold what that division produces.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare rate as alerts divided by hours.")
+                .accept("double rate = alerts / hours;", "double rate = alerts / hours")
+                .hints(
+                    "One side of the division is a double. What type is the "
+                    + "result?",
+                    "Mixed arithmetic always gives a double.",
+                    "double rate = and then the division.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int alerts = 9;",
+                    "        double hours = 2.0;",
+                    "        double rate = alerts / hours;",
+                    "        System.out.println(rate);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "hours is a double, so alerts is promoted and the division is "
+                    + "done in decimals: 9.0 / 2.0 is 4.5. The result is a double, "
+                    + "so it goes in a double box.\n"
+                    + "\n"
+                    + "Compare mission 10, where total / count were both ints and "
+                    + "the average came out as 2.0. The difference is not the box "
+                    + "on the left. It is that a double is already INSIDE the "
+                    + "division here, so there is nothing for Java to throw "
+                    + "away.\n"
+                    + "\n"
+                    + "int rate = alerts / hours; would not compile, and that is "
+                    + "Java protecting the .5.")
+                .explain(
+                    "A double in the division means a double result.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Thinking a double anywhere in the line is enough",
+                    "10 / 4 * 2.0 is 4.0. Promotion only applies to the "
+                    + "operator the double is part of."},
+                new String[]{"Storing a mixed result in an int",
+                    "int n = 2 * 1.5; does not compile, even though the value is "
+                    + "whole. Java checks the type, not the value."},
+                new String[]{"Expecting a whole-looking result to print whole",
+                    "3 + 0.0 prints 3.0. The result is a double, so it prints "
+                    + "like one."})
+            .cyber(
+                "Rates are how anomalies are found. Normal is 3 failed logins an "
+                + "hour; tonight it is 300. Normal outbound traffic is 2.1 GB a "
+                + "day; this host sent 40.\n"
+                + "\n"
+                + "A rate computed in whole numbers is coarse enough to hide in. "
+                + "If a baseline of 0.4 alerts per minute is stored as 0, then "
+                + "any rate above zero looks infinitely unusual and the rule "
+                + "fires constantly - and a rule that fires constantly gets "
+                + "switched off. Getting the type right is what keeps a "
+                + "detection sensitive enough to be useful and quiet enough to "
+                + "be trusted.")
+            .check(new Task(Task.CHOICE,
+                    "What type is the result of  4 + 1.0 ?")
+                .choices("int", "double", "It depends on the box", "String")
+                .accept("2", "b")
+                .hints(
+                    "One side is a double.",
+                    "Promotion goes towards the type that holds more.")
+                .explain(
+                    "double. The 4 is promoted to 4.0 and the answer is 5.0. The "
+                    + "type of an expression comes from what is in it, never from "
+                    + "the box it is later stored in.")
+                .xp(10))
+            .check(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "double a = 3 * 2;",
+                    "int b = 3 * 2;",
+                    "int c = 3 * 2.0;")
+                .accept("3", "line 3")
+                .hints(
+                    "Work out the TYPE of each right-hand side.",
+                    "A double result cannot go into an int box.")
+                .explain(
+                    "Line 3. 3 * 2.0 is a double, even though its value is 6.0, "
+                    + "and a double does not fit in an int.\n\n"
+                    + "Line 1 is fine: 3 * 2 is the int 6, and an int fits safely "
+                    + "into a double box as 6.0.")
+                .xp(20))
+            .recap(
+                "int with double: the int is promoted and the result is a "
+                + "double.\n"
+                + "\n"
+                + "    7 / 2.0         3.5\n"
+                + "    10 / 4 * 2.0    4.0  - the division ran in ints first\n"
+                + "\n"
+                + "Promotion works one operator at a time. The double has to be "
+                + "part of the division to save the fraction.\n"
+                + "\n"
+                + "Java checks the type of an expression, not its value.")
+            .next("Next: converting a value to another type on purpose."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(14), "Converting on Purpose", 3)
+            .brief(
+                "Mission 10 left a bug unsolved. total and count are both ints, "
+                + "so total / count throws the fraction away, and neither of them "
+                + "should be changed to a double - they are counts.\n\n"
+                + "What you need is a way to say 'treat this one as a double, "
+                + "just for this sum'.")
+            .willLearn("Casting", "(int) and (double)", "Truncation")
+            .whyUseful(
+                "Real data rarely arrives in the type you want. Casting is how "
+                + "you convert deliberately - and knowing exactly what a cast "
+                + "does to a value is how you avoid it quietly damaging your "
+                + "numbers.")
+            .concept("Casting",
+                "A CAST converts a value to another type. The type goes in "
+                + "brackets in front of the value:\n"
+                + "\n"
+                + "    (double) total    the value of total, as a double\n"
+                + "    (int) 9.8         the value 9.8, as an int\n"
+                + "\n"
+                + "A cast does not change the variable. total is still an int "
+                + "holding the same number. The cast produces a converted COPY "
+                + "for this one use.\n"
+                + "\n"
+                + "Fixing mission 10's average:\n"
+                + "\n"
+                + "    double average = (double) total / count;\n"
+                + "\n"
+                + "A cast binds tighter than any arithmetic operator, so it "
+                + "happens first, to total alone. Now the division has a double "
+                + "on one side, promotion does the rest, and the fraction "
+                + "survives.\n"
+                + "\n"
+                + "Where the cast sits is everything:\n"
+                + "\n"
+                + "    (double) total / count      9.0 / 4    2.25\n"
+                + "    (double) (total / count)    (double) 2   2.0\n"
+                + "\n"
+                + "The second one divides in ints FIRST, because the brackets "
+                + "say so, and then converts the already-damaged 2.\n"
+                + "\n"
+                + "Casting a double to an int does not round. It cuts off "
+                + "everything after the point:\n"
+                + "\n"
+                + "    (int) 9.2     9\n"
+                + "    (int) 9.99    9\n"
+                + "    (int) -2.7    -2    towards zero, not down\n"
+                + "\n"
+                + "This is called TRUNCATION. Java lets you do it because you "
+                + "asked explicitly - the cast is you saying 'I know I am losing "
+                + "the fraction'. Without the cast, int n = 9.99; is refused.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 9;",
+                "        int count = 4;",
+                "        double average = (double) total / count;",
+                "        System.out.println(\"AVERAGE: \" + average);",
+                "        System.out.println(\"WHOLE:   \" + (int) average);",
+                "    }",
+                "}")
+            .exampleOutput("AVERAGE: 2.25", "WHOLE:   2")
+            .lineByLine(
+                new String[]{"(double) total",
+                    "The cast happens first. 9 becomes 9.0 for this sum only. "
+                    + "total itself is still the int 9."},
+                new String[]{"/ count",
+                    "Now a double divided by an int. count is promoted and the "
+                    + "answer is 2.25."},
+                new String[]{"(int) average",
+                    "Converts 2.25 to an int by cutting off the fraction. 2."},
+                new String[]{"average afterwards",
+                    "Still 2.25. The cast made a copy; the variable was never "
+                    + "touched."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "double score = 9.99;",
+                    "System.out.println((int) score);")
+                .accept("9", "nine")
+                .hints(
+                    "A cast to int does not round.",
+                    "Everything after the decimal point is cut off.")
+                .explain(
+                    "9. Casting to int truncates - 9.99 loses its .99 and becomes "
+                    + "9, not 10. If you want rounding, that is a different tool, "
+                    + "coming soon.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "Two lines, one bracket's difference. What are the TWO lines "
+                    + "of output?")
+                .code(
+                    "int total = 9;",
+                    "int count = 4;",
+                    "System.out.println((double) (total / count));",
+                    "System.out.println((double) total / count);")
+                .accept("2.0 2.25", "2.0, 2.25", "2.0 and 2.25")
+                .hints(
+                    "On line 3, the brackets force the division to happen before "
+                    + "the cast.",
+                    "On line 4, the cast applies to total alone, before the "
+                    + "division.")
+                .explain(
+                    "    2.0\n"
+                    + "    2.25\n"
+                    + "\n"
+                    + "Line 3 divides first, in ints, giving 2, then converts 2 to "
+                    + "2.0. The cast came too late to help.\n"
+                    + "\n"
+                    + "Line 4 converts total to 9.0 first, so the division is "
+                    + "decimal and gives 2.25. Same parts, different order, "
+                    + "different answer.")
+                .xp(30))
+            .objective(
+                "Fix the average-failures-per-host report.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int failures = 17;",
+                "        int hosts = 4;",
+                "        // work out the average here",
+                "        System.out.println(average);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare average as failures divided by hosts, keeping the "
+                + "fraction. Do not change either declaration - they are counts "
+                + "and should stay ints.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare average, casting so the fraction survives.")
+                .accept(
+                    "double average = (double) failures / hosts;",
+                    "double average = (double) failures / hosts",
+                    "double average = (double)failures / hosts;",
+                    "double average = (double)failures / hosts",
+                    "double average = failures / (double) hosts;",
+                    "double average = failures / (double) hosts",
+                    "double average = failures / (double)hosts;",
+                    "double average = failures / (double)hosts")
+                .hints(
+                    "The answer has a fraction, so the box is a double.",
+                    "One side of the division must be a double BEFORE the "
+                    + "division happens.",
+                    "double average = (double) failures / hosts;  - the cast goes "
+                    + "directly in front of one variable.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int failures = 17;",
+                    "        int hosts = 4;",
+                    "        double average = (double) failures / hosts;",
+                    "        System.out.println(average);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "(double) failures converts 17 to 17.0 before anything else "
+                    + "happens, because a cast binds tighter than /. The division "
+                    + "then has a double on one side, hosts is promoted, and the "
+                    + "answer is 4.25.\n"
+                    + "\n"
+                    + "failures and hosts are untouched. They are still ints, still "
+                    + "counts, still correct for everything else that uses them. "
+                    + "The cast converted a copy for this one sum.\n"
+                    + "\n"
+                    + "(double) (failures / hosts) would print 4.0: the brackets "
+                    + "make the int division happen first, and the cast only "
+                    + "dresses up the damage. Casting either variable works; "
+                    + "casting the result does not.")
+                .explain(
+                    "Cast one operand, not the result. Then the division is "
+                    + "decimal.")
+                .xp(35))
+            .mistakes(
+                new String[]{"Casting the result instead of an operand",
+                    "(double) (a / b) divides in ints first. Put the cast on a "
+                    + "or on b."},
+                new String[]{"Expecting (int) to round",
+                    "(int) 9.99 is 9. A cast cuts off; it never rounds up."},
+                new String[]{"Thinking a cast changes the variable",
+                    "(double) total gives a converted copy. total is still an "
+                    + "int afterwards."})
+            .cyber(
+                "Truncation is a quiet way for numbers to move across a line "
+                + "that matters.\n"
+                + "\n"
+                + "A service promises 99.5% availability. Measured uptime is "
+                + "99.7%, comfortably inside. A report casts it to an int for a "
+                + "tidy dashboard and shows 99 - a breach that never happened, "
+                + "and an incident call for nothing. Turn it round and a 4.9% "
+                + "false-negative rate shown as 4 passes a 'below 5' audit it "
+                + "should not have.\n"
+                + "\n"
+                + "Neither of those is a crash. The cast did exactly what it "
+                + "says. The mistake was not deciding, on purpose, what the "
+                + "fraction was worth.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println((int) -2.7);")
+                .accept("-2")
+                .hints(
+                    "Truncation cuts off the fraction.",
+                    "It moves towards zero, not downwards.")
+                .explain(
+                    "-2. The .7 is cut off, which moves the value towards zero. "
+                    + "Rounding down would have given -3, and that is not what a "
+                    + "cast does.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "With int a = 7 and int b = 2, which gives 3.5?")
+                .choices(
+                    "(double) (a / b)",
+                    "(double) a / b",
+                    "(int) a / b",
+                    "a / b")
+                .accept("2", "b")
+                .hints(
+                    "The double has to exist before the division runs.",
+                    "Which option casts an operand rather than the result?")
+                .explain(
+                    "(double) a / b. The cast converts a to 7.0 first, then the "
+                    + "division is decimal. Casting the result gives 3.0, and the "
+                    + "other two stay entirely in ints.")
+                .xp(20))
+            .recap(
+                "    (double) total    a double copy of total\n"
+                + "    (int) 9.99        9 - cut off, never rounded\n"
+                + "\n"
+                + "A cast binds tighter than arithmetic, so it applies to the "
+                + "value right after it.\n"
+                + "\n"
+                + "    (double) a / b      fraction survives\n"
+                + "    (double) (a / b)    fraction already lost\n"
+                + "\n"
+                + "The variable itself never changes type.")
+            .next("Next: what happens when a number is too big for its box."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(15), "Too Big for the Box", 3)
+            .brief(
+                "The firewall counts every byte it lets out. By Wednesday the "
+                + "counter shows a negative number of bytes.\n\n"
+                + "Nothing crashed. Every box has a size limit, and this one "
+                + "was full.")
+            .willLearn("Integer overflow", "long", "int range")
+            .whyUseful(
+                "Byte counts, timestamps and totals over long periods outgrow an "
+                + "int far sooner than you would expect. When they do, Java does "
+                + "not stop - it wraps round silently.")
+            .concept("Overflow and long",
+                "An int has a fixed size, so it has a largest value:\n"
+                + "\n"
+                + "    2147483647    about 2.1 billion\n"
+                + "\n"
+                + "You do not need to memorise it. Java has a named constant - "
+                + "final, in UPPER_SNAKE_CASE, like the ones you write:\n"
+                + "\n"
+                + "    Integer.MAX_VALUE    2147483647\n"
+                + "    Integer.MIN_VALUE    -2147483648\n"
+                + "\n"
+                + "Add one to the largest int and you do not get an error. You "
+                + "get the SMALLEST int:\n"
+                + "\n"
+                + "    int bytes = Integer.MAX_VALUE;\n"
+                + "    bytes++;\n"
+                + "    System.out.println(bytes);    -2147483648\n"
+                + "\n"
+                + "This is OVERFLOW. The value wraps round like a mileage "
+                + "counter rolling over, and nothing tells you.\n"
+                + "\n"
+                + "When a value could get that big, use a LONG. It is a whole "
+                + "number type like int, with a vastly bigger range - about 9.2 "
+                + "quintillion.\n"
+                + "\n"
+                + "    long bytesSent = 5000000000L;\n"
+                + "\n"
+                + "Note the L on the end. A plain whole number written in your "
+                + "code is treated as an int, and 5000000000 is too big to BE "
+                + "an int, so without the L it does not compile: 'integer "
+                + "number too large'. The L says 'this number is a long'. Use a "
+                + "capital - a small l looks like the digit 1.\n"
+                + "\n"
+                + "A long can still overflow. It just takes a great deal "
+                + "longer.\n"
+                + "\n"
+                + "So which to use? int for anything with a sensible upper "
+                + "limit - ports, users, attempts. long for anything that "
+                + "accumulates without one - bytes, milliseconds, totals over "
+                + "months.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int small = Integer.MAX_VALUE;",
+                "        small++;",
+                "        long large = Integer.MAX_VALUE;",
+                "        large++;",
+                "        System.out.println(\"int:  \" + small);",
+                "        System.out.println(\"long: \" + large);",
+                "    }",
+                "}")
+            .exampleOutput("int:  -2147483648", "long: 2147483648")
+            .lineByLine(
+                new String[]{"int small = Integer.MAX_VALUE;",
+                    "The biggest value an int can hold."},
+                new String[]{"small++;",
+                    "One too many. It wraps round to the most negative int. No "
+                    + "error, no warning."},
+                new String[]{"long large = Integer.MAX_VALUE;",
+                    "The same starting value in a long box. An int always fits "
+                    + "into a long, so no L is needed here."},
+                new String[]{"large++;",
+                    "Plenty of room left. It simply becomes 2147483648."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int counter = Integer.MAX_VALUE;",
+                    "counter++;",
+                    "System.out.println(counter);")
+                .accept("-2147483648")
+                .hints(
+                    "counter starts at the largest int there is.",
+                    "Going past the top wraps round to the bottom.")
+                .explain(
+                    "-2147483648, which is Integer.MIN_VALUE. The counter did not "
+                    + "stop and did not crash. It wrapped round to the most "
+                    + "negative int and carried on as if that were a normal "
+                    + "number.")
+                .xp(20))
+            .practice(new Task(Task.CHOICE,
+                    "Which of these should be a long rather than an int?")
+                .choices(
+                    "The number of open ports on one host",
+                    "Failed logins for one account today",
+                    "Total bytes the firewall has let out this year",
+                    "The lockout threshold")
+                .accept("3", "c")
+                .hints(
+                    "Which one has no sensible upper limit?",
+                    "A busy network moves more than 2.1 billion bytes in an "
+                    + "afternoon.")
+                .explain(
+                    "Total bytes this year. 2.1 billion bytes is about 2 GB, "
+                    + "which a single server can send before lunch. The other "
+                    + "three have natural limits far below an int's range - a "
+                    + "host has at most 65535 ports.")
+                .xp(20))
+            .objective(
+                "Give the outbound byte counter a box big enough for a year.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // declare bytesSent here",
+                "        System.out.println(\"BYTES OUT: \" + bytesSent);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare bytesSent holding 5000000000 - five billion, more than "
+                + "an int can hold. Choose the type, and remember what a number "
+                + "that size needs on the end.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare bytesSent holding 5000000000.")
+                .accept("long bytesSent = 5000000000L;", "long bytesSent = 5000000000L",
+                        "long bytesSent = 5000000000l;", "long bytesSent = 5000000000l")
+                .hints(
+                    "Five billion is more than Integer.MAX_VALUE, so not an int.",
+                    "The bigger whole-number type is long.",
+                    "long bytesSent = 5000000000L;  - the L makes the number "
+                    + "itself a long.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        long bytesSent = 5000000000L;",
+                    "        System.out.println(\"BYTES OUT: \" + bytesSent);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "A long has room for about 9.2 quintillion, so five billion "
+                    + "fits with enormous space to spare.\n"
+                    + "\n"
+                    + "The L matters separately from the type. Java reads "
+                    + "5000000000 in your code before it looks at the box on the "
+                    + "left, and a plain whole number is assumed to be an int. "
+                    + "Five billion cannot be an int, so without the L the line "
+                    + "fails with 'integer number too large' - even though the "
+                    + "box would have held it. The L tells Java what the number "
+                    + "IS, and then it fits.")
+                .explain(
+                    "long for the box, and L on a number too big to be an int.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Forgetting the L",
+                    "long n = 5000000000; does not compile: 'integer number too "
+                    + "large'. The number itself must be marked as a long."},
+                new String[]{"Expecting Java to warn about overflow",
+                    "It does not. int arithmetic wraps round silently. You have "
+                    + "to choose a type big enough in advance."},
+                new String[]{"A small l",
+                    "5000000000l is legal and looks like 50000000001. Always use "
+                    + "a capital L."})
+            .cyber(
+                "Integer overflow is a recognised class of vulnerability, not "
+                + "just a bug.\n"
+                + "\n"
+                + "In languages that manage memory by hand, an overflowed size "
+                + "calculation can allocate a tiny buffer and then write a huge "
+                + "amount into it - one of the oldest routes to running an "
+                + "attacker's code. Java protects memory, so here the damage is "
+                + "to logic instead: a byte counter that wraps negative sits "
+                + "far below any exfiltration threshold, and a rate limiter "
+                + "whose counter wraps round lets the flood through as if it "
+                + "had just started.\n"
+                + "\n"
+                + "Systems that stored time as a 32-bit count of seconds since "
+                + "1970 run out in January 2038. Somebody chose that box size "
+                + "decades ago, reasonably, for a program nobody expected to "
+                + "still be running.")
+            .check(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "long a = 42;",
+                    "long b = 3000000000;",
+                    "long c = 3000000000L;")
+                .accept("2", "line 2")
+                .hints(
+                    "Is 3000000000 small enough to be an int?",
+                    "Which line is missing its L?")
+                .explain(
+                    "Line 2. Three billion is bigger than Integer.MAX_VALUE, so it "
+                    + "cannot be a plain int number, and it has no L. 'integer "
+                    + "number too large'.\n\n"
+                    + "Line 1 is fine: 42 is a perfectly good int, and an int fits "
+                    + "into a long box.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "What happens when an int goes past Integer.MAX_VALUE?")
+                .choices(
+                    "The program crashes",
+                    "It stays at the maximum",
+                    "It wraps round to the most negative int",
+                    "It becomes a long automatically")
+                .accept("3", "c")
+                .hints(
+                    "Remember the counter in the example.",
+                    "Java does not stop you, and does not change the type.")
+                .explain(
+                    "It wraps round to Integer.MIN_VALUE, with no error and no "
+                    + "warning. That silence is what makes overflow dangerous.")
+                .xp(15))
+            .recap(
+                "    Integer.MAX_VALUE    2147483647\n"
+                + "\n"
+                + "One past the top wraps to the most negative int. Silently.\n"
+                + "\n"
+                + "    long bytesSent = 5000000000L;\n"
+                + "\n"
+                + "long for values that accumulate without limit. Capital L on "
+                + "any number too big to be an int.")
+            .next("Next: asking a String a question about itself."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(16), "Asking a String a Question", 2)
+            .brief(
+                "The login service passes every username it receives to the "
+                + "audit tool. Most are six or seven characters long. This "
+                + "morning one of them was four hundred.\n\n"
+                + "Nobody has a four-hundred-character username. Something is "
+                + "probing the login form. To notice, the tool has to be able to "
+                + "ask how long a piece of text is.")
+            .willLearn("length()", "Calling a method on a String", "The dot")
+            .whyUseful(
+                "A String is not just a box of text. It can answer questions "
+                + "about itself and hand back changed versions of itself. From "
+                + "here to the end of this campaign, you are learning to use "
+                + "those abilities.")
+            .concept("length()",
+                "Every String can tell you how many characters it holds:\n"
+                + "\n"
+                + "    String username = \"jsmith\";\n"
+                + "    int size = username.length();\n"
+                + "\n"
+                + "size now holds 6.\n"
+                + "\n"
+                + "Read  username.length()  in three parts:\n"
+                + "\n"
+                + "    username    the String you are asking\n"
+                + "    .           'use something belonging to it'\n"
+                + "    length()    what you are asking it to do\n"
+                + "\n"
+                + "length is a METHOD - a named piece of behaviour that belongs "
+                + "to the String. The brackets on the end are how you CALL it, "
+                + "which means 'do it now'. They are required even though "
+                + "nothing goes inside them.\n"
+                + "\n"
+                + "You have been calling a method since your first program: "
+                + "println belongs to System.out, and the dots in "
+                + "System.out.println mean exactly the same thing. Writing "
+                + "methods of your own is Campaign 04. For now you are using "
+                + "the ones String already has.\n"
+                + "\n"
+                + "length() hands back an int, so you can store it, print it or "
+                + "do arithmetic with it like any other int.\n"
+                + "\n"
+                + "EVERY character counts - letters, digits, dots, and spaces:\n"
+                + "\n"
+                + "    \"admin\"       5\n"
+                + "    \"10.0.0.1\"    8\n"
+                + "    \"a b\"         3\n"
+                + "    \"\"            0    the empty String\n"
+                + "\n"
+                + "The empty String holds no characters at all. It is still a "
+                + "String, and its length is 0.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String username = \"contractor\";",
+                "        int size = username.length();",
+                "        System.out.println(username + \" is \" + size + \" long\");",
+                "    }",
+                "}")
+            .exampleOutput("contractor is 10 long")
+            .lineByLine(
+                new String[]{"username.length()",
+                    "Asks the String in username how many characters it has. It "
+                    + "answers 10."},
+                new String[]{"int size = ...",
+                    "The answer is an int, so it goes in an int box like any "
+                    + "other whole number."},
+                new String[]{"The brackets",
+                    "They make it a call. username.length without them does not "
+                    + "compile - Java looks for a variable called length and "
+                    + "finds none."},
+                new String[]{"username afterwards",
+                    "Unchanged. Asking a question does not alter the thing you "
+                    + "asked."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String role = \"admin\";",
+                    "System.out.println(role.length());")
+                .accept("5", "five")
+                .hints(
+                    "Count the characters inside the quotes.",
+                    "a, d, m, i, n.")
+                .explain(
+                    "5. The quotes are not part of the String, so they are not "
+                    + "counted.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "Every character counts. What does this print?")
+                .code(
+                    "String address = \"10.0.4.17\";",
+                    "System.out.println(address.length());")
+                .accept("9", "nine")
+                .hints(
+                    "Dots are characters too.",
+                    "Six digits and three dots.")
+                .explain(
+                    "9. 1, 0, ., 0, ., 4, ., 1, 7. A String does not know that "
+                    + "this text is an address, or that dots are separators. It "
+                    + "counts characters, all of them.")
+                .xp(20))
+            .objective(
+                "Measure the username the login service just passed in.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String username = \"svc-backup-legacy\";",
+                "        // measure it here",
+                "        System.out.println(\"LENGTH: \" + nameLength);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare an int called nameLength holding the length of "
+                + "username. Ask the String - do not count it yourself.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare nameLength holding the length of username.")
+                .accept("int nameLength = username.length();",
+                        "int nameLength = username.length()")
+                .hints(
+                    "length() gives back a whole number, so the box is an int.",
+                    "Ask username with a dot, then the method name.",
+                    "int nameLength = username.length();  - brackets included.")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String username = \"svc-backup-legacy\";",
+                    "        int nameLength = username.length();",
+                    "        System.out.println(\"LENGTH: \" + nameLength);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "username.length() asks the String how long it is, and it "
+                    + "answers 17. That int goes into nameLength.\n"
+                    + "\n"
+                    + "Writing int nameLength = 17; would print the same and be "
+                    + "useless: it is true of this username only. The audit tool "
+                    + "will see a different username every few milliseconds, and "
+                    + "only asking the String itself gives an answer that is "
+                    + "right for whichever one arrives.")
+                .explain(
+                    "Ask the String with .length(), brackets and all.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Leaving off the brackets",
+                    "username.length does not compile: 'cannot find symbol'. "
+                    + "The brackets are what make it a call."},
+                new String[]{"A capital L",
+                    "username.Length() does not exist. Method names follow "
+                    + "camelCase like variables do."},
+                new String[]{"Not counting spaces or punctuation",
+                    "\"a b\" has length 3. Every character counts, including "
+                    + "the ones you cannot see."})
+            .cyber(
+                "Length is one of the cheapest and most useful signals there "
+                + "is. Real usernames, hostnames and search terms have typical "
+                + "lengths. Attack payloads usually do not.\n"
+                + "\n"
+                + "SQL injection strings, script tags, directory traversal "
+                + "sequences and buffer overflow attempts all tend to be long, "
+                + "because they carry code as well as data. Web application "
+                + "firewalls reject fields over a length limit before looking "
+                + "at anything else, and a sudden jump in average field length "
+                + "in a log is often the first visible sign of automated "
+                + "probing.\n"
+                + "\n"
+                + "It is also why password rules measure length. Twelve "
+                + "characters of anything is harder to guess than eight "
+                + "characters of cleverness.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String note = \"\";",
+                    "System.out.println(note.length());")
+                .accept("0", "zero")
+                .hints(
+                    "There is nothing between the quotes.",
+                    "It is still a String. How many characters does it have?")
+                .explain(
+                    "0. The empty String is a real String with no characters in "
+                    + "it. It is not the same as having no String at all - a "
+                    + "difference that will matter a great deal later.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String user = \"jsmith \";",
+                    "System.out.println(user.length());")
+                .accept("7", "seven")
+                .hints(
+                    "Look very carefully at the end of the text.",
+                    "There is a space before the closing quote.")
+                .explain(
+                    "7. There is a space after jsmith, and a space is a "
+                    + "character. You cannot see it when it is printed, but the "
+                    + "String knows it is there - and so will any comparison "
+                    + "against \"jsmith\". Next-but-one mission deals with "
+                    + "exactly this.")
+                .xp(20))
+            .recap(
+                "    username.length()    how many characters, as an int\n"
+                + "\n"
+                + "The dot means 'use something belonging to this'. The brackets "
+                + "mean 'do it now', and are required.\n"
+                + "\n"
+                + "Every character counts, spaces included. \"\" has length 0.")
+            .next("Next: asking a String for a changed version of itself - and "
+                + "the trap that comes with it."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(17), "Strings Do Not Change", 3)
+            .brief(
+                "Two accounts appear in the audit: Admin and admin. To a person "
+                + "they are the same name. To Java they are different Strings.\n\n"
+                + "The fix is to convert usernames to one case before using "
+                + "them. There is a method for that - and a trap in using it "
+                + "that catches nearly everyone once.")
+            .willLearn("toUpperCase()", "toLowerCase()", "Strings do not change")
+            .whyUseful(
+                "Comparing names, filtering logs and matching indicators all "
+                + "need text in one consistent form. And the rule you learn "
+                + "here - a String is never changed, only replaced - applies to "
+                + "every String method you will ever call.")
+            .concept("Converting case",
+                "Two methods hand back a version of the String in one case:\n"
+                + "\n"
+                + "    String name = \"JSmith\";\n"
+                + "    name.toLowerCase()    \"jsmith\"\n"
+                + "    name.toUpperCase()    \"JSMITH\"\n"
+                + "\n"
+                + "Digits, dots and spaces are left as they are. Only letters "
+                + "change.\n"
+                + "\n"
+                + "Now the rule that matters more than either method:\n"
+                + "\n"
+                + "    A String NEVER changes.\n"
+                + "\n"
+                + "toLowerCase() does not alter name. It builds a NEW String "
+                + "and hands it back. name still holds \"JSmith\". So this line "
+                + "does nothing useful at all:\n"
+                + "\n"
+                + "    name.toLowerCase();\n"
+                + "\n"
+                + "It makes a lower-case copy and then throws it away, because "
+                + "nothing kept it. Java does not warn you - the line is "
+                + "legal.\n"
+                + "\n"
+                + "To keep the result, store it:\n"
+                + "\n"
+                + "    String clean = name.toLowerCase();    new box\n"
+                + "    name = name.toLowerCase();            same box\n"
+                + "\n"
+                + "The second is ordinary reassignment, exactly like "
+                + "x = x + 1. The right side builds the new String, then it is "
+                + "stored in name, replacing the old one.\n"
+                + "\n"
+                + "Types whose values can never be altered are called "
+                + "IMMUTABLE. String is one. Every String method you meet - "
+                + "this mission and the next three - hands back something new "
+                + "and leaves the original exactly as it was.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"JSmith\";",
+                "        name.toLowerCase();",
+                "        System.out.println(name);",
+                "        name = name.toLowerCase();",
+                "        System.out.println(name);",
+                "    }",
+                "}")
+            .exampleOutput("JSmith", "jsmith")
+            .lineByLine(
+                new String[]{"name.toLowerCase();",
+                    "Builds \"jsmith\" and throws it away. name is untouched."},
+                new String[]{"The first println",
+                    "Still JSmith. The previous line changed nothing."},
+                new String[]{"name = name.toLowerCase();",
+                    "Builds \"jsmith\" and this time stores it back in name."},
+                new String[]{"The second println",
+                    "jsmith. The box now holds the new String."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String host = \"web-01\";",
+                    "System.out.println(host.toUpperCase());")
+                .accept("WEB-01")
+                .hints(
+                    "Every letter becomes a capital.",
+                    "The dash and the digits have no case, so they stay as they "
+                    + "are.")
+                .explain(
+                    "WEB-01. The letters were raised; the dash and the digits "
+                    + "were left alone. This line prints the new String directly "
+                    + "without storing it, which is fine - it is being used, "
+                    + "just not kept.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "The trap. What does this print?")
+                .code(
+                    "String role = \"admin\";",
+                    "role.toUpperCase();",
+                    "System.out.println(role);")
+                .accept("admin")
+                .hints(
+                    "Does line 2 store its result anywhere?",
+                    "A String never changes. What is still in role?")
+                .explain(
+                    "admin, in lower case. Line 2 built \"ADMIN\" and discarded "
+                    + "it, because nothing stored it. role was never changed, "
+                    + "because a String cannot be.\n\n"
+                    + "If you answered ADMIN, you have made the most common "
+                    + "String mistake in Java, and now you have made it here "
+                    + "instead of in a security check.")
+                .xp(30))
+            .objective(
+                "Normalise the username before it goes into the audit.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String username = \"JSmith\";",
+                "        // convert username to lower case here",
+                "        System.out.println(\"AUDIT: \" + username);",
+                "    }",
+                "}")
+            .yourTask(
+                "Change what is in username to its lower-case version, so the "
+                + "println shows jsmith. Keep the same variable - do not declare "
+                + "a new one.")
+            .mainTask(new Task(Task.WRITE,
+                    "Replace username with its lower-case version.")
+                .accept("username = username.toLowerCase();",
+                        "username = username.toLowerCase()")
+                .hints(
+                    "Calling the method on its own changes nothing. The result "
+                    + "has to be stored.",
+                    "Store it back in the same variable - reassignment.",
+                    "username = username.toLowerCase();")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String username = \"JSmith\";",
+                    "        username = username.toLowerCase();",
+                    "        System.out.println(\"AUDIT: \" + username);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The right side runs first: username.toLowerCase() builds a "
+                    + "new String, \"jsmith\". The = then stores it in username, "
+                    + "replacing \"JSmith\".\n"
+                    + "\n"
+                    + "Writing just username.toLowerCase(); compiles, runs, and "
+                    + "prints JSmith - the correct method, called correctly, "
+                    + "with its answer thrown on the floor. That is the whole "
+                    + "lesson of this mission: with a String, calling the method "
+                    + "is only half of it. Keeping the result is the other half.")
+                .explain(
+                    "Call the method, then store what it hands back.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Calling the method and not storing the result",
+                    "name.toLowerCase(); compiles and does nothing. Write "
+                    + "name = name.toLowerCase();"},
+                new String[]{"Expecting digits or symbols to change",
+                    "Only letters have a case. \"web-01\".toUpperCase() is "
+                    + "\"WEB-01\"."},
+                new String[]{"Forgetting the brackets",
+                    "name.toUpperCase without () does not compile. It is a "
+                    + "method call, like length()."})
+            .cyber(
+                "Case is a classic place for security checks to disagree with "
+                + "each other.\n"
+                + "\n"
+                + "A blocklist contains \"admin\". An attacker registers "
+                + "\"Admin\". If the blocklist check compares exact text and "
+                + "the login system ignores case, both checks pass and the "
+                + "attacker holds an account every human reading the logs "
+                + "will take for the real one. The same trick works on file "
+                + "extensions: a filter that blocks \".exe\" and not \".EXE\" "
+                + "blocks nothing on Windows.\n"
+                + "\n"
+                + "The defence is to normalise first - convert to one case, "
+                + "then compare. And the way that defence fails is exactly "
+                + "the trap in this mission: a normalising call whose result "
+                + "is never stored. The code looks protected. The check runs "
+                + "on the raw input.")
+            .check(new Task(Task.PREDICT,
+                    "What are the TWO lines of output?")
+                .code(
+                    "String user = \"m.reyes\";",
+                    "String loud = user.toUpperCase();",
+                    "System.out.println(loud);",
+                    "System.out.println(user);")
+                .accept("M.REYES m.reyes", "M.REYES, m.reyes", "M.REYES and m.reyes")
+                .hints(
+                    "loud holds the new String. What does user hold?",
+                    "A String never changes.")
+                .explain(
+                    "    M.REYES\n"
+                    + "    m.reyes\n"
+                    + "\n"
+                    + "The upper-case version was stored in a new variable, "
+                    + "loud. user still holds the original, because calling a "
+                    + "method on a String never alters it.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "Which line actually changes what is stored in host?")
+                .choices(
+                    "host.toUpperCase();",
+                    "host = host.toUpperCase();",
+                    "String.toUpperCase(host);",
+                    "host.toUpperCase() = host;")
+                .accept("2", "b")
+                .hints(
+                    "The result has to be stored.",
+                    "Only one of these has host on the left of an =.")
+                .explain(
+                    "host = host.toUpperCase(); - it builds the new String and "
+                    + "stores it in host. Option A throws the result away. C and "
+                    + "D do not compile.")
+                .xp(15))
+            .recap(
+                "    name.toUpperCase()    a NEW String in capitals\n"
+                + "    name.toLowerCase()    a NEW String in small letters\n"
+                + "\n"
+                + "A String never changes. Methods hand back a new one.\n"
+                + "\n"
+                + "    name.toLowerCase();           does nothing useful\n"
+                + "    name = name.toLowerCase();    keeps the result")
+            .next("Next: the characters you cannot see."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(18), "The Characters You Cannot See", 3)
+            .brief(
+                "Two accounts in the audit look identical: admin and admin. One "
+                + "of them has a space after it.\n\n"
+                + "Text typed by people, copied from emails or read from files "
+                + "picks up stray spaces at the ends. Java counts every one of "
+                + "them.")
+            .willLearn("trim()", "Leading and trailing spaces", "Chaining calls")
+            .whyUseful(
+                "Almost any text that arrives from outside the program - a "
+                + "form, a file, a network message - needs its edges cleaned "
+                + "before it is compared or stored. trim() is the first step of "
+                + "cleaning input.")
+            .concept("trim()",
+                "trim() hands back a copy with the spaces removed from BOTH "
+                + "ends:\n"
+                + "\n"
+                + "    \"  jsmith  \".trim()      \"jsmith\"\n"
+                + "\n"
+                + "Spaces at the start are LEADING spaces. Spaces at the end "
+                + "are TRAILING spaces. trim() removes both. It also removes "
+                + "tabs and line breaks at the ends.\n"
+                + "\n"
+                + "It does NOT touch anything in the middle:\n"
+                + "\n"
+                + "    \"  j smith  \".trim()     \"j smith\"\n"
+                + "\n"
+                + "And like every String method, it hands back a NEW String. "
+                + "The original is unchanged, so the result must be stored:\n"
+                + "\n"
+                + "    String clean = raw.trim();\n"
+                + "\n"
+                + "CHAINING. A method call on a String gives back a String, and "
+                + "you can call another method straight on that:\n"
+                + "\n"
+                + "    String clean = raw.trim().toLowerCase();\n"
+                + "\n"
+                + "Read it left to right:\n"
+                + "\n"
+                + "    raw                   \"  JSmith \"\n"
+                + "    raw.trim()            \"JSmith\"\n"
+                + "    ....toLowerCase()     \"jsmith\"\n"
+                + "\n"
+                + "Each call works on what the call before it handed back. raw "
+                + "itself is still \"  JSmith \" at the end.\n"
+                + "\n"
+                + "trim then lower-case is the standard first step for a "
+                + "username: remove the invisible edges, then settle the "
+                + "case.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String raw = \"  Admin \";",
+                "        String clean = raw.trim().toLowerCase();",
+                "        System.out.println(\"[\" + raw + \"] \" + raw.length());",
+                "        System.out.println(\"[\" + clean + \"] \" + clean.length());",
+                "    }",
+                "}")
+            .exampleOutput("[  Admin ] 8", "[admin] 5")
+            .lineByLine(
+                new String[]{"raw.trim()",
+                    "Hands back \"Admin\" - both ends cleaned."},
+                new String[]{".toLowerCase()",
+                    "Called on what trim() handed back. Gives \"admin\"."},
+                new String[]{"The brackets in the println",
+                    "Square brackets around the value make invisible spaces "
+                    + "visible. A useful habit when checking text."},
+                new String[]{"raw afterwards",
+                    "Still 8 characters, spaces and capital A included. Neither "
+                    + "call changed it."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String raw = \"  jsmith  \";",
+                    "String clean = raw.trim();",
+                    "System.out.println(clean.length());")
+                .accept("6", "six")
+                .hints(
+                    "trim() removes the spaces at both ends.",
+                    "What is left is just the name.")
+                .explain(
+                    "6. trim() removed the two leading and two trailing spaces, "
+                    + "leaving jsmith - six characters.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String raw = \" a okafor \";",
+                    "System.out.println(\"[\" + raw.trim() + \"]\");")
+                .accept("[a okafor]")
+                .hints(
+                    "Which spaces does trim() remove?",
+                    "Only the ones at the ends. The one in the middle stays.")
+                .explain(
+                    "[a okafor]. The spaces at the two ends are gone and the one "
+                    + "in the middle survived. trim() cleans edges, it does not "
+                    + "remove every space - which is what you want, because "
+                    + "sometimes the space in the middle is real.")
+                .xp(20))
+            .objective(
+                "Clean a username that arrived from the web form.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String input = \"  jsmith \";",
+                "        // clean the input here",
+                "        System.out.println(\"[\" + clean + \"]\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare a String called clean holding input with the spaces "
+                + "removed from both ends.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare clean as input with its edges trimmed.")
+                .accept("String clean = input.trim();", "String clean = input.trim()")
+                .hints(
+                    "It is a new String, so declare it with its type.",
+                    "The method that removes edge spaces is trim().",
+                    "String clean = input.trim();")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String input = \"  jsmith \";",
+                    "        String clean = input.trim();",
+                    "        System.out.println(\"[\" + clean + \"]\");",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "input.trim() builds a new String without the spaces at "
+                    + "either end, and it is stored in clean. The println shows "
+                    + "[jsmith] with nothing inside the brackets but the name.\n"
+                    + "\n"
+                    + "input is untouched, which is often what you want: keep "
+                    + "the raw value for the audit record, exactly as it "
+                    + "arrived, and use the clean one for decisions. If someone "
+                    + "later asks why a login matched, you can show both.")
+                .explain(
+                    "trim() returns the cleaned copy. Store it.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Expecting trim() to remove every space",
+                    "It only touches the ends. \" a b \".trim() is \"a b\"."},
+                new String[]{"Calling it without storing the result",
+                    "input.trim(); on its own changes nothing, exactly like "
+                    + "toLowerCase() in the last mission."},
+                new String[]{"Losing track of a chain",
+                    "In raw.trim().toLowerCase(), the second call works on the "
+                    + "result of the first, not on raw."})
+            .cyber(
+                "Invisible characters are an old and still effective trick.\n"
+                + "\n"
+                + "Some systems compare usernames with trailing spaces ignored "
+                + "and store them with the spaces kept - so \"admin \" can be "
+                + "registered as a new account, and later be treated as "
+                + "\"admin\" by the part of the system that checks passwords. "
+                + "Variations of this have produced real account takeovers.\n"
+                + "\n"
+                + "The defence is to decide on one clean form and convert to "
+                + "it the moment input arrives, before any check sees it: "
+                + "trim, then settle the case. Every later comparison then "
+                + "works on the same text the attacker cannot vary.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String raw = \"  WEB-01 \";",
+                    "System.out.println(raw.trim().toLowerCase());")
+                .accept("web-01")
+                .hints(
+                    "Work left to right: trim first.",
+                    "Then lower-case what trim handed back.")
+                .explain(
+                    "web-01. trim() gave \"WEB-01\", then toLowerCase() gave "
+                    + "\"web-01\". Each link in the chain works on the result of "
+                    + "the one before it.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "What does trim() remove?")
+                .choices(
+                    "Every space in the String",
+                    "Spaces at the start and end only",
+                    "The first and last character",
+                    "Capital letters")
+                .accept("2", "b")
+                .hints(
+                    "Think of \" a okafor \".",
+                    "Did the middle space survive?")
+                .explain(
+                    "Spaces - and tabs and line breaks - at the start and end "
+                    + "only. Anything in the middle is left as it is.")
+                .xp(10))
+            .recap(
+                "    raw.trim()    a new String, edge spaces removed\n"
+                + "\n"
+                + "Leading and trailing only. The middle is untouched.\n"
+                + "\n"
+                + "Calls can be chained. Each one works on what the last one "
+                + "handed back:\n"
+                + "\n"
+                + "    raw.trim().toLowerCase()")
+            .next("Next: pulling a single character out of a String by its "
+                + "position."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(19), "Counting From Zero", 3)
+            .brief(
+                "Every line in the application log starts with a single letter: "
+                + "I, W or E. The audit tool needs that first letter on its own "
+                + "to know how serious the line is.\n\n"
+                + "To get one character out of a String you give its position. "
+                + "And positions in Java start somewhere most people do not "
+                + "expect.")
+            .willLearn("charAt()", "Indexes start at 0", "The last index")
+            .whyUseful(
+                "Positions - called indexes - are how you reach inside text now "
+                + "and inside arrays and lists later. Counting from zero is the "
+                + "source of more off-by-one bugs than anything else in "
+                + "programming, so it pays to get it firmly now.")
+            .concept("charAt() and indexes",
+                "Every character in a String has a position, called its "
+                + "INDEX. The first character is at index 0, not 1:\n"
+                + "\n"
+                + "    String host = \"DB-01\";\n"
+                + "\n"
+                + "    index    0   1   2   3   4\n"
+                + "    char     D   B   -   0   1\n"
+                + "\n"
+                + "charAt hands back the character at an index:\n"
+                + "\n"
+                + "    host.charAt(0)    'D'\n"
+                + "    host.charAt(2)    '-'\n"
+                + "\n"
+                + "The index goes inside the brackets. What comes back is a "
+                + "char, the one-character type from mission 6 - not a "
+                + "String.\n"
+                + "\n"
+                + "Because counting starts at 0, the LAST index is one less "
+                + "than the length:\n"
+                + "\n"
+                + "    host.length()                5\n"
+                + "    last index                   4\n"
+                + "    host.charAt(host.length() - 1)    '1'\n"
+                + "\n"
+                + "Ask for an index that does not exist and the program "
+                + "compiles, starts, and then stops dead when it reaches that "
+                + "line:\n"
+                + "\n"
+                + "    host.charAt(5)\n"
+                + "    StringIndexOutOfBoundsException\n"
+                + "\n"
+                + "That is a crash at RUN time, not a compile error. The "
+                + "compiler cannot know how long the String will be. Handling "
+                + "crashes like this properly is Campaign 10. For now, the "
+                + "defence is knowing the rule: valid indexes go from 0 to "
+                + "length() - 1.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"E login failed for contractor\";",
+                "        char level = line.charAt(0);",
+                "        char last = line.charAt(line.length() - 1);",
+                "        System.out.println(\"LEVEL: \" + level);",
+                "        System.out.println(\"LAST:  \" + last);",
+                "    }",
+                "}")
+            .exampleOutput("LEVEL: E", "LAST:  r")
+            .lineByLine(
+                new String[]{"line.charAt(0)",
+                    "The first character - index 0. It comes back as a char, so "
+                    + "it goes in a char box."},
+                new String[]{"line.length() - 1",
+                    "The line is 29 characters long, so the last index is 28. "
+                    + "Worked out, not counted by hand."},
+                new String[]{"line.charAt(line.length() - 1)",
+                    "The last character, whatever the line's length. This shape "
+                    + "is worth remembering."},
+                new String[]{"What would crash",
+                    "line.charAt(line.length()) - one past the end. Always one "
+                    + "less than the length."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String level = \"ERROR\";",
+                    "System.out.println(level.charAt(1));")
+                .accept("R")
+                .hints(
+                    "The first character is at index 0.",
+                    "Index 0 is E. What is at index 1?")
+                .explain(
+                    "R. Index 0 is E, index 1 is the first R. If you answered E, "
+                    + "you counted from 1 - which is the exact mistake this "
+                    + "mission exists to fix.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String host = \"WEB-01\";",
+                    "System.out.println(host.charAt(host.length() - 1));")
+                .accept("1")
+                .hints(
+                    "Work out host.length() first.",
+                    "6 characters, so the last index is 5.")
+                .explain(
+                    "1. host is 6 characters long, 6 - 1 is 5, and index 5 is "
+                    + "the last character: 1. This is how to reach the end of "
+                    + "any String without knowing its length in advance.")
+                .xp(25))
+            .objective(
+                "Pull the severity letter off the front of a log line.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"W disk usage at 91 percent on FILE-01\";",
+                "        // take the first character here",
+                "        System.out.println(\"SEVERITY: \" + level);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare a char called level holding the first character of "
+                + "line.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare level holding the first character of line.")
+                .accept("char level = line.charAt(0);", "char level = line.charAt(0)")
+                .hints(
+                    "charAt hands back a char, so that is the type.",
+                    "The first character is at index 0, not 1.",
+                    "char level = line.charAt(0);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String line = \"W disk usage at 91 percent on FILE-01\";",
+                    "        char level = line.charAt(0);",
+                    "        System.out.println(\"SEVERITY: \" + level);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Index 0 is the first character, W, and charAt hands it "
+                    + "back as a char - which is the type of the box.\n"
+                    + "\n"
+                    + "charAt(1) would compile, run and give a space: the "
+                    + "character after the W. Nothing would crash. The tool "
+                    + "would simply report every line's severity as blank, and "
+                    + "you would find out when someone asked why no warnings "
+                    + "had been raised all week. Counting from 1 does not "
+                    + "always fail loudly; sometimes it just quietly reads the "
+                    + "wrong thing.")
+                .explain(
+                    "The first character is at index 0.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Counting from 1",
+                    "charAt(1) is the SECOND character. The first is charAt(0)."},
+                new String[]{"Using length() as the last index",
+                    "s.charAt(s.length()) is one past the end and crashes. The "
+                    + "last index is length() - 1."},
+                new String[]{"Storing the result in a String",
+                    "String c = s.charAt(0); does not compile. charAt gives a "
+                    + "char."})
+            .cyber(
+                "Reading a fixed position in a line is how a great deal of log "
+                + "parsing works: severity in column 0, a timestamp in the "
+                + "first 19 characters, an address at a known offset.\n"
+                + "\n"
+                + "It is also fragile against input you do not control. A "
+                + "parser that assumes every line has at least 20 characters "
+                + "will crash on the first empty or truncated line - and an "
+                + "attacker who can get a short line into your logs can stop "
+                + "your monitoring with it. Off-by-one reads are a genuine and "
+                + "recurring source of vulnerabilities in parsers of every kind. "
+                + "Knowing exactly where 0 and length() - 1 are is the first "
+                + "defence.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String host = \"DC-01\";",
+                    "System.out.println(host.charAt(2));")
+                .accept("-")
+                .hints(
+                    "D is at 0.",
+                    "Count 0, 1, 2.")
+                .explain(
+                    "-. D is at 0, C is at 1, and the dash is at 2. Punctuation "
+                    + "has an index just like a letter does.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What is the last valid index of \"admin\"?")
+                .choices("5", "4", "6", "0")
+                .accept("2", "b")
+                .hints(
+                    "\"admin\" has length 5.",
+                    "The last index is always length - 1.")
+                .explain(
+                    "4. Five characters at indexes 0, 1, 2, 3, 4. Index 5 does "
+                    + "not exist, and asking for it crashes the program.")
+                .xp(15))
+            .recap(
+                "    s.charAt(0)                first character, as a char\n"
+                + "    s.charAt(s.length() - 1)   last character\n"
+                + "\n"
+                + "Indexes start at 0. The last one is length() - 1.\n"
+                + "\n"
+                + "Outside that range: a crash at run time, not a compile "
+                + "error.")
+            .next("Next: cutting a whole piece out of a String."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(20), "Cutting Out a Piece", 4)
+            .brief(
+                "The authentication log writes every line the same way:\n\n"
+                + "    2024-03-11 ERROR login failed for contractor\n\n"
+                + "The date is always the first ten characters. The level always "
+                + "follows. The audit tool needs to cut those pieces out and "
+                + "work with them separately.")
+            .willLearn("substring()", "Start and end indexes", "Fixed-width parsing")
+            .whyUseful(
+                "Pulling fields out of structured text is most of what log "
+                + "analysis is. substring is the most direct tool for it, and "
+                + "its one odd rule is the source of a great many off-by-one "
+                + "errors.")
+            .concept("substring()",
+                "substring cuts out part of a String and hands it back as a "
+                + "new String. Give it where to start and where to stop:\n"
+                + "\n"
+                + "    s.substring(start, end)\n"
+                + "\n"
+                + "The odd rule: START IS INCLUDED, END IS NOT. The cut stops "
+                + "just BEFORE the end index.\n"
+                + "\n"
+                + "    String host = \"NORTHSTAR\";\n"
+                + "\n"
+                + "    index    0 1 2 3 4 5 6 7 8\n"
+                + "    char     N O R T H S T A R\n"
+                + "\n"
+                + "    host.substring(0, 5)    \"NORTH\"  indexes 0 to 4\n"
+                + "    host.substring(5, 9)    \"STAR\"   indexes 5 to 8\n"
+                + "\n"
+                + "There is a useful consequence. The number of characters you "
+                + "get is simply end minus start:\n"
+                + "\n"
+                + "    substring(0, 5)    5 characters\n"
+                + "    substring(5, 9)    4 characters\n"
+                + "\n"
+                + "And one cut's end can be the next cut's start, with nothing "
+                + "missed and nothing repeated. That is the reason for the "
+                + "rule.\n"
+                + "\n"
+                + "Give only a start and you get everything from there to the "
+                + "end:\n"
+                + "\n"
+                + "    host.substring(5)       \"STAR\"\n"
+                + "\n"
+                + "An end equal to length() is allowed, since the end is not "
+                + "included. Anything beyond that, or a start after the end, "
+                + "crashes at run time just as charAt does.\n"
+                + "\n"
+                + "Like every String method, the original is left exactly as "
+                + "it was.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"2024-03-11 ERROR login failed\";",
+                "        String date = line.substring(0, 10);",
+                "        String rest = line.substring(11);",
+                "        System.out.println(\"DATE: \" + date);",
+                "        System.out.println(\"REST: \" + rest);",
+                "    }",
+                "}")
+            .exampleOutput("DATE: 2024-03-11", "REST: ERROR login failed")
+            .lineByLine(
+                new String[]{"line.substring(0, 10)",
+                    "Indexes 0 to 9 - the ten characters of the date. Index 10 "
+                    + "is the space, and it is not included."},
+                new String[]{"line.substring(11)",
+                    "From index 11 to the end. 11, not 10, to skip the space."},
+                new String[]{"10 - 0 is 10",
+                    "The date has ten characters. end minus start tells you how "
+                    + "long a cut is without counting."},
+                new String[]{"line afterwards",
+                    "Untouched. Both cuts are new Strings."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String org = \"NORTHSTAR\";",
+                    "System.out.println(org.substring(0, 5));")
+                .accept("NORTH")
+                .hints(
+                    "Index 5 is NOT included.",
+                    "You get indexes 0, 1, 2, 3 and 4 - five characters.")
+                .explain(
+                    "NORTH. Indexes 0 to 4. The S at index 5 is where the cut "
+                    + "stops, and the stop is not included. 5 - 0 is 5 "
+                    + "characters.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "Write out the indexes before you answer. What does this "
+                    + "print?")
+                .code(
+                    "String address = \"10.0.4.17\";",
+                    "System.out.println(address.substring(5));")
+                .accept("4.17")
+                .hints(
+                    "Label each character with its index, starting at 0.",
+                    "1 is 0, 0 is 1, the dot is 2, 0 is 3, the dot is 4. What is "
+                    + "at 5?")
+                .explain(
+                    "4.17.\n"
+                    + "\n"
+                    + "    index    0 1 2 3 4 5 6 7 8\n"
+                    + "    char     1 0 . 0 . 4 . 1 7\n"
+                    + "\n"
+                    + "From index 5 to the end. When positions get confusing, "
+                    + "write the index row out - it is what experienced "
+                    + "programmers do too.")
+                .xp(30))
+            .objective(
+                "Cut the severity level out of an authentication log line.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"2024-03-11 ERROR login failed for contractor\";",
+                "        // cut out the level here",
+                "        System.out.println(\"[\" + level + \"]\");",
+                "    }",
+                "}")
+            .yourTask(
+                "The date is indexes 0 to 9. Index 10 is a space. The level, "
+                + "ERROR, starts at index 11 and is five characters long.\n\n"
+                + "Declare a String called level holding just ERROR. Work out "
+                + "the end index from the start and the length.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare level holding the five characters from index 11.")
+                .accept("String level = line.substring(11, 16);",
+                        "String level = line.substring(11, 16)")
+                .hints(
+                    "substring(start, end), and the end is not included.",
+                    "Characters you get = end - start. You want 5, starting at "
+                    + "11.",
+                    "11 + 5 is 16: String level = line.substring(11, 16);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String line = \"2024-03-11 ERROR login failed for contractor\";",
+                    "        String level = line.substring(11, 16);",
+                    "        System.out.println(\"[\" + level + \"]\");",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The start, 11, is included; the end, 16, is not. That gives "
+                    + "indexes 11 to 15 - five characters, E R R O R. The "
+                    + "brackets in the output show [ERROR] with nothing extra "
+                    + "on either side.\n"
+                    + "\n"
+                    + "The reliable way to get the end is start plus length. "
+                    + "Counting characters by eye gives 15 - the index of the "
+                    + "last R - and substring(11, 15) quietly returns ERRO. No "
+                    + "crash, a truncated value, and a filter looking for ERROR "
+                    + "that never matches anything.")
+                .explain(
+                    "End is start plus length, because the end is not included.")
+                .xp(35))
+            .mistakes(
+                new String[]{"Using the last index as the end",
+                    "substring(11, 15) gives four characters. The end is one "
+                    + "past the last character you want."},
+                new String[]{"Counting from 1",
+                    "Every substring position is an index, so the first "
+                    + "character is 0."},
+                new String[]{"Going past the end",
+                    "An end greater than length() crashes at run time. "
+                    + "length() itself is allowed."})
+            .cyber(
+                "Cutting fields out by position is fast and simple, and it "
+                + "works right up until a line arrives that is not the shape "
+                + "you expected.\n"
+                + "\n"
+                + "A username with a space in it shifts every field after it. "
+                + "A line that was truncated in transit is shorter than your "
+                + "end index and crashes the parser. An attacker who can "
+                + "control part of a log line - a username, a user agent, a "
+                + "requested URL - can often choose exactly what lands at the "
+                + "positions your parser reads, and make an ERROR look like "
+                + "INFO.\n"
+                + "\n"
+                + "That is why later campaigns parse more carefully: check the "
+                + "line is long enough, split on separators rather than "
+                + "trusting positions, and treat anything that does not fit as "
+                + "suspicious rather than as data.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String role = \"ADMIN\";",
+                    "System.out.println(role.substring(1, 3));")
+                .accept("DM")
+                .hints(
+                    "Indexes 1 and 2. Not 3.",
+                    "A is 0, D is 1, M is 2.")
+                .explain(
+                    "DM. Index 1 is D, index 2 is M, and the cut stops before "
+                    + "index 3. 3 - 1 is 2 characters.")
+                .xp(20))
+            .check(new Task(Task.RECALL,
+                    "How many characters does  s.substring(3, 7)  give you? "
+                    + "Answer with a number.")
+                .accept("4", "four")
+                .hints(
+                    "There is a shortcut that needs no counting.",
+                    "end minus start.")
+                .explain(
+                    "4. end minus start: 7 - 3. That is the payoff of the "
+                    + "end-is-not-included rule - lengths fall straight out of "
+                    + "the arithmetic.")
+                .xp(15))
+            .recap(
+                "    s.substring(start, end)   start included, end NOT\n"
+                + "    s.substring(start)        from start to the end\n"
+                + "\n"
+                + "Characters you get = end - start.\n"
+                + "To take n characters from start: substring(start, start + n)\n"
+                + "\n"
+                + "An end past length() crashes at run time.")
+            .next("Next: reading what the analyst types, instead of fixing "
+                + "every value in the code."));
     }
 }
