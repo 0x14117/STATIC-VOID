@@ -239,7 +239,7 @@ public class MissionRunner {
                 Terminal.line("  Skipped. The answer was:");
                 Terminal.wrapped(task.getFirstAccepted(), "      ");
                 Terminal.blank();
-                Terminal.wrapped(task.getExplanation(), "  ");
+                Terminal.teachingText(task.getExplanation(), "  ");
                 Terminal.blank();
                 Terminal.pause();
                 return SKIPPED;
@@ -254,7 +254,7 @@ public class MissionRunner {
                 Terminal.line("  CORRECT.   +" + award + " XP"
                         + (penalty > 0 ? "   (" + penalty + " spent on hints)" : ""));
                 Terminal.blank();
-                Terminal.wrapped(task.getExplanation(), "  ");
+                Terminal.teachingText(task.getExplanation(), "  ");
                 Terminal.blank();
                 player.addXp(award);
                 Terminal.pause();

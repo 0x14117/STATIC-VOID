@@ -10,6 +10,54 @@ public class CheckAll {
     static int checks = 0;
     static int failures = 0;
 
+    /**
+     * Teaching prose is printed by Terminal.teachingText, which wraps ordinary
+     * paragraphs but prints indented lines verbatim so that diagrams and code
+     * layout survive. A verbatim line wider than the terminal breaks the frame,
+     * and nobody notices until they play the mission on a narrow window.
+     */
+    static void checkProseWidth(String tag, String text) {
+        if (text == null) {
+            return;
+        }
+        int worst = 0;
+        String offender = "";
+        for (String raw : text.split("\n", -1)) {
+            if (!raw.startsWith(" ")) {
+                continue;   // wrapped by teachingText, so its width is safe
+            }
+            int rendered = 2 + raw.length();   // the "  " indent teachingText adds
+            if (rendered > worst) {
+                worst = rendered;
+                offender = raw.trim();
+            }
+        }
+        check(tag + " fits the terminal", worst <= Terminal.WIDTH,
+              worst + " cols: " + offender);
+    }
+
+    /**
+     * Code blocks are printed with a "   nn | " gutter and never wrapped, since
+     * breaking a line of Java changes what it means. Eighty columns is the
+     * narrowest terminal worth supporting, so that is the ceiling.
+     */
+    static void checkCodeWidth(String tag, String[] lines) {
+        if (lines == null) {
+            return;
+        }
+        int worst = 0;
+        String offender = "";
+        for (String raw : lines) {
+            int rendered = 8 + raw.length();   // "   nn | "
+            if (rendered > worst) {
+                worst = rendered;
+                offender = raw.trim();
+            }
+        }
+        check(tag + " fits 80 columns", worst <= 78,
+              worst + " cols: " + offender);
+    }
+
     static void check(String what, boolean ok, String detail) {
         checks++;
         if (!ok) {
@@ -66,6 +114,13 @@ public class CheckAll {
                 check(id + " has a difficulty in range",
                       m.getDifficulty() >= 1 && m.getDifficulty() <= 10, "");
 
+                // --- it must still fit on a screen ------------------------
+                checkProseWidth(id + " concept", m.getExplanation());
+                checkProseWidth(id + " recap", m.getRecap());
+                checkProseWidth(id + " cyber connection", m.getCyberConnection());
+                checkCodeWidth(id + " example", m.getExample());
+                checkCodeWidth(id + " starter", m.getStarter());
+
                 // --- it must ask, not just tell ---------------------------
                 check(id + " asks a prediction", m.getPredict() != null, "");
                 check(id + " gives a practice", m.getPractice() != null, "");
@@ -92,6 +147,13 @@ public class CheckAll {
                     taskCount++;
                     totalXp += t.getXp();
                     String tag = id + "/" + t.getType();
+
+                    checkProseWidth(tag + " explanation", t.getExplanation());
+                    checkCodeWidth(tag + " code", t.getCode());
+                    if (t.hasSolution()) {
+                        checkCodeWidth(tag + " solution", t.getSolution());
+                        checkProseWidth(tag + " reasoning", t.getWhyItWorks());
+                    }
 
                     check(tag + " has a prompt", t.getPrompt().length() > 10, "");
                     check(tag + " has an accepted answer",

@@ -40,6 +40,7 @@ public class CampaignIndex {
 
         // Missions are added campaign by campaign as each one is built.
         Campaign00.build(byNumber(0));
+        Campaign01.build(byNumber(1));
     }
 
     private static void declare(int number, String code, String topic, int planned) {
