@@ -14,8 +14,8 @@ each one. Built items are marked; everything else is the plan.
 | Variables & constants | 01 JAVA ZERO | built |
 | Operators, expressions & statements | 01 JAVA ZERO | built |
 | Basic I/O | 01 JAVA ZERO (Scanner, parseInt, printf) | built |
-| Selection: Boolean operators & expressions | 02 CONDITIONAL, M001-M010 | built |
-| If, if-else, else if & switch-case | 02 CONDITIONAL, M002-M030 | 10 of 30 built |
+| Selection: Boolean operators & expressions | 02 CONDITIONAL, M001-M020 | built |
+| If, if-else, else if & switch-case | 02 CONDITIONAL, M002-M030 | 20 of 30 built |
 | Methods, parameters and the stack | 03 METHODS | planned |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | planned |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
@@ -88,7 +88,7 @@ reached.
 
 Each line is one mission, one idea.
 
-### 02 CONDITIONAL (remaining 20)
+### 02 CONDITIONAL (11-20 built, 21-30 remaining)
 
 11. Comparing text: `==` against `.equals()`
 12. `equalsIgnoreCase`, and when case should matter

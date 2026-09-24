@@ -34,6 +34,24 @@ public class CheckAll {
         }
         check(tag + " fits the terminal", worst <= Terminal.WIDTH,
               worst + " cols: " + offender);
+        checkAscii(tag, text);
+    }
+
+    /**
+     * The Windows console prints anything outside plain ASCII as '?', so a
+     * curly quote, an em dash or a foreign letter in mission text arrives as
+     * garbage on exactly the machines most learners use.
+     */
+    static void checkAscii(String tag, String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) > 126) {
+                int from = Math.max(0, i - 20);
+                check(tag + " is plain ASCII", false,
+                      "character " + (int) text.charAt(i) + " near: "
+                      + text.substring(from, Math.min(text.length(), i + 10)));
+                return;
+            }
+        }
     }
 
     /**
@@ -56,6 +74,7 @@ public class CheckAll {
         }
         check(tag + " fits 80 columns", worst <= 78,
               worst + " cols: " + offender);
+        checkAscii(tag, String.join("\n", lines));
     }
 
     static void check(String what, boolean ok, String detail) {
@@ -183,6 +202,35 @@ public class CheckAll {
                     if (t.getType().equals(Task.CHOICE)) {
                         check(tag + " offers choices", t.getChoices().length >= 2, "");
                     }
+                }
+            }
+        }
+
+        // --- every source file is plain ASCII --------------------------------
+        // Checked on the files themselves, so no field of any mission or lab
+        // can slip through: brief, mistakes, hints, anything.
+        java.io.File[] sources = new java.io.File("src").listFiles();
+        if (sources != null) {
+            for (java.io.File file : sources) {
+                if (!file.getName().endsWith(".java")) {
+                    continue;
+                }
+                try {
+                    byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+                    int bad = -1;
+                    for (int i = 0; i < bytes.length && bad < 0; i++) {
+                        if ((bytes[i] & 0xff) > 126) {
+                            bad = i;
+                        }
+                    }
+                    int line = 1;
+                    for (int i = 0; i < bad; i++) {
+                        line += bytes[i] == '\n' ? 1 : 0;
+                    }
+                    check(file.getName() + " is plain ASCII", bad < 0,
+                          "non-ASCII byte on line " + line);
+                } catch (java.io.IOException e) {
+                    check(file.getName() + " can be read", false, e.getMessage());
                 }
             }
         }

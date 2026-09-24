@@ -2171,5 +2171,2025 @@ public class Campaign02 {
                 + "\n"
                 + "Check, then use.")
             .next("Next: comparing text - and why == is the wrong tool."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(11), "Same Text, Different Box", 4)
+            .brief(
+                "The admin console compares the typed username with the stored "
+                + "one using ==. In testing it worked every time. In production "
+                + "it refused every administrator who typed their name in "
+                + "capitals, even after the tool lower-cased it.\n\n"
+                + "For text, == asks the wrong question. This is one of the most "
+                + "famous bugs in Java, and a real security one.")
+            .willLearn("String comparison", ".equals()", "== on objects")
+            .whyUseful(
+                "Every login, every allowlist, every command match compares "
+                + "text. Getting it wrong either locks out the right people or "
+                + "lets in the wrong ones - and == can do both, depending on "
+                + "where the text came from.")
+            .concept("== against .equals()",
+                "An int variable holds a number. A String variable does not "
+                + "hold text directly - it holds a REFERENCE: directions to "
+                + "where the text is kept in memory. (Campaign 06 goes into "
+                + "this properly.)\n"
+                + "\n"
+                + "So for Strings, == compares the directions, not the text:\n"
+                + "\n"
+                + "    a == b         same place in memory?\n"
+                + "    a.equals(b)    same characters?\n"
+                + "\n"
+                + "Two Strings with identical characters can live in two "
+                + "different places. Then == says false while equals says "
+                + "true:\n"
+                + "\n"
+                + "    String stored = \"admin\";\n"
+                + "    String typed = \"ADMIN\".toLowerCase();\n"
+                + "    stored == typed          false\n"
+                + "    stored.equals(typed)     true\n"
+                + "\n"
+                + "toLowerCase built a brand-new String. It has the same "
+                + "characters as stored, in a different place.\n"
+                + "\n"
+                + "WHY THE BUG HIDES. Java reuses identical text written in "
+                + "quotes in your code, so \"admin\" == \"admin\" happens to be "
+                + "true. Tests that use literals pass. Text that arrives at "
+                + "run time - typed, read from a file, built by a method - "
+                + "lives somewhere new, and == fails.\n"
+                + "\n"
+                + "The rule has no exceptions: compare text with equals. "
+                + "== is for numbers, chars and booleans.\n"
+                + "\n"
+                + "To test 'not equal', put ! in front: "
+                + "!typed.equals(stored).")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String stored = \"admin\";",
+                "        String typed = \"ADMIN\".toLowerCase();",
+                "        System.out.println(\"==     : \" + (typed == stored));",
+                "        System.out.println(\"equals : \" + typed.equals(stored));",
+                "    }",
+                "}")
+            .exampleOutput("==     : false", "equals : true")
+            .lineByLine(
+                new String[]{"String typed = \"ADMIN\".toLowerCase();",
+                    "Builds a new String, admin, somewhere new in memory - just "
+                    + "like typed input would."},
+                new String[]{"typed == stored",
+                    "Compares where the two Strings live. Different places, so "
+                    + "false - even though the text matches."},
+                new String[]{"typed.equals(stored)",
+                    "Compares the characters, one by one. All five match: true."},
+                new String[]{"Which one a login check needs",
+                    "Always equals. A user cares whether the text matches, never "
+                    + "where Java happened to put it."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String a = \"jsmith\";",
+                    "String b = \"JSMITH\".toLowerCase();",
+                    "System.out.println(a == b);")
+                .accept("false")
+                .hints(
+                    "Is b a literal written in the code, or built at run time?",
+                    "== compares where the Strings live, not their text.")
+                .explain(
+                    "false. b was built by toLowerCase, so it is a new String in "
+                    + "a new place. The text is identical; the location is not. "
+                    + "This is exactly what happens to every username a person "
+                    + "types.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "The surprising one. What does this print?")
+                .code(
+                    "String a = \"admin\";",
+                    "String b = \"admin\";",
+                    "System.out.println(a == b);")
+                .accept("true")
+                .hints(
+                    "Both are literals - text written in quotes in the code.",
+                    "Java reuses identical literals.")
+                .explain(
+                    "true - and that is the problem. Java keeps one copy of each "
+                    + "literal and lets both variables point at it, so == "
+                    + "happens to work. A test written like this passes, the "
+                    + "code ships, and then real input - which never comes from "
+                    + "a literal - fails the same check. The bug hides precisely "
+                    + "in the kind of test people write first.")
+                .xp(25))
+            .objective(
+                "Fix the admin console's username check.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String stored = \"admin\";",
+                "        String typed = \" Admin \".trim().toLowerCase();",
+                "        // write the if line here",
+                "            System.out.println(\"USERNAME ACCEPTED\");",
+                "        } else {",
+                "            System.out.println(\"UNKNOWN USER\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line so that ACCEPTED prints when typed has the "
+                + "same text as stored. Put typed first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line comparing typed with stored properly.")
+                .accept("if (typed.equals(stored)) {", "if(typed.equals(stored)) {",
+                        "if (typed.equals(stored)){", "if(typed.equals(stored)){")
+                .hints(
+                    "Not ==. Text is compared with a method.",
+                    "The String you ask comes first, then .equals, then the other "
+                    + "String in brackets.",
+                    "if (typed.equals(stored)) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String stored = \"admin\";",
+                    "        String typed = \" Admin \".trim().toLowerCase();",
+                    "        if (typed.equals(stored)) {",
+                    "            System.out.println(\"USERNAME ACCEPTED\");",
+                    "        } else {",
+                    "            System.out.println(\"UNKNOWN USER\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "typed is built at run time by trim and toLowerCase, so it is "
+                    + "a different String from stored even though both say "
+                    + "admin. equals compares the characters, finds all five the "
+                    + "same, and returns true.\n"
+                    + "\n"
+                    + "With == the program would compile, and print UNKNOWN USER "
+                    + "for the real administrator - a denial of service against "
+                    + "your own admins. In code that compares against a "
+                    + "blocklist instead, the same bug fails the other way and "
+                    + "lets a banned name straight through.")
+                .explain(
+                    "Text is compared with equals, never ==.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Comparing Strings with ==",
+                    "It compares locations, not text. It can pass every test "
+                    + "that uses literals and fail on real input."},
+                new String[]{"Writing it as a == check with the ! inside",
+                    "For 'not equal', write !a.equals(b), not a != b."},
+                new String[]{"Trusting a passing test",
+                    "\"x\" == \"x\" is true because of literal reuse. It proves "
+                    + "nothing about typed input."})
+            .cyber(
+                "String comparison with == is a classic entry in secure coding "
+                + "guides for exactly this reason: it fails silently and "
+                + "inconsistently, depending on where the text came from.\n"
+                + "\n"
+                + "In an authentication check it tends to fail closed - real "
+                + "users locked out, which gets noticed and fixed. In a "
+                + "blocklist or a 'deny if this is the banned account' check it "
+                + "fails OPEN: the comparison quietly says 'not the banned "
+                + "name' for the banned name, and nothing is blocked. Failing "
+                + "open is the version nobody notices until the incident "
+                + "report.")
+            .check(new Task(Task.CHOICE,
+                    "Which is the right way to compare two Strings a and b?")
+                .choices("a == b", "a.equals(b)", "a = b", "a.compare(b)")
+                .accept("2", "b")
+                .hints("Compare the characters, not the locations.",
+                       "It is a method on String.")
+                .explain(
+                    "a.equals(b). == compares where the Strings are, = assigns, "
+                    + "and compare is not a String method.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String role = \"GUEST\".toLowerCase();",
+                    "if (!role.equals(\"admin\")) {",
+                    "    System.out.println(\"LIMITED ACCESS\");",
+                    "} else {",
+                    "    System.out.println(\"FULL ACCESS\");",
+                    "}")
+                .accept("LIMITED ACCESS")
+                .hints("role holds guest.",
+                       "The ! flips the result of equals.")
+                .explain(
+                    "LIMITED ACCESS. guest does not equal admin, so equals is "
+                    + "false, and ! makes the condition true.")
+                .xp(20))
+            .recap(
+                "    a.equals(b)     same text       use this for Strings\n"
+                + "    a == b          same location   numbers, chars, booleans\n"
+                + "    !a.equals(b)    different text\n"
+                + "\n"
+                + "== on Strings can pass tests with literals and fail on real "
+                + "input. There are no exceptions to the rule.")
+            .next("Next: comparing text when capitals should not matter."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(12), "When Capitals Should Not Matter", 3)
+            .brief(
+                "Analysts type commands into the console: QUIT, quit, Quit. All "
+                + "of them should work. Passwords are different - Winter2024 "
+                + "and winter2024 must never be the same password.\n\n"
+                + "Deciding which comparisons ignore case is a security "
+                + "decision.")
+            .willLearn(".equals()", "equalsIgnoreCase", "Case-sensitive or not")
+            .whyUseful(
+                "Commands, usernames, hostnames and file extensions usually "
+                + "ignore case. Passwords, tokens and keys must never. Using the "
+                + "right comparison in each place is part of the job.")
+            .concept("equalsIgnoreCase",
+                "equalsIgnoreCase compares text with capitals treated as the "
+                + "same:\n"
+                + "\n"
+                + "    \"QUIT\".equals(\"quit\")              false\n"
+                + "    \"QUIT\".equalsIgnoreCase(\"quit\")    true\n"
+                + "\n"
+                + "It does the same job as lower-casing both sides and then "
+                + "using equals, without making copies.\n"
+                + "\n"
+                + "WHEN TO USE WHICH\n"
+                + "\n"
+                + "    ignore case    commands, hostnames, email domains,\n"
+                + "                   usernames (after normalising),\n"
+                + "                   file extensions\n"
+                + "    exact case     passwords, API keys, tokens,\n"
+                + "                   anything secret\n"
+                + "\n"
+                + "A password check that ignores case divides the number of "
+                + "possible passwords enormously - every letter becomes one "
+                + "possibility instead of two - and makes guessing far easier.\n"
+                + "\n"
+                + "Be consistent. If usernames ignore case at login, they must "
+                + "ignore case everywhere: registration, the blocklist, the "
+                + "audit. A system that ignores case in one place and not "
+                + "another is the Admin-and-admin problem from Campaign 01.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String command = \"Quit\";",
+                "        System.out.println(command.equals(\"quit\"));",
+                "        System.out.println(command.equalsIgnoreCase(\"quit\"));",
+                "    }",
+                "}")
+            .exampleOutput("false", "true")
+            .lineByLine(
+                new String[]{"command.equals(\"quit\")",
+                    "Q and q are different characters. false."},
+                new String[]{"command.equalsIgnoreCase(\"quit\")",
+                    "Capitals treated as equal. true."},
+                new String[]{"No copies made",
+                    "command is unchanged either way. Neither method alters the "
+                    + "String."},
+                new String[]{"For a command",
+                    "Ignoring case is what the analyst expects."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"Admin\".equalsIgnoreCase(\"ADMIN\"));")
+                .accept("true")
+                .hints("Same letters, different capitals.",
+                       "equalsIgnoreCase treats capitals as equal.")
+                .explain("true. Same letters; the capitals do not count.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "Which of these should be compared with exact case, using "
+                    + "equals?")
+                .choices("A menu command like QUIT", "A hostname like WEB-01",
+                         "A password", "A file extension like .EXE")
+                .accept("3", "c")
+                .hints("Which one is a secret?",
+                       "Ignoring case makes a secret much easier to guess.")
+                .explain(
+                    "The password. Treating capitals as equal cuts the number of "
+                    + "possible passwords dramatically. The others are names, "
+                    + "where ignoring case is what people expect - and for .EXE, "
+                    + "what security requires, since Windows ignores case too.")
+                .xp(20))
+            .objective(
+                "Let the console accept quit in any capitals.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String command = \"QUIT\";",
+                "        // write the if line here",
+                "            System.out.println(\"Session closed.\");",
+                "        } else {",
+                "            System.out.println(\"Unknown command.\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line so that Session closed prints when command is "
+                + "quit in any mix of capitals. Put command first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: command is quit, ignoring case.")
+                .accept("if (command.equalsIgnoreCase(\"quit\")) {",
+                        "if(command.equalsIgnoreCase(\"quit\")) {",
+                        "if (command.equalsIgnoreCase(\"quit\")){",
+                        "if (command.equalsIgnoreCase(\"QUIT\")) {")
+                .hints(
+                    "equals would need exactly the same capitals.",
+                    "The method that ignores capitals is equalsIgnoreCase.",
+                    "if (command.equalsIgnoreCase(\"quit\")) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String command = \"QUIT\";",
+                    "        if (command.equalsIgnoreCase(\"quit\")) {",
+                    "            System.out.println(\"Session closed.\");",
+                    "        } else {",
+                    "            System.out.println(\"Unknown command.\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "equalsIgnoreCase compares QUIT with quit letter by letter, "
+                    + "treating capitals as the same, and returns true.\n"
+                    + "\n"
+                    + "For a command that is the friendly choice and costs "
+                    + "nothing: there is no secret in the word quit. The same "
+                    + "line comparing a password would be a vulnerability, which "
+                    + "is why the choice has to be made deliberately each time "
+                    + "rather than out of habit.")
+                .explain(
+                    "equalsIgnoreCase for names and commands; equals for "
+                    + "secrets.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Ignoring case on a secret",
+                    "Passwords, tokens and keys must match exactly. Use equals."},
+                new String[]{"Ignoring case in one place only",
+                    "If logins ignore case, registration and blocklists must too, "
+                    + "or Admin slips past a rule written for admin."},
+                new String[]{"Lower-casing with a call you do not store",
+                    "name.toLowerCase(); then name.equals(...) compares the "
+                    + "original. equalsIgnoreCase avoids that trap."})
+            .cyber(
+                "Case handling is a surprisingly common source of real "
+                + "vulnerabilities, because different parts of a system make "
+                + "different choices.\n"
+                + "\n"
+                + "A web application blocks the path /admin, comparing exactly. "
+                + "The web server underneath treats /ADMIN as the same page. "
+                + "Request /ADMIN and the application's check does not match "
+                + "while the server serves the admin page anyway. The same "
+                + "pattern appears with usernames, email addresses and file "
+                + "names.\n"
+                + "\n"
+                + "The defence is to decide once how each kind of value is "
+                + "compared, and make every check agree with the thing it "
+                + "protects.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"Winter2024\".equals(\"winter2024\"));")
+                .accept("false")
+                .hints("equals compares exactly.",
+                       "Is W the same character as w?")
+                .explain(
+                    "false. equals is case-sensitive - exactly right for a "
+                    + "password.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Which comparison should a login use for the PASSWORD?")
+                .choices("password.equalsIgnoreCase(stored)",
+                         "password.equals(stored)",
+                         "password == stored",
+                         "password.toLowerCase().equals(stored)")
+                .accept("2", "b")
+                .hints("Exact case, and compare the text.",
+                       "One ignores case, one compares locations.")
+                .explain(
+                    "password.equals(stored): exact, character by character. "
+                    + "Ignoring case weakens the password; == compares "
+                    + "locations. (Real systems store a hash, not the password - "
+                    + "Campaign 17 - but the rule about case is the same.)")
+                .xp(15))
+            .recap(
+                "    a.equals(b)             exact\n"
+                + "    a.equalsIgnoreCase(b)   capitals treated as equal\n"
+                + "\n"
+                + "Names and commands: ignore case. Secrets: exact.\n"
+                + "\n"
+                + "Every check must make the same choice as the thing it "
+                + "protects.")
+            .next("Next: why two decimal numbers that should be equal are "
+                + "not."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(13), "Almost Equal", 4)
+            .brief(
+                "The billing check adds up three charges - 0.1, 0.2 and 0.3 - "
+                + "and compares the total with the invoice, 0.6. They never "
+                + "match. The finance team is convinced someone is stealing "
+                + "fractions of a penny.\n\n"
+                + "Nobody is. doubles are not exact, and == on them is a trap.")
+            .willLearn("Comparing decimals", "Tolerance", "Whole units instead of decimals")
+            .whyUseful(
+                "Totals, averages, rates and scores are doubles, and comparing "
+                + "them is everywhere. Knowing why 0.1 + 0.2 is not 0.3 - and "
+                + "what to do instead - prevents a whole family of baffling "
+                + "bugs.")
+            .concept("Comparing doubles",
+                "A double stores numbers in binary. Most decimal fractions - "
+                + "0.1, 0.2, 0.3 - have no exact binary form, the way 1/3 has "
+                + "no exact decimal form. So each is stored as the nearest value "
+                + "that fits, and tiny errors appear:\n"
+                + "\n"
+                + "    System.out.println(0.1 + 0.2);\n"
+                + "    0.30000000000000004\n"
+                + "\n"
+                + "So == on doubles that came from arithmetic is unreliable:\n"
+                + "\n"
+                + "    0.1 + 0.2 == 0.3      false\n"
+                + "\n"
+                + "COMPARE WITH A TOLERANCE. Ask whether the two are close "
+                + "enough:\n"
+                + "\n"
+                + "    Math.abs(a - b) < 0.000001\n"
+                + "\n"
+                + "Math.abs gives the size of the gap whichever is larger, and "
+                + "the tolerance says how close counts as equal. Choose it to "
+                + "suit the data - for money, anything smaller than a tenth of a "
+                + "penny.\n"
+                + "\n"
+                + "OR AVOID FRACTIONS. For money, store whole pennies in a long: "
+                + "1099 pennies, not 10.99 pounds. Whole numbers are exact, and "
+                + "== works again. Banks and payment systems do exactly this.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        double total = 0.1 + 0.2;",
+                "        System.out.println(total);",
+                "        System.out.println(total == 0.3);",
+                "        System.out.println(Math.abs(total - 0.3) < 0.000001);",
+                "    }",
+                "}")
+            .exampleOutput("0.30000000000000004", "false", "true")
+            .lineByLine(
+                new String[]{"0.1 + 0.2",
+                    "Neither value is exact in binary, and the tiny errors add "
+                    + "up."},
+                new String[]{"total == 0.3",
+                    "0.30000000000000004 is not 0.3. false."},
+                new String[]{"Math.abs(total - 0.3)",
+                    "The gap: about 0.00000000000000004. Far below the "
+                    + "tolerance."},
+                new String[]{"< 0.000001",
+                    "Close enough counts as equal. true."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(0.1 + 0.2 == 0.3);")
+                .accept("false")
+                .hints("Is 0.1 + 0.2 exactly 0.3 in binary?",
+                       "The sum is 0.30000000000000004.")
+                .explain(
+                    "false. The sum is a hair above 0.3, and == demands an exact "
+                    + "match.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "Whole numbers, stored as pennies. What does this print?")
+                .code(
+                    "long pennies = 10 + 20;",
+                    "System.out.println(pennies == 30);")
+                .accept("true")
+                .hints("These are whole numbers.",
+                       "Whole numbers are exact.")
+                .explain(
+                    "true. 10p + 20p is exactly 30p. Keeping money as whole "
+                    + "pennies makes every comparison exact again - which is why "
+                    + "financial systems avoid doubles for money altogether.")
+                .xp(20))
+            .objective(
+                "Make the billing check compare the total sensibly.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        double total = 0.1 + 0.2 + 0.3;",
+                "        double invoice = 0.6;",
+                "        // write the if line here",
+                "            System.out.println(\"INVOICE MATCHES\");",
+                "        } else {",
+                "            System.out.println(\"MISMATCH - investigate\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line so the invoice matches when total and invoice "
+                + "differ by less than 0.0001. Use Math.abs and subtract invoice "
+                + "from total.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: total within 0.0001 of invoice.")
+                .accept("if (Math.abs(total - invoice) < 0.0001) {",
+                        "if(Math.abs(total - invoice) < 0.0001) {",
+                        "if (Math.abs(total - invoice) < 0.0001){",
+                        "if (Math.abs(invoice - total) < 0.0001) {")
+                .hints(
+                    "Not ==. Ask whether the gap is small.",
+                    "The gap is Math.abs(total - invoice).",
+                    "if (Math.abs(total - invoice) < 0.0001) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        double total = 0.1 + 0.2 + 0.3;",
+                    "        double invoice = 0.6;",
+                    "        if (Math.abs(total - invoice) < 0.0001) {",
+                    "            System.out.println(\"INVOICE MATCHES\");",
+                    "        } else {",
+                    "            System.out.println(\"MISMATCH - investigate\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "total ends up as 0.6000000000000001. The gap to 0.6 is "
+                    + "about one ten-thousand-trillionth - far below 0.0001 - so "
+                    + "the check reports a match.\n"
+                    + "\n"
+                    + "With ==, the program raised a false alarm on every "
+                    + "invoice. False alarms are not harmless: a check that "
+                    + "cries wolf daily gets ignored, and the day a real "
+                    + "mismatch arrives, nobody looks.")
+                .explain(
+                    "Compare doubles by the size of the gap, not with ==.")
+                .xp(30))
+            .mistakes(
+                new String[]{"== on computed doubles",
+                    "Tiny binary errors make it fail. Use a tolerance."},
+                new String[]{"Forgetting Math.abs",
+                    "total - invoice < 0.0001 is also true when total is far "
+                    + "SMALLER. The gap must be measured without its sign."},
+                new String[]{"doubles for money",
+                    "Store whole pennies in a long, and money is exact."})
+            .cyber(
+                "Rounding errors have been used deliberately. In the classic "
+                + "'salami slicing' fraud, an insider's code rounds each of "
+                + "millions of transactions down by a fraction of a penny and "
+                + "moves the fractions into an account of their own. Each slice "
+                + "is invisible; the total is not.\n"
+                + "\n"
+                + "It works best where money is kept in doubles and checks are "
+                + "loose, because small discrepancies are expected and "
+                + "explained away. Exact whole-penny arithmetic, and checks with "
+                + "a tolerance chosen on purpose rather than by accident, leave "
+                + "no fog for anyone to hide in.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Math.abs(0.5 - 0.7) < 0.3);")
+                .accept("true")
+                .hints("0.5 - 0.7 is negative.",
+                       "Math.abs makes it positive: about 0.2.")
+                .explain(
+                    "true. The gap is about 0.2, which is less than 0.3. Math.abs "
+                    + "is what makes the order of the subtraction irrelevant.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What is the safest way to hold money in a program?")
+                .choices("A double in pounds", "A long in pennies",
+                         "A String", "An int in pounds")
+                .accept("2", "b")
+                .hints("Which one is exact?",
+                       "Whole numbers are exact; fractions in doubles are not.")
+                .explain(
+                    "A long in pennies. Whole numbers are exact, and a long has "
+                    + "room for any realistic sum. An int in pounds cannot hold "
+                    + "the pence at all.")
+                .xp(15))
+            .recap(
+                "    0.1 + 0.2 == 0.3                    false\n"
+                + "    Math.abs(a - b) < tolerance         close enough\n"
+                + "\n"
+                + "doubles are approximations. Compare them by the size of the "
+                + "gap.\n"
+                + "\n"
+                + "For money, use whole pennies in a long.")
+            .next("Next: asking what kind of character something is."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(14), "What Kind of Character?", 3)
+            .brief(
+                "The new username rules say a name must start with a letter. "
+                + "Port numbers must start with a digit. Access codes must "
+                + "start with a capital.\n\n"
+                + "Java has ready-made tests for what kind of character "
+                + "something is.")
+            .willLearn("Character methods", "isDigit, isLetter, isUpperCase", "Validating one character")
+            .whyUseful(
+                "Validation starts with characters: does this start with a "
+                + "letter, is this a digit, is there whitespace. These methods "
+                + "answer each question in one call.")
+            .concept("Character methods",
+                "Character is to char what Integer is to int: a class of "
+                + "helpers you call on its name. Each takes a char and answers "
+                + "true or false:\n"
+                + "\n"
+                + "    Character.isDigit(c)        0 to 9\n"
+                + "    Character.isLetter(c)       a letter\n"
+                + "    Character.isLetterOrDigit(c)\n"
+                + "    Character.isUpperCase(c)    a capital letter\n"
+                + "    Character.isLowerCase(c)\n"
+                + "    Character.isWhitespace(c)   space, tab, line break\n"
+                + "\n"
+                + "    Character.isDigit('7')      true\n"
+                + "    Character.isLetter('7')     false\n"
+                + "    Character.isUpperCase('a')  false\n"
+                + "\n"
+                + "Combined with charAt, they check a position in a String:\n"
+                + "\n"
+                + "    Character.isLetter(name.charAt(0))\n"
+                + "\n"
+                + "is true when the name starts with a letter.\n"
+                + "\n"
+                + "Remember mission 10: charAt(0) on an empty String crashes. "
+                + "Guard it:\n"
+                + "\n"
+                + "    name.length() > 0 && Character.isLetter(name.charAt(0))\n"
+                + "\n"
+                + "These methods know about far more than English. isLetter is "
+                + "true for letters in every alphabet, isDigit for digits in "
+                + "many scripts. Usually that is what you want; when it is not, "
+                + "compare against the exact characters you allow.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"7smith\";",
+                "        char first = name.charAt(0);",
+                "        System.out.println(\"letter: \" + Character.isLetter(first));",
+                "        System.out.println(\"digit:  \" + Character.isDigit(first));",
+                "    }",
+                "}")
+            .exampleOutput("letter: false", "digit:  true")
+            .lineByLine(
+                new String[]{"name.charAt(0)",
+                    "The first character, '7', as a char."},
+                new String[]{"Character.isLetter(first)",
+                    "'7' is not a letter: false. This username breaks the rule."},
+                new String[]{"Character.isDigit(first)",
+                    "'7' is a digit: true."},
+                new String[]{"Called on Character",
+                    "Like Integer.parseInt, these belong to the class, so you "
+                    + "write the class name first."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Character.isUpperCase('a'));")
+                .accept("false")
+                .hints("Is a a capital?", "isUpperCase asks exactly that.")
+                .explain(
+                    "false. 'a' is lower case, so the answer to 'is it a "
+                    + "capital?' is no.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String code = \"X-17\";",
+                    "System.out.println(Character.isLetterOrDigit(code.charAt(1)));")
+                .accept("false")
+                .hints("Which character is at index 1?",
+                       "Is a dash a letter or a digit?")
+                .explain(
+                    "false. Index 1 is the dash, which is neither a letter nor a "
+                    + "digit.")
+                .xp(20))
+            .objective(
+                "Enforce the rule that a username starts with a letter.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"4dmin\";",
+                "        // write the if line here - guard against an empty name",
+                "            System.out.println(\"VALID\");",
+                "        } else {",
+                "            System.out.println(\"MUST START WITH A LETTER\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line: VALID only when name is not empty AND its "
+                + "first character is a letter. Put the length check first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the guarded if line: non-empty, and starts with a letter.")
+                .accept("if (name.length() > 0 && Character.isLetter(name.charAt(0))) {",
+                        "if(name.length() > 0 && Character.isLetter(name.charAt(0))) {",
+                        "if (name.length() > 0 && Character.isLetter(name.charAt(0))){",
+                        "if (name.length() >= 1 && Character.isLetter(name.charAt(0))) {")
+                .hints(
+                    "Mission 10's guard comes first, on the left of &&.",
+                    "The first character is name.charAt(0), and "
+                    + "Character.isLetter tests it.",
+                    "if (name.length() > 0 && Character.isLetter(name.charAt(0))) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String name = \"4dmin\";",
+                    "        if (name.length() > 0 && Character.isLetter(name.charAt(0))) {",
+                    "            System.out.println(\"VALID\");",
+                    "        } else {",
+                    "            System.out.println(\"MUST START WITH A LETTER\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The length check stops an empty name before charAt can "
+                    + "crash. For 4dmin it passes, charAt(0) gives '4', isLetter "
+                    + "says false, and the rule refuses it.\n"
+                    + "\n"
+                    + "4dmin is chosen on purpose. Look-alike names - a digit 4 for "
+                    + "an A, a 0 for an O - are how impostor accounts get made. "
+                    + "Rules about which characters are allowed where are the "
+                    + "first line of defence against them.")
+                .explain(
+                    "Guard the length, then test the character.")
+                .xp(30))
+            .mistakes(
+                new String[]{"No length guard",
+                    "charAt(0) on \"\" crashes. Check length first, on the left "
+                    + "of &&."},
+                new String[]{"Calling it on the char",
+                    "first.isLetter() does not compile. It is "
+                    + "Character.isLetter(first)."},
+                new String[]{"Assuming English only",
+                    "isLetter is true for letters in every alphabet. If only "
+                    + "a-z is allowed, test for exactly that."})
+            .cyber(
+                "The last mistake above is a real attack. Homoglyph attacks "
+                + "register names using letters from other alphabets that look "
+                + "identical to Latin ones. Cyrillic has its own letter a, "
+                + "drawn exactly like the Latin a - so paypal spelled with it is "
+                + "a completely different name that looks identical. Both "
+                + "versions pass isLetter, and a person reading the name sees "
+                + "no difference.\n"
+                + "\n"
+                + "Where names must be unambiguous - usernames, domains, "
+                + "anything shown to other people - the safe rule is an "
+                + "allowlist of the exact characters permitted, rather than "
+                + "'any letter'.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(Character.isWhitespace(' '));")
+                .accept("true")
+                .hints("What is inside the quotes?", "A space is whitespace.")
+                .explain("true. A space counts as whitespace, as do tabs and "
+                    + "line breaks.")
+                .xp(10))
+            .check(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "char c = 'Q';",
+                    "boolean big = Character.isUpperCase(c);",
+                    "boolean digit = c.isDigit();",
+                    "System.out.println(big);")
+                .accept("3", "line 3")
+                .hints("How are Character methods called?",
+                       "A char has no methods of its own.")
+                .explain(
+                    "Line 3. A char is a simple value with no methods, so "
+                    + "c.isDigit() cannot exist. The method belongs to the "
+                    + "Character class: Character.isDigit(c).")
+                .xp(20))
+            .recap(
+                "    Character.isDigit(c)      Character.isLetter(c)\n"
+                + "    Character.isUpperCase(c)  Character.isWhitespace(c)\n"
+                + "\n"
+                + "Called on the class name, with the char in brackets.\n"
+                + "\n"
+                + "Guard charAt with a length check. For strict rules, allow "
+                + "exact characters rather than 'any letter'.")
+            .next("Next: an if inside another if."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(15), "An If Inside an If", 4)
+            .brief(
+                "The login service needs to say WHY it refused someone: no such "
+                + "account, account locked, or wrong second factor. Each "
+                + "question only makes sense once the one before it has been "
+                + "answered.\n\n"
+                + "That shape is an if inside another if.")
+            .willLearn("Nested if", "else belongs to the nearest if", "Nesting against &&")
+            .whyUseful(
+                "Decisions often come in layers: only check the password if the "
+                + "account exists, only check MFA if the password was right. "
+                + "Nesting expresses layers, and gives each one its own "
+                + "outcome.")
+            .concept("Nested if",
+                "Any statement can go inside an if block - including another "
+                + "if:\n"
+                + "\n"
+                + "    if (accountExists) {\n"
+                + "        if (locked) {\n"
+                + "            System.out.println(\"ACCOUNT LOCKED\");\n"
+                + "        } else {\n"
+                + "            System.out.println(\"CHECKING PASSWORD\");\n"
+                + "        }\n"
+                + "    } else {\n"
+                + "        System.out.println(\"NO SUCH ACCOUNT\");\n"
+                + "    }\n"
+                + "\n"
+                + "The inner if only runs when the outer condition was true. "
+                + "Each level can have its own else, so each failure gets its "
+                + "own message.\n"
+                + "\n"
+                + "NESTING OR &&? These two are the same:\n"
+                + "\n"
+                + "    if (a) { if (b) { X } }\n"
+                + "    if (a && b) { X }\n"
+                + "\n"
+                + "Use && when there is one outcome. Nest when the levels need "
+                + "different outcomes, as above.\n"
+                + "\n"
+                + "THE DANGLING ELSE. Without braces, an else belongs to the "
+                + "NEAREST if above it, whatever the indentation says:\n"
+                + "\n"
+                + "    if (a)\n"
+                + "        if (b)\n"
+                + "            X\n"
+                + "    else\n"
+                + "        Y\n"
+                + "\n"
+                + "The else looks like it belongs to if (a). It belongs to "
+                + "if (b). With a false, nothing runs at all. Braces make the "
+                + "structure what you wrote - one more reason to always use "
+                + "them.\n"
+                + "\n"
+                + "Keep nesting shallow. Past three levels, code is hard to "
+                + "follow; methods, in Campaign 03, help flatten it.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean accountExists = true;",
+                "        boolean locked = true;",
+                "        if (accountExists) {",
+                "            if (locked) {",
+                "                System.out.println(\"ACCOUNT LOCKED\");",
+                "            } else {",
+                "                System.out.println(\"CHECKING PASSWORD\");",
+                "            }",
+                "        } else {",
+                "            System.out.println(\"NO SUCH ACCOUNT\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("ACCOUNT LOCKED")
+            .lineByLine(
+                new String[]{"if (accountExists)",
+                    "true, so the outer block runs."},
+                new String[]{"if (locked)",
+                    "Only reached because the account exists. true: LOCKED."},
+                new String[]{"The inner else",
+                    "Belongs to if (locked). Skipped."},
+                new String[]{"The outer else",
+                    "Belongs to if (accountExists). Skipped. The braces make it "
+                    + "impossible to confuse the two."})
+            .predict(new Task(Task.PREDICT,
+                    "The same code with different values. What does it print?")
+                .code(
+                    "boolean accountExists = false;",
+                    "boolean locked = true;",
+                    "if (accountExists) {",
+                    "    if (locked) {",
+                    "        System.out.println(\"LOCKED\");",
+                    "    }",
+                    "} else {",
+                    "    System.out.println(\"NO SUCH ACCOUNT\");",
+                    "}")
+                .accept("NO SUCH ACCOUNT")
+                .hints("Start with the outer condition.",
+                       "If it is false, is the inner if ever reached?")
+                .explain(
+                    "NO SUCH ACCOUNT. The outer condition is false, so the inner "
+                    + "if never runs - locked being true does not matter. That "
+                    + "is the point: an account that does not exist cannot be "
+                    + "locked.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "No braces. Read it the way Java does, not the way it is "
+                    + "indented. What does it print?")
+                .code(
+                    "boolean a = false;",
+                    "boolean b = true;",
+                    "if (a)",
+                    "    if (b)",
+                    "        System.out.println(\"X\");",
+                    "else",
+                    "    System.out.println(\"Y\");",
+                    "System.out.println(\"done\");")
+                .accept("done")
+                .hints(
+                    "Which if does the else belong to? The nearest one above it.",
+                    "The else belongs to if (b), which is inside if (a). Is "
+                    + "if (a) true?")
+                .explain(
+                    "done - and nothing else. The else belongs to if (b), not "
+                    + "if (a), so the whole inner if/else is skipped when a is "
+                    + "false. The indentation promised Y. Java never reads "
+                    + "indentation.")
+                .xp(30))
+            .objective(
+                "Give each login failure its own message.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean passwordOk = true;",
+                "        boolean mfaOk = false;",
+                "        if (passwordOk) {",
+                "            // write the inner if line here",
+                "                System.out.println(\"ACCESS GRANTED\");",
+                "            } else {",
+                "                System.out.println(\"MFA FAILED\");",
+                "            }",
+                "        } else {",
+                "            System.out.println(\"WRONG PASSWORD\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "The password was right. Write the inner if line so that access "
+                + "is granted only if the second factor also passed.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the inner if line, testing mfaOk.")
+                .accept("if (mfaOk) {", "if(mfaOk) {", "if (mfaOk){", "if(mfaOk){")
+                .hints(
+                    "It sits inside the passwordOk block, so the password is "
+                    + "already known to be right.",
+                    "A boolean is already a condition.",
+                    "if (mfaOk) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        boolean passwordOk = true;",
+                    "        boolean mfaOk = false;",
+                    "        if (passwordOk) {",
+                    "            if (mfaOk) {",
+                    "                System.out.println(\"ACCESS GRANTED\");",
+                    "            } else {",
+                    "                System.out.println(\"MFA FAILED\");",
+                    "            }",
+                    "        } else {",
+                    "            System.out.println(\"WRONG PASSWORD\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The inner if is only reached once the password is known to "
+                    + "be right, so it can focus on the second factor. mfaOk is "
+                    + "false, and MFA FAILED prints.\n"
+                    + "\n"
+                    + "if (passwordOk && mfaOk) would decide access just as "
+                    + "correctly, but could only give one refusal message. "
+                    + "Nesting lets each layer report its own failure - useful in "
+                    + "the audit log, though see the cyber note about what to "
+                    + "show the person logging in.")
+                .explain(
+                    "The inner if tests the second layer only.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Trusting indentation",
+                    "Without braces, else belongs to the nearest if. Always use "
+                    + "braces."},
+                new String[]{"Nesting where && would do",
+                    "If every path ends the same way, a flat condition is "
+                    + "clearer."},
+                new String[]{"Nesting too deep",
+                    "Past three levels, readers lose track. Methods help "
+                    + "flatten it."})
+            .cyber(
+                "Detailed failure messages are a double-edged sword. In the "
+                + "audit log, 'no such account' against 'wrong password' is "
+                + "valuable: a burst of the first means someone is guessing "
+                + "usernames.\n"
+                + "\n"
+                + "Shown to the person logging in, the same difference is a gift "
+                + "to attackers: they can find out which usernames exist, then "
+                + "concentrate on those. This is called USER ENUMERATION. The "
+                + "usual practice is to log the precise reason and show the user "
+                + "one generic message - 'username or password incorrect' - "
+                + "whichever layer failed.")
+            .check(new Task(Task.CHOICE,
+                    "Which is the same as  if (a) { if (b) { X } } ?")
+                .choices("if (a || b) { X }", "if (a && b) { X }",
+                         "if (a) { X } else if (b) { X }", "if (!a && b) { X }")
+                .accept("2", "b")
+                .hints("X runs only when both are true.",
+                       "Both true is &&.")
+                .explain(
+                    "if (a && b). X runs only when a and b are both true. The "
+                    + "nested form is only worth it when the levels need "
+                    + "different outcomes.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int failures = 7;",
+                    "boolean admin = true;",
+                    "if (failures > 5) {",
+                    "    if (admin) {",
+                    "        System.out.println(\"PAGE ON-CALL\");",
+                    "    } else {",
+                    "        System.out.println(\"LOG IT\");",
+                    "    }",
+                    "}")
+                .accept("PAGE ON-CALL")
+                .hints("Is 7 more than 5?", "Then: is it an admin account?")
+                .explain(
+                    "PAGE ON-CALL. Both conditions hold. Failures on an admin "
+                    + "account are worth waking someone for; on a normal account "
+                    + "they are logged.")
+                .xp(20))
+            .recap(
+                "An if can contain another if. The inner one runs only when the "
+                + "outer condition was true.\n"
+                + "\n"
+                + "Nest when levels need different outcomes; use && when they "
+                + "share one.\n"
+                + "\n"
+                + "Without braces, else belongs to the nearest if. Always use "
+                + "braces.")
+            .next("Next: checking a search found something before you use "
+                + "it."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(16), "Did the Search Find Anything?", 4)
+            .brief(
+                "Campaign 01 left a trap set: when indexOf finds nothing it "
+                + "returns -1, and substring quietly produces nonsense or "
+                + "crashes. The phishing triage tool just filed a report with "
+                + "the domain 'call me urgently' because the 'address' had no @ "
+                + "in it.\n\n"
+                + "Now the program can check before it cuts.")
+            .willLearn("Validating input", "Checking for -1", "Check, then use")
+            .whyUseful(
+                "Every search can come back empty. Checking the result before "
+                + "using it turns silent nonsense and crashes into a clear, "
+                + "handled case - which is most of what makes a parser "
+                + "robust.")
+            .concept("Checking for -1",
+                "indexOf returns -1 when the text is not there. So the "
+                + "question 'was it found?' is a comparison:\n"
+                + "\n"
+                + "    int at = email.indexOf(\"@\");\n"
+                + "    if (at == -1) {\n"
+                + "        System.out.println(\"NOT AN EMAIL ADDRESS\");\n"
+                + "    } else {\n"
+                + "        String domain = email.substring(at + 1);\n"
+                + "        ...\n"
+                + "    }\n"
+                + "\n"
+                + "The substring is now inside the else, so it can only run when "
+                + "the @ exists. That is 'check, then use' again, written as an "
+                + "if/else instead of an &&.\n"
+                + "\n"
+                + "Two ways to write the test, both correct:\n"
+                + "\n"
+                + "    at == -1      not found\n"
+                + "    at < 0        not found\n"
+                + "    at >= 0       found\n"
+                + "\n"
+                + "A found position is always 0 or more, so any negative value "
+                + "means missing. Some people prefer < 0 because it does not "
+                + "depend on remembering the exact value.\n"
+                + "\n"
+                + "If you only need to know WHETHER text is there, contains is "
+                + "simpler. When you need WHERE it is as well, use indexOf and "
+                + "check the result.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String email = \"call me urgently\";",
+                "        int at = email.indexOf(\"@\");",
+                "        if (at == -1) {",
+                "            System.out.println(\"NOT AN EMAIL ADDRESS\");",
+                "        } else {",
+                "            System.out.println(\"DOMAIN: \" + email.substring(at + 1));",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("NOT AN EMAIL ADDRESS")
+            .lineByLine(
+                new String[]{"email.indexOf(\"@\")",
+                    "No @ in the text, so at is -1."},
+                new String[]{"if (at == -1)",
+                    "The check. true, so the refusal prints."},
+                new String[]{"The substring in the else",
+                    "Never runs here. It only ever sees text that really has an "
+                    + "@."},
+                new String[]{"Without the check",
+                    "substring(0) - the whole text - would have been filed as "
+                    + "the domain. No crash, a wrong report."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String email = \"a.okafor@northstar.example\";",
+                    "int at = email.indexOf(\"@\");",
+                    "if (at == -1) {",
+                    "    System.out.println(\"NO @\");",
+                    "} else {",
+                    "    System.out.println(email.substring(0, at));",
+                    "}")
+                .accept("a.okafor")
+                .hints("This time there is an @.",
+                       "The else runs: everything before the @.")
+                .explain(
+                    "a.okafor. The @ is at index 8, so the check fails and the "
+                    + "else cuts out the part before it.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "A firewall line with a field missing. What does this print?")
+                .code(
+                    "String line = \"BLOCK 10.0.4.17\";",
+                    "int first = line.indexOf(\" \");",
+                    "int second = line.indexOf(\" \", first + 1);",
+                    "if (second < 0) {",
+                    "    System.out.println(\"MALFORMED LINE\");",
+                    "} else {",
+                    "    System.out.println(\"PORT \" + line.substring(second + 1));",
+                    "}")
+                .accept("MALFORMED LINE")
+                .hints("How many spaces are there?",
+                       "What does indexOf give for the missing second space?")
+                .explain(
+                    "MALFORMED LINE. There is no second space, so second is -1, "
+                    + "which is below 0. The parser from Campaign 01 would have "
+                    + "printed PORT BLOCK 10.0.4.17 - its whole input, labelled "
+                    + "as a port.")
+                .xp(25))
+            .objective(
+                "Stop the triage tool filing text that is not an email address.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String email = \"urgent invoice attached\";",
+                "        int at = email.indexOf(\"@\");",
+                "        // write the if line here: true when there is no @",
+                "            System.out.println(\"INVALID ADDRESS\");",
+                "        } else {",
+                "            System.out.println(\"DOMAIN: \" + email.substring(at + 1));",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that is true when indexOf found no @.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: at shows the @ was not found.")
+                .accept("if (at == -1) {", "if(at == -1) {", "if (at == -1){",
+                        "if (at < 0) {", "if(at < 0) {", "if (at < 0){")
+                .hints(
+                    "What does indexOf return when it finds nothing?",
+                    "Compare at with that value.",
+                    "if (at == -1) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String email = \"urgent invoice attached\";",
+                    "        int at = email.indexOf(\"@\");",
+                    "        if (at == -1) {",
+                    "            System.out.println(\"INVALID ADDRESS\");",
+                    "        } else {",
+                    "            System.out.println(\"DOMAIN: \" + email.substring(at + 1));",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "There is no @, so at is -1, the condition is true, and the "
+                    + "tool refuses the input instead of inventing a domain.\n"
+                    + "\n"
+                    + "The substring now lives only in the else, where the @ is "
+                    + "guaranteed. The check and the use are tied together by "
+                    + "the structure of the code, so nobody can later call the "
+                    + "substring without the check by accident.")
+                .explain(
+                    "Check the search result before cutting with it.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Using the position without checking",
+                    "substring(at + 1) with at = -1 is substring(0): the whole "
+                    + "text, silently."},
+                new String[]{"Testing at > 0 for 'found'",
+                    "Something found at the very start is at 0. Found is at >= 0."},
+                new String[]{"Checking in one place, cutting in another",
+                    "Keep the use inside the branch where the check passed."})
+            .cyber(
+                "Much of secure parsing is refusing to guess. Input that does "
+                + "not have the shape you expect is not 'probably fine' - it is "
+                + "either broken or crafted, and either way the safest thing is "
+                + "to say so and stop.\n"
+                + "\n"
+                + "A parser that guesses produces records that look valid and "
+                + "are not: a domain that is a sentence, a port that is a whole "
+                + "line. Those records feed dashboards, blocklists and reports, "
+                + "and the damage spreads a long way from the line that was "
+                + "never checked. Rejecting a malformed line - and counting how "
+                + "many were rejected - is both safer and more informative.")
+            .check(new Task(Task.CHOICE,
+                    "at holds the result of indexOf. Which condition means the "
+                    + "text WAS found?")
+                .choices("at > 0", "at >= 0", "at == 0", "at != 0")
+                .accept("2", "b")
+                .hints("Found text can be at the very first position.",
+                       "The first position is 0.")
+                .explain(
+                    "at >= 0. Text found at the very start is at index 0, and "
+                    + "at > 0 would wrongly call that missing. Only negative "
+                    + "means not found.")
+                .xp(20))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String cmd = \"#restart web-01\";",
+                    "if (cmd.indexOf(\"#\") == 0) {",
+                    "    System.out.println(\"COMMENT - ignored\");",
+                    "} else {",
+                    "    System.out.println(\"RUN: \" + cmd);",
+                    "}")
+                .accept("COMMENT - ignored")
+                .hints("Where is the # ?", "Index 0 is the very first character.")
+                .explain(
+                    "COMMENT - ignored. The # is at index 0, so the check is "
+                    + "true. indexOf == 0 is one way to ask 'does it start "
+                    + "with'; startsWith is the clearer one.")
+                .xp(15))
+            .recap(
+                "    int at = s.indexOf(x);\n"
+                + "    if (at == -1) {  not found - refuse\n"
+                + "    } else {         found - safe to cut\n"
+                + "    }\n"
+                + "\n"
+                + "Found means >= 0. Put the use inside the branch where the "
+                + "check passed.")
+            .next("Next: checking text really is a number before converting "
+                + "it."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(17), "Is It Really a Number?", 4)
+            .brief(
+                "Integer.parseInt crashes on anything that is not a whole number "
+                + "- a letter, a space, an empty line. The port field on the "
+                + "config form has been crashing the tool whenever someone "
+                + "types 'eighty'.\n\n"
+                + "Before converting text, a program can check it matches the "
+                + "shape of a number.")
+            .willLearn("Validating input", "matches with a pattern", "Allowlist validation")
+            .whyUseful(
+                "Validating input before using it is the single most important "
+                + "habit in secure programming. This mission gives you a tool "
+                + "that says exactly what IS allowed - which is safer than "
+                + "listing what is not.")
+            .concept("Checking text with matches",
+                "matches asks whether the WHOLE String fits a pattern:\n"
+                + "\n"
+                + "    text.matches(\"[0-9]+\")\n"
+                + "\n"
+                + "Read the pattern in two parts:\n"
+                + "\n"
+                + "    [0-9]    any one character from 0 to 9\n"
+                + "    +        one or more of the thing before it\n"
+                + "\n"
+                + "So [0-9]+ means 'one or more digits, and nothing else'. "
+                + "Patterns like this are called REGULAR EXPRESSIONS. They are "
+                + "a language of their own, and this campaign uses only this "
+                + "one; later campaigns add more.\n"
+                + "\n"
+                + "    \"443\".matches(\"[0-9]+\")     true\n"
+                + "    \"44a\".matches(\"[0-9]+\")     false - a letter\n"
+                + "    \" 44\".matches(\"[0-9]+\")     false - a space\n"
+                + "    \"\".matches(\"[0-9]+\")        false - + needs one\n"
+                + "    \"-5\".matches(\"[0-9]+\")      false - the minus sign\n"
+                + "\n"
+                + "Every value parseInt would choke on is refused - apart from "
+                + "one. A long run of digits like 99999999999 matches the "
+                + "pattern and is still too big for an int. Limit the length "
+                + "too:\n"
+                + "\n"
+                + "    text.matches(\"[0-9]+\") && text.length() <= 9\n"
+                + "\n"
+                + "Nine digits always fit in an int. Now parseInt is safe.\n"
+                + "\n"
+                + "This is ALLOWLIST validation: describe exactly what is "
+                + "acceptable and refuse everything else. It is far safer than "
+                + "trying to list what is not acceptable, because nobody can "
+                + "think of everything that is not.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String text = \"eighty\";",
+                "        if (text.matches(\"[0-9]+\") && text.length() <= 9) {",
+                "            int port = Integer.parseInt(text);",
+                "            System.out.println(\"PORT \" + port);",
+                "        } else {",
+                "            System.out.println(\"NOT A NUMBER: \" + text);",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("NOT A NUMBER: eighty")
+            .lineByLine(
+                new String[]{"text.matches(\"[0-9]+\")",
+                    "eighty contains letters. false."},
+                new String[]{"&& text.length() <= 9",
+                    "Not even checked - && already knows the answer."},
+                new String[]{"Integer.parseInt(text)",
+                    "Inside the if, so it only ever sees text that is safe to "
+                    + "convert."},
+                new String[]{"The else",
+                    "Refuses clearly, instead of crashing."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"8080\".matches(\"[0-9]+\"));")
+                .accept("true")
+                .hints("Is every character a digit?", "And is there at least one?")
+                .explain("true. Four digits and nothing else.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "Typed with a space in front. What does this print?")
+                .code("System.out.println(\" 22\".matches(\"[0-9]+\"));")
+                .accept("false")
+                .hints("matches checks the WHOLE String.",
+                       "Is a space a digit?")
+                .explain(
+                    "false. The space is not a digit, and matches needs the whole "
+                    + "String to fit. Trim first, then check - the same order as "
+                    + "before parseInt.")
+                .xp(20))
+            .objective(
+                "Stop the config tool crashing on a port that is not a number.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String text = \"80a\";",
+                "        // write the if line here: digits only",
+                "            System.out.println(\"PORT \" + Integer.parseInt(text));",
+                "        } else {",
+                "            System.out.println(\"INVALID PORT\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line so parseInt only runs when text is one or "
+                + "more digits and nothing else. Use matches.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: text matches one or more digits.")
+                .accept("if (text.matches(\"[0-9]+\")) {",
+                        "if(text.matches(\"[0-9]+\")) {",
+                        "if (text.matches(\"[0-9]+\")){",
+                        "if (text.matches(\"[0-9]+\") && text.length() <= 9) {")
+                .hints(
+                    "The pattern for 'one or more digits' is \"[0-9]+\".",
+                    "matches is called on the text, with the pattern in the "
+                    + "brackets.",
+                    "if (text.matches(\"[0-9]+\")) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String text = \"80a\";",
+                    "        if (text.matches(\"[0-9]+\")) {",
+                    "            System.out.println(\"PORT \" + Integer.parseInt(text));",
+                    "        } else {",
+                    "            System.out.println(\"INVALID PORT\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "80a has a letter in it, so it does not match one-or-more "
+                    + "digits, and the else refuses it. parseInt is never "
+                    + "reached with text it cannot handle.\n"
+                    + "\n"
+                    + "Notice what the check describes: what a port LOOKS like, "
+                    + "not a list of bad things to watch for. Nobody has to "
+                    + "predict every wrong thing a person might type - anything "
+                    + "not described is refused. Adding && text.length() <= 9 "
+                    + "would also refuse numbers too big for an int.")
+                .explain(
+                    "Describe what is allowed; refuse the rest.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Checking after converting",
+                    "By then parseInt has already crashed. Check first."},
+                new String[]{"Forgetting the length",
+                    "Twelve digits match [0-9]+ and still overflow an int."},
+                new String[]{"Listing bad input instead",
+                    "A blocklist of letters misses spaces, symbols, and "
+                    + "everything else nobody thought of."})
+            .cyber(
+                "Input validation by allowlist is the first defence against "
+                + "almost every injection attack. SQL injection, command "
+                + "injection and path traversal all rely on a program accepting "
+                + "characters it never needed - a quote, a semicolon, a dot "
+                + "dot slash - in a field that should only ever hold a number or "
+                + "a name.\n"
+                + "\n"
+                + "A port field that only accepts [0-9]+ cannot carry any of "
+                + "those. Validation is not the only defence - later campaigns "
+                + "add others - but it is the cheapest, and it stops a great "
+                + "deal before anything else has to.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String text = \"12345678901\";",
+                    "boolean safe = text.matches(\"[0-9]+\") && text.length() <= 9;",
+                    "System.out.println(safe);")
+                .accept("false")
+                .hints("It is all digits. How many?",
+                       "More than 9, so the second half is false.")
+                .explain(
+                    "false. It matches the pattern, but eleven digits is too long "
+                    + "to be sure it fits an int - and this one does not.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "What does the pattern [0-9]+ accept?")
+                .choices("Any number, including negatives and decimals",
+                         "One or more digits and nothing else",
+                         "Exactly one digit",
+                         "Anything containing a digit")
+                .accept("2", "b")
+                .hints("[0-9] is one digit. + means one or more.",
+                       "matches needs the whole String to fit.")
+                .explain(
+                    "One or more digits and nothing else. No sign, no point, no "
+                    + "spaces, and it must match the whole String.")
+                .xp(15))
+            .recap(
+                "    text.matches(\"[0-9]+\")     digits only, at least one\n"
+                + "    && text.length() <= 9      fits in an int\n"
+                + "\n"
+                + "Check first, convert inside the if.\n"
+                + "\n"
+                + "Allowlist: describe what is allowed, refuse everything else.")
+            .next("Next: text that is empty, or only looks empty."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(18), "Empty, or Just Spaces?", 3)
+            .brief(
+                "The sign-up form rejects empty usernames. Someone registered "
+                + "the username '   ' - three spaces - and now there is an "
+                + "account nobody can see in the list.\n\n"
+                + "Empty and blank are different questions.")
+            .willLearn("isEmpty and isBlank", "Empty against blank", "trim().isEmpty()")
+            .whyUseful(
+                "Every required field needs a 'was anything actually entered' "
+                + "check. Asking the right one of two similar questions is the "
+                + "difference between a working form and an invisible account.")
+            .concept("isEmpty and isBlank",
+                "Two questions, easily confused:\n"
+                + "\n"
+                + "    isEmpty()    no characters at all\n"
+                + "    isBlank()    nothing but whitespace (or nothing)\n"
+                + "\n"
+                + "    \"\".isEmpty()       true     \"\".isBlank()       true\n"
+                + "    \"   \".isEmpty()    false    \"   \".isBlank()    true\n"
+                + "    \"ab\".isEmpty()     false    \"ab\".isBlank()     false\n"
+                + "\n"
+                + "Three spaces are not empty - there are three characters - but "
+                + "they are blank. For a required field, blank is almost always "
+                + "the question you mean.\n"
+                + "\n"
+                + "isBlank arrived in Java 11. On older Java, the same check is "
+                + "written:\n"
+                + "\n"
+                + "    text.trim().isEmpty()\n"
+                + "\n"
+                + "Trim away the edges, then see if anything is left.\n"
+                + "\n"
+                + "isEmpty() is the same as length() == 0, just easier to read.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"   \";",
+                "        System.out.println(\"empty: \" + name.isEmpty());",
+                "        System.out.println(\"blank: \" + name.isBlank());",
+                "    }",
+                "}")
+            .exampleOutput("empty: false", "blank: true")
+            .lineByLine(
+                new String[]{"name.isEmpty()",
+                    "Three characters, so not empty. false."},
+                new String[]{"name.isBlank()",
+                    "All three are spaces. true."},
+                new String[]{"Which one a form needs",
+                    "isBlank - three spaces is not a name."},
+                new String[]{"On Java 8",
+                    "name.trim().isEmpty() gives the same answer."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"\".isEmpty());")
+                .accept("true")
+                .hints("How many characters are between the quotes?",
+                       "None at all.")
+                .explain("true. The empty String has no characters.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String name = \"  \\t \";",
+                    "System.out.println(name.trim().isEmpty());")
+                .accept("true")
+                .hints("\\t is a tab. What does trim remove?",
+                       "trim removes spaces AND tabs at the ends.")
+                .explain(
+                    "true. The text is spaces and a tab, trim removes all of "
+                    + "them, and nothing is left. This is the Java 8 way of "
+                    + "asking isBlank.")
+                .xp(20))
+            .objective(
+                "Refuse usernames that are nothing but spaces.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String name = \"   \";",
+                "        // write the if line here",
+                "            System.out.println(\"USERNAME REQUIRED\");",
+                "        } else {",
+                "            System.out.println(\"Registered: \" + name.trim());",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that refuses a name which is empty or only "
+                + "whitespace.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: name is blank.")
+                .accept("if (name.isBlank()) {", "if(name.isBlank()) {",
+                        "if (name.isBlank()){", "if (name.trim().isEmpty()) {",
+                        "if(name.trim().isEmpty()) {")
+                .hints(
+                    "isEmpty would say three spaces is fine.",
+                    "The question is 'is there nothing but whitespace?'",
+                    "if (name.isBlank()) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String name = \"   \";",
+                    "        if (name.isBlank()) {",
+                    "            System.out.println(\"USERNAME REQUIRED\");",
+                    "        } else {",
+                    "            System.out.println(\"Registered: \" + name.trim());",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "isBlank is true for three spaces, so the form refuses them. "
+                    + "A real name is not blank and goes on to be registered - "
+                    + "trimmed, so ' jsmith ' and 'jsmith' cannot become two "
+                    + "accounts.\n"
+                    + "\n"
+                    + "isEmpty would have let the three spaces through, creating "
+                    + "an account whose name prints as nothing at all: invisible "
+                    + "in lists, impossible to search for, and a perfect place "
+                    + "to hide.")
+                .explain(
+                    "Blank, not empty, is the question for a required field.")
+                .xp(25))
+            .mistakes(
+                new String[]{"isEmpty for a required field",
+                    "Three spaces pass it. Use isBlank or trim().isEmpty()."},
+                new String[]{"isBlank on old Java",
+                    "It needs Java 11 or later. trim().isEmpty() works "
+                    + "everywhere."},
+                new String[]{"Checking but storing the untrimmed value",
+                    "Check with isBlank, then store name.trim()."})
+            .cyber(
+                "Invisible names are a recurring trick. An account called with "
+                + "only spaces, or with characters that print as nothing, shows "
+                + "up in an admin list as a blank row - easy to overlook, hard "
+                + "to search for, and ideal for an attacker who wants a "
+                + "foothold to go unnoticed.\n"
+                + "\n"
+                + "The same check protects every required field in a security "
+                + "tool: a firewall rule with a blank source, a ticket with a "
+                + "blank owner, an alert with a blank host. Blank values do not "
+                + "just look sloppy; they break the filters and reports that "
+                + "depend on them.")
+            .check(new Task(Task.CHOICE,
+                    "For \"   \" (three spaces), which is true?")
+                .choices("isEmpty() true, isBlank() true",
+                         "isEmpty() false, isBlank() true",
+                         "isEmpty() true, isBlank() false",
+                         "both false")
+                .accept("2", "b")
+                .hints("Three characters is not zero characters.",
+                       "But all three are whitespace.")
+                .explain(
+                    "isEmpty() is false - there are three characters. isBlank() "
+                    + "is true - they are all whitespace.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(\"a b\".isBlank());")
+                .accept("false")
+                .hints("Is there anything other than whitespace?",
+                       "a and b are letters.")
+                .explain(
+                    "false. It contains a space, but also letters, so it is not "
+                    + "blank.")
+                .xp(10))
+            .recap(
+                "    isEmpty()          no characters\n"
+                + "    isBlank()          only whitespace, or nothing\n"
+                + "    trim().isEmpty()   the same as isBlank, on any Java\n"
+                + "\n"
+                + "Required fields ask isBlank. Store the trimmed value.")
+            .next("Next: why a variable made inside an if can vanish."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(19), "Where a Variable Lives", 4)
+            .brief(
+                "The grading tool works out a severity label inside its if "
+                + "statement, then tries to print it afterwards. It will not "
+                + "compile: 'cannot find symbol'. The variable is right there "
+                + "in the code.\n\n"
+                + "It is - but not where the println is. Variables have a "
+                + "home.")
+            .willLearn("Scope", "Declaring before an if", "Definite assignment")
+            .whyUseful(
+                "As soon as programs make decisions, where a variable is "
+                + "declared starts to matter. Understanding scope turns two of "
+                + "the most confusing compiler errors into obvious fixes.")
+            .concept("Scope",
+                "A variable exists from where it is declared to the end of the "
+                + "BLOCK it was declared in - the closing brace of the { } "
+                + "around it. That region is its SCOPE.\n"
+                + "\n"
+                + "    if (score >= 7.0) {\n"
+                + "        String label = \"HIGH\";\n"
+                + "    }\n"
+                + "    System.out.println(label);   does NOT compile\n"
+                + "\n"
+                + "label was born inside the if block and ends at its closing "
+                + "brace. By the println, it no longer exists: 'cannot find "
+                + "symbol'.\n"
+                + "\n"
+                + "THE FIX: declare the variable before the if, where the "
+                + "println can see it, and only assign inside:\n"
+                + "\n"
+                + "    String label;\n"
+                + "    if (score >= 7.0) {\n"
+                + "        label = \"HIGH\";\n"
+                + "    } else {\n"
+                + "        label = \"NORMAL\";\n"
+                + "    }\n"
+                + "    System.out.println(label);\n"
+                + "\n"
+                + "DEFINITE ASSIGNMENT. Java refuses to let you read a variable "
+                + "that might never have been given a value. Remove the else "
+                + "above and the println fails with 'variable label might not "
+                + "have been initialized' - because when the score is low, "
+                + "nothing ever put a value in label.\n"
+                + "\n"
+                + "That rule is a safety feature: every path through the code "
+                + "must give the variable a value before anyone reads it.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        double score = 8.2;",
+                "        String label;",
+                "        if (score >= 7.0) {",
+                "            label = \"HIGH\";",
+                "        } else {",
+                "            label = \"NORMAL\";",
+                "        }",
+                "        System.out.println(\"SEVERITY: \" + label);",
+                "    }",
+                "}")
+            .exampleOutput("SEVERITY: HIGH")
+            .lineByLine(
+                new String[]{"String label;",
+                    "Declared outside the if, so it lives until the end of main."},
+                new String[]{"label = \"HIGH\";",
+                    "Assignment, not declaration - no type word. The variable "
+                    + "already exists."},
+                new String[]{"The else",
+                    "Guarantees label gets a value on every path."},
+                new String[]{"System.out.println(label)",
+                    "label is in scope and definitely assigned. Compiles."})
+            .predict(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "int failures = 7;",
+                    "if (failures > 5) {",
+                    "    String alert = \"BRUTE FORCE\";",
+                    "}",
+                    "System.out.println(alert);")
+                .accept("5", "line 5")
+                .hints("Where was alert declared?",
+                       "Where does that block end?")
+                .explain(
+                    "Line 5. alert was declared inside the if block, and that "
+                    + "block ended on line 4. On line 5 there is no such "
+                    + "variable: 'cannot find symbol'.")
+                .xp(20))
+            .practice(new Task(Task.DEBUG,
+                    "Declared in the right place this time. Which line still "
+                    + "does not compile?")
+                .code(
+                    "int failures = 2;",
+                    "String status;",
+                    "if (failures > 5) {",
+                    "    status = \"LOCKED\";",
+                    "}",
+                    "System.out.println(status);")
+                .accept("6", "line 6")
+                .hints(
+                    "status is in scope on line 6. Does it always have a value?",
+                    "What happens when failures is 5 or less?")
+                .explain(
+                    "Line 6: 'variable status might not have been initialized'. "
+                    + "When the condition is false, nothing ever puts a value in "
+                    + "status. Java does not look at the actual number 2 - it "
+                    + "checks every possible path, and one path leaves status "
+                    + "empty.")
+                .xp(30))
+            .objective(
+                "Make sure the account status always has a value.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int failures = 2;",
+                "        String status;",
+                "        if (failures > 5) {",
+                "            status = \"LOCKED\";",
+                "        } else {",
+                "            // give status a value here",
+                "        }",
+                "        System.out.println(\"STATUS: \" + status);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line inside the else that sets status to ACTIVE, so "
+                + "every path gives it a value.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the assignment for the else branch.")
+                .accept("status = \"ACTIVE\";", "status = \"ACTIVE\"")
+                .hints(
+                    "status is already declared. Do not write String again.",
+                    "An assignment: name, =, value.",
+                    "status = \"ACTIVE\";")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int failures = 2;",
+                    "        String status;",
+                    "        if (failures > 5) {",
+                    "            status = \"LOCKED\";",
+                    "        } else {",
+                    "            status = \"ACTIVE\";",
+                    "        }",
+                    "        System.out.println(\"STATUS: \" + status);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Now both paths assign status, so Java can prove it has a "
+                    + "value by the println, and the program compiles and prints "
+                    + "STATUS: ACTIVE.\n"
+                    + "\n"
+                    + "Writing String status = \"ACTIVE\"; inside the else would "
+                    + "fail differently: it would declare a SECOND variable "
+                    + "called status that only lives inside the else, leaving "
+                    + "the outer one still unassigned - and Java refuses to have "
+                    + "two variables of the same name overlapping like that.")
+                .explain(
+                    "Assign the existing variable; do not declare it again.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Declaring inside the block",
+                    "The variable ends at the closing brace. Declare before the "
+                    + "if."},
+                new String[]{"Leaving a path unassigned",
+                    "'might not have been initialized'. Every branch must set "
+                    + "it - an else usually fixes it."},
+                new String[]{"Re-declaring inside a branch",
+                    "String status = ... inside the if makes a new variable. "
+                    + "Assign the existing one."})
+            .cyber(
+                "The definite-assignment rule is Java quietly enforcing a "
+                + "security principle. A decision variable - allowed, "
+                + "clearance, riskLevel - that could be read before any path "
+                + "set it is exactly the kind of gap that produces a default "
+                + "nobody chose.\n"
+                + "\n"
+                + "Some languages would give such a variable whatever happened "
+                + "to be in memory, or a default like false or zero, and carry "
+                + "on. Java refuses to compile until every path decides. When "
+                + "you add the missing else, decide it deliberately - and for "
+                + "anything that grants access, make the default the safe "
+                + "one.")
+            .check(new Task(Task.CHOICE,
+                    "A variable declared inside an if block can be used...")
+                .choices("anywhere in main", "only inside that block",
+                         "only after the if", "anywhere in the class")
+                .accept("2", "b")
+                .hints("Its scope ends at a brace.", "Which brace?")
+                .explain(
+                    "Only inside that block. Its scope ends at the block's "
+                    + "closing brace.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int hour = 22;",
+                    "String shift;",
+                    "if (hour >= 8 && hour < 20) {",
+                    "    shift = \"DAY\";",
+                    "} else {",
+                    "    shift = \"NIGHT\";",
+                    "}",
+                    "System.out.println(shift);")
+                .accept("NIGHT")
+                .hints("Is 22 between 8 and 20?", "The else runs.")
+                .explain(
+                    "NIGHT. 22 is not below 20, so the else assigns NIGHT. Both "
+                    + "paths assign shift, so it compiles.")
+                .xp(15))
+            .recap(
+                "A variable lives from its declaration to the end of its block.\n"
+                + "\n"
+                + "    String label;          declare before the if\n"
+                + "    if (...) { label = ...; } else { label = ...; }\n"
+                + "    use label here\n"
+                + "\n"
+                + "Every path must assign it before it is read.")
+            .next("Next: an if that produces a value in one line."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(20), "An If That Gives a Value", 3)
+            .brief(
+                "The last mission needed five lines to set one label: declare, "
+                + "if, assign, else, assign. For choosing between two values, "
+                + "Java has a shorter form.\n\n"
+                + "It is compact, easy to overuse, and worth knowing well "
+                + "enough to recognise.")
+            .willLearn("The conditional operator", "? and :", "When not to use it")
+            .whyUseful(
+                "Short either/or values - a label, a plural, a default - appear "
+                + "constantly. The conditional operator writes them in one "
+                + "readable line, and you will meet it in almost every codebase "
+                + "you read.")
+            .concept("condition ? a : b",
+                "The CONDITIONAL OPERATOR chooses between two values:\n"
+                + "\n"
+                + "    condition ? valueIfTrue : valueIfFalse\n"
+                + "\n"
+                + "    String label = score >= 7.0 ? \"HIGH\" : \"NORMAL\";\n"
+                + "\n"
+                + "Read it as a question: 'score at least 7? then HIGH, "
+                + "otherwise NORMAL'. It does the same as the five-line if/else "
+                + "from the last mission.\n"
+                + "\n"
+                + "It is an EXPRESSION - it produces a value - so it goes where "
+                + "a value goes: after an =, inside a println, as an argument:\n"
+                + "\n"
+                + "    System.out.println(count + \" attempt\"\n"
+                + "            + (count == 1 ? \"\" : \"s\"));\n"
+                + "\n"
+                + "Both values must be the same kind of thing - two Strings, or "
+                + "two numbers.\n"
+                + "\n"
+                + "BRACKETS. It has very low precedence, below + . So\n"
+                + "\n"
+                + "    \"Status: \" + locked ? \"L\" : \"U\"\n"
+                + "\n"
+                + "joins \"Status: \" + locked first, then tries to use that "
+                + "String as the condition - which does not compile. Put the "
+                + "whole ?: in brackets whenever it sits inside a bigger "
+                + "expression.\n"
+                + "\n"
+                + "WHEN NOT TO. It chooses VALUES. For choosing ACTIONS - print "
+                + "this, lock that - use if. And never nest them: a ? b : c ? "
+                + "d : e is legal, and almost nobody reads it correctly first "
+                + "time.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int failures = 1;",
+                "        String state = failures > 5 ? \"LOCKED\" : \"ACTIVE\";",
+                "        System.out.println(state);",
+                "        System.out.println(failures + \" failure\"",
+                "                + (failures == 1 ? \"\" : \"s\"));",
+                "    }",
+                "}")
+            .exampleOutput("ACTIVE", "1 failure")
+            .lineByLine(
+                new String[]{"failures > 5 ? \"LOCKED\" : \"ACTIVE\"",
+                    "1 > 5 is false, so the value after the colon: ACTIVE."},
+                new String[]{"(failures == 1 ? \"\" : \"s\")",
+                    "Exactly one, so no s. Bracketed because it sits inside a + "
+                    + "chain."},
+                new String[]{"Both sides the same type",
+                    "Two Strings each time, so the result is a String."},
+                new String[]{"No actions inside",
+                    "It only chooses values. The printing stays outside it."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "boolean patched = false;",
+                    "System.out.println(patched ? \"OK\" : \"VULNERABLE\");")
+                .accept("VULNERABLE")
+                .hints("Is patched true?", "False picks the value after the colon.")
+                .explain("VULNERABLE. The condition is false, so the second value.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int count = 3;",
+                    "System.out.println(count + \" alert\" + (count == 1 ? \"\" : \"s\"));")
+                .accept("3 alerts")
+                .hints("Is count exactly 1?", "Not 1, so an s is added.")
+                .explain(
+                    "3 alerts. count == 1 is false, so \"s\" is chosen and joined "
+                    + "on. With 1, it would print 1 alert.")
+                .xp(20))
+            .objective(
+                "Label a host's patch state in one line.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean patched = true;",
+                "        // declare state here",
+                "        System.out.println(\"WEB-01: \" + state);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare a String called state that is PATCHED when patched is "
+                + "true and VULNERABLE otherwise, using the conditional "
+                + "operator.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare state with the conditional operator.")
+                .accept("String state = patched ? \"PATCHED\" : \"VULNERABLE\";",
+                        "String state = patched ? \"PATCHED\" : \"VULNERABLE\"",
+                        "String state = (patched ? \"PATCHED\" : \"VULNERABLE\");")
+                .hints(
+                    "The shape is condition ? valueIfTrue : valueIfFalse.",
+                    "patched is already a boolean - it is the condition.",
+                    "String state = patched ? \"PATCHED\" : \"VULNERABLE\";")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        boolean patched = true;",
+                    "        String state = patched ? \"PATCHED\" : \"VULNERABLE\";",
+                    "        System.out.println(\"WEB-01: \" + state);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "patched is true, so the operator hands back the value "
+                    + "before the colon, PATCHED, and state holds it.\n"
+                    + "\n"
+                    + "One line instead of five, and still easy to read, because "
+                    + "it only chooses between two plain values. The moment "
+                    + "either branch needs to DO something - raise an alert, "
+                    + "log a reason - an if/else is the right tool again.")
+                .explain(
+                    "condition ? valueIfTrue : valueIfFalse.")
+                .xp(25))
+            .mistakes(
+                new String[]{"No brackets inside a bigger expression",
+                    "\"S: \" + x ? a : b joins first. Write \"S: \" + (x ? a : b)."},
+                new String[]{"Two different types",
+                    "flag ? \"yes\" : 0 mixes a String and an int. Keep both "
+                    + "sides the same kind."},
+                new String[]{"Nesting them",
+                    "a ? b : c ? d : e compiles and confuses everyone. Use "
+                    + "if/else if."})
+            .cyber(
+                "Short conditional values are common in security code: "
+                + "\"ALLOW\" or \"DENY\", a severity label, a masked or unmasked "
+                + "value. Their brevity is useful - one line, one decision, easy "
+                + "to audit.\n"
+                + "\n"
+                + "The same brevity is a risk when they are nested or when the "
+                + "safe value is on the wrong side of the colon. "
+                + "isAdmin ? \"ALLOW\" : \"DENY\" reads naturally; flipping it "
+                + "while refactoring is a one-character change that inverts a "
+                + "security decision. Keep them short, keep the safe default "
+                + "obvious, and give anything complicated a full if/else.")
+            .check(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "boolean locked = true;",
+                    "String a = locked ? \"LOCKED\" : \"OPEN\";",
+                    "String b = \"Status: \" + locked ? \"LOCKED\" : \"OPEN\";")
+                .accept("3", "line 3")
+                .hints(
+                    "?: has lower precedence than +. What does + build first on "
+                    + "line 3?",
+                    "Can a String be used as the condition?")
+                .explain(
+                    "Line 3. The + runs first and builds \"Status: true\", a "
+                    + "String, which then becomes the condition of ?: - and a "
+                    + "condition must be a boolean. Brackets fix it: "
+                    + "\"Status: \" + (locked ? \"LOCKED\" : \"OPEN\").")
+                .xp(25))
+            .check(new Task(Task.CHOICE,
+                    "When is the conditional operator the WRONG tool?")
+                .choices("Choosing between two labels",
+                         "Adding an s for plurals",
+                         "Deciding whether to lock an account and alert the team",
+                         "Picking a default value")
+                .accept("3", "c")
+                .hints("?: chooses values.", "Which option is about actions?")
+                .explain(
+                    "Locking an account and alerting the team are actions, not "
+                    + "values. That is what if is for.")
+                .xp(15))
+            .recap(
+                "    condition ? valueIfTrue : valueIfFalse\n"
+                + "\n"
+                + "An expression: it produces a value. Both sides the same type.\n"
+                + "\n"
+                + "Bracket it inside a bigger expression. Values only, never "
+                + "actions. Never nested.")
+            .next("Next: choosing between many exact values with switch."));
     }
 }
