@@ -2,7 +2,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The full plan: twenty campaigns, 530 missions.
+ * The full plan: twenty campaigns, 510 missions.
+ *
+ * Campaigns 00 to 08 follow the module syllabus, in its order, so the game
+ * and the lectures move together. 09 to 19 go beyond the module. See
+ * docs/CURRICULUM.md for what each one covers.
  *
  * Every campaign is declared here with the number of missions it is meant to
  * hold, whether or not those missions exist yet. That way the game can show
@@ -17,18 +21,20 @@ public class CampaignIndex {
     private static final List<Campaign> CAMPAIGNS = new ArrayList<>();
 
     static {
-        declare(0,  "INIT",              "Setup and Java orientation",   10);
-        declare(1,  "JAVA ZERO",         "Java from zero",               30);
-        declare(2,  "CONDITIONAL",       "Conditions and decisions",     30);
-        declare(3,  "LOOP//CONTROL",     "Loops",                        30);
-        declare(4,  "METHODS",           "Methods",                      30);
-        declare(5,  "DATA",              "Arrays and Strings",           30);
-        declare(6,  "DEBUG",             "Debugging",                    30);
-        declare(7,  "OBJECTS",           "Classes and objects",          30);
-        declare(8,  "OOP",               "Object-oriented programming",  30);
-        declare(9,  "COLLECTIONS",       "Collections",                  30);
-        declare(10, "EXCEPTIONS",        "Exceptions and error handling",25);
-        declare(11, "FILES",             "Files and data processing",    25);
+        // Part 1: the module.
+        declare(0,  "INIT",              "Language and IDE basics",      10);
+        declare(1,  "JAVA ZERO",         "Variables, operators, I/O",    30);
+        declare(2,  "CONDITIONAL",       "Selection and switch",         30);
+        declare(3,  "METHODS",           "Methods and the stack",        30);
+        declare(4,  "LOOP//CONTROL",     "Iteration",                    30);
+        declare(5,  "COLLECTIONS",       "Arrays and ArrayList",         30);
+        declare(6,  "OBJECTS",           "Classes and constructors",     30);
+        declare(7,  "EXCEPTIONS",        "Exceptions and events",        25);
+        declare(8,  "FILES",             "File I/O",                     25);
+        // Part 2: beyond the module.
+        declare(9,  "DEBUG",             "Debugging and testing",        30);
+        declare(10, "OOP",               "Inheritance and interfaces",   30);
+        declare(11, "DATA STRUCTURES",   "Maps, sets and generics",      30);
         declare(12, "ALGORITHMS",        "Algorithms and problem solving",25);
         declare(13, "SECURE CODE",       "Secure Java programming",      25);
         declare(14, "CYBER OPS",         "Cybersecurity programming",    25);
@@ -42,10 +48,31 @@ public class CampaignIndex {
         Campaign00.build(byNumber(0));
         Campaign01.build(byNumber(1));
         Campaign02.build(byNumber(2));
+
+        // Labs: whole programs, written by the learner, tested by the game.
+        Campaign00Labs.build(byNumber(0));
+        Campaign01Labs.build(byNumber(1));
     }
 
     private static void declare(int number, String code, String topic, int planned) {
         CAMPAIGNS.add(new Campaign(number, code, topic, planned));
+    }
+
+    public static List<Lab> allLabs() {
+        List<Lab> labs = new ArrayList<>();
+        for (Campaign campaign : CAMPAIGNS) {
+            labs.addAll(campaign.getLabs());
+        }
+        return labs;
+    }
+
+    public static Lab labById(String id) {
+        for (Lab lab : allLabs()) {
+            if (lab.getId().equalsIgnoreCase(id.trim())) {
+                return lab;
+            }
+        }
+        return null;
     }
 
     public static List<Campaign> all() {

@@ -7,7 +7,7 @@
  * missions kept pointing at the same gap: a -1 nobody checked, input
  * nobody validated, a threshold nothing acted on. This campaign closes it.
  *
- * Loops are Campaign 03 and writing methods is Campaign 04, so a mission
+ * Writing methods is Campaign 03 and loops are Campaign 04, so a mission
  * here may use everything from Campaigns 00 and 01, plus whatever this
  * campaign has already introduced - and nothing else.
  */

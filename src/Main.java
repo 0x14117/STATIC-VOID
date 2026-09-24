@@ -150,14 +150,16 @@ public class Main {
             } else if (choice.equals("3")) {
                 training();
             } else if (choice.equals("4")) {
-                KnowledgeIndex.show(player);
+                LabDesk.show(player);
             } else if (choice.equals("5")) {
-                CampaignIndex.showTree(player);
+                KnowledgeIndex.show(player);
             } else if (choice.equals("6")) {
-                progress();
+                CampaignIndex.showTree(player);
             } else if (choice.equals("7")) {
+                progress();
+            } else if (choice.equals("8")) {
                 settings();
-            } else if (choice.equals("8") || choice.equalsIgnoreCase("exit")
+            } else if (choice.equals("9") || choice.equalsIgnoreCase("exit")
                     || choice.equalsIgnoreCase("quit")) {
                 SaveFile.save(player);
                 Terminal.blank();
@@ -165,7 +167,7 @@ public class Main {
                 Terminal.blank();
                 return;
             } else {
-                Terminal.line("  Not an option. Choose 1 to 8.");
+                Terminal.line("  Not an option. Choose 1 to 9.");
                 Terminal.pause();
             }
         }
@@ -190,6 +192,8 @@ public class Main {
         Terminal.line("  Missions  : " + player.getCompletedMissions().size()
                 + " of " + CampaignIndex.builtTotal() + " built"
                 + "   (" + CampaignIndex.plannedTotal() + " planned)");
+        Terminal.line("  Labs      : " + player.getLabsPassed().size()
+                + " of " + CampaignIndex.allLabs().size() + " passed");
         Terminal.blank();
 
         if (next == null) {
@@ -204,10 +208,11 @@ public class Main {
         Terminal.blank();
         Terminal.rule('+', '-');
         Terminal.blank();
-        menuRow("1", "View Mission", "5", "Campaign Map");
-        menuRow("2", "Start Mission", "6", "Progress");
-        menuRow("3", "Training", "7", "Settings");
-        menuRow("4", "Java Knowledge", "8", "Exit");
+        menuRow("1", "View Mission", "6", "Campaign Map");
+        menuRow("2", "Start Mission", "7", "Progress");
+        menuRow("3", "Training", "8", "Settings");
+        menuRow("4", "Labs", "9", "Exit");
+        Terminal.line("   " + Theme.paint(Theme.ACCENT, "5.") + " Java Knowledge");
         Terminal.blank();
     }
 
@@ -324,6 +329,8 @@ public class Main {
         Terminal.line("  Missions done  : " + player.getCompletedMissions().size()
                 + " of " + CampaignIndex.builtTotal() + " built"
                 + ", " + CampaignIndex.plannedTotal() + " planned");
+        Terminal.line("  Labs passed    : " + player.getLabsPassed().size()
+                + " of " + CampaignIndex.allLabs().size());
         Terminal.line("  Topics learned : " + player.getLearnedTopics().size());
         Terminal.line("  Hints used     : " + player.getHintsUsed());
         Terminal.line("  Wrong answers  : " + player.getWrongAnswers());
@@ -437,6 +444,9 @@ public class Main {
             Terminal.wrapped("Your progress is in cyberops-save.txt, in the folder "
                     + "you run the game from. It is plain text - open it and you "
                     + "can read exactly what the game remembers about you.", "  ");
+            Terminal.blank();
+            Terminal.wrapped("Your lab programs are in the labs folder beside it, "
+                    + "one folder per lab.", "  ");
             Terminal.blank();
             Terminal.pause();
         }

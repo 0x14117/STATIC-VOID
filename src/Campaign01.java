@@ -6,7 +6,7 @@
  * could change. This campaign gives programs memory: variables, the types
  * they come in, and the operators that work on them.
  *
- * Still no conditions and no loops - those are Campaigns 02 and 03. A mission
+ * Still no conditions and no loops - those are Campaigns 02 and 04. A mission
  * here may only use printing, comments and whatever this campaign has already
  * introduced.
  */
@@ -3302,7 +3302,7 @@ public class Campaign01 {
                 + "You have been calling a method since your first program: "
                 + "println belongs to System.out, and the dots in "
                 + "System.out.println mean exactly the same thing. Writing "
-                + "methods of your own is Campaign 04. For now you are using "
+                + "methods of your own is Campaign 03. For now you are using "
                 + "the ones String already has.\n"
                 + "\n"
                 + "length() hands back an int, so you can store it, print it or "
@@ -3947,7 +3947,7 @@ public class Campaign01 {
                 + "\n"
                 + "That is a crash at RUN time, not a compile error. The "
                 + "compiler cannot know how long the String will be. Handling "
-                + "crashes like this properly is Campaign 10. For now, the "
+                + "crashes like this properly is Campaign 07. For now, the "
                 + "defence is knowing the rule: valid indexes go from 0 to "
                 + "length() - 1.")
             .example(
@@ -4350,7 +4350,7 @@ public class Campaign01 {
                 + "    Scanner input = new Scanner(System.in);\n"
                 + "\n"
                 + "System.out is the screen; System.in is the keyboard. The "
-                + "word new builds something - Campaign 07 is about exactly "
+                + "word new builds something - Campaign 06 is about exactly "
                 + "that. input is just a variable name.\n"
                 + "\n"
                 + "3. Each time you want a line, ask for one:\n"
@@ -4608,7 +4608,7 @@ public class Campaign01 {
                 + "That fixes stray spaces. It does not fix 'ten'. Checking "
                 + "whether text is a valid number before converting needs "
                 + "decisions, which is Campaign 02, and recovering from the "
-                + "crash is Campaign 10. For now, know exactly what crashes "
+                + "crash is Campaign 07. For now, know exactly what crashes "
                 + "and why.")
             .example(
                 "public class Main {",
@@ -6021,7 +6021,7 @@ public class Campaign01 {
                 + "What this parser does NOT survive: a missing field, a double "
                 + "space, a port that is not a number. Each is -1 or a crash "
                 + "waiting to happen. Checking for them is Campaign 02; "
-                + "recovering from them is Campaign 10. Knowing they exist is "
+                + "recovering from them is Campaign 07. Knowing they exist is "
                 + "today.")
             .example(
                 "public class Main {",

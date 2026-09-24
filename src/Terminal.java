@@ -24,6 +24,11 @@ public class Terminal {
         System.out.println(text);
     }
 
+    /** Text with no line break after it, for a label the next call continues. */
+    public static void inline(String text) {
+        System.out.print(text);
+    }
+
     /** One line in a theme role - GOOD for correct, BAD for wrong, and so on. */
     public static void lineAs(int role, String text) {
         System.out.println(Theme.paint(role, text));

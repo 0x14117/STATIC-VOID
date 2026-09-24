@@ -187,6 +187,59 @@ public class CheckAll {
             }
         }
 
+        // --- labs ------------------------------------------------------------
+        // Whether each lab can actually be done is tools/CheckLabs' job, which
+        // runs the real compiler. These are the fast checks on its content.
+        java.util.Set<String> labIds = new java.util.HashSet<>();
+        int labCount = 0;
+        for (Campaign campaign : CampaignIndex.all()) {
+            for (int i = 0; i < campaign.getLabs().size(); i++) {
+                Lab lab = campaign.getLabs().get(i);
+                String id = lab.getId();
+                labCount++;
+                check(id + " is numbered in order", id.equals(campaign.labId(i + 1)), "");
+                check(id + " id is unique", labIds.add(id), "");
+                check(id + " has a title", lab.getTitle().length() > 3, "");
+                check(id + " has a known size",
+                      java.util.Arrays.asList(Lab.SMALL, Lab.MEDIUM, Lab.BIG, Lab.CAPSTONE)
+                          .contains(lab.getSize()), lab.getSize());
+                check(id + " builds on a real mission",
+                      CampaignIndex.byId(lab.getAfter()) != null, lab.getAfter());
+                check(id + " has a brief", lab.getBrief().length() > 100, "");
+                check(id + " says what it practises", lab.getPractises().length >= 1, "");
+                check(id + " has a specification", lab.getSpec().length >= 2, "");
+                check(id + " has a starter", lab.getStarter().length >= 3, "");
+                check(id + " has 3 or more hints", lab.getHints().length >= 3,
+                      "got " + lab.getHints().length);
+                check(id + " has a solution", lab.getSolution().length >= 3, "");
+                check(id + " explains its solution", lab.getWalkthrough().length() > 150,
+                      "a solution without reasoning teaches copying");
+                boolean sample = false;
+                boolean hidden = false;
+                for (LabTest t : lab.getTests()) {
+                    sample = sample || !t.isHidden();
+                    hidden = hidden || t.isHidden();
+                    for (String line : t.getScreen()) {
+                        check(id + " sample line fits the screen",
+                              6 + line.length() <= Terminal.WIDTH + 16, line);
+                    }
+                }
+                check(id + " shows a sample run", sample, "");
+                if (lab.readsInput()) {
+                    check(id + " has a hidden test", hidden,
+                          "input labs need hidden tests so hard-coding fails");
+                }
+                checkProseWidth(id + " brief", lab.getBrief());
+                checkProseWidth(id + " walkthrough", lab.getWalkthrough());
+                for (String h : lab.getHints()) {
+                    checkProseWidth(id + " hint", h);
+                }
+                checkCodeWidth(id + " starter", lab.getStarter());
+                checkCodeWidth(id + " solution", lab.getSolution());
+            }
+        }
+        System.out.println("labs built        : " + labCount);
+
         // --- the knowledge index and the missions agree -------------------
         // Every mission ticks at least one topic, except a campaign's closing
         // checkpoint, which reviews rather than introduces. And once a

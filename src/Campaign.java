@@ -15,6 +15,7 @@ public class Campaign {
     private final String topic;
     private final int plannedMissions;
     private final List<Mission> missions = new ArrayList<>();
+    private final List<Lab> labs = new ArrayList<>();
 
     public Campaign(int number, String code, String topic, int plannedMissions) {
         this.number = number;
@@ -47,6 +48,31 @@ public class Campaign {
         mission.setCampaign(this);
         missions.add(mission);
         return this;
+    }
+
+    public List<Lab> getLabs() {
+        return labs;
+    }
+
+    public Campaign addLab(Lab lab) {
+        lab.setCampaign(this);
+        labs.add(lab);
+        return this;
+    }
+
+    /** Lab ids look like C01-L05, beside the mission ids they build on. */
+    public String labId(int labNumber) {
+        return String.format("C%02d-L%02d", number, labNumber);
+    }
+
+    public int labsPassedBy(Player player) {
+        int passed = 0;
+        for (Lab lab : labs) {
+            if (player.hasPassedLab(lab.getId())) {
+                passed = passed + 1;
+            }
+        }
+        return passed;
     }
 
     /** "CAMPAIGN 00 - INIT" */

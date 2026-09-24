@@ -12,6 +12,8 @@ public class Player {
     private int wrongAnswers;
     private final List<String> completedMissions = new ArrayList<>();
     private final List<String> learnedTopics = new ArrayList<>();
+    private final List<String> labsPassed = new ArrayList<>();
+    private final List<String> labSolutionsSeen = new ArrayList<>();
 
     public Player(String name) {
         this.name = name;
@@ -87,6 +89,35 @@ public class Player {
     public void markCompleted(String missionId) {
         if (!hasCompleted(missionId)) {
             completedMissions.add(missionId);
+        }
+    }
+
+    public List<String> getLabsPassed() {
+        return labsPassed;
+    }
+
+    public boolean hasPassedLab(String labId) {
+        return labsPassed.contains(labId);
+    }
+
+    public void passLab(String labId) {
+        if (!hasPassedLab(labId)) {
+            labsPassed.add(labId);
+        }
+    }
+
+    public List<String> getLabSolutionsSeen() {
+        return labSolutionsSeen;
+    }
+
+    /** Remembered so that reopening the game cannot restore the full XP. */
+    public boolean sawLabSolution(String labId) {
+        return labSolutionsSeen.contains(labId);
+    }
+
+    public void markLabSolutionSeen(String labId) {
+        if (!sawLabSolution(labId)) {
+            labSolutionsSeen.add(labId);
         }
     }
 

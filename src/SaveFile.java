@@ -29,6 +29,10 @@ public class SaveFile {
             out.newLine();
             out.write("topics=" + String.join(",", player.getLearnedTopics()));
             out.newLine();
+            out.write("labs=" + String.join(",", player.getLabsPassed()));
+            out.newLine();
+            out.write("labhelp=" + String.join(",", player.getLabSolutionsSeen()));
+            out.newLine();
             if (Theme.isChosen()) {
                 out.write("theme=" + Theme.current());
                 out.newLine();
@@ -51,6 +55,8 @@ public class SaveFile {
         int wrong = 0;
         String completed = "";
         String topics = "";
+        String labs = "";
+        String labHelp = "";
 
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String line = in.readLine();
@@ -71,6 +77,10 @@ public class SaveFile {
                         completed = value;
                     } else if (key.equals("topics")) {
                         topics = value;
+                    } else if (key.equals("labs")) {
+                        labs = value;
+                    } else if (key.equals("labhelp")) {
+                        labHelp = value;
                     } else if (key.equals("theme")) {
                         Theme.choose(value);
                     }
@@ -92,6 +102,16 @@ public class SaveFile {
         for (String topic : topics.split(",")) {
             if (!topic.isEmpty()) {
                 player.learn(topic);
+            }
+        }
+        for (String lab : labs.split(",")) {
+            if (!lab.isEmpty()) {
+                player.passLab(lab);
+            }
+        }
+        for (String lab : labHelp.split(",")) {
+            if (!lab.isEmpty()) {
+                player.markLabSolutionSeen(lab);
             }
         }
         return player;
