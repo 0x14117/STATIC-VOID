@@ -756,5 +756,1001 @@ public class Campaign02Labs {
             .hidden(Lab.typing("tool.ps1"), 
                 "Attachment: tool.ps1",
                 "DELIVER .ps1"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(11), "Leap-Year Log Rotation", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M008")
+            .brief(
+                "Audit logs are kept for one calendar year, rotated daily, so the "
+                + "storage plan needs the number of days in the year. Leap years "
+                + "follow a rule with an exception to the exception - a small, "
+                + "classic test of combining && and ||.")
+            .practises("&& and || together", "The remainder operator", "Brackets for clarity")
+            .spec(
+                "Prompt Year: and read a whole number.",
+                "A year is a leap year if it divides by 4 but not by 100 - or if it divides by 400.",
+                "Print <year>: leap year, 366 days of logs  or  <year>: 365 days of logs.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Year: \");",
+                "        int year = Integer.parseInt(input.nextLine().trim());",
+                "        // decide whether it is a leap year",
+                "    }",
+                "}")
+            .hints(
+                "'Divides by 4' is year % 4 == 0: no remainder.",
+                "The rule has two parts joined by OR: (divides by 4 AND not by "
+                + "100) OR (divides by 400).",
+                "Bracket the && part so nobody has to remember precedence:\n"
+                + "\n"
+                + "    boolean leap = (year % 4 == 0 && year % 100 != 0)\n"
+                + "            || year % 400 == 0;")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Year: \");",
+                "        int year = Integer.parseInt(input.nextLine().trim());",
+                "        boolean leap = (year % 4 == 0 && year % 100 != 0)",
+                "                || year % 400 == 0;",
+                "        if (leap) {",
+                "            System.out.println(year",
+                "                    + \": leap year, 366 days of logs\");",
+                "        } else {",
+                "            System.out.println(year + \": 365 days of logs\");",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The rule is written straight from the specification: divisible "
+                + "by 4 AND not by 100, OR divisible by 400. % gives the "
+                + "remainder, so == 0 means 'divides exactly'.\n"
+                + "\n"
+                + "Storing the answer in a named boolean first keeps the if "
+                + "readable. The hidden tests are the four kinds of year: 2024 "
+                + "(normal leap), 2023 (not), 1900 (divisible by 100, so not) and "
+                + "2000 (divisible by 400, so leap after all). Get either "
+                + "exception wrong and one of them fails.")
+            .sample(Lab.typing("2024"), 
+                "Year: 2024",
+                "2024: leap year, 366 days of logs")
+            .hidden(Lab.typing("2023"), 
+                "Year: 2023",
+                "2023: 365 days of logs")
+            .hidden(Lab.typing("1900"), 
+                "Year: 1900",
+                "1900: 365 days of logs")
+            .hidden(Lab.typing("2000"), 
+                "Year: 2000",
+                "2000: leap year, 366 days of logs"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(12), "Login Decision Engine", Lab.MEDIUM)
+            .after("C02-M015")
+            .brief(
+                "A login passes four checks in order: the account exists, it is "
+                + "not locked, the password is right, the second factor passed. "
+                + "The audit log must record exactly which check failed. The "
+                + "person logging in must NOT be told - one generic message "
+                + "for every failure, so attackers cannot learn which usernames "
+                + "exist.")
+            .practises("Nested decisions or else-if chains", "Reading y/n answers",
+                       "Separating audit detail from user messages")
+            .spec(
+                "Ask, in this order, each answered y or n: Account exists (y/n):, Locked (y/n):, Password correct (y/n):, MFA passed (y/n):",
+                "Treat y or Y (with any spaces) as yes; anything else as no.",
+                "Print AUDIT: with the FIRST failing check: no such account, account locked, wrong password, MFA failed - or access granted.",
+                "Then print USER SEES: Welcome if granted, otherwise USER SEES: Login failed.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // 1. ask the four questions",
+                "        // 2. find the first failing check",
+                "        // 3. print the audit line and the user line",
+                "    }",
+                "}")
+            .hints(
+                "Turn each answer into a boolean as you read it:\n"
+                + "\n"
+                + "    System.out.print(\"Account exists (y/n): \");\n"
+                + "    boolean exists = input.nextLine().trim()\n"
+                + "            .equalsIgnoreCase(\"y\");",
+                "An else-if chain in check order finds the FIRST failure: "
+                + "!exists, then locked, then !passwordOk, then !mfaOk, then "
+                + "the final else is success.",
+                "Set a String reason in each branch, and a boolean granted only "
+                + "in the last one. Print both lines after the chain.",
+                "The user line is one ?: away:\n"
+                + "\n"
+                + "    System.out.println(\"USER SEES: \"\n"
+                + "            + (granted ? \"Welcome\" : \"Login failed\"));")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Account exists (y/n): \");",
+                "        boolean exists = input.nextLine().trim()",
+                "                .equalsIgnoreCase(\"y\");",
+                "        System.out.print(\"Locked (y/n): \");",
+                "        boolean locked = input.nextLine().trim()",
+                "                .equalsIgnoreCase(\"y\");",
+                "        System.out.print(\"Password correct (y/n): \");",
+                "        boolean passwordOk = input.nextLine().trim()",
+                "                .equalsIgnoreCase(\"y\");",
+                "        System.out.print(\"MFA passed (y/n): \");",
+                "        boolean mfaOk = input.nextLine().trim().equalsIgnoreCase(\"y\");",
+                "",
+                "        String reason;",
+                "        boolean granted = false;",
+                "        if (!exists) {",
+                "            reason = \"no such account\";",
+                "        } else if (locked) {",
+                "            reason = \"account locked\";",
+                "        } else if (!passwordOk) {",
+                "            reason = \"wrong password\";",
+                "        } else if (!mfaOk) {",
+                "            reason = \"MFA failed\";",
+                "        } else {",
+                "            reason = \"access granted\";",
+                "            granted = true;",
+                "        }",
+                "        System.out.println(\"AUDIT: \" + reason);",
+                "        String shown = granted ? \"Welcome\" : \"Login failed\";",
+                "        System.out.println(\"USER SEES: \" + shown);",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each answer becomes a boolean the moment it is read, so the "
+                + "decision code never deals with text. Anything that is not a "
+                + "y counts as no - including a typo - which is the safe way "
+                + "round.\n"
+                + "\n"
+                + "The else-if chain checks in the order the policy lists, and "
+                + "stops at the first failure: a locked account is reported as "
+                + "locked even if its password is also wrong. reason is "
+                + "declared before the chain and assigned in every branch, so "
+                + "it is definitely assigned (mission 19).\n"
+                + "\n"
+                + "The two output lines are the real lesson. The audit line is "
+                + "precise, for analysts. The user line is identical for every "
+                + "failure, so nobody can use the login form to discover which "
+                + "accounts exist - the user enumeration problem from mission "
+                + "15.")
+            .sample(Lab.typing("y", "n", "y", "n"), 
+                "Account exists (y/n): y",
+                "Locked (y/n): n",
+                "Password correct (y/n): y",
+                "MFA passed (y/n): n",
+                "AUDIT: MFA failed",
+                "USER SEES: Login failed")
+            .hidden(Lab.typing("n", "n", "y", "y"), 
+                "Account exists (y/n): n",
+                "Locked (y/n): n",
+                "Password correct (y/n): y",
+                "MFA passed (y/n): y",
+                "AUDIT: no such account",
+                "USER SEES: Login failed")
+            .hidden(Lab.typing("Y", "y", "y", "y"), 
+                "Account exists (y/n): Y",
+                "Locked (y/n): y",
+                "Password correct (y/n): y",
+                "MFA passed (y/n): y",
+                "AUDIT: account locked",
+                "USER SEES: Login failed")
+            .hidden(Lab.typing("y", "n", "n", "y"), 
+                "Account exists (y/n): y",
+                "Locked (y/n): n",
+                "Password correct (y/n): n",
+                "MFA passed (y/n): y",
+                "AUDIT: wrong password",
+                "USER SEES: Login failed")
+            .hidden(Lab.typing(" y ", "N", "Y", "y"), 
+                "Account exists (y/n):  y",
+                "Locked (y/n): N",
+                "Password correct (y/n): Y",
+                "MFA passed (y/n): y",
+                "AUDIT: access granted",
+                "USER SEES: Welcome"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(13), "Protocol by Port", Lab.MEDIUM)
+            .after("C02-M024")
+            .brief(
+                "The exposure report names the service behind each open port and "
+                + "flags the ones that send everything - passwords included - "
+                + "in clear text. A switch maps the port to its name; a second "
+                + "decision adds the warning.")
+            .practises("Switch expressions", "Several values per case", "A decision on the result")
+            .spec(
+                "Prompt Port: and read a whole number.",
+                "Print Service: with the name: 20 or 21 FTP, 22 SSH, 23 TELNET, 25 SMTP, 53 DNS, 80 or 8080 HTTP, 443 HTTPS, 3389 RDP, anything else UNKNOWN.",
+                "For FTP or TELNET, also print WARNING: cleartext protocol.",
+                "For UNKNOWN, also print REVIEW: unrecognised service.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Port: \");",
+                "        int port = Integer.parseInt(input.nextLine().trim());",
+                "        // map the port to a service, then warn if needed",
+                "    }",
+                "}")
+            .hints(
+                "A switch expression gives the name in one statement:\n"
+                + "\n"
+                + "    String service = switch (port) {\n"
+                + "        case 20, 21 -> \"FTP\";\n"
+                + "        ...\n"
+                + "        default -> \"UNKNOWN\";\n"
+                + "    };",
+                "The warnings depend on the service NAME, so decide them after "
+                + "the switch, comparing Strings with equals.",
+                "    if (service.equals(\"FTP\") || service.equals(\"TELNET\")) {")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Port: \");",
+                "        int port = Integer.parseInt(input.nextLine().trim());",
+                "        String service = switch (port) {",
+                "            case 20, 21 -> \"FTP\";",
+                "            case 22 -> \"SSH\";",
+                "            case 23 -> \"TELNET\";",
+                "            case 25 -> \"SMTP\";",
+                "            case 53 -> \"DNS\";",
+                "            case 80, 8080 -> \"HTTP\";",
+                "            case 443 -> \"HTTPS\";",
+                "            case 3389 -> \"RDP\";",
+                "            default -> \"UNKNOWN\";",
+                "        };",
+                "        System.out.println(\"Service: \" + service);",
+                "        if (service.equals(\"FTP\") || service.equals(\"TELNET\")) {",
+                "            System.out.println(\"WARNING: cleartext protocol\");",
+                "        } else if (service.equals(\"UNKNOWN\")) {",
+                "            System.out.println(\"REVIEW: unrecognised service\");",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The switch expression is a lookup table: one line per service, "
+                + "commas where several ports share a name, and a default that "
+                + "turns everything unlisted into UNKNOWN rather than ignoring "
+                + "it. No breaks, so no fall-through.\n"
+                + "\n"
+                + "The warnings are a separate decision on the RESULT. Keeping "
+                + "the mapping and the judgement apart means adding a port "
+                + "never risks changing which services get flagged. Telnet and "
+                + "FTP send credentials unencrypted; anyone on the network path "
+                + "can read them - which is why finding either one open is an "
+                + "immediate finding in any audit.")
+            .sample(Lab.typing("22"), 
+                "Port: 22",
+                "Service: SSH")
+            .hidden(Lab.typing("23"), 
+                "Port: 23",
+                "Service: TELNET",
+                "WARNING: cleartext protocol")
+            .hidden(Lab.typing("21"), 
+                "Port: 21",
+                "Service: FTP",
+                "WARNING: cleartext protocol")
+            .hidden(Lab.typing("8080"), 
+                "Port: 8080",
+                "Service: HTTP")
+            .hidden(Lab.typing("9999"), 
+                "Port: 9999",
+                "Service: UNKNOWN",
+                "REVIEW: unrecognised service"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(14), "Command Router", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M023")
+            .brief(
+                "The analyst console takes one command at a time. It must accept "
+                + "commands in any capitals with stray spaces, answer each known "
+                + "command, and for anything else repeat back exactly what was "
+                + "typed so the analyst can spot the mistake.")
+            .practises("switch on a String", "Normalising the switched value", "A helpful default")
+            .spec(
+                "Prompt Command: and read the line.",
+                "Compare it trimmed and in lower case: status, scan, lock, help and quit.",
+                "status: All systems monitored.  scan: Scan queued.  lock: Account locked.  help: Commands: status scan lock help quit.  quit: Session closed.",
+                "Anything else: Unknown command: followed by what was typed, trimmed but with its original capitals.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Command: \");",
+                "        String typed = input.nextLine().trim();",
+                "        // route the command",
+                "    }",
+                "}")
+            .hints(
+                "Switch on the normalised copy, typed.toLowerCase(), and keep "
+                + "typed itself for the unknown message.",
+                "Either form of switch works. The arrow form needs no breaks:\n"
+                + "\n"
+                + "    switch (typed.toLowerCase()) {\n"
+                + "        case \"status\" -> System.out.println(\"...\");\n"
+                + "        ...\n"
+                + "    }",
+                "The default prints typed, not the lower-case copy - the "
+                + "specification asks for the original capitals.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Command: \");",
+                "        String typed = input.nextLine().trim();",
+                "        switch (typed.toLowerCase()) {",
+                "            case \"status\" ->",
+                "                System.out.println(\"All systems monitored\");",
+                "            case \"scan\" -> System.out.println(\"Scan queued\");",
+                "            case \"lock\" -> System.out.println(\"Account locked\");",
+                "            case \"help\" ->",
+                "                System.out.println(",
+                "                        \"Commands: status scan lock help quit\");",
+                "            case \"quit\" -> System.out.println(\"Session closed\");",
+                "            default ->",
+                "                System.out.println(\"Unknown command: \" + typed);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The switch examines a normalised copy, so STATUS, Status and "
+                + "'  status ' all route the same way. The original, trimmed "
+                + "text is kept for the one place it matters: telling the "
+                + "analyst exactly what they typed when it was not understood.\n"
+                + "\n"
+                + "The arrow form runs one statement per case and cannot fall "
+                + "through, so there is no break to forget. And the command set "
+                + "is a fixed list - an allowlist - so nothing typed can make "
+                + "the console do anything that is not on it.")
+            .sample(Lab.typing("status"), 
+                "Command: status",
+                "All systems monitored")
+            .hidden(Lab.typing("  SCAN "), 
+                "Command:   SCAN",
+                "Scan queued")
+            .hidden(Lab.typing("Help"), 
+                "Command: Help",
+                "Commands: status scan lock help quit")
+            .hidden(Lab.typing("Restart WEB-01"), 
+                "Command: Restart WEB-01",
+                "Unknown command: Restart WEB-01"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(15), "Safe Email Parser", Lab.MEDIUM)
+            .after("C02-M016")
+            .brief(
+                "Campaign 01's email splitter trusted every address to be "
+                + "well-formed. The phishing triage tool gets pasted text of "
+                + "every kind, so the new version checks the shape first and "
+                + "says precisely what is wrong - and only splits an address "
+                + "that has exactly one @ with something on each side.")
+            .practises("Validation before use", "indexOf and lastIndexOf", "An ordered chain of checks")
+            .spec(
+                "Prompt Email: and read the line, then trim it.",
+                "Refuse, in this order: blank - REQUIRED;  no @ - MISSING @;  @ first - MISSING USER;  @ last - MISSING DOMAIN;  more than one @ - TOO MANY @.",
+                "Otherwise print User: as typed and Domain: in lower case, lined up as the sample shows.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Email: \");",
+                "        String email = input.nextLine().trim();",
+                "        int at = email.indexOf(\"@\");",
+                "        // check the shape, then split",
+                "    }",
+                "}")
+            .hints(
+                "The checks form one else-if chain, in the order given, with the "
+                + "split in the final else.",
+                "@ first means at == 0. @ last means at == email.length() - 1.",
+                "Two or more @ signs means the first one and the last one are in "
+                + "different places:\n"
+                + "\n"
+                + "    at != email.lastIndexOf(\"@\")",
+                "Check blank before anything else - isEmpty after trimming, or "
+                + "isBlank.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Email: \");",
+                "        String email = input.nextLine().trim();",
+                "        int at = email.indexOf(\"@\");",
+                "        if (email.isEmpty()) {",
+                "            System.out.println(\"REQUIRED\");",
+                "        } else if (at == -1) {",
+                "            System.out.println(\"MISSING @\");",
+                "        } else if (at == 0) {",
+                "            System.out.println(\"MISSING USER\");",
+                "        } else if (at == email.length() - 1) {",
+                "            System.out.println(\"MISSING DOMAIN\");",
+                "        } else if (at != email.lastIndexOf(\"@\")) {",
+                "            System.out.println(\"TOO MANY @\");",
+                "        } else {",
+                "            System.out.println(\"User:   \" + email.substring(0, at));",
+                "            String domain = email.substring(at + 1).toLowerCase();",
+                "            System.out.println(\"Domain: \" + domain);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each gate relies on the ones before it. By the time the chain "
+                + "asks whether the @ is first or last, it already knows there "
+                + "is one. By the time it cuts, it knows there is exactly one, "
+                + "with at least one character on each side - so neither "
+                + "substring can crash or come back empty.\n"
+                + "\n"
+                + "indexOf finds the first @ and lastIndexOf the last; if they "
+                + "differ, there are at least two. That one comparison catches "
+                + "addresses like a@b@evil.example, a classic trick for "
+                + "confusing a parser about which domain it is looking at.\n"
+                + "\n"
+                + "The hidden tests send one input for each refusal, plus a "
+                + "good address with odd capitals.")
+            .sample(Lab.typing("a.okafor@NorthStar.example"), 
+                "Email: a.okafor@NorthStar.example",
+                "User:   a.okafor",
+                "Domain: northstar.example")
+            .hidden(Lab.typing("   "), 
+                "Email:",
+                "REQUIRED")
+            .hidden(Lab.typing("call me urgently"), 
+                "Email: call me urgently",
+                "MISSING @")
+            .hidden(Lab.typing("@northstar.example"), 
+                "Email: @northstar.example",
+                "MISSING USER")
+            .hidden(Lab.typing("jsmith@"), 
+                "Email: jsmith@",
+                "MISSING DOMAIN")
+            .hidden(Lab.typing("jsmith@northstar.example@evil.example"), 
+                "Email: jsmith@northstar.example@evil.example",
+                "TOO MANY @"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(16), "Validated Number Input", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M017")
+            .brief(
+                "Every numeric field in the admin console goes through the same "
+                + "gatekeeper before anything uses it. Build it: refuse empty "
+                + "input, anything that is not digits, and anything too long to "
+                + "be sure it fits an int - and only then convert.")
+            .practises("A validation pipeline", "matches", "Converting only when safe")
+            .spec(
+                "Prompt Value: and read the line, then trim it.",
+                "Empty: REQUIRED.  Not one or more digits: NOT A NUMBER.  More than 9 digits: TOO LARGE.",
+                "Otherwise print Value: and the number, then Doubled: and twice the number.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Value: \");",
+                "        String text = input.nextLine().trim();",
+                "        // the gates, then the conversion",
+                "    }",
+                "}")
+            .hints(
+                "Three rejecting gates in an else-if chain, and the conversion "
+                + "in the final else.",
+                "The digits gate rejects what does NOT match: "
+                + "!text.matches(\"[0-9]+\").",
+                "Nine digits is at most 999999999; doubled, that still fits in "
+                + "an int.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Value: \");",
+                "        String text = input.nextLine().trim();",
+                "        if (text.isEmpty()) {",
+                "            System.out.println(\"REQUIRED\");",
+                "        } else if (!text.matches(\"[0-9]+\")) {",
+                "            System.out.println(\"NOT A NUMBER\");",
+                "        } else if (text.length() > 9) {",
+                "            System.out.println(\"TOO LARGE\");",
+                "        } else {",
+                "            int value = Integer.parseInt(text);",
+                "            System.out.println(\"Value: \" + value);",
+                "            System.out.println(\"Doubled: \" + value * 2);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The pipeline from mission 29, as a reusable gatekeeper. Every "
+                + "gate describes a reason to REFUSE, and parseInt only runs in "
+                + "the final else, where all three have passed - so this "
+                + "program cannot crash on anything typed.\n"
+                + "\n"
+                + "The length gate matters: ten digits match [0-9]+ and still "
+                + "overflow an int. One hidden test sends exactly nine digits "
+                + "and another ten - the boundary - and another sends a number "
+                + "with a minus sign, which the pattern rightly refuses because "
+                + "the field only takes counts.")
+            .sample(Lab.typing("42"), 
+                "Value: 42",
+                "Value: 42",
+                "Doubled: 84")
+            .hidden(Lab.typing(""), 
+                "Value:",
+                "REQUIRED")
+            .hidden(Lab.typing("4 2"), 
+                "Value: 4 2",
+                "NOT A NUMBER")
+            .hidden(Lab.typing("-7"), 
+                "Value: -7",
+                "NOT A NUMBER")
+            .hidden(Lab.typing("999999999"), 
+                "Value: 999999999",
+                "Value: 999999999",
+                "Doubled: 1999999998")
+            .hidden(Lab.typing("1000000000"), 
+                "Value: 1000000000",
+                "TOO LARGE"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(17), "Risk Band", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M020")
+            .brief(
+                "A vulnerability on a critical asset - the domain controller, "
+                + "the payroll database - is more urgent than the same "
+                + "vulnerability on a test laptop. Weight the score for critical "
+                + "assets, cap it at 10, and band it.")
+            .practises("?: to choose a value", "Math.min as a cap", "Bands on doubles")
+            .spec(
+                "Prompt Severity (0-10): and read a decimal; then Critical asset (y/n): .",
+                "A severity below 0 or above 10: print INVALID SEVERITY and nothing else.",
+                "Risk is the severity times 1.5 for a critical asset, unchanged otherwise, never more than 10.",
+                "Print Risk: to one decimal place, then Band: CRITICAL (9+), HIGH (7+), MEDIUM (4+) or LOW.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Severity (0-10): \");",
+                "        double severity = Double.parseDouble(input.nextLine().trim());",
+                "        System.out.print(\"Critical asset (y/n): \");",
+                "        boolean critical = input.nextLine().trim()",
+                "                .equalsIgnoreCase(\"y\");",
+                "        // validate, weight, cap, band",
+                "    }",
+                "}")
+            .hints(
+                "Validate first; everything else goes in the else.",
+                "Weighting is choosing a value: "
+                + "critical ? severity * 1.5 : severity.",
+                "Math.min(risk, 10.0) caps it.",
+                "Band with an else-if chain, highest first, and print Risk: "
+                + "with printf and %.1f.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Severity (0-10): \");",
+                "        double severity = Double.parseDouble(input.nextLine().trim());",
+                "        System.out.print(\"Critical asset (y/n): \");",
+                "        boolean critical = input.nextLine().trim()",
+                "                .equalsIgnoreCase(\"y\");",
+                "        if (severity < 0 || severity > 10) {",
+                "            System.out.println(\"INVALID SEVERITY\");",
+                "        } else {",
+                "            double risk = critical ? severity * 1.5 : severity;",
+                "            risk = Math.min(risk, 10.0);",
+                "            String band;",
+                "            if (risk >= 9.0) {",
+                "                band = \"CRITICAL\";",
+                "            } else if (risk >= 7.0) {",
+                "                band = \"HIGH\";",
+                "            } else if (risk >= 4.0) {",
+                "                band = \"MEDIUM\";",
+                "            } else {",
+                "                band = \"LOW\";",
+                "            }",
+                "            System.out.printf(\"Risk: %.1f%n\", risk);",
+                "            System.out.println(\"Band: \" + band);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "Three steps, each one a tool from this campaign or the last: "
+                + "?: chooses the weighting, Math.min caps it, and an else-if "
+                + "chain bands it. band is declared before the chain and set in "
+                + "every branch.\n"
+                + "\n"
+                + "The cap matters: a 7.0 on a critical asset would otherwise "
+                + "score 10.5, off the scale. The hidden tests include exactly "
+                + "that case, a 6.0 that becomes 9.0 (moving from MEDIUM to "
+                + "CRITICAL - the point of weighting), and an invalid score. "
+                + "The bands compare with >=, so values that land exactly on a "
+                + "threshold behave as the policy says.")
+            .sample(Lab.typing("5.0", "n"), 
+                "Severity (0-10): 5.0",
+                "Critical asset (y/n): n",
+                "Risk: 5.0",
+                "Band: MEDIUM")
+            .hidden(Lab.typing("6.0", "y"), 
+                "Severity (0-10): 6.0",
+                "Critical asset (y/n): y",
+                "Risk: 9.0",
+                "Band: CRITICAL")
+            .hidden(Lab.typing("7.0", "Y"), 
+                "Severity (0-10): 7.0",
+                "Critical asset (y/n): Y",
+                "Risk: 10.0",
+                "Band: CRITICAL")
+            .hidden(Lab.typing("2.5", "y"), 
+                "Severity (0-10): 2.5",
+                "Critical asset (y/n): y",
+                "Risk: 3.8",
+                "Band: LOW")
+            .hidden(Lab.typing("11", "n"), 
+                "Severity (0-10): 11",
+                "Critical asset (y/n): n",
+                "INVALID SEVERITY"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(18), "Account Status Report", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M020")
+            .brief(
+                "The quarterly access review prints one small report per "
+                + "account. Each line is a label and a value chosen from two "
+                + "options - exactly what the conditional operator is for.")
+            .practises("?: for labels", "Plurals", "Reading several answers")
+            .spec(
+                "Ask Account:, Failed attempts:, Days since last login: and MFA enabled (y/n): in that order.",
+                "Print ACCOUNT, ATTEMPTS, ACTIVITY and MFA lines, labels padded to 9 characters, as the sample shows.",
+                "Attempts: 1 failed attempt, but any other number says attempts.",
+                "Activity: DORMANT (<n> days) if more than 90 days, otherwise ACTIVE.  MFA: ENABLED, or DISABLED - action needed.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // ask the four questions, then print four lines",
+                "    }",
+                "}")
+            .hints(
+                "Read the two numbers with Integer.parseInt and the y/n answer "
+                + "into a boolean.",
+                "The plural is a ?: inside brackets:\n"
+                + "\n"
+                + "    failures + \" failed attempt\"\n"
+                + "        + (failures == 1 ? \"\" : \"s\")",
+                "The activity label needs the number inside it when dormant:\n"
+                + "\n"
+                + "    days > 90 ? \"DORMANT (\" + days + \" days)\" : \"ACTIVE\"",
+                "Labels padded to 9: \"ACCOUNT  \", \"ATTEMPTS \", \"ACTIVITY \", "
+                + "\"MFA      \".")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Account: \");",
+                "        String account = input.nextLine().trim();",
+                "        System.out.print(\"Failed attempts: \");",
+                "        int failures = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Days since last login: \");",
+                "        int days = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"MFA enabled (y/n): \");",
+                "        boolean mfa = input.nextLine().trim().equalsIgnoreCase(\"y\");",
+                "",
+                "        String attempts = failures + \" failed attempt\"",
+                "                + (failures == 1 ? \"\" : \"s\");",
+                "        String activity = days > 90",
+                "                ? \"DORMANT (\" + days + \" days)\"",
+                "                : \"ACTIVE\";",
+                "        String mfaState = mfa",
+                "                ? \"ENABLED\"",
+                "                : \"DISABLED - action needed\";",
+                "        System.out.println(\"ACCOUNT  \" + account);",
+                "        System.out.println(\"ATTEMPTS \" + attempts);",
+                "        System.out.println(\"ACTIVITY \" + activity);",
+                "        System.out.println(\"MFA      \" + mfaState);",
+                "    }",
+                "}")
+            .walkthrough(
+                "Every line of the report is a value chosen between two "
+                + "options, so every line is a ?:. Working the three labels out "
+                + "into named Strings first keeps the printing simple and each "
+                + "choice easy to check on its own.\n"
+                + "\n"
+                + "The hidden tests hit the edges: exactly 1 attempt (singular), "
+                + "0 attempts (plural - '0 failed attempts'), exactly 90 days "
+                + "(still active) and 91 (dormant). Dormant accounts and "
+                + "missing MFA are two of the most common findings in any "
+                + "access review: accounts nobody uses are accounts nobody "
+                + "notices being used by someone else.")
+            .sample(Lab.typing("contractor", "3", "120", "n"), 
+                "Account: contractor",
+                "Failed attempts: 3",
+                "Days since last login: 120",
+                "MFA enabled (y/n): n",
+                "ACCOUNT  contractor",
+                "ATTEMPTS 3 failed attempts",
+                "ACTIVITY DORMANT (120 days)",
+                "MFA      DISABLED - action needed")
+            .hidden(Lab.typing("a.okafor", "1", "2", "y"), 
+                "Account: a.okafor",
+                "Failed attempts: 1",
+                "Days since last login: 2",
+                "MFA enabled (y/n): y",
+                "ACCOUNT  a.okafor",
+                "ATTEMPTS 1 failed attempt",
+                "ACTIVITY ACTIVE",
+                "MFA      ENABLED")
+            .hidden(Lab.typing("m.reyes", "0", "90", "Y"), 
+                "Account: m.reyes",
+                "Failed attempts: 0",
+                "Days since last login: 90",
+                "MFA enabled (y/n): Y",
+                "ACCOUNT  m.reyes",
+                "ATTEMPTS 0 failed attempts",
+                "ACTIVITY ACTIVE",
+                "MFA      ENABLED")
+            .hidden(Lab.typing("svc-backup", "12", "91", "n"), 
+                "Account: svc-backup",
+                "Failed attempts: 12",
+                "Days since last login: 91",
+                "MFA enabled (y/n): n",
+                "ACCOUNT  svc-backup",
+                "ATTEMPTS 12 failed attempts",
+                "ACTIVITY DORMANT (91 days)",
+                "MFA      DISABLED - action needed"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(19), "Password Rule Checker", Lab.MEDIUM)
+            .after("C02-M017")
+            .brief(
+                "The new password policy has five rules, checked in order, and "
+                + "a refusal must name the FIRST rule broken so the person can "
+                + "fix it. It is the validation pipeline again, applied to the "
+                + "field attackers care about most.")
+            .practises("An ordered validation chain", "contains with normalising",
+                       "switch as a small blocklist")
+            .spec(
+                "Prompt Username: then Password: , reading each line. Trim the username; use the password exactly as typed.",
+                "Check in order: empty - REJECTED: empty;  fewer than 12 characters - REJECTED: too short;  only digits - REJECTED: digits only.",
+                "Then: contains the username, ignoring case - REJECTED: contains username;  one of password1234, qwerty123456, letmein12345 (ignoring case) - REJECTED: too common.",
+                "Otherwise print ACCEPTED.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Username: \");",
+                "        String user = input.nextLine().trim();",
+                "        System.out.print(\"Password: \");",
+                "        String password = input.nextLine();",
+                "        // five rules, in order",
+                "    }",
+                "}")
+            .hints(
+                "One else-if chain, one rule per branch, in the order given, "
+                + "ending in else ACCEPTED.",
+                "'Only digits' is password.matches(\"[0-9]+\").",
+                "To ignore case in contains, lower-case both sides:\n"
+                + "\n"
+                + "    password.toLowerCase().contains(user.toLowerCase())",
+                "The common-password check can be a switch expression that "
+                + "gives a boolean:\n"
+                + "\n"
+                + "    boolean common = switch (password.toLowerCase()) {\n"
+                + "        case \"password1234\", \"qwerty123456\",\n"
+                + "             \"letmein12345\" -> true;\n"
+                + "        default -> false;\n"
+                + "    };")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Username: \");",
+                "        String user = input.nextLine().trim();",
+                "        System.out.print(\"Password: \");",
+                "        String password = input.nextLine();",
+                "        String lower = password.toLowerCase();",
+                "        boolean common = switch (lower) {",
+                "            case \"password1234\", \"qwerty123456\",",
+                "                 \"letmein12345\" -> true;",
+                "            default -> false;",
+                "        };",
+                "        if (password.isEmpty()) {",
+                "            System.out.println(\"REJECTED: empty\");",
+                "        } else if (password.length() < 12) {",
+                "            System.out.println(\"REJECTED: too short\");",
+                "        } else if (password.matches(\"[0-9]+\")) {",
+                "            System.out.println(\"REJECTED: digits only\");",
+                "        } else if (lower.contains(user.toLowerCase())) {",
+                "            System.out.println(\"REJECTED: contains username\");",
+                "        } else if (common) {",
+                "            System.out.println(\"REJECTED: too common\");",
+                "        } else {",
+                "            System.out.println(\"ACCEPTED\");",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "A chain of gates, each naming one rule, so the first failure is "
+                + "the one reported. The password is never trimmed - spaces are "
+                + "legitimate password characters - but the username is, so "
+                + "' jsmith' cannot slip its name past the contains check.\n"
+                + "\n"
+                + "Lower-casing both sides before contains means JSmith2024isfine "
+                + "is still caught. The common-password list is a tiny "
+                + "switch-based blocklist; real checkers compare against lists "
+                + "of millions of breached passwords, which needs the "
+                + "collections and files of later campaigns.\n"
+                + "\n"
+                + "The hidden tests break each rule once, including a password "
+                + "that is long enough but all digits, and one that is common "
+                + "but in capitals.")
+            .sample(Lab.typing("jsmith", "Jsmith-was-here"), 
+                "Username: jsmith",
+                "Password: Jsmith-was-here",
+                "REJECTED: contains username")
+            .hidden(Lab.typing("jsmith", ""), 
+                "Username: jsmith",
+                "Password:",
+                "REJECTED: empty")
+            .hidden(Lab.typing("jsmith", "tiny"), 
+                "Username: jsmith",
+                "Password: tiny",
+                "REJECTED: too short")
+            .hidden(Lab.typing("jsmith", "123456789012"), 
+                "Username: jsmith",
+                "Password: 123456789012",
+                "REJECTED: digits only")
+            .hidden(Lab.typing("jsmith", "QWERTY123456"), 
+                "Username: jsmith",
+                "Password: QWERTY123456",
+                "REJECTED: too common")
+            .hidden(Lab.typing("jsmith", "correct horse battery"), 
+                "Username: jsmith",
+                "Password: correct horse battery",
+                "ACCEPTED"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(20), "Time-Window Rule", Lab.MEDIUM)
+            .stretch()
+            .after("C02-M019")
+            .brief(
+                "Contractors may only log in between 07:30 and 19:00. The "
+                + "gateway receives the login time as text - and some clients "
+                + "send it badly formed. Validate the format completely, then "
+                + "decide.")
+            .practises("Validating a fixed format", "Minutes since midnight", "Boundaries on a window")
+            .spec(
+                "Prompt Login time (HH:MM): and read the line, then trim it.",
+                "Valid means exactly 5 characters, a colon in the middle, digits on each side, hours 0-23 and minutes 0-59. Anything else: INVALID TIME.",
+                "07:30 up to but not including 19:00: ALLOWED. Otherwise: BLOCKED - outside 07:30-19:00.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Login time (HH:MM): \");",
+                "        String time = input.nextLine().trim();",
+                "        // validate the format, then check the window",
+                "    }",
+                "}")
+            .hints(
+                "Check the SHAPE first, guarded so nothing can crash: length "
+                + "5, then charAt(2) == ':', then each side matches [0-9]+.",
+                "Only after the shape is right is it safe to parseInt the two "
+                + "halves. Then check hours <= 23 and minutes <= 59.",
+                "Convert to minutes since midnight: hours * 60 + minutes. 07:30 "
+                + "is 450 and 19:00 is 1140.",
+                "Inside the window: minutes >= 450 && minutes < 1140.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Login time (HH:MM): \");",
+                "        String time = input.nextLine().trim();",
+                "        boolean shape = time.length() == 5 && time.charAt(2) == ':'",
+                "                && time.substring(0, 2).matches(\"[0-9]+\")",
+                "                && time.substring(3).matches(\"[0-9]+\");",
+                "        if (!shape) {",
+                "            System.out.println(\"INVALID TIME\");",
+                "        } else {",
+                "            int hours = Integer.parseInt(time.substring(0, 2));",
+                "            int minutes = Integer.parseInt(time.substring(3));",
+                "            if (hours > 23 || minutes > 59) {",
+                "                System.out.println(\"INVALID TIME\");",
+                "            } else {",
+                "                int total = hours * 60 + minutes;",
+                "                if (total >= 450 && total < 1140) {",
+                "                    System.out.println(\"ALLOWED\");",
+                "                } else {",
+                "                    System.out.println(",
+                "                            \"BLOCKED - outside 07:30-19:00\");",
+                "                }",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The shape check is one long && chain, and short-circuiting "
+                + "makes it safe: charAt(2) and the substrings are only reached "
+                + "once the length is known to be 5. Only when the shape is "
+                + "right does parseInt run, and only when the numbers are real "
+                + "times does the window get checked.\n"
+                + "\n"
+                + "Converting to minutes turns 'between 07:30 and 19:00' into one "
+                + "range check on one number. The hidden tests sit on both edges "
+                + "(07:29, 07:30, 18:59, 19:00) and send three kinds of broken "
+                + "time: a missing leading zero, an impossible hour and letters. "
+                + "Refusing malformed input outright is fail-closed: a gateway "
+                + "that guessed what 7:30 meant would one day guess wrong.")
+            .sample(Lab.typing("08:15"), 
+                "Login time (HH:MM): 08:15",
+                "ALLOWED")
+            .hidden(Lab.typing("07:29"), 
+                "Login time (HH:MM): 07:29",
+                "BLOCKED - outside 07:30-19:00")
+            .hidden(Lab.typing("07:30"), 
+                "Login time (HH:MM): 07:30",
+                "ALLOWED")
+            .hidden(Lab.typing("18:59"), 
+                "Login time (HH:MM): 18:59",
+                "ALLOWED")
+            .hidden(Lab.typing("19:00"), 
+                "Login time (HH:MM): 19:00",
+                "BLOCKED - outside 07:30-19:00")
+            .hidden(Lab.typing("7:30"), 
+                "Login time (HH:MM): 7:30",
+                "INVALID TIME")
+            .hidden(Lab.typing("25:00"), 
+                "Login time (HH:MM): 25:00",
+                "INVALID TIME")
+            .hidden(Lab.typing("ab:cd"), 
+                "Login time (HH:MM): ab:cd",
+                "INVALID TIME"));
     }
 }
