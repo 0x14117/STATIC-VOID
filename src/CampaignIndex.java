@@ -52,6 +52,7 @@ public class CampaignIndex {
         // Labs: whole programs, written by the learner, tested by the game.
         Campaign00Labs.build(byNumber(0));
         Campaign01Labs.build(byNumber(1));
+        Campaign02Labs.build(byNumber(2));
     }
 
     private static void declare(int number, String code, String topic, int planned) {
