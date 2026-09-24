@@ -20,9 +20,10 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 50 missions are playable (Campaigns 00 and 01 complete,
-> Campaign 02 in progress) out of 510 planned. New campaigns are added one at
-> a time.
+> **Status:** 50 missions and 20 labs are playable (Campaigns 00 and 01
+> complete, Campaign 02 in progress) out of 510 missions planned. The order
+> follows a first-year Java programming module; see
+> [the curriculum plan](docs/CURRICULUM.md).
 
 ---
 
@@ -33,11 +34,12 @@ stopping forged log entries, checking access.
 3. [Step 2: get the game](#step-2-get-the-game)
 4. [Step 3: play](#step-3-play)
 5. [How to play](#how-to-play)
-6. [Updating to the newest missions](#updating-to-the-newest-missions)
-7. [Troubleshooting](#troubleshooting)
-8. [What is in the game](#what-is-in-the-game)
-9. [For contributors](#for-contributors)
-10. [Licence](#licence)
+6. [Labs: writing whole programs](#labs-writing-whole-programs)
+7. [Updating to the newest missions](#updating-to-the-newest-missions)
+8. [Troubleshooting](#troubleshooting)
+9. [What is in the game](#what-is-in-the-game)
+10. [For contributors](#for-contributors)
+11. [Licence](#licence)
 
 ---
 
@@ -260,11 +262,12 @@ level, your clearance, and the next mission waiting for you.
 | `1` | View Mission | Read the briefing for your next mission before starting it |
 | `2` | Start Mission | Play your next unfinished mission |
 | `3` | Training | Replay **any** mission by typing its ID, for example `C01-M017` |
-| `4` | Java Knowledge | Every Java topic, ticked as you learn it. Type a topic name to read about it |
-| `5` | Campaign Map | All 20 campaigns and how far through them you are |
-| `6` | Progress | XP, level, missions completed, topics learned, hints used, wrong answers |
-| `7` | Settings | Change your name or theme, reset progress, find your save file, see the NORTHSTAR network |
-| `8` | Exit | Save and quit |
+| `4` | Labs | Write whole programs in your own editor; the game compiles and tests them |
+| `5` | Java Knowledge | Every Java topic, ticked as you learn it. Type a topic name to read about it |
+| `6` | Campaign Map | All 20 campaigns and how far through them you are |
+| `7` | Progress | XP, level, missions and labs completed, topics learned, hints used, wrong answers |
+| `8` | Settings | Change your name or theme, reset progress, find your save file, see the NORTHSTAR network |
+| `9` | Exit | Save and quit |
 
 ### Inside a mission
 
@@ -362,6 +365,60 @@ To back up your progress, copy that file. To start again, use
 
 ---
 
+## Labs: writing whole programs
+
+Missions teach one idea at a time with short questions. **Labs** are where
+you write complete programs yourself. Choose **4. Labs** on the main menu.
+
+Every campaign has its own labs, growing from small to big: ten small ones
+for Campaign 00, and thirty per campaign after that. **CORE** labs are the
+path through a campaign. **STRETCH** labs are extra practice for when a
+topic has not stuck, or before an assessment.
+
+### How a lab works
+
+1. **Read the brief.** It gives the task, a numbered specification, and a
+   sample run showing exactly what the screen should look like.
+2. **Create your file.** The game writes a starter program to
+   `labs/C01-L05/Main.java` (the lab's ID is in the path) and shows you the
+   full path. Open it in any editor: Notepad, VS Code, IntelliJ. Keep the
+   class called `Main`.
+3. **Test.** The game compiles your file with the real Java compiler and runs
+   it against several tests. Some tests are the sample runs; others are
+   **hidden** and use different values, so a program that just prints the
+   sample answer does not pass. Testing is free, so test as often as you
+   like.
+4. **Read what went wrong.** A failed test shows what was typed, the output
+   that was expected, what your program printed, and the first line that
+   differs. If your program does not compile, you see the compiler's
+   message and the line to look at.
+5. **Run.** Starts your program in the terminal so you can try it yourself.
+6. **Hint.** Each lab has at least three hints, each more specific than the
+   last. Each costs 5 XP.
+7. **Solution.** A complete working program and an explanation of why it
+   works. It asks first; passing the lab after seeing the solution earns a
+   quarter of the XP, because you still have to write and test it yourself.
+
+After you pass, you can compare your program with the reference solution
+for free. There is always more than one right answer.
+
+![A lab test report: a hidden test typed a space before the number, and the program crashed on line 8](docs/screenshot-lab.png)
+
+| Size | Typical time | XP |
+|------|--------------|----|
+| SMALL | 10-20 minutes | 30 |
+| MEDIUM | 30-60 minutes | 60 |
+| BIG | 1-3 hours | 100 |
+| CAPSTONE | 2-5 hours | 150 |
+
+Output is compared exactly: capitals, spelling and spaces inside a line all
+count. Spaces at the end of a line, and blank lines at the very end, do not.
+
+Your lab programs are kept in the `labs` folder inside the game folder. Git
+ignores that folder, so `git pull` never touches your work.
+
+---
+
 ## Updating to the newest missions
 
 **If you used Git:** in the game folder, run:
@@ -370,11 +427,12 @@ To back up your progress, copy that file. To start again, use
 git pull
 ```
 
-Then play as usual. The scripts recompile automatically. Your progress is
-kept, because Git never touches `cyberops-save.txt`.
+Then play as usual. The scripts recompile automatically. Your progress and
+your lab programs are kept, because Git never touches `cyberops-save.txt` or
+the `labs` folder.
 
 **If you used the ZIP:** download it again, unzip it, and copy your old
-`cyberops-save.txt` into the new folder.
+`cyberops-save.txt` and `labs` folder into the new folder.
 
 ---
 
@@ -429,30 +487,38 @@ what you typed, the full message you saw, and the output of
 
 ## What is in the game
 
-Twenty campaigns, 510 missions, built one campaign at a time:
+Twenty campaigns and 510 missions, built one campaign at a time. **Part 1**
+follows a first-year Java programming module, topic by topic. **Part 2**
+goes further, into deeper Java and applied security.
 
 ```
-CAMPAIGN 00 - INIT              10 missions    BUILT
-CAMPAIGN 01 - JAVA ZERO         30 missions    BUILT
-CAMPAIGN 02 - CONDITIONAL       30 missions    10 BUILT
-CAMPAIGN 03 - LOOP//CONTROL     30 missions
-CAMPAIGN 04 - METHODS           30 missions
-CAMPAIGN 05 - DATA              30 missions
-CAMPAIGN 06 - DEBUG             30 missions
-CAMPAIGN 07 - OBJECTS           30 missions
-CAMPAIGN 08 - OOP               30 missions
-CAMPAIGN 09 - COLLECTIONS       30 missions
-CAMPAIGN 10 - EXCEPTIONS        25 missions
-CAMPAIGN 11 - FILES             25 missions
-CAMPAIGN 12 - ALGORITHMS        25 missions
-CAMPAIGN 13 - SECURE CODE       25 missions
-CAMPAIGN 14 - CYBER OPS         25 missions
-CAMPAIGN 15 - SOC               25 missions
-CAMPAIGN 16 - NETWORK           20 missions
-CAMPAIGN 17 - CRYPTO            20 missions
-CAMPAIGN 18 - INCIDENT RESPONSE 20 missions
-CAMPAIGN 19 - FINAL SOC         20 missions
+PART 1 - THE MODULE                            missions  labs
+CAMPAIGN 00 - INIT            language, IDE      10       10   BUILT
+CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT, 10 labs
+CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   10 BUILT
+CAMPAIGN 03 - METHODS         methods, stack     30       30
+CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30
+CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30
+CAMPAIGN 06 - OBJECTS         classes            30       30
+CAMPAIGN 07 - EXCEPTIONS      errors, events     25       30
+CAMPAIGN 08 - FILES           file I/O           25       30
+
+PART 2 - BEYOND THE MODULE
+CAMPAIGN 09 - DEBUG                              30
+CAMPAIGN 10 - OOP                                30
+CAMPAIGN 11 - DATA STRUCTURES                    30
+CAMPAIGN 12 - ALGORITHMS                         25
+CAMPAIGN 13 - SECURE CODE                        25
+CAMPAIGN 14 - CYBER OPS                          25
+CAMPAIGN 15 - SOC                                25
+CAMPAIGN 16 - NETWORK                            20
+CAMPAIGN 17 - CRYPTO                             20
+CAMPAIGN 18 - INCIDENT RESPONSE                  20
+CAMPAIGN 19 - FINAL SOC                          20
 ```
+
+The full plan - which syllabus topic goes where, every remaining mission,
+and every lab by name - is in **[docs/CURRICULUM.md](docs/CURRICULUM.md)**.
 
 **Campaign 00 - INIT:** what Java is, the JDK and JVM, your first program,
 compiling and running, comments, semicolons, `print` and `println`, escape
@@ -495,15 +561,26 @@ src/Campaign02.java       CAMPAIGN 02 - CONDITIONAL
 src/KnowledgeIndex.java   the Java topics, and which missions teach them
 src/World.java            NORTHSTAR SYSTEMS: hosts and accounts
 
-tools/CheckAll.java       checks every mission is complete
+src/Lab.java              one lab: brief, specification, hints, solution, tests
+src/LabTest.java          one lab test: what is typed, what the screen shows
+src/LabBench.java         compiles and tests a lab program with the real JDK
+src/LabEcho.java          runs a lab program so typed input appears on screen
+src/LabDesk.java          the Labs screens
+src/Campaign00Labs.java   the labs for CAMPAIGN 00
+src/Campaign01Labs.java   the labs for CAMPAIGN 01
+
+tools/CheckAll.java       checks every mission and lab is complete
 tools/CheckJava.java      checks the Java in every mission is true
+tools/CheckLabs.java      checks every lab can actually be done
+
+docs/CURRICULUM.md        the full plan: syllabus, missions and labs
 ```
 
 Plain Java, standard library only. No build tool and no dependencies. The
 game builds on Java 8 or newer; the two checking tools need Java 11 or
 newer.
 
-### The two checks
+### The three checks
 
 **Is every mission complete?** This is fast, so run it after any change:
 
@@ -530,7 +607,20 @@ mission shows, and that every solution compiles and runs. Every "what does
 this print" answer must be what Java really prints. Every "which line does
 not compile" snippet must really fail, on the line the question names.
 
-Both must report `0 failed` before a change is committed.
+**Can every lab actually be done?** Also slow, for the same reason:
+
+```
+java -cp check CheckLabs          every lab
+java -cp check CheckLabs C01      one campaign
+```
+
+It uses the same code that tests the learner. Every reference solution must
+pass every test. Every starter file must compile but not already pass,
+unless the lab is about fixing a broken program, in which case it must not
+compile. And for labs that read input, a program that just prints the
+sample answer must fail a hidden test.
+
+All three must report `0 failed` before a change is committed.
 
 ### Adding a mission
 
@@ -543,6 +633,17 @@ Both must report `0 failed` before a change is committed.
 
 A new campaign file is registered with one line in the static block of
 `src/CampaignIndex.java`.
+
+### Adding a lab
+
+1. Add it to the right `src/CampaignNNLabs.java`, using the same shape as
+   the labs around it: a brief, a numbered specification, a starter, at
+   least three progressive hints, a solution and a walkthrough.
+2. Give it at least one `sample(...)` test. If it reads input, add
+   `hidden(...)` tests with different values, including the edges.
+3. Point `after(...)` at the mission it builds on, and use nothing that
+   mission has not taught.
+4. Run `CheckAll` and `CheckLabs`.
 
 ---
 

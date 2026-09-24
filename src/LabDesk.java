@@ -434,8 +434,13 @@ public class LabDesk {
             Terminal.blank();
         }
         if (test.getInput().length > 0) {
-            Terminal.line("  Typed: " + Theme.paint(Theme.ACCENT,
-                    String.join("  /  ", test.getInput())));
+            StringBuilder typed = new StringBuilder();
+            for (String line : test.getInput()) {
+                typed.append(typed.length() == 0 ? "" : "  then  ")
+                     .append("|").append(line).append("|");
+            }
+            Terminal.line("  Typed: " + Theme.paint(Theme.ACCENT, typed.toString()));
+            Terminal.lineAs(Theme.MUTED, "         (between the | marks, spaces included)");
             Terminal.blank();
         }
         if (!result.problem.isEmpty()) {
