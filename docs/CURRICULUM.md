@@ -413,7 +413,7 @@ Tier: **C** = core, **S** = stretch. "After" is the mission a lab assumes.
 | L29 | Alert Summary Card | BIG | S | M029 |
 | L30 | Incident Ticket Formatter | CAPSTONE | C | M030 |
 
-### 02 CONDITIONAL: 30 labs
+### 02 CONDITIONAL: 30 labs (built)
 
 | Lab | Title | Size | Tier |
 |---|---|---|---|
