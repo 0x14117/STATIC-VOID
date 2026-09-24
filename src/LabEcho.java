@@ -26,6 +26,11 @@ public class LabEcho {
     public static void main(String[] args) {
         System.setIn(new EchoingInput(System.in));
 
+        // printf("%.1f") writes 7,5 on a machine set up for, say, Germany.
+        // Tests are written with a decimal point, so every test run uses UK
+        // number formatting, whatever the machine's own setting is.
+        java.util.Locale.setDefault(java.util.Locale.UK);
+
         Method main;
         try {
             Class<?> program = Class.forName(args[0]);

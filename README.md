@@ -20,7 +20,7 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 50 missions and 20 labs are playable (Campaigns 00 and 01
+> **Status:** 50 missions and 40 labs are playable (Campaigns 00 and 01
 > complete, Campaign 02 in progress) out of 510 missions planned. The order
 > follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
@@ -494,7 +494,7 @@ goes further, into deeper Java and applied security.
 ```
 PART 1 - THE MODULE                            missions  labs
 CAMPAIGN 00 - INIT            language, IDE      10       10   BUILT
-CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT, 10 labs
+CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT
 CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   10 BUILT
 CAMPAIGN 03 - METHODS         methods, stack     30       30
 CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30

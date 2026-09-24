@@ -378,7 +378,7 @@ Tier: **C** = core, **S** = stretch. "After" is the mission a lab assumes.
 | L09 | Analyst Badge | S | M009 |
 | L10 | Shift Handover Note | C | M010 |
 
-### 01 JAVA ZERO: 30 labs (L01-L10 built)
+### 01 JAVA ZERO: 30 labs (built)
 
 | Lab | Title | Size | Tier | After |
 |---|---|---|---|---|
