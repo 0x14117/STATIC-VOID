@@ -27,10 +27,10 @@ if not exist "%SOURCES%" (
     echo.
     echo No .java files found in the src folder.
     echo.
-    echo If this folder only contains README.md, you are on the main branch.
-    echo Switch to the branch holding the game:
+    echo If this folder only contains README.md, it was cloned before the
+    echo game was published. Update it with:
     echo.
-    echo     git checkout claude/mission-practice-steps-2oh6pn
+    echo     git pull
     echo.
     pause
     exit /b 1

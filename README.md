@@ -35,6 +35,7 @@ stopping forged log entries, checking access.
 7. [Troubleshooting](#troubleshooting)
 8. [What is in the game](#what-is-in-the-game)
 9. [For contributors](#for-contributors)
+10. [Licence](#licence)
 
 ---
 
@@ -43,7 +44,7 @@ stopping forged log entries, checking access.
 If you already have Java and Git installed:
 
 ```
-git clone -b claude/mission-practice-steps-2oh6pn https://github.com/0x14117/STATIC-VOID.git
+git clone https://github.com/0x14117/STATIC-VOID.git
 cd STATIC-VOID
 ```
 
@@ -143,9 +144,6 @@ Both should print a version number. Ideally it is the same version for both.
 
 ## Step 2: get the game
 
-The game lives on the branch **`claude/mission-practice-steps-2oh6pn`**.
-Both methods below fetch that branch.
-
 ### Option A: with Git (recommended, makes updating easy)
 
 If you do not have Git: on Windows run `winget install Git.Git`, on macOS run
@@ -154,7 +152,7 @@ If you do not have Git: on Windows run `winget install Git.Git`, on macOS run
 Then:
 
 ```
-git clone -b claude/mission-practice-steps-2oh6pn https://github.com/0x14117/STATIC-VOID.git
+git clone https://github.com/0x14117/STATIC-VOID.git
 cd STATIC-VOID
 ```
 
@@ -164,16 +162,15 @@ Windows:
 
 ```
 cd D:\
-git clone -b claude/mission-practice-steps-2oh6pn https://github.com/0x14117/STATIC-VOID.git
+git clone https://github.com/0x14117/STATIC-VOID.git
 cd STATIC-VOID
 ```
 
 ### Option B: download a ZIP (no Git needed)
 
 1. Download:
-   **https://github.com/0x14117/STATIC-VOID/archive/refs/heads/claude/mission-practice-steps-2oh6pn.zip**
-2. Unzip it. You get a folder called
-   `STATIC-VOID-claude-mission-practice-steps-2oh6pn`.
+   **https://github.com/0x14117/STATIC-VOID/archive/refs/heads/main.zip**
+2. Unzip it. You get a folder called `STATIC-VOID-main`.
 3. Open a terminal in that folder. On Windows, open the folder in File
    Explorer, click the address bar, type `powershell` and press ENTER.
 
@@ -186,12 +183,8 @@ should see:
 README.md   play.bat   play.sh   src   tools
 ```
 
-If you see **only** `README.md`, you have the `main` branch, which does not
-contain the game yet. Fix it with:
-
-```
-git checkout claude/mission-practice-steps-2oh6pn
-```
+If `src` is missing, the download did not finish. Clone or download it
+again.
 
 ---
 
@@ -372,8 +365,8 @@ The terminal is not in the game folder. Use `cd` to go into it, then run
 `dir`. You should see `play.bat` in the list.
 
 **The folder only contains `README.md`**
-You cloned the `main` branch. Run
-`git checkout claude/mission-practice-steps-2oh6pn`.
+Your copy was cloned before the game was published. Run `git pull` in the
+folder.
 
 **`error: invalid flag: C:\Users\...` or `error: file not found: D:New folder...`**
 Your copy of `play.bat` is older than the fix for folders with spaces in
@@ -518,3 +511,11 @@ Both must report `0 failed` before a change is committed.
 
 A new campaign file is registered with one line in the static block of
 `src/CampaignIndex.java`.
+
+---
+
+## Licence
+
+CYBER//OPS is released under the [MIT Licence](LICENSE). You may use, copy,
+change and share it, including in your own projects, as long as the
+copyright and licence notice stay with it.
