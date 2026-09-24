@@ -10,27 +10,105 @@ public class Main {
 
     private static Player player;
 
+    private static final String[] LOGO = {
+        "     ________  ______  __________     __ ______  ____  _____",
+        "    / ____/\\ \\/ / __ )/ ____/ __ \\  _/_//_/ __ \\/ __ \\/ ___/",
+        "   / /      \\  / __  / __/ / /_/ /_/_//_// / / / /_/ /\\__ \\",
+        "  / /___    / / /_/ / /___/ _, _//_//_/ / /_/ / ____/___/ /",
+        "  \\____/   /_/_____/_____/_/ |_/_//_/   \\____/_/    /____/"
+    };
+
     public static void main(String[] args) {
         player = SaveFile.load();
+        if (!Theme.isChosen()) {
+            pickColour();
+        }
+
+        banner();
+        boot();
 
         if (player == null) {
             player = firstRun();
         } else {
-            Terminal.newScreen();
-            Terminal.line("  Save found. Welcome back, " + player.getName() + ".");
+            Terminal.blank();
+            Terminal.line("  Save found. Welcome back, "
+                    + Theme.paint(Theme.ACCENT, player.getName()) + ".");
+            Terminal.pause();
         }
 
         mainLoop();
     }
 
+    // ------------------------------------------------------------ the look
+
+    /**
+     * Colour where it is known to work, none where it cannot be seen, and on
+     * a Windows console that might print escape codes as junk, a one-time
+     * question - because only the player can see what their screen shows.
+     */
+    private static void pickColour() {
+        int support = Theme.colourSupport();
+        if (support == Theme.YES) {
+            Theme.use("PHOSPHOR");
+            return;
+        }
+        if (support == Theme.NO) {
+            Theme.use("PLAIN");
+            return;
+        }
+
+        Terminal.newScreen();
+        Terminal.line("  One quick check before we start.");
+        Terminal.blank();
+        Terminal.line("  The next line should say GREEN, in green:");
+        Terminal.blank();
+        Terminal.line("      " + Theme.testSample());
+        Terminal.blank();
+        Terminal.line("   1. I see the word GREEN, in colour");
+        Terminal.line("   2. I see odd symbols around it, like <-[1;32m");
+        Terminal.blank();
+        String answer = Terminal.ask("  Select: ");
+        Theme.choose(answer.equals("1") ? "PHOSPHOR" : "PLAIN");
+        Terminal.blank();
+        Terminal.wrapped("Noted. You can change this any time in Settings > "
+                + "Theme.", "  ");
+    }
+
+    private static void banner() {
+        Terminal.newScreen();
+        for (String row : LOGO) {
+            Terminal.lineAs(Theme.TITLE, row);
+        }
+        Terminal.blank();
+        Terminal.lineAs(Theme.ACCENT,
+                "      S E C U R I T Y   O P E R A T I O N S   T E R M I N A L");
+        Terminal.rule('+', '=');
+    }
+
+    /** A short start-up sequence. Instant when no one is watching. */
+    private static void boot() {
+        Terminal.blank();
+        bootLine("Link to " + World.ORGANISATION, "established");
+        bootLine("Training network", World.HOSTS.length + " hosts, "
+                + World.ACCOUNTS.length + " accounts");
+        bootLine("Mission library", CampaignIndex.builtTotal() + " missions ready");
+        bootLine("Live systems", "none - sandbox only");
+    }
+
+    private static void bootLine(String label, String value) {
+        StringBuilder dots = new StringBuilder(" ");
+        while (label.length() + dots.length() < 30) {
+            dots.append('.');
+        }
+        Terminal.beat(140);
+        Terminal.line("  " + Theme.paint(Theme.GOOD, "[ OK ]") + " " + label
+                + Theme.paint(Theme.MUTED, dots.toString()) + " "
+                + Theme.paint(Theme.ACCENT, value));
+    }
+
     // ------------------------------------------------------------ first run
 
     private static Player firstRun() {
-        Terminal.newScreen();
-        Terminal.rule('+', '=');
-        Terminal.centred("CYBER//OPS");
-        Terminal.centred("SECURITY OPERATIONS TERMINAL");
-        Terminal.rule('+', '=');
         Terminal.blank();
         Terminal.wrapped("You are joining the security desk at "
                 + World.ORGANISATION + " as a junior analyst.", "  ");
@@ -49,8 +127,9 @@ public class Main {
         SaveFile.save(fresh);
 
         Terminal.blank();
-        Terminal.wrapped("Registered. Clearance TRAINEE. Your first mission is "
-                + "waiting.", "  ");
+        Terminal.line("  Registered. Clearance "
+                + Theme.paint(Theme.ACCENT, "TRAINEE")
+                + ". Your first mission is waiting.");
         Terminal.pause();
         return fresh;
     }
@@ -100,10 +179,11 @@ public class Main {
         Terminal.rule('+', '=');
         Terminal.blank();
 
-        Terminal.line("  STATUS    : ONLINE          " + World.ORGANISATION);
+        Terminal.line("  STATUS    : " + Theme.paint(Theme.GOOD, "ONLINE")
+                + "          " + World.ORGANISATION);
         Terminal.blank();
-        Terminal.line("  Analyst   : " + player.getName());
-        Terminal.line("  Clearance : " + player.getClearance());
+        Terminal.line("  Analyst   : " + Theme.paint(Theme.ACCENT, player.getName()));
+        Terminal.line("  Clearance : " + Theme.paint(Theme.ACCENT, player.getClearance()));
         Terminal.line("  Level     : " + player.getLevel()
                 + "   " + xpBar(player.getXpIntoLevel()) + "  "
                 + player.getXp() + " XP");
@@ -115,7 +195,8 @@ public class Main {
         if (next == null) {
             Terminal.line("  Active Mission: none - every mission is complete.");
         } else {
-            Terminal.line("  Active Mission: " + next.getId() + "  " + next.getTitle());
+            Terminal.line("  Active Mission: " + Theme.paint(Theme.ACCENT, next.getId())
+                    + "  " + next.getTitle());
             Terminal.line("                  " + next.getCampaign().getLabel()
                     + "   difficulty " + next.getDifficulty() + "/10");
         }
@@ -123,21 +204,33 @@ public class Main {
         Terminal.blank();
         Terminal.rule('+', '-');
         Terminal.blank();
-        Terminal.line("   1. View Mission        5. Campaign Map");
-        Terminal.line("   2. Start Mission       6. Progress");
-        Terminal.line("   3. Training            7. Settings");
-        Terminal.line("   4. Java Knowledge      8. Exit");
+        menuRow("1", "View Mission", "5", "Campaign Map");
+        menuRow("2", "Start Mission", "6", "Progress");
+        menuRow("3", "Training", "7", "Settings");
+        menuRow("4", "Java Knowledge", "8", "Exit");
         Terminal.blank();
+    }
+
+    private static void menuRow(String leftKey, String left,
+                                String rightKey, String right) {
+        Terminal.line("   " + Theme.paint(Theme.ACCENT, leftKey + ".") + " "
+                + Terminal.pad(left, 19) + " "
+                + Theme.paint(Theme.ACCENT, rightKey + ".") + " " + right);
     }
 
     private static String xpBar(int intoLevel) {
         int filled = intoLevel / 10;
-        StringBuilder bar = new StringBuilder("[");
+        StringBuilder full = new StringBuilder();
+        StringBuilder empty = new StringBuilder();
         for (int i = 0; i < 10; i++) {
-            bar.append(i < filled ? '#' : '.');
+            if (i < filled) {
+                full.append('#');
+            } else {
+                empty.append('.');
+            }
         }
-        bar.append(']');
-        return bar.toString();
+        return "[" + Theme.paint(Theme.ACCENT, full.toString())
+                + Theme.paint(Theme.MUTED, empty.toString()) + "]";
     }
 
     // ------------------------------------------------------------- the menu items
@@ -191,7 +284,8 @@ public class Main {
             Terminal.blank();
             Terminal.heading(campaign.getLabel());
             for (Mission mission : campaign.getMissions()) {
-                String done = player.hasCompleted(mission.getId()) ? "[x]" : "[ ]";
+                String done = player.hasCompleted(mission.getId())
+                        ? Theme.paint(Theme.GOOD, "[x]") : "[ ]";
                 Terminal.line("  " + done + " " + Terminal.pad(mission.getId(), 11)
                         + Terminal.pad(mission.getTitle(), 30)
                         + "d" + mission.getDifficulty());
@@ -257,6 +351,44 @@ public class Main {
         Terminal.pause();
     }
 
+    private static void chooseTheme() {
+        Terminal.newScreen();
+        Terminal.rule('+', '=');
+        Terminal.centred("THEME");
+        Terminal.rule('+', '=');
+        Terminal.blank();
+
+        String[] names = Theme.names();
+        for (int i = 0; i < names.length; i++) {
+            String sample = Theme.paintAs(names[i], Theme.FRAME, "+==")
+                    + Theme.paintAs(names[i], Theme.TITLE, " CYBER//OPS ")
+                    + Theme.paintAs(names[i], Theme.FRAME, "==+")
+                    + "  " + Theme.paintAs(names[i], Theme.GOOD, "CORRECT")
+                    + " " + Theme.paintAs(names[i], Theme.BAD, "WRONG");
+            Terminal.line("   " + Theme.paint(Theme.ACCENT, (i + 1) + ".") + " "
+                    + Terminal.pad(names[i], 10) + "  " + sample);
+            Terminal.line("              " + Theme.describe(names[i]));
+        }
+
+        Terminal.blank();
+        Terminal.wrapped("If the samples show odd symbols instead of colours, "
+                + "your console cannot display colour. Choose PLAIN.", "  ");
+        Terminal.blank();
+
+        String choice = Terminal.ask("  Theme number, or ENTER to keep "
+                + Theme.current() + ": ");
+        for (int i = 0; i < names.length; i++) {
+            if (choice.equals(String.valueOf(i + 1))) {
+                Theme.choose(names[i]);
+                SaveFile.save(player);
+                Terminal.blank();
+                Terminal.line("  Theme set to " + Theme.paint(Theme.ACCENT, names[i]) + ".");
+                Terminal.pause();
+                return;
+            }
+        }
+    }
+
     private static void settings() {
         Terminal.newScreen();
         Terminal.rule('+', '=');
@@ -267,7 +399,8 @@ public class Main {
         Terminal.line("   2. Reset all progress");
         Terminal.line("   3. Where is my save file?");
         Terminal.line("   4. NORTHSTAR inventory");
-        Terminal.line("   5. Back");
+        Terminal.line("   5. Theme           now: " + Theme.current());
+        Terminal.line("   6. Back");
         Terminal.blank();
 
         String choice = Terminal.ask("  Select: ");
@@ -297,6 +430,8 @@ public class Main {
             Terminal.pause();
         } else if (choice.equals("4")) {
             World.showInventory();
+        } else if (choice.equals("5")) {
+            chooseTheme();
         } else if (choice.equals("3")) {
             Terminal.blank();
             Terminal.wrapped("Your progress is in cyberops-save.txt, in the folder "

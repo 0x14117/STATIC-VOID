@@ -29,6 +29,10 @@ public class SaveFile {
             out.newLine();
             out.write("topics=" + String.join(",", player.getLearnedTopics()));
             out.newLine();
+            if (Theme.isChosen()) {
+                out.write("theme=" + Theme.current());
+                out.newLine();
+            }
         } catch (IOException e) {
             Terminal.line("  Could not save progress: " + e.getMessage());
         }
@@ -67,6 +71,8 @@ public class SaveFile {
                         completed = value;
                     } else if (key.equals("topics")) {
                         topics = value;
+                    } else if (key.equals("theme")) {
+                        Theme.choose(value);
                     }
                 }
                 line = in.readLine();

@@ -113,12 +113,13 @@ public class CampaignIndex {
             String progress;
 
             if (!campaign.isBuilt()) {
-                marker = "[locked]";
+                marker = Theme.paint(Theme.MUTED, "[locked]");
                 progress = "";
             } else {
                 int done = campaign.completedBy(player);
                 int built = campaign.getMissions().size();
-                marker = done == built ? "[  done]" : "[  open]";
+                marker = done == built ? Theme.paint(Theme.GOOD, "[  done]")
+                                       : Theme.paint(Theme.ACCENT, "[  open]");
                 progress = "  " + done + "/" + built + " played"
                         + (built < campaign.getPlannedMissions()
                            ? "   (" + built + " of " + campaign.getPlannedMissions() + " written)"

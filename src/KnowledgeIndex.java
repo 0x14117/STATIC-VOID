@@ -267,7 +267,8 @@ public class KnowledgeIndex {
                     known = known + 1;
                 }
                 shown = shown + 1;
-                Terminal.line("    [" + (learned ? "x" : " ") + "] " + topic[1]);
+                Terminal.line("    " + (learned ? Theme.paint(Theme.GOOD, "[x]") : "[ ]")
+                        + " " + topic[1]);
             }
         }
 

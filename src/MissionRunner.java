@@ -214,13 +214,13 @@ public class MissionRunner {
 
             if (answer.equalsIgnoreCase("hint")) {
                 if (hintsShown >= task.getHints().length) {
-                    Terminal.line("  That is every hint. Try SKIP"
+                    Terminal.lineAs(Theme.WARN, "  That is every hint. Try SKIP"
                             + (task.hasSolution() ? " or SOLUTION" : "") + ".");
                     Terminal.blank();
                     continue;
                 }
                 Terminal.blank();
-                Terminal.wrapped("HINT " + (hintsShown + 1) + ": "
+                Terminal.wrappedAs(Theme.WARN, "HINT " + (hintsShown + 1) + ": "
                         + task.getHints()[hintsShown], "  ");
                 Terminal.blank();
                 hintsShown = hintsShown + 1;
@@ -231,7 +231,7 @@ public class MissionRunner {
 
             if (answer.equalsIgnoreCase("solution")) {
                 if (!task.hasSolution()) {
-                    Terminal.line("  No full solution for this one. Try HINT.");
+                    Terminal.lineAs(Theme.WARN, "  No full solution for this one. Try HINT.");
                     Terminal.blank();
                     continue;
                 }
@@ -242,8 +242,8 @@ public class MissionRunner {
 
             if (answer.equalsIgnoreCase("skip") || answer.equalsIgnoreCase("exit")) {
                 Terminal.blank();
-                Terminal.line("  Skipped. The answer was:");
-                Terminal.wrapped(task.getFirstAccepted(), "      ");
+                Terminal.lineAs(Theme.MUTED, "  Skipped. The answer was:");
+                Terminal.wrappedAs(Theme.ACCENT, task.getFirstAccepted(), "      ");
                 Terminal.blank();
                 Terminal.teachingText(task.getExplanation(), "  ");
                 Terminal.blank();
@@ -257,8 +257,10 @@ public class MissionRunner {
                     award = 1;
                 }
                 Terminal.blank();
-                Terminal.line("  CORRECT.   +" + award + " XP"
-                        + (penalty > 0 ? "   (" + penalty + " spent on hints)" : ""));
+                Terminal.line(Theme.paint(Theme.GOOD, "  CORRECT.")
+                        + Theme.paint(Theme.ACCENT, "   +" + award + " XP")
+                        + (penalty > 0 ? Theme.paint(Theme.MUTED,
+                                "   (" + penalty + " spent on hints)") : ""));
                 Terminal.blank();
                 Terminal.teachingText(task.getExplanation(), "  ");
                 Terminal.blank();
@@ -270,11 +272,11 @@ public class MissionRunner {
             player.countWrongAnswer();
             Terminal.blank();
             if (task.matchesIgnoringCase(answer)) {
-                Terminal.wrapped("Nearly. The letters are right but the capitals "
-                        + "are not, and Java treats those as different. Try "
-                        + "again.", "  ");
+                Terminal.wrappedAs(Theme.WARN, "Nearly. The letters are right but "
+                        + "the capitals are not, and Java treats those as "
+                        + "different. Try again.", "  ");
             } else {
-                Terminal.line("  Not quite. Try again, or type HINT.");
+                Terminal.lineAs(Theme.BAD, "  Not quite. Try again, or type HINT.");
             }
             Terminal.blank();
         }
@@ -352,11 +354,12 @@ public class MissionRunner {
             for (String concept : mission.getWillLearn()) {
                 player.learn(concept);
             }
-            Terminal.line("  Mission            : COMPLETE");
+            Terminal.line("  Mission            : " + Theme.paint(Theme.GOOD, "COMPLETE"));
         } else if (answered > 0) {
-            Terminal.line("  Mission            : PARTLY DONE - replay from TRAINING");
+            Terminal.line("  Mission            : "
+                    + Theme.paint(Theme.WARN, "PARTLY DONE - replay from TRAINING"));
         } else {
-            Terminal.line("  Mission            : NOT DONE");
+            Terminal.line("  Mission            : " + Theme.paint(Theme.BAD, "NOT DONE"));
         }
 
         Terminal.blank();

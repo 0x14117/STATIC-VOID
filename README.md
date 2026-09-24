@@ -18,6 +18,8 @@ stopping forged log entries, checking access.
 - **Nothing real is touched.** Everything is simulated on your own machine.
   No network, no accounts, no attacking anything.
 
+![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
+
 > **Status:** 50 missions are playable (Campaigns 00 and 01 complete,
 > Campaign 02 in progress) out of 510 planned. New campaigns are added one at
 > a time.
@@ -261,7 +263,7 @@ level, your clearance, and the next mission waiting for you.
 | `4` | Java Knowledge | Every Java topic, ticked as you learn it. Type a topic name to read about it |
 | `5` | Campaign Map | All 20 campaigns and how far through them you are |
 | `6` | Progress | XP, level, missions completed, topics learned, hints used, wrong answers |
-| `7` | Settings | Change your name, reset progress, find your save file, see the NORTHSTAR network |
+| `7` | Settings | Change your name or theme, reset progress, find your save file, see the NORTHSTAR network |
 | `8` | Exit | Save and quit |
 
 ### Inside a mission
@@ -327,6 +329,30 @@ A mission counts as **complete** when you have answered every question in
 it yourself. A question you `SKIP`, or solve with `SOLUTION`, leaves the
 mission unfinished. Come back to it through **Training** once you are ready.
 
+### Themes
+
+The terminal comes in five looks. Change it any time in
+**Settings > Theme**, which shows a sample of each:
+
+![The theme picker showing PHOSPHOR, AMBER, BLUE TEAM, RED TEAM and PLAIN](docs/screenshot-themes.png)
+
+| Theme | Look |
+|-------|------|
+| PHOSPHOR | classic green-screen terminal (the default) |
+| AMBER | retro amber monitor |
+| BLUE TEAM | defender's SOC console |
+| RED TEAM | attacker's shell |
+| PLAIN | no colour at all |
+
+In every theme, green means correct, red means wrong and yellow means a hint
+or a near miss.
+
+Colour switches on by itself in terminals known to support it: macOS
+Terminal, Linux terminals, Windows Terminal and VS Code. In an older Windows
+console the game asks once, on first start, whether a test word shows in
+colour, and remembers your answer. Setting the environment variable
+`NO_COLOR` turns colour off everywhere.
+
 ### Your save file
 
 Progress is saved after every mission, to a plain-text file called
@@ -384,6 +410,11 @@ older Java.
 **The window closes straight away after double-clicking `play.bat`**
 Open a terminal in the game folder and run `.\play.bat` from there, so the
 message stays on screen.
+
+**Odd symbols like `<-[32m` or `[1;32m` all over the screen**
+Your console cannot display colour. Choose **Settings > Theme > PLAIN**.
+Or run the game in **Windows Terminal**, which shows colour properly. It is
+free from the Microsoft Store, and built into Windows 11.
 
 **Boxes and lines look broken or wrap badly**
 Make the terminal window wider. The game is designed for at least 80
@@ -450,6 +481,7 @@ against failing closed, and password spraying.
 ```
 src/Main.java             the menu and game loop
 src/Terminal.java         all screen drawing and keyboard input
+src/Theme.java            the colour themes, and when colour is safe to use
 src/Player.java           name, XP, level, completed missions
 src/SaveFile.java         reads and writes cyberops-save.txt
 src/Task.java             one question, and how its answer is judged

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -5,6 +7,10 @@ import java.util.Scanner;
  *
  * Kept in one place so the rest of the game never calls System.out directly.
  * If the look of CYBER//OPS ever changes, it changes here and nowhere else.
+ *
+ * Colour comes from Theme, by role. Padding and wrapping are always worked
+ * out on the plain text first and painted afterwards, because colour codes
+ * take up characters but no space on screen.
  */
 public class Terminal {
 
@@ -16,6 +22,11 @@ public class Terminal {
 
     public static void line(String text) {
         System.out.println(text);
+    }
+
+    /** One line in a theme role - GOOD for correct, BAD for wrong, and so on. */
+    public static void lineAs(int role, String text) {
+        System.out.println(Theme.paint(role, text));
     }
 
     public static void blank() {
@@ -30,19 +41,28 @@ public class Terminal {
             bar.append(fill);
         }
         bar.append(edge);
-        System.out.println(bar);
+        System.out.println(Theme.paint(Theme.FRAME, bar.toString()));
     }
 
     /** One row of a box, with the text padded out to the full width. */
     public static void boxed(String text) {
-        System.out.println("| " + pad(text, WIDTH - 4) + " |");
+        boxed(text, -1);
     }
 
-    /** One row of a box with the text centred. */
+    private static void boxed(String text, int role) {
+        String inside = pad(text, WIDTH - 4);
+        if (role >= 0) {
+            inside = Theme.paint(role, inside);
+        }
+        String edge = Theme.paint(Theme.FRAME, "|");
+        System.out.println(edge + " " + inside + " " + edge);
+    }
+
+    /** One row of a box with the text centred, in the title colour. */
     public static void centred(String text) {
         int space = WIDTH - 4 - text.length();
         if (space < 0) {
-            boxed(text);
+            boxed(text, Theme.TITLE);
             return;
         }
         int left = space / 2;
@@ -51,7 +71,7 @@ public class Terminal {
             padded.append(' ');
         }
         padded.append(text);
-        boxed(padded.toString());
+        boxed(padded.toString(), Theme.TITLE);
     }
 
     public static String pad(String text, int width) {
@@ -67,11 +87,13 @@ public class Terminal {
 
     /** A heading like:  -- SECTION NAME ------------------------- */
     public static void heading(String text) {
-        StringBuilder out = new StringBuilder("-- " + text + " ");
-        while (out.length() < WIDTH) {
-            out.append('-');
+        StringBuilder tail = new StringBuilder(" ");
+        while (3 + text.length() + tail.length() < WIDTH) {
+            tail.append('-');
         }
-        System.out.println(out);
+        System.out.println(Theme.paint(Theme.FRAME, "-- ")
+                + Theme.paint(Theme.HEADING, text)
+                + Theme.paint(Theme.FRAME, tail.toString()));
     }
 
     /**
@@ -83,15 +105,29 @@ public class Terminal {
     }
 
     public static void wrapped(String text, String indent) {
+        for (String row : wrapLines(text, indent)) {
+            System.out.println(row);
+        }
+    }
+
+    /** Wrapped text in a theme role. Each row is painted after wrapping. */
+    public static void wrappedAs(int role, String text, String indent) {
+        for (String row : wrapLines(text, indent)) {
+            System.out.println(row.isEmpty() ? row : Theme.paint(role, row));
+        }
+    }
+
+    private static List<String> wrapLines(String text, String indent) {
+        List<String> rows = new ArrayList<>();
         for (String paragraph : text.split("\n")) {
             if (paragraph.isEmpty()) {
-                System.out.println();
+                rows.add("");
                 continue;
             }
             StringBuilder currentLine = new StringBuilder(indent);
             for (String word : paragraph.split(" ")) {
                 if (currentLine.length() + word.length() + 1 > WIDTH && currentLine.length() > indent.length()) {
-                    System.out.println(currentLine);
+                    rows.add(currentLine.toString());
                     currentLine = new StringBuilder(indent);
                 }
                 if (currentLine.length() > indent.length()) {
@@ -100,9 +136,10 @@ public class Terminal {
                 currentLine.append(word);
             }
             if (currentLine.length() > indent.length()) {
-                System.out.println(currentLine);
+                rows.add(currentLine.toString());
             }
         }
+        return rows;
     }
 
     /**
@@ -143,7 +180,7 @@ public class Terminal {
             if (line.trim().isEmpty()) {
                 System.out.println();
             } else if (line.startsWith(" ")) {
-                System.out.println(indent + line);
+                System.out.println(indent + Theme.paint(Theme.CODE, line));
             } else {
                 wrapped(line, indent);
             }
@@ -154,7 +191,9 @@ public class Terminal {
     public static void code(String[] lines) {
         blank();
         for (int i = 0; i < lines.length; i++) {
-            System.out.printf("   %2d | %s%n", i + 1, lines[i]);
+            String gutter = String.format("   %2d | ", i + 1);
+            System.out.println(Theme.paint(Theme.GUTTER, gutter)
+                    + Theme.paint(Theme.CODE, lines[i]));
         }
         blank();
     }
@@ -169,7 +208,7 @@ public class Terminal {
     // ----------------------------------------------------------------- input
 
     public static String ask(String prompt) {
-        System.out.print(prompt);
+        System.out.print(Theme.paint(Theme.PROMPT, prompt));
         System.out.flush();
         if (!INPUT.hasNextLine()) {
             // Input ran out (the window was closed, or the game is being
@@ -180,6 +219,26 @@ public class Terminal {
     }
 
     public static void pause() {
-        ask("\n[ press ENTER to continue ] ");
+        System.out.println();
+        System.out.print(Theme.paint(Theme.MUTED, "[ press ENTER to continue ] "));
+        System.out.flush();
+        if (INPUT.hasNextLine()) {
+            INPUT.nextLine();
+        }
+    }
+
+    /**
+     * A short pause for effect, but only when a person is watching. A script
+     * or a pipe gets the output at full speed.
+     */
+    public static void beat(int millis) {
+        if (!Theme.outputIsTerminal()) {
+            return;
+        }
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }
