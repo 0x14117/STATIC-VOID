@@ -20,8 +20,8 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 60 missions and 40 labs are playable (Campaigns 00 and 01
-> complete, Campaign 02 in progress) out of 510 missions planned. The order
+> **Status:** 70 missions and 40 labs are playable (Campaigns 00, 01 and
+> 02 complete; Campaign 02's labs are next) out of 510 missions planned. The order
 > follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
 
@@ -495,7 +495,7 @@ goes further, into deeper Java and applied security.
 PART 1 - THE MODULE                            missions  labs
 CAMPAIGN 00 - INIT            language, IDE      10       10   BUILT
 CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT
-CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   20 BUILT
+CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   MISSIONS BUILT
 CAMPAIGN 03 - METHODS         methods, stack     30       30
 CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30
 CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30
@@ -530,12 +530,13 @@ division, casting and overflow, String methods (`length`, `trim`, `charAt`,
 `substring`, `indexOf`, `replace`, and more), reading input with `Scanner`,
 `parseInt`, `Math`, `printf`, and parsing a log line.
 
-**Campaign 02 - CONDITIONAL (in progress):** comparisons, `if` and `else`,
+**Campaign 02 - CONDITIONAL:** comparisons, `if` and `else`,
 turning policy wording into `>` or `>=`, boundary testing, `else if`
 chains, `&&`, `||`, `!`, short-circuit guards, comparing text with
 `equals` (never `==`), comparing decimals, `Character` tests, nested `if`,
 checking for `-1`, validating input before `parseInt`, `isBlank`, scope,
-and the `? :` operator.
+the `? :` operator, `switch` in both forms, fall-through, deny-by-default,
+De Morgan's laws, full access rules, and validation pipelines.
 
 Each mission ends with a cybersecurity connection. Examples: the 2014
 "goto fail" certificate bug, log injection, integer overflow, failing open

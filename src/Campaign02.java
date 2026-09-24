@@ -4191,5 +4191,2220 @@ public class Campaign02 {
                 + "Bracket it inside a bigger expression. Values only, never "
                 + "actions. Never nested.")
             .next("Next: choosing between many exact values with switch."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "Many Exact Values", 3)
+            .brief(
+                "The port report names the service on each open port: 22 is "
+                + "SSH, 80 is HTTP, 443 is HTTPS, anything else is unknown. An "
+                + "else-if chain works, but every line repeats port == .\n\n"
+                + "When one value is compared against a list of exact "
+                + "possibilities, Java has a statement built for it.")
+            .willLearn("switch", "case and break", "default")
+            .whyUseful(
+                "Menus, commands, status codes, ports, message types - "
+                + "choosing by exact value is everywhere. switch says 'one of "
+                + "these' more clearly than a long chain of ==.")
+            .concept("switch",
+                "A switch compares ONE value against a list of exact CASES:\n"
+                + "\n"
+                + "    switch (port) {\n"
+                + "        case 22:\n"
+                + "            System.out.println(\"SSH\");\n"
+                + "            break;\n"
+                + "        case 443:\n"
+                + "            System.out.println(\"HTTPS\");\n"
+                + "            break;\n"
+                + "        default:\n"
+                + "            System.out.println(\"UNKNOWN\");\n"
+                + "    }\n"
+                + "\n"
+                + "    switch (port)    the value being examined\n"
+                + "    case 22:         run from here if port is 22\n"
+                + "    break;           leave the switch\n"
+                + "    default:         when no case matched\n"
+                + "\n"
+                + "Java jumps straight to the matching case and runs its lines "
+                + "until it meets a break. If nothing matches, it runs default; "
+                + "if there is no default, nothing at all.\n"
+                + "\n"
+                + "LIMITS. Each case is one exact CONSTANT value. No ranges, no "
+                + "conditions: case > 1000: does not exist. For ranges, use an "
+                + "if/else if chain. And two cases may not have the same value "
+                + "- that is a compile error.\n"
+                + "\n"
+                + "switch works with int, char, String (mission 23) and a few "
+                + "other types. It does not work with double or boolean.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int port = 22;",
+                "        switch (port) {",
+                "            case 22:",
+                "                System.out.println(\"SSH\");",
+                "                break;",
+                "            case 80:",
+                "                System.out.println(\"HTTP\");",
+                "                break;",
+                "            case 443:",
+                "                System.out.println(\"HTTPS\");",
+                "                break;",
+                "            default:",
+                "                System.out.println(\"UNKNOWN\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("SSH")
+            .lineByLine(
+                new String[]{"switch (port)",
+                    "Examine port once. Its value is 22."},
+                new String[]{"case 22:",
+                    "Matches. Java starts running here."},
+                new String[]{"break;",
+                    "Leaves the switch. Nothing below runs."},
+                new String[]{"default:",
+                    "Would run for any port not listed - 3389, 25, anything."})
+            .predict(new Task(Task.PREDICT,
+                    "The example's switch, with port = 443. What does it "
+                    + "print?")
+                .code(
+                    "int port = 443;",
+                    "switch (port) {",
+                    "    case 22:",
+                    "        System.out.println(\"SSH\");",
+                    "        break;",
+                    "    case 443:",
+                    "        System.out.println(\"HTTPS\");",
+                    "        break;",
+                    "    default:",
+                    "        System.out.println(\"UNKNOWN\");",
+                    "}")
+                .accept("HTTPS")
+                .hints("Which case matches 443?", "Then the break ends it.")
+                .explain("HTTPS. Java jumps to case 443, prints, and breaks out.")
+                .xp(10))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "int port = 80;",
+                    "switch (port) {",
+                    "    case 80:",
+                    "        System.out.println(\"HTTP\");",
+                    "        break;",
+                    "    case 80:",
+                    "        System.out.println(\"ALSO HTTP\");",
+                    "        break;",
+                    "}")
+                .accept("6", "line 6")
+                .hints("Look at the case values.",
+                       "Can two cases have the same value?")
+                .explain(
+                    "Line 6: 'duplicate case label'. Each value can appear only "
+                    + "once, because a switch must know exactly where to jump. "
+                    + "The compiler catching this is useful: two cases with the "
+                    + "same value would mean one of them could never run.")
+                .xp(20))
+            .objective(
+                "Add HTTPS to the port report.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int port = 443;",
+                "        switch (port) {",
+                "            case 22:",
+                "                System.out.println(\"SSH\");",
+                "                break;",
+                "            // write the case line for 443 here",
+                "                System.out.println(\"HTTPS\");",
+                "                break;",
+                "            default:",
+                "                System.out.println(\"UNKNOWN\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the case line that makes port 443 print HTTPS.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the case label for 443.")
+                .accept("case 443:", "case 443 :")
+                .hints(
+                    "Look at how case 22 is written.",
+                    "The keyword case, the value, then a colon - not a "
+                    + "semicolon.",
+                    "case 443:")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int port = 443;",
+                    "        switch (port) {",
+                    "            case 22:",
+                    "                System.out.println(\"SSH\");",
+                    "                break;",
+                    "            case 443:",
+                    "                System.out.println(\"HTTPS\");",
+                    "                break;",
+                    "            default:",
+                    "                System.out.println(\"UNKNOWN\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "case 443: is a label: a place Java jumps to when the value "
+                    + "is 443. From there it runs the println and stops at the "
+                    + "break.\n"
+                    + "\n"
+                    + "Notice the colon. A case is not a statement, so it does "
+                    + "not end with a semicolon; it marks where statements begin. "
+                    + "Each case added is one line, instead of another "
+                    + "} else if (port == ...) {.")
+                .explain(
+                    "case, the exact value, and a colon.")
+                .xp(20))
+            .mistakes(
+                new String[]{"A semicolon after the case",
+                    "case 443; does not compile. Case labels end with a colon."},
+                new String[]{"Trying a range",
+                    "case > 1000: is not Java. Ranges need if/else if."},
+                new String[]{"Switching on a double",
+                    "switch does not accept double. Decimals are compared with "
+                    + "if and a tolerance."})
+            .cyber(
+                "switch is a natural fit for protocol handling: message types, "
+                + "command codes, status numbers. A server reads a type byte "
+                + "from the network and switches on it to decide what to do.\n"
+                + "\n"
+                + "That makes the default case a security boundary. Every value "
+                + "the switch does not list - including values no legitimate "
+                + "client ever sends - goes there. A default that quietly treats "
+                + "the unknown like a known case, or does nothing and lets "
+                + "processing continue, is where fuzzers find crashes and "
+                + "attackers find behaviour nobody designed. Mission 25 is "
+                + "about getting it right.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int port = 3389;",
+                    "switch (port) {",
+                    "    case 22:",
+                    "        System.out.println(\"SSH\");",
+                    "        break;",
+                    "    default:",
+                    "        System.out.println(\"UNKNOWN - review\");",
+                    "}")
+                .accept("UNKNOWN - review")
+                .hints("Is 3389 listed?", "No case matched.")
+                .explain(
+                    "UNKNOWN - review. No case matches 3389, so default runs. "
+                    + "(3389 is Windows Remote Desktop - worth reviewing indeed.)")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which can NOT be a case label?")
+                .choices("case 80:", "case 'Y':", "case > 1000:", "case \"quit\":")
+                .accept("3", "c")
+                .hints("Every case is one exact value.",
+                       "Which one is a condition?")
+                .explain(
+                    "case > 1000: is a condition, not a value, and switch has no "
+                    + "way to express it. The others are exact values of int, "
+                    + "char and String.")
+                .xp(15))
+            .recap(
+                "    switch (value) {\n"
+                + "        case 22:  ...  break;\n"
+                + "        default:  ...\n"
+                + "    }\n"
+                + "\n"
+                + "One value against exact constants. break leaves; default "
+                + "catches the rest. No ranges, no doubles, no duplicates.")
+            .next("Next: what happens when a break goes missing."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Falling Through", 4)
+            .brief(
+                "The permissions tool uses a switch on the user's level. Level "
+                + "1 is a guest and should only get READ. After a code tidy-up, "
+                + "guests started receiving DELETE as well.\n\n"
+                + "Somebody removed a break.")
+            .willLearn("switch", "Fall-through", "Grouping cases on purpose")
+            .whyUseful(
+                "Fall-through is the single most common switch bug, and in "
+                + "permission code it is a privilege escalation. Knowing exactly "
+                + "how it works also lets you use it deliberately, which is "
+                + "sometimes exactly right.")
+            .concept("Fall-through",
+                "A case is only a place to START. Java runs from the matching "
+                + "case downward, through the following cases, until it meets "
+                + "a break or the end of the switch. This is called "
+                + "FALL-THROUGH.\n"
+                + "\n"
+                + "    switch (level) {\n"
+                + "        case 1:\n"
+                + "            System.out.println(\"READ\");\n"
+                + "        case 2:\n"
+                + "            System.out.println(\"WRITE\");\n"
+                + "            break;\n"
+                + "    }\n"
+                + "\n"
+                + "With level 1, this prints READ and then WRITE: there was no "
+                + "break after READ, so Java carried on into case 2's lines. "
+                + "The case 2: label does not stop anything - it is only a "
+                + "label.\n"
+                + "\n"
+                + "ON PURPOSE. Stacking labels with nothing between them lets "
+                + "several values share one block:\n"
+                + "\n"
+                + "    case 80:\n"
+                + "    case 8080:\n"
+                + "        System.out.println(\"HTTP\");\n"
+                + "        break;\n"
+                + "\n"
+                + "That is clear and common. Fall-through from a case that DOES "
+                + "something into the next case is almost always a mistake - "
+                + "and when it is deliberate, write a comment saying so, "
+                + "because the next person will assume it is a bug.\n"
+                + "\n"
+                + "The last case or default needs no break, but many people add "
+                + "one anyway, so that adding a case below it later cannot "
+                + "create a fall-through.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int level = 1;",
+                "        switch (level) {",
+                "            case 1:",
+                "                System.out.println(\"grant READ\");",
+                "            case 2:",
+                "                System.out.println(\"grant WRITE\");",
+                "            case 3:",
+                "                System.out.println(\"grant DELETE\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("grant READ", "grant WRITE", "grant DELETE")
+            .lineByLine(
+                new String[]{"case 1:",
+                    "Matches level 1. Java starts here."},
+                new String[]{"grant READ",
+                    "Correct so far."},
+                new String[]{"No break",
+                    "Java carries straight on through case 2 and case 3. The "
+                    + "labels do not stop it."},
+                new String[]{"grant DELETE",
+                    "A guest just received the highest permission. Nothing "
+                    + "crashed and nothing warned."})
+            .predict(new Task(Task.PREDICT,
+                    "What are the TWO lines of output?")
+                .code(
+                    "int code = 2;",
+                    "switch (code) {",
+                    "    case 1:",
+                    "        System.out.println(\"ONE\");",
+                    "    case 2:",
+                    "        System.out.println(\"TWO\");",
+                    "    case 3:",
+                    "        System.out.println(\"THREE\");",
+                    "        break;",
+                    "    case 4:",
+                    "        System.out.println(\"FOUR\");",
+                    "}")
+                .accept("TWO THREE", "TWO, THREE", "TWO and THREE")
+                .hints(
+                    "Start at the matching case.",
+                    "Keep going until a break.")
+                .explain(
+                    "    TWO\n"
+                    + "    THREE\n"
+                    + "\n"
+                    + "Java starts at case 2, has no break, falls into case 3, "
+                    + "and stops at the break there. ONE is above the starting "
+                    + "point and FOUR is after the break, so neither runs.")
+                .xp(25))
+            .practice(new Task(Task.PREDICT,
+                    "Deliberate grouping. What does this print?")
+                .code(
+                    "int port = 8080;",
+                    "switch (port) {",
+                    "    case 80:",
+                    "    case 8080:",
+                    "        System.out.println(\"HTTP\");",
+                    "        break;",
+                    "    case 443:",
+                    "        System.out.println(\"HTTPS\");",
+                    "        break;",
+                    "}")
+                .accept("HTTP")
+                .hints("Which label matches 8080?",
+                       "What comes after it, before a break?")
+                .explain(
+                    "HTTP. case 8080 matches; its lines are shared with case 80 "
+                    + "above it; the break stops before HTTPS. Stacked labels "
+                    + "with nothing between them are the good kind of "
+                    + "fall-through.")
+                .xp(20))
+            .objective(
+                "Fix the guest permissions.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int level = 1;",
+                "        switch (level) {",
+                "            case 1:",
+                "                System.out.println(\"grant READ\");",
+                "                // guests must stop here",
+                "            case 2:",
+                "                System.out.println(\"grant WRITE\");",
+                "                break;",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the one line that goes where the comment is, so that "
+                + "level 1 gets READ and nothing more.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that stops the fall-through.")
+                .accept("break;", "break")
+                .hints(
+                    "What ends a case's run?",
+                    "One word and a semicolon.",
+                    "break;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int level = 1;",
+                    "        switch (level) {",
+                    "            case 1:",
+                    "                System.out.println(\"grant READ\");",
+                    "                break;",
+                    "            case 2:",
+                    "                System.out.println(\"grant WRITE\");",
+                    "                break;",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "break leaves the switch immediately after READ is granted, "
+                    + "so case 2's lines never run for a guest.\n"
+                    + "\n"
+                    + "One missing word turned a read-only account into one that "
+                    + "could write. The switch looked correct at a glance - "
+                    + "every case had the right permission beside it - which is "
+                    + "exactly why fall-through bugs survive code review.")
+                .explain(
+                    "break ends the case; without it, Java falls into the next.")
+                .xp(25))
+            .mistakes(
+                new String[]{"A missing break",
+                    "Java runs on into the next case's lines. Every case that "
+                    + "does something needs a break."},
+                new String[]{"Thinking a case label stops execution",
+                    "Labels are only places to start. Only break stops."},
+                new String[]{"Deliberate fall-through with no comment",
+                    "The next reader will 'fix' it. Say it is intentional."})
+            .cyber(
+                "Fall-through in a permission switch is a textbook privilege "
+                + "escalation: a lower role runs straight into the code meant "
+                + "for a higher one. It has turned up in real access-control "
+                + "code, and it is exactly the kind of flaw that passes a "
+                + "casual review, because each case on its own looks right.\n"
+                + "\n"
+                + "Two habits prevent it: a break after every case that does "
+                + "anything, and ordering permission cases so that falling "
+                + "through could only ever grant LESS, never more. The switch "
+                + "expression in mission 24 removes the problem entirely.")
+            .check(new Task(Task.CHOICE,
+                    "What stops Java running on into the next case?")
+                .choices("The next case label", "A blank line",
+                         "A break statement", "The end of the line")
+                .accept("3", "c")
+                .hints("Case labels do not stop anything.",
+                       "It is a one-word statement.")
+                .explain(
+                    "break. A case label is only a place to begin; Java keeps "
+                    + "going until a break or the end of the switch.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int level = 3;",
+                    "switch (level) {",
+                    "    case 1:",
+                    "        System.out.println(\"READ\");",
+                    "        break;",
+                    "    case 3:",
+                    "        System.out.println(\"DELETE\");",
+                    "    default:",
+                    "        System.out.println(\"AUDIT\");",
+                    "}")
+                .accept("DELETE AUDIT", "DELETE, AUDIT", "DELETE and AUDIT")
+                .hints("Start at case 3.", "Is there a break before default?")
+                .explain(
+                    "    DELETE\n"
+                    + "    AUDIT\n"
+                    + "\n"
+                    + "No break after DELETE, so Java falls into default as well. "
+                    + "default is just another label.")
+                .xp(20))
+            .recap(
+                "A case is where Java starts, not where it stops. Without a "
+                + "break it falls through into the next case's lines.\n"
+                + "\n"
+                + "    case 80:\n"
+                + "    case 8080:   stacked labels share one block - fine\n"
+                + "\n"
+                + "In permission code, a missing break escalates privilege.")
+            .next("Next: switching on text."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "Switching on Text", 3)
+            .brief(
+                "The analyst console reads commands: status, scan, lock, "
+                + "quit. A chain of equals calls works, but a switch reads "
+                + "better - and switch works on Strings too.\n\n"
+                + "With one catch about capitals.")
+            .willLearn("switch", "switch on a String", "Normalising before switching")
+            .whyUseful(
+                "Command interpreters, protocol verbs like GET and POST, "
+                + "message types and configuration keys are all text chosen "
+                + "from a fixed list. switch on a String handles all of them.")
+            .concept("switch on a String",
+                "switch accepts a String, with each case a String literal:\n"
+                + "\n"
+                + "    switch (command) {\n"
+                + "        case \"status\":\n"
+                + "            ...\n"
+                + "            break;\n"
+                + "        case \"quit\":\n"
+                + "            ...\n"
+                + "            break;\n"
+                + "        default:\n"
+                + "            System.out.println(\"Unknown command\");\n"
+                + "    }\n"
+                + "\n"
+                + "Behind the scenes it compares with equals, not ==, so it "
+                + "matches text correctly however the String was made.\n"
+                + "\n"
+                + "But equals is EXACT. STATUS does not match \"status\". For "
+                + "commands, normalise first - trim and lower-case - and write "
+                + "every case in lower case:\n"
+                + "\n"
+                + "    switch (command.trim().toLowerCase()) {\n"
+                + "\n"
+                + "The switch examines the cleaned-up copy. The original "
+                + "command is unchanged, which is handy for logging exactly "
+                + "what was typed.\n"
+                + "\n"
+                + "Everything from missions 21 and 22 still applies: break after "
+                + "each case, and a default for anything not listed.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String command = \"  SCAN \";",
+                "        switch (command.trim().toLowerCase()) {",
+                "            case \"status\":",
+                "                System.out.println(\"All systems monitored\");",
+                "                break;",
+                "            case \"scan\":",
+                "                System.out.println(\"Scan queued\");",
+                "                break;",
+                "            default:",
+                "                System.out.println(\"Unknown command\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("Scan queued")
+            .lineByLine(
+                new String[]{"command.trim().toLowerCase()",
+                    "\"  SCAN \" becomes \"scan\" - the value the switch "
+                    + "examines."},
+                new String[]{"case \"scan\":",
+                    "Compared with equals. Matches."},
+                new String[]{"break;",
+                    "Leaves the switch, as always."},
+                new String[]{"Without normalising",
+                    "\"  SCAN \" matches nothing and the analyst gets 'Unknown "
+                    + "command' for a command that exists."})
+            .predict(new Task(Task.PREDICT,
+                    "No normalising this time. What does this print?")
+                .code(
+                    "String command = \"Quit\";",
+                    "switch (command) {",
+                    "    case \"quit\":",
+                    "        System.out.println(\"Bye\");",
+                    "        break;",
+                    "    default:",
+                    "        System.out.println(\"Unknown command\");",
+                    "}")
+                .accept("Unknown command")
+                .hints("switch compares with equals.",
+                       "Does Quit equal quit exactly?")
+                .explain(
+                    "Unknown command. The comparison is exact, and Q is not q. "
+                    + "Lower-casing before the switch would have matched it.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why does switch on a String work correctly for typed "
+                    + "input, when == would not?")
+                .choices("It ignores capitals",
+                         "It compares with equals behind the scenes",
+                         "It trims the text first",
+                         "It only works on literals")
+                .accept("2", "b")
+                .hints("Mission 11: == compares locations.",
+                       "switch uses the method that compares characters.")
+                .explain(
+                    "It compares with equals, so text built at run time matches "
+                    + "correctly. It does NOT ignore capitals or trim - those you "
+                    + "do yourself before the switch.")
+                .xp(20))
+            .objective(
+                "Make the console accept commands in any capitals.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String command = \"LOCK\";",
+                "        // write the switch line here",
+                "            case \"lock\":",
+                "                System.out.println(\"Account locked\");",
+                "                break;",
+                "            default:",
+                "                System.out.println(\"Unknown command\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the switch line so it examines command lower-cased. The "
+                + "cases are all in lower case.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the switch line, on command in lower case.")
+                .accept("switch (command.toLowerCase()) {",
+                        "switch(command.toLowerCase()) {",
+                        "switch (command.toLowerCase()){",
+                        "switch (command.trim().toLowerCase()) {",
+                        "switch(command.trim().toLowerCase()) {")
+                .hints(
+                    "The switch examines whatever is in its brackets.",
+                    "Put the lower-cased copy there.",
+                    "switch (command.toLowerCase()) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String command = \"LOCK\";",
+                    "        switch (command.toLowerCase()) {",
+                    "            case \"lock\":",
+                    "                System.out.println(\"Account locked\");",
+                    "                break;",
+                    "            default:",
+                    "                System.out.println(\"Unknown command\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "command.toLowerCase() hands the switch \"lock\", which "
+                    + "equals the case exactly. LOCK, Lock and lock all behave "
+                    + "the same.\n"
+                    + "\n"
+                    + "Adding .trim() as well would also forgive stray spaces - "
+                    + "for typed commands, usually worth it. Both are accepted "
+                    + "here.")
+                .explain(
+                    "Normalise inside the switch brackets; write cases in lower "
+                    + "case.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Forgetting it is exact",
+                    "switch on a String is case-sensitive. Normalise first."},
+                new String[]{"Mixed-case case labels",
+                    "Once the input is lower-cased, a case \"Quit\" can never "
+                    + "match. Keep every case in lower case."},
+                new String[]{"No default",
+                    "Unknown commands then do nothing silently. Tell the user."})
+            .cyber(
+                "Command handling is a trust boundary: text from a person or a "
+                + "network decides what code runs. A switch with an exact list "
+                + "of allowed commands and a default that refuses everything "
+                + "else is an allowlist - the safe shape.\n"
+                + "\n"
+                + "The dangerous alternative is building an action from the "
+                + "input itself - running whatever command was named, or "
+                + "loading whatever file was asked for. Many remote-execution "
+                + "vulnerabilities come from exactly that shortcut. A fixed "
+                + "switch cannot be talked into running something that is not "
+                + "on its list.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String verb = \"post\".toUpperCase();",
+                    "switch (verb) {",
+                    "    case \"GET\":",
+                    "        System.out.println(\"read\");",
+                    "        break;",
+                    "    case \"POST\":",
+                    "        System.out.println(\"write\");",
+                    "        break;",
+                    "}")
+                .accept("write")
+                .hints("What is in verb after toUpperCase?",
+                       "Which case equals POST?")
+                .explain(
+                    "write. verb is POST, which equals case \"POST\". Upper case "
+                    + "works just as well as lower, as long as input and cases "
+                    + "agree.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which switch accepts status, STATUS and ' Status '?")
+                .choices("switch (command)",
+                         "switch (command.trim().toLowerCase()) with case \"status\"",
+                         "switch (command) with case \"STATUS\"",
+                         "switch (command.toUpperCase()) with case \"status\"")
+                .accept("2", "b")
+                .hints("Remove the spaces and settle the case.",
+                       "Then the case must be written in that same case.")
+                .explain(
+                    "Trimming and lower-casing turns all three into \"status\", "
+                    + "which the lower-case case matches. Option D upper-cases "
+                    + "the input but writes the case in lower case, so it never "
+                    + "matches.")
+                .xp(20))
+            .recap(
+                "    switch (command.trim().toLowerCase()) {\n"
+                + "        case \"quit\": ... break;\n"
+                + "        default:     ...\n"
+                + "    }\n"
+                + "\n"
+                + "Compared with equals: exact, so normalise first. Cases all in "
+                + "the same case as the normalised input.")
+            .next("Next: a switch that produces a value, with no breaks to "
+                + "forget."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "A Switch That Gives a Value", 4)
+            .brief(
+                "Most switches in the port report exist to set one variable: "
+                + "service = \"SSH\", break, service = \"HTTP\", break. Each "
+                + "break is a chance to forget one.\n\n"
+                + "Modern Java has a form of switch that gives a value directly "
+                + "and cannot fall through.")
+            .willLearn("Switch expressions", "case ->", "Exhaustiveness")
+            .whyUseful(
+                "Switch expressions remove fall-through bugs completely and "
+                + "make mappings - port to service, level to permission - "
+                + "read like a table. They are what current Java code uses.")
+            .concept("Switch expressions",
+                "Since Java 14, switch can PRODUCE a value, like the ? : "
+                + "operator:\n"
+                + "\n"
+                + "    String service = switch (port) {\n"
+                + "        case 22 -> \"SSH\";\n"
+                + "        case 80, 8080 -> \"HTTP\";\n"
+                + "        case 443 -> \"HTTPS\";\n"
+                + "        default -> \"UNKNOWN\";\n"
+                + "    };\n"
+                + "\n"
+                + "What is different from the old switch:\n"
+                + "\n"
+                + "    ->         an arrow instead of a colon\n"
+                + "    no break   each case runs only its own value -\n"
+                + "               fall-through cannot happen\n"
+                + "    80, 8080   several values share a case with commas\n"
+                + "    };         it is part of a statement, so the\n"
+                + "               closing brace needs a semicolon\n"
+                + "\n"
+                + "EXHAUSTIVE. A switch expression must produce a value for "
+                + "EVERY possible input, so for an int or a String it needs a "
+                + "default. Leave it out and the program does not compile. "
+                + "That is a feature: no value can ever slip through "
+                + "unhandled.\n"
+                + "\n"
+                + "The arrow form also works as a statement, running one "
+                + "statement per case:\n"
+                + "\n"
+                + "    case 22 -> System.out.println(\"SSH\");\n"
+                + "\n"
+                + "For new code, prefer the arrow form. You still need to read "
+                + "the colon-and-break form, because most existing code uses "
+                + "it.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int port = 8080;",
+                "        String service = switch (port) {",
+                "            case 22 -> \"SSH\";",
+                "            case 80, 8080 -> \"HTTP\";",
+                "            case 443 -> \"HTTPS\";",
+                "            default -> \"UNKNOWN\";",
+                "        };",
+                "        System.out.println(port + \" is \" + service);",
+                "    }",
+                "}")
+            .exampleOutput("8080 is HTTP")
+            .lineByLine(
+                new String[]{"String service = switch (port) {",
+                    "The whole switch produces a value, stored in service."},
+                new String[]{"case 80, 8080 -> \"HTTP\";",
+                    "Either value gives HTTP. 8080 matches."},
+                new String[]{"No break anywhere",
+                    "Each arrow case produces its value and the switch is done."},
+                new String[]{"};",
+                    "The declaration ends here, so it needs its semicolon."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int level = 1;",
+                    "String grant = switch (level) {",
+                    "    case 1 -> \"READ\";",
+                    "    case 2 -> \"WRITE\";",
+                    "    default -> \"NONE\";",
+                    "};",
+                    "System.out.println(grant);")
+                .accept("READ")
+                .hints("Which case matches 1?",
+                       "Can an arrow case fall through?")
+                .explain(
+                    "READ - only READ. Arrow cases never fall through, so the "
+                    + "mission 22 bug cannot be written this way.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "int port = 22;",
+                    "String service = switch (port) {",
+                    "    case 22 -> \"SSH\";",
+                    "    case 443 -> \"HTTPS\";",
+                    "};",
+                    "System.out.println(service);")
+                .accept("2", "line 2")
+                .hints("What if port were 25?",
+                       "A switch expression must give a value for every input.")
+                .explain(
+                    "Line 2: 'the switch expression does not cover all possible "
+                    + "input values'. With no default, a port like 25 would "
+                    + "produce nothing, so Java refuses. The error points at the "
+                    + "switch itself, where the value is missing.")
+                .xp(25))
+            .objective(
+                "Map both HTTP ports in the service table.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int port = 80;",
+                "        String service = switch (port) {",
+                "            case 22 -> \"SSH\";",
+                "            // write the HTTP case here: ports 80 and 8080",
+                "            case 443 -> \"HTTPS\";",
+                "            default -> \"UNKNOWN\";",
+                "        };",
+                "        System.out.println(service);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write one case line that gives HTTP for both 80 and 8080.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the case for 80 and 8080.")
+                .accept("case 80, 8080 -> \"HTTP\";", "case 8080, 80 -> \"HTTP\";",
+                        "case 80,8080 -> \"HTTP\";")
+                .hints(
+                    "Several values share an arrow case, separated by commas.",
+                    "The arrow, then the value, then a semicolon.",
+                    "case 80, 8080 -> \"HTTP\";")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int port = 80;",
+                    "        String service = switch (port) {",
+                    "            case 22 -> \"SSH\";",
+                    "            case 80, 8080 -> \"HTTP\";",
+                    "            case 443 -> \"HTTPS\";",
+                    "            default -> \"UNKNOWN\";",
+                    "        };",
+                    "        System.out.println(service);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The comma lists both values in one case, and the arrow "
+                    + "gives HTTP for either. No stacked labels, no break, and "
+                    + "no way for 80 to fall into the HTTPS case below it.\n"
+                    + "\n"
+                    + "The table reads top to bottom as exactly what it is - a "
+                    + "mapping from ports to names - which makes a missing or "
+                    + "wrong entry easy to spot in review.")
+                .explain(
+                    "Values separated by commas, then -> and the result.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Leaving out default",
+                    "A switch expression on an int or String must cover every "
+                    + "value. Add default."},
+                new String[]{"Forgetting the final semicolon",
+                    "String s = switch (...) { ... }; - the declaration needs "
+                    + "its ;"},
+                new String[]{"Mixing -> and : in one switch",
+                    "Use one form throughout a switch; Java refuses to mix "
+                    + "them."})
+            .cyber(
+                "Exhaustiveness is a security property. A switch expression "
+                + "cannot be compiled if some input would produce no decision, "
+                + "so 'we forgot that case' becomes a build failure instead of "
+                + "a silent hole.\n"
+                + "\n"
+                + "Combined with no fall-through, it removes two of the "
+                + "classic ways a permission or routing decision goes wrong. "
+                + "What remains is choosing the default well - which is the "
+                + "whole of the next mission.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String code = \"W\";",
+                    "String level = switch (code) {",
+                    "    case \"I\" -> \"INFO\";",
+                    "    case \"W\" -> \"WARNING\";",
+                    "    case \"E\" -> \"ERROR\";",
+                    "    default -> \"UNKNOWN\";",
+                    "};",
+                    "System.out.println(level);")
+                .accept("WARNING")
+                .hints("Which case matches \"W\"?", "One value, no fall-through.")
+                .explain("WARNING. Switch expressions work on Strings too.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which is NOT true of a switch expression with arrows?")
+                .choices("It cannot fall through",
+                         "It must handle every possible value",
+                         "Each case needs a break",
+                         "A case can list several values")
+                .accept("3", "c")
+                .hints("What does the arrow replace?",
+                       "Breaks existed to stop fall-through.")
+                .explain(
+                    "Each case needs a break - false. Arrow cases never fall "
+                    + "through, so there is nothing for a break to stop.")
+                .xp(15))
+            .recap(
+                "    String s = switch (x) {\n"
+                + "        case 1, 2 -> \"A\";\n"
+                + "        default -> \"B\";\n"
+                + "    };\n"
+                + "\n"
+                + "Arrows, no break, no fall-through. Must cover every value, so "
+                + "default is required. Java 14 and later.")
+            .next("Next: the case nobody thought of."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "The Case Nobody Thought Of", 3)
+            .brief(
+                "The access tool switches on a user's role: admin, analyst, "
+                + "guest. Then someone's account arrived with the role "
+                + "'contractor', from a system nobody had told the security "
+                + "team about. The switch had no default, and the code after it "
+                + "assumed access had been decided.\n\n"
+                + "It had not. The contractor walked in.")
+            .willLearn("switch", "default as a safety net", "Failing closed")
+            .whyUseful(
+                "Real data always contains values the designer did not expect. "
+                + "What the default case does with them decides whether "
+                + "surprises are refused, reported, or let through.")
+            .concept("A default that fails closed",
+                "default runs for every value the cases do not list: typos, "
+                + "new roles, corrupted data, and input crafted to be "
+                + "unexpected. It is the same idea as the else from mission 3.\n"
+                + "\n"
+                + "For anything that GRANTS something, the default must be the "
+                + "safe answer:\n"
+                + "\n"
+                + "    String access = switch (role) {\n"
+                + "        case \"admin\" -> \"FULL\";\n"
+                + "        case \"analyst\" -> \"READ-WRITE\";\n"
+                + "        case \"guest\" -> \"READ\";\n"
+                + "        default -> \"NONE\";\n"
+                + "    };\n"
+                + "\n"
+                + "A role nobody planned for gets nothing. That is FAILING "
+                + "CLOSED.\n"
+                + "\n"
+                + "Three things a good default does:\n"
+                + "\n"
+                + "    refuse    the safe outcome, not a guess\n"
+                + "    report    say what arrived, so someone can look\n"
+                + "    never     copy a real case 'to be helpful'\n"
+                + "\n"
+                + "A default like  default -> \"READ\"  looks harmless and "
+                + "means every unknown role - including made-up ones - gets "
+                + "access. Writing out a list of allowed values and refusing "
+                + "the rest is the allowlist idea again, in switch form.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String role = \"contractor\";",
+                "        String access = switch (role) {",
+                "            case \"admin\" -> \"FULL\";",
+                "            case \"analyst\" -> \"READ-WRITE\";",
+                "            case \"guest\" -> \"READ\";",
+                "            default -> \"NONE\";",
+                "        };",
+                "        System.out.println(role + \": \" + access);",
+                "    }",
+                "}")
+            .exampleOutput("contractor: NONE")
+            .lineByLine(
+                new String[]{"role = \"contractor\"",
+                    "A value nobody listed."},
+                new String[]{"The three cases",
+                    "None match."},
+                new String[]{"default -> \"NONE\"",
+                    "The unknown gets nothing - the safe outcome."},
+                new String[]{"The printout",
+                    "Names the role that arrived, so the refusal can be "
+                    + "investigated."})
+            .predict(new Task(Task.PREDICT,
+                    "A typo in the role. What does this print?")
+                .code(
+                    "String role = \"admn\";",
+                    "String access = switch (role) {",
+                    "    case \"admin\" -> \"FULL\";",
+                    "    case \"guest\" -> \"READ\";",
+                    "    default -> \"NONE\";",
+                    "};",
+                    "System.out.println(access);")
+                .accept("NONE")
+                .hints("Does admn equal admin?", "No case matches.")
+                .explain(
+                    "NONE. The typo matches nothing, so the default refuses. A "
+                    + "typo costs an admin a minute; the opposite default would "
+                    + "cost you the system.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which default is safest for a switch that grants access?")
+                .choices("default -> \"READ\"", "default -> \"FULL\"",
+                         "default -> \"NONE\"", "no default at all")
+                .accept("3", "c")
+                .hints("The default handles values nobody planned for.",
+                       "Fail closed.")
+                .explain(
+                    "default -> \"NONE\". Unknown values get nothing. READ grants "
+                    + "something to every made-up role, FULL grants everything, "
+                    + "and with no default a switch expression will not even "
+                    + "compile.")
+                .xp(20))
+            .objective(
+                "Close the gap in the access switch.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String role = \"contractor\";",
+                "        String access = switch (role) {",
+                "            case \"admin\" -> \"FULL\";",
+                "            case \"guest\" -> \"READ\";",
+                "            // write the default here",
+                "        };",
+                "        System.out.println(role + \": \" + access);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the default case so any role not listed gets DENY.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the default that denies unknown roles.")
+                .accept("default -> \"DENY\";", "default->\"DENY\";")
+                .hints(
+                    "Same shape as the cases above it, with default instead of "
+                    + "case and a value.",
+                    "The safe outcome for an unknown role is DENY.",
+                    "default -> \"DENY\";")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String role = \"contractor\";",
+                    "        String access = switch (role) {",
+                    "            case \"admin\" -> \"FULL\";",
+                    "            case \"guest\" -> \"READ\";",
+                    "            default -> \"DENY\";",
+                    "        };",
+                    "        System.out.println(role + \": \" + access);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "contractor matches neither case, so the default produces "
+                    + "DENY. Every role nobody planned for - today's contractor, "
+                    + "tomorrow's typo, an attacker's invented role - is "
+                    + "refused.\n"
+                    + "\n"
+                    + "The switch expression would not even compile without a "
+                    + "default. What the compiler cannot do is choose the RIGHT "
+                    + "default; that decision is yours, and for access it is "
+                    + "always the refusal.")
+                .explain(
+                    "The default refuses: unknown means no.")
+                .xp(20))
+            .mistakes(
+                new String[]{"A generous default",
+                    "Any default that grants something grants it to every value "
+                    + "nobody thought of."},
+                new String[]{"A silent default",
+                    "Refusing without saying what arrived hides the new role "
+                    + "from the people who need to know."},
+                new String[]{"No default in an old-style switch",
+                    "Nothing runs, and the code after carries on as if a "
+                    + "decision was made."})
+            .cyber(
+                "'Deny by default' is one of the oldest principles in security "
+                + "design, and firewalls are its classic example: a list of "
+                + "allowed traffic, and a final rule that drops everything "
+                + "else. A firewall whose last rule is 'allow' is not a "
+                + "firewall.\n"
+                + "\n"
+                + "The same principle applies inside every program you write. "
+                + "Wherever code chooses what someone may do, the path for the "
+                + "unexpected - the else, the default, the case where a lookup "
+                + "found nothing - should lead to refusal, and ideally to a log "
+                + "entry that someone reads.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String role = \"GUEST\".toLowerCase();",
+                    "String access = switch (role) {",
+                    "    case \"guest\" -> \"READ\";",
+                    "    default -> \"DENY\";",
+                    "};",
+                    "System.out.println(access);")
+                .accept("READ")
+                .hints("What is role after toLowerCase?",
+                       "Does it match the case?")
+                .explain(
+                    "READ. Normalising turned GUEST into guest, which matches. "
+                    + "Deny by default works best with normalised input, so "
+                    + "legitimate values are not refused just for their "
+                    + "capitals.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What does 'failing closed' mean for an access decision?")
+                .choices("Anything unexpected is allowed",
+                         "Anything unexpected is refused",
+                         "The program crashes on unexpected input",
+                         "Unexpected input is ignored")
+                .accept("2", "b")
+                .hints("Think of a door during a power cut.",
+                       "Closed means shut.")
+                .explain(
+                    "Anything unexpected is refused. Like a door that stays "
+                    + "locked when the power fails.")
+                .xp(10))
+            .recap(
+                "default handles every value nobody listed - typos, new data, "
+                + "attacks.\n"
+                + "\n"
+                + "For anything that grants access, default refuses: deny by "
+                + "default, fail closed.\n"
+                + "\n"
+                + "Refuse, report what arrived, never copy a real case.")
+            .next("Next: turning a condition inside out without breaking "
+                + "it."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "Inside Out", 4)
+            .brief(
+                "The allow rule for the VPN is simple: MFA passed AND account "
+                + "not locked. The audit team wants the opposite - a rule that "
+                + "flags every DENIED attempt - and the first draft, "
+                + "!mfaOk && locked, missed most of them.\n\n"
+                + "Flipping a condition has rules of its own.")
+            .willLearn("De Morgan's laws", "Negating && and ||", "Allow rules and deny rules")
+            .whyUseful(
+                "Every allow rule has a deny rule, every 'valid' test an "
+                + "'invalid' one. Flipping a compound condition correctly - "
+                + "without leaving a gap - is a skill you use constantly.")
+            .concept("De Morgan's laws",
+                "To flip a condition built with && or ||, flip each part AND "
+                + "swap the operator:\n"
+                + "\n"
+                + "    !(a && b)    is the same as    !a || !b\n"
+                + "    !(a || b)    is the same as    !a && !b\n"
+                + "\n"
+                + "In words: 'not both' means 'at least one is missing'. 'Not "
+                + "either' means 'neither'.\n"
+                + "\n"
+                + "These are DE MORGAN'S LAWS, and they hold for every "
+                + "combination of true and false.\n"
+                + "\n"
+                + "The allow rule:\n"
+                + "\n"
+                + "    mfaOk && !locked\n"
+                + "\n"
+                + "Its exact opposite, the deny rule - flip each part, swap && "
+                + "for ||:\n"
+                + "\n"
+                + "    !mfaOk || locked\n"
+                + "\n"
+                + "Denied if MFA failed, OR if the account is locked. Either "
+                + "alone is enough.\n"
+                + "\n"
+                + "The common mistake is flipping the parts but keeping the "
+                + "operator: !mfaOk && locked. That only catches attempts "
+                + "where BOTH went wrong, and misses everyone who failed MFA on "
+                + "an unlocked account.\n"
+                + "\n"
+                + "When in doubt, !( ... ) around the whole allow rule is "
+                + "always correct, if less readable.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean mfaOk = false;",
+                "        boolean locked = false;",
+                "        System.out.println(\"allowed: \" + (mfaOk && !locked));",
+                "        System.out.println(\"denied:  \" + (!mfaOk || locked));",
+                "        System.out.println(\"wrong:   \" + (!mfaOk && locked));",
+                "    }",
+                "}")
+            .exampleOutput("allowed: false", "denied:  true", "wrong:   false")
+            .lineByLine(
+                new String[]{"mfaOk && !locked",
+                    "MFA failed, so not allowed: false."},
+                new String[]{"!mfaOk || locked",
+                    "The correct flip. MFA failed is enough: true."},
+                new String[]{"!mfaOk && locked",
+                    "The wrong flip. It wants the account locked as well, so it "
+                    + "says false - calling a denied attempt fine."},
+                new String[]{"allowed and denied",
+                    "The right pair always disagree. The wrong 'deny' agrees "
+                    + "with 'allowed' here - the gap the audit found."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code("System.out.println(!(true && false));")
+                .accept("true")
+                .hints("Work out the brackets first.",
+                       "true && false is false. Then flip it.")
+                .explain(
+                    "true. The same as !true || !false, which is false || true.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "Which is the same as  !(locked || expired) ?")
+                .choices("!locked || !expired", "!locked && !expired",
+                         "locked && expired", "!locked || expired")
+                .accept("2", "b")
+                .hints("Flip each part.", "And swap || for &&.")
+                .explain(
+                    "!locked && !expired: neither locked nor expired. Flip each "
+                    + "part and swap the operator.")
+                .xp(20))
+            .objective(
+                "Write the deny rule that flags every refused VPN attempt.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean mfaOk = false;",
+                "        boolean locked = false;",
+                "        // allow rule: mfaOk && !locked",
+                "        // write the if line for its exact opposite",
+                "            System.out.println(\"FLAG: denied attempt\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that is true exactly when the allow rule is "
+                + "false. Use De Morgan: flip each part and swap the operator. "
+                + "Keep mfaOk first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the deny rule's if line.")
+                .accept("if (!mfaOk || locked) {", "if(!mfaOk || locked) {",
+                        "if (!mfaOk || locked){", "if (!(mfaOk && !locked)) {")
+                .hints(
+                    "Flip mfaOk to !mfaOk, and !locked to locked.",
+                    "Then swap && for ||.",
+                    "if (!mfaOk || locked) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        boolean mfaOk = false;",
+                    "        boolean locked = false;",
+                    "        if (!mfaOk || locked) {",
+                    "            System.out.println(\"FLAG: denied attempt\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The allow rule needs both parts; so it fails when EITHER "
+                    + "part fails. That 'either' is the ||. MFA failed here, so "
+                    + "the attempt is flagged even though the account is not "
+                    + "locked.\n"
+                    + "\n"
+                    + "The draft !mfaOk && locked only flagged attempts that "
+                    + "failed MFA on an already-locked account - a tiny corner "
+                    + "of what was actually being refused. An audit rule with a "
+                    + "gap like that produces a quiet report and a false sense "
+                    + "that nothing is happening.")
+                .explain(
+                    "Flip each part, swap && for ||.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Flipping parts but not the operator",
+                    "!(a && b) is NOT !a && !b. Swap to ||."},
+                new String[]{"Flipping only one part",
+                    "Every part flips, including the ones already negated: !x "
+                    + "becomes x."},
+                new String[]{"Not checking the pair",
+                    "The allow and deny rules must disagree for every "
+                    + "combination. Test all four."})
+            .cyber(
+                "Security configurations are full of paired rules: allow and "
+                + "deny, alert and suppress, valid and invalid. When one is "
+                + "written as the opposite of the other and the flip is wrong, "
+                + "a gap opens between them - a set of cases that is neither "
+                + "allowed nor denied, neither alerted nor suppressed.\n"
+                + "\n"
+                + "Those gaps are where incidents hide. De Morgan's laws are "
+                + "the tool for closing them, and checking all four "
+                + "true/false combinations of two conditions takes a minute "
+                + "and settles it for certain.")
+            .check(new Task(Task.PREDICT,
+                    "For every a and b, this prints the same thing. What?")
+                .code(
+                    "boolean a = true;",
+                    "boolean b = false;",
+                    "System.out.println(!(a || b) == (!a && !b));")
+                .accept("true")
+                .hints("Work out each side.",
+                       "De Morgan says the two sides are always equal.")
+                .explain(
+                    "true. !(true || false) is false; !true && !false is false. "
+                    + "Equal, as De Morgan's law promises for any values.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "The allow rule is  valid && !expired . Which is its deny "
+                    + "rule?")
+                .choices("!valid && expired", "!valid || expired",
+                         "valid || !expired", "!valid || !expired")
+                .accept("2", "b")
+                .hints("Flip both parts.", "Swap && for ||.")
+                .explain(
+                    "!valid || expired. Either problem on its own is enough to "
+                    + "deny.")
+                .xp(15))
+            .recap(
+                "    !(a && b)   =   !a || !b\n"
+                + "    !(a || b)   =   !a && !b\n"
+                + "\n"
+                + "Flip every part AND swap the operator.\n"
+                + "\n"
+                + "An allow rule and its deny rule must disagree for every "
+                + "combination - or a gap opens between them.")
+            .next("Next: a whole access rule, with brackets where they "
+                + "matter."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "A Full Access Rule", 4)
+            .brief(
+                "The written policy for the finance share: the account must not "
+                + "be locked, MFA must have passed, and the user must be an "
+                + "admin OR it must be office hours.\n\n"
+                + "Four conditions, three operators, and one pair of brackets "
+                + "that decides whether a locked account can get in.")
+            .willLearn("Logical operators", "Grouping with brackets", "Named conditions")
+            .whyUseful(
+                "Real policies combine several conditions. Writing them so "
+                + "they are both correct and readable - and knowing exactly "
+                + "where brackets are needed - is what access control code is "
+                + "made of.")
+            .concept("Building a compound rule",
+                "Write a rule in two steps.\n"
+                + "\n"
+                + "STEP 1 - name each condition in a boolean:\n"
+                + "\n"
+                + "    boolean isAdmin = role.equals(\"admin\");\n"
+                + "    boolean officeHours = hour >= 8 && hour < 18;\n"
+                + "\n"
+                + "Each name says what it means, so the rule can read like the "
+                + "policy.\n"
+                + "\n"
+                + "STEP 2 - combine them, bracketing every || that sits among "
+                + "&&s:\n"
+                + "\n"
+                + "    if (!locked && mfa && (isAdmin || officeHours)) {\n"
+                + "\n"
+                + "That reads as the policy: not locked, and MFA, and (admin or "
+                + "office hours).\n"
+                + "\n"
+                + "WHY THE BRACKETS MATTER. && binds tighter than ||. Without "
+                + "them,\n"
+                + "\n"
+                + "    !locked && mfa && isAdmin || officeHours\n"
+                + "\n"
+                + "is read as\n"
+                + "\n"
+                + "    (!locked && mfa && isAdmin) || officeHours\n"
+                + "\n"
+                + "- and then ANYONE gets in during office hours: locked or "
+                + "not, MFA or not. The brackets are the difference between the "
+                + "policy and a hole.\n"
+                + "\n"
+                + "Test a compound rule with the cases that should FAIL, one "
+                + "condition at a time: locked but otherwise fine, no MFA but "
+                + "otherwise fine. Each must be refused.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String role = \"analyst\";",
+                "        int hour = 22;",
+                "        boolean mfa = true;",
+                "        boolean locked = false;",
+                "        boolean isAdmin = role.equals(\"admin\");",
+                "        boolean officeHours = hour >= 8 && hour < 18;",
+                "        if (!locked && mfa && (isAdmin || officeHours)) {",
+                "            System.out.println(\"GRANTED\");",
+                "        } else {",
+                "            System.out.println(\"DENIED\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("DENIED")
+            .lineByLine(
+                new String[]{"isAdmin and officeHours",
+                    "An analyst at 22:00: both false."},
+                new String[]{"!locked && mfa",
+                    "Both true so far."},
+                new String[]{"(isAdmin || officeHours)",
+                    "false || false is false, so the whole rule is false."},
+                new String[]{"DENIED",
+                    "Right: an analyst outside office hours does not get in, even "
+                    + "with MFA."})
+            .predict(new Task(Task.PREDICT,
+                    "Same rule, office hours this time. What does it print?")
+                .code(
+                    "boolean locked = false;",
+                    "boolean mfa = true;",
+                    "boolean isAdmin = false;",
+                    "boolean officeHours = true;",
+                    "System.out.println(!locked && mfa && (isAdmin || officeHours));")
+                .accept("true")
+                .hints("Work out the brackets first.",
+                       "Then the && chain.")
+                .explain(
+                    "true. Not locked, MFA passed, and office hours makes the "
+                    + "bracket true.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "The same rule WITHOUT the brackets, for a locked account. "
+                    + "What does it print?")
+                .code(
+                    "boolean locked = true;",
+                    "boolean mfa = true;",
+                    "boolean isAdmin = false;",
+                    "boolean officeHours = true;",
+                    "System.out.println(!locked && mfa && isAdmin || officeHours);")
+                .accept("true")
+                .hints(
+                    "&& binds tighter than ||. Group the && part first.",
+                    "(!locked && mfa && isAdmin) is false. Then || officeHours.")
+                .explain(
+                    "true - a LOCKED account is let in. Without brackets the "
+                    + "rule means (not locked and MFA and admin) OR office hours, "
+                    + "so office hours alone is enough. One missing pair of "
+                    + "brackets, and the lock does nothing between nine and "
+                    + "six.")
+                .xp(30))
+            .objective(
+                "Write the finance share's access rule.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        boolean locked = true;",
+                "        boolean mfa = true;",
+                "        boolean isAdmin = false;",
+                "        boolean officeHours = true;",
+                "        // the rule: not locked, MFA, and (admin or office hours)",
+                "            System.out.println(\"GRANTED\");",
+                "        } else {",
+                "            System.out.println(\"DENIED\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line for the policy, in the order it is written: "
+                + "not locked, then MFA, then admin or office hours. Put the "
+                + "brackets where they are needed.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the full access rule's if line.")
+                .accept("if (!locked && mfa && (isAdmin || officeHours)) {",
+                        "if(!locked && mfa && (isAdmin || officeHours)) {",
+                        "if (!locked && mfa && (isAdmin || officeHours)){",
+                        "if (!locked && mfa && (officeHours || isAdmin)) {")
+                .hints(
+                    "Three parts joined with &&.",
+                    "The third part is itself an ||, so it needs brackets.",
+                    "if (!locked && mfa && (isAdmin || officeHours)) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        boolean locked = true;",
+                    "        boolean mfa = true;",
+                    "        boolean isAdmin = false;",
+                    "        boolean officeHours = true;",
+                    "        if (!locked && mfa && (isAdmin || officeHours)) {",
+                    "            System.out.println(\"GRANTED\");",
+                    "        } else {",
+                    "            System.out.println(\"DENIED\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The account is locked, so !locked is false and the whole "
+                    + "&& chain is false: DENIED, even in office hours.\n"
+                    + "\n"
+                    + "The brackets keep 'admin or office hours' as ONE of the "
+                    + "three requirements, as the policy says. The starter sets "
+                    + "up exactly the case that exposes a missing bracket - "
+                    + "locked, during office hours - which is how to test a rule: "
+                    + "try the case that should fail.")
+                .explain(
+                    "Bracket the || that sits among &&s.")
+                .xp(35))
+            .mistakes(
+                new String[]{"No brackets around the ||",
+                    "&& binds tighter, so the || swallows the whole rule. A "
+                    + "locked account gets in."},
+                new String[]{"Testing only the happy path",
+                    "A rule that grants the right people can still grant the "
+                    + "wrong ones. Test each failing case."},
+                new String[]{"One long unnamed condition",
+                    "Name the parts: isAdmin, officeHours. The rule then reads "
+                    + "like the policy."})
+            .cyber(
+                "This is policy as code, and it is where the real world's "
+                + "access control lives: file shares, VPN gateways, cloud "
+                + "permissions, admin panels. The written policy goes to "
+                + "auditors; the code is what actually runs.\n"
+                + "\n"
+                + "Precedence mistakes like the one in this mission turn up in "
+                + "real authorisation code, and they are nasty because the "
+                + "people who SHOULD get in all still do - nobody complains. "
+                + "The only way to find them is to test the refusals "
+                + "deliberately, one condition at a time. Security testers "
+                + "call it testing the negative cases, and it catches more "
+                + "access-control bugs than anything else.")
+            .check(new Task(Task.CHOICE,
+                    "In  a && b || c , which is worked out first?")
+                .choices("b || c", "a && b", "They run left to right equally",
+                         "c")
+                .accept("2", "b")
+                .hints("&& binds tighter than ||.",
+                       "Like * before +.")
+                .explain(
+                    "a && b. The expression is (a && b) || c - so c on its own "
+                    + "can make it true.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "No MFA, admin, office hours, not locked. What does this "
+                    + "print?")
+                .code(
+                    "boolean locked = false;",
+                    "boolean mfa = false;",
+                    "boolean isAdmin = true;",
+                    "boolean officeHours = true;",
+                    "System.out.println(!locked && mfa && (isAdmin || officeHours));")
+                .accept("false")
+                .hints("Every && part must be true.", "Is mfa true?")
+                .explain(
+                    "false. MFA failed, and MFA is required of everyone - admins "
+                    + "included. A negative case the rule correctly refuses.")
+                .xp(15))
+            .recap(
+                "Name the conditions, then combine them.\n"
+                + "\n"
+                + "    !locked && mfa && (isAdmin || officeHours)\n"
+                + "\n"
+                + "&& binds tighter than ||: bracket every || among &&s.\n"
+                + "\n"
+                + "Test the cases that should fail, one condition at a time.")
+            .next("Next: a whole lockout program, from input to decision."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "The Lockout Decision", 5)
+            .brief(
+                "Time to put a whole decision together. The lockout service "
+                + "reads a username and a failure count, checks the count is a "
+                + "real number, and decides: LOCK, WARN or OK. Admin accounts "
+                + "are worth more to an attacker, so they lock sooner.")
+            .willLearn("if / else if / else", "Combining validation and decisions",
+                       "A threshold chosen by ?:")
+            .whyUseful(
+                "Real programs are not one if - they are input, validation, a "
+                + "choice of rule, and a decision, one after the other. This "
+                + "mission is that whole shape in one small program.")
+            .concept("Input to decision",
+                "The program runs in four stages:\n"
+                + "\n"
+                + "    1. READ       username and count, cleaned up\n"
+                + "    2. VALIDATE   is the count really a number?\n"
+                + "    3. CHOOSE     which threshold applies to this user?\n"
+                + "    4. DECIDE     LOCK, WARN or OK\n"
+                + "\n"
+                + "Stage 2 guards everything after it: parseInt only runs inside "
+                + "the branch where the count passed matches. Bad input gets "
+                + "one clear message and nothing else happens.\n"
+                + "\n"
+                + "Stage 3 picks a number, which is what ?: is for:\n"
+                + "\n"
+                + "    int limit = user.equals(\"admin\") ? 3 : 5;\n"
+                + "\n"
+                + "Stage 4 is an else-if chain on that limit, highest threshold "
+                + "first:\n"
+                + "\n"
+                + "    if (failures >= limit)           LOCK\n"
+                + "    else if (failures >= limit - 2)  WARN\n"
+                + "    else                             OK\n"
+                + "\n"
+                + "Because the decision uses limit rather than 3 or 5, the same "
+                + "three lines serve both kinds of account. Changing the admin "
+                + "policy later means changing one number in one place.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Username: \");",
+                "        String user = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Failed logins: \");",
+                "        String text = input.nextLine().trim();",
+                "        if (!text.matches(\"[0-9]+\") || text.length() > 6) {",
+                "            System.out.println(\"INVALID COUNT\");",
+                "        } else {",
+                "            int failures = Integer.parseInt(text);",
+                "            int limit = user.equals(\"admin\") ? 3 : 5;",
+                "            if (failures >= limit) {",
+                "                System.out.println(\"LOCK \" + user);",
+                "            } else if (failures >= limit - 2) {",
+                "                System.out.println(\"WARN \" + user);",
+                "            } else {",
+                "                System.out.println(\"OK \" + user);",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .exampleInput("Admin", "3")
+            .exampleOutput("Username: Admin", "Failed logins: 3", "LOCK admin")
+            .lineByLine(
+                new String[]{"trim().toLowerCase()",
+                    "Admin becomes admin, so the admin rule cannot be dodged with "
+                    + "capitals."},
+                new String[]{"!text.matches(...) || text.length() > 6",
+                    "The deny side of validation - De Morgan from mission 26. "
+                    + "Anything not a short run of digits is refused."},
+                new String[]{"user.equals(\"admin\") ? 3 : 5",
+                    "Chooses the threshold. Admin locks at 3."},
+                new String[]{"failures >= limit",
+                    "3 >= 3: LOCK. The same line would give a normal user WARN."})
+            .predict(new Task(Task.PREDICT,
+                    "A normal user types 3. The program reads the name and count "
+                    + "without prompts. What does it print?")
+                .code(
+                    "Scanner in = new Scanner(System.in);",
+                    "String user = in.nextLine().trim().toLowerCase();",
+                    "int failures = Integer.parseInt(in.nextLine().trim());",
+                    "int limit = user.equals(\"admin\") ? 3 : 5;",
+                    "if (failures >= limit) {",
+                    "    System.out.println(\"LOCK \" + user);",
+                    "} else if (failures >= limit - 2) {",
+                    "    System.out.println(\"WARN \" + user);",
+                    "} else {",
+                    "    System.out.println(\"OK \" + user);",
+                    "}")
+                .input("jsmith", "3")
+                .accept("WARN jsmith")
+                .hints("jsmith is not admin, so limit is 5.",
+                       "3 is below 5, but is it at least 5 - 2?")
+                .explain(
+                    "WARN jsmith. The limit is 5; 3 is not >= 5, but it is >= 3, "
+                    + "so the WARN branch runs. Typed by an admin, the same 3 "
+                    + "would lock.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "The count typed is 'five'. What does this print?")
+                .code(
+                    "String text = \"five\";",
+                    "if (!text.matches(\"[0-9]+\") || text.length() > 6) {",
+                    "    System.out.println(\"INVALID COUNT\");",
+                    "} else {",
+                    "    System.out.println(\"COUNT \" + Integer.parseInt(text));",
+                    "}")
+                .accept("INVALID COUNT")
+                .hints("Does five match [0-9]+?",
+                       "One true side of || is enough.")
+                .explain(
+                    "INVALID COUNT. five is not digits, so the first half is "
+                    + "true and parseInt, which would have crashed, is never "
+                    + "reached.")
+                .xp(20))
+            .objective(
+                "Choose the lockout threshold for the account.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String user = \"admin\";",
+                "        int failures = 4;",
+                "        // declare limit here: 3 for admin, 5 for everyone else",
+                "        if (failures >= limit) {",
+                "            System.out.println(\"LOCK \" + user);",
+                "        } else {",
+                "            System.out.println(\"OK \" + user);",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare an int called limit, using the conditional operator: "
+                + "3 when user equals admin, otherwise 5.")
+            .mainTask(new Task(Task.WRITE,
+                    "Declare limit with ?: - 3 for admin, else 5.")
+                .accept("int limit = user.equals(\"admin\") ? 3 : 5;",
+                        "int limit = user.equals(\"admin\") ? 3 : 5",
+                        "int limit = (user.equals(\"admin\") ? 3 : 5);",
+                        "int limit = \"admin\".equals(user) ? 3 : 5;")
+                .hints(
+                    "Compare text with equals.",
+                    "condition ? valueIfTrue : valueIfFalse",
+                    "int limit = user.equals(\"admin\") ? 3 : 5;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String user = \"admin\";",
+                    "        int failures = 4;",
+                    "        int limit = user.equals(\"admin\") ? 3 : 5;",
+                    "        if (failures >= limit) {",
+                    "            System.out.println(\"LOCK \" + user);",
+                    "        } else {",
+                    "            System.out.println(\"OK \" + user);",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "user equals admin, so limit is 3, and 4 failures locks the "
+                    + "account. For any other user the same line gives 5 and "
+                    + "4 failures is fine.\n"
+                    + "\n"
+                    + "Two missions meet in one line: equals, because this is "
+                    + "text, and ?:, because the job is choosing a value. The "
+                    + "decision below never mentions admin at all - it just uses "
+                    + "limit - which keeps each piece of the policy in exactly "
+                    + "one place.")
+                .explain(
+                    "equals for the text, ?: to choose the number.")
+                .xp(30))
+            .mistakes(
+                new String[]{"user == \"admin\"",
+                    "Text is compared with equals. With typed input, == would "
+                    + "give every admin the normal limit."},
+                new String[]{"Parsing before validating",
+                    "parseInt on 'five' crashes. Validate, then convert inside "
+                    + "the else."},
+                new String[]{"Hard-coding 3 and 5 in the decision",
+                    "Choose the limit once; let the decision use the variable."})
+            .cyber(
+                "Tiered thresholds are standard practice: privileged accounts "
+                + "get stricter lockout, faster alerting and closer monitoring, "
+                + "because compromising one is worth so much more to an "
+                + "attacker.\n"
+                + "\n"
+                + "The normalising at the top of the program matters just as "
+                + "much. If the username were not lower-cased, 'Admin' would "
+                + "get the relaxed limit of 5 - an attacker trying capital "
+                + "variations of the admin account would quietly get two extra "
+                + "guesses per variation.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String user = \"ADMIN\".toLowerCase();",
+                    "int failures = 2;",
+                    "int limit = user.equals(\"admin\") ? 3 : 5;",
+                    "if (failures >= limit) {",
+                    "    System.out.println(\"LOCK\");",
+                    "} else if (failures >= limit - 2) {",
+                    "    System.out.println(\"WARN\");",
+                    "} else {",
+                    "    System.out.println(\"OK\");",
+                    "}")
+                .accept("WARN")
+                .hints("The limit is 3.", "2 is below 3 but at least 1.")
+                .explain(
+                    "WARN. After lower-casing, user is admin, so limit is 3. "
+                    + "2 >= 3 is false; 2 >= 1 is true.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "Why does parseInt sit inside the else of the validation "
+                    + "check?")
+                .choices("It runs faster there",
+                         "It only runs once the text is known to be safe to convert",
+                         "Java requires it",
+                         "So it runs twice")
+                .accept("2", "b")
+                .hints("What happens to parseInt on bad text?",
+                       "Check, then use.")
+                .explain(
+                    "So it only ever sees text that passed validation. Outside "
+                    + "the else, 'five' would crash the service.")
+                .xp(15))
+            .recap(
+                "Read, validate, choose, decide.\n"
+                + "\n"
+                + "    validate first, convert inside the else\n"
+                + "    int limit = user.equals(\"admin\") ? 3 : 5;\n"
+                + "    decide with limit, highest threshold first\n"
+                + "\n"
+                + "Normalise names before any rule looks at them.")
+            .next("Next: a validation pipeline with a clear message for "
+                + "every kind of bad input."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "A Validation Pipeline", 5)
+            .brief(
+                "The firewall rule editor accepts a port number. People type "
+                + "all sorts: nothing, 'http', ' 8080 ', '99999'. Each deserves "
+                + "a clear, specific refusal - and only a genuine port from 1 "
+                + "to 65535 may reach the rule.\n\n"
+                + "One check at a time, in the right order.")
+            .willLearn("Validating input", "Ordered checks", "Specific error messages")
+            .whyUseful(
+                "Every form field, API parameter and config value needs this "
+                + "shape. Get the order right and each check can rely on the "
+                + "ones before it, and each refusal can say exactly what was "
+                + "wrong.")
+            .concept("A validation pipeline",
+                "Validation is a series of gates. Each gate can reject, and "
+                + "each one can rely on every gate before it having passed:\n"
+                + "\n"
+                + "    if (text.isEmpty())                    REQUIRED\n"
+                + "    else if (!text.matches(\"[0-9]+\"))      NOT A NUMBER\n"
+                + "    else if (text.length() > 5)            OUT OF RANGE\n"
+                + "    else {\n"
+                + "        int port = Integer.parseInt(text);\n"
+                + "        if (port < 1 || port > 65535)      OUT OF RANGE\n"
+                + "        else                               ACCEPTED\n"
+                + "    }\n"
+                + "\n"
+                + "(Trim first, before any gate.)\n"
+                + "\n"
+                + "WHY THIS ORDER\n"
+                + "\n"
+                + "    empty first    the clearest message for no input\n"
+                + "    digits next    parseInt would crash otherwise\n"
+                + "    length next    more than 5 digits cannot be a port,\n"
+                + "                   and might overflow an int\n"
+                + "    parse          only now is it safe\n"
+                + "    range last     needs the number, so it must come\n"
+                + "                   after parsing\n"
+                + "\n"
+                + "The else-if chain guarantees only one message, and that "
+                + "parseInt only runs when every format gate has passed. Swap "
+                + "two gates and either the messages get worse or the program "
+                + "crashes.\n"
+                + "\n"
+                + "Note the range check uses || - OUT of range means below the "
+                + "bottom OR above the top (mission 8).")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String text = \" 70000 \".trim();",
+                "        if (text.isEmpty()) {",
+                "            System.out.println(\"REQUIRED\");",
+                "        } else if (!text.matches(\"[0-9]+\")) {",
+                "            System.out.println(\"NOT A NUMBER\");",
+                "        } else if (text.length() > 5) {",
+                "            System.out.println(\"OUT OF RANGE\");",
+                "        } else {",
+                "            int port = Integer.parseInt(text);",
+                "            if (port < 1 || port > 65535) {",
+                "                System.out.println(\"OUT OF RANGE\");",
+                "            } else {",
+                "                System.out.println(\"ACCEPTED \" + port);",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput("OUT OF RANGE")
+            .lineByLine(
+                new String[]{"\" 70000 \".trim()",
+                    "Cleaned before any gate: 70000."},
+                new String[]{"The first three gates",
+                    "Not empty, all digits, five characters. All pass."},
+                new String[]{"Integer.parseInt(text)",
+                    "Safe now: at most five digits, so it cannot fail."},
+                new String[]{"port > 65535",
+                    "70000 is above the top of the range. OUT OF RANGE."})
+            .predict(new Task(Task.PREDICT,
+                    "The same pipeline, with text = \"\". What does it print?")
+                .code(
+                    "String text = \"\";",
+                    "if (text.isEmpty()) {",
+                    "    System.out.println(\"REQUIRED\");",
+                    "} else if (!text.matches(\"[0-9]+\")) {",
+                    "    System.out.println(\"NOT A NUMBER\");",
+                    "} else {",
+                    "    System.out.println(\"FORMAT OK\");",
+                    "}")
+                .accept("REQUIRED")
+                .hints("Which gate comes first?", "Is the text empty?")
+                .explain(
+                    "REQUIRED. The first gate catches it, so the others are "
+                    + "never asked. Without that gate the answer would be NOT A "
+                    + "NUMBER - true, but less helpful to someone who typed "
+                    + "nothing.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "text = \"8o80\" - with a letter o. What does it print?")
+                .code(
+                    "String text = \"8o80\";",
+                    "if (text.isEmpty()) {",
+                    "    System.out.println(\"REQUIRED\");",
+                    "} else if (!text.matches(\"[0-9]+\")) {",
+                    "    System.out.println(\"NOT A NUMBER\");",
+                    "} else if (text.length() > 5) {",
+                    "    System.out.println(\"OUT OF RANGE\");",
+                    "} else {",
+                    "    System.out.println(\"PORT \" + Integer.parseInt(text));",
+                    "}")
+                .accept("NOT A NUMBER")
+                .hints("Is o a digit?", "Look closely: letter o, not zero.")
+                .explain(
+                    "NOT A NUMBER. The letter o is not a digit - an easy typo to "
+                    + "miss by eye, and exactly what the pattern exists to catch "
+                    + "before parseInt crashes on it.")
+                .xp(20))
+            .objective(
+                "Add the gate that refuses anything that is not digits.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String text = \"http\";",
+                "        if (text.isEmpty()) {",
+                "            System.out.println(\"REQUIRED\");",
+                "        // write the NOT A NUMBER gate here",
+                "            System.out.println(\"NOT A NUMBER\");",
+                "        } else {",
+                "            System.out.println(\"PORT \" + Integer.parseInt(text));",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that closes the REQUIRED block and opens a gate "
+                + "for text that is not one or more digits.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the else-if line for the NOT A NUMBER gate.")
+                .accept("} else if (!text.matches(\"[0-9]+\")) {",
+                        "}else if (!text.matches(\"[0-9]+\")) {",
+                        "} else if(!text.matches(\"[0-9]+\")) {",
+                        "} else if (!text.matches(\"[0-9]+\")){")
+                .hints(
+                    "It continues the chain: } else if (...) {",
+                    "The gate REJECTS, so its condition is the opposite of "
+                    + "matching: put ! in front.",
+                    "} else if (!text.matches(\"[0-9]+\")) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String text = \"http\";",
+                    "        if (text.isEmpty()) {",
+                    "            System.out.println(\"REQUIRED\");",
+                    "        } else if (!text.matches(\"[0-9]+\")) {",
+                    "            System.out.println(\"NOT A NUMBER\");",
+                    "        } else {",
+                    "            System.out.println(\"PORT \" + Integer.parseInt(text));",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "http is not empty, so the chain moves to the new gate. It "
+                    + "does not match one-or-more digits, so !matches is true and "
+                    + "NOT A NUMBER prints. parseInt, in the final else, is only "
+                    + "reached by text that has passed every gate.\n"
+                    + "\n"
+                    + "Each gate is written as the condition for REJECTING, "
+                    + "which is why it has a ! in front. The pipeline reads as a "
+                    + "list of reasons to refuse, and whatever survives all of "
+                    + "them is accepted - the allowlist idea, built as a "
+                    + "chain.")
+                .explain(
+                    "The gate rejects what does NOT match: !text.matches(...).")
+                .xp(30))
+            .mistakes(
+                new String[]{"Parsing before the format gates",
+                    "parseInt on 'http' crashes. Parse only in the final else."},
+                new String[]{"Checking the range as text",
+                    "\"9\" > \"65535\" is not a thing. Compare numbers, after "
+                    + "parsing."},
+                new String[]{"One vague message for everything",
+                    "Specific messages help honest users fix typos. (Keep them "
+                    + "about the INPUT - never reveal internal details.)"})
+            .cyber(
+                "Validate early, validate strictly, and give each rejection one "
+                + "clear reason. This pipeline is the standard shape for "
+                + "handling any value that crosses a trust boundary: a web form, "
+                + "an API parameter, a config file, a network message.\n"
+                + "\n"
+                + "One caution about the messages. 'Port must be 1 to 65535' "
+                + "helps a legitimate user and gives an attacker nothing they "
+                + "did not know. A message that echoes internal details - a "
+                + "stack trace, a database error, a file path - helps only the "
+                + "attacker. Tell people what was wrong with what they sent, "
+                + "never how the system works inside.")
+            .check(new Task(Task.CHOICE,
+                    "Why must the range check come after parseInt?")
+                .choices("It is faster",
+                         "It needs the number, and the number only exists after parsing",
+                         "Ranges cannot be checked on ints",
+                         "It does not matter")
+                .accept("2", "b")
+                .hints("What does port < 1 need?", "An int.")
+                .explain(
+                    "It compares numbers, and there is no number until parseInt "
+                    + "has run - which in turn is only safe once the format "
+                    + "gates have passed.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int port = 0;",
+                    "if (port < 1 || port > 65535) {",
+                    "    System.out.println(\"OUT OF RANGE\");",
+                    "} else {",
+                    "    System.out.println(\"OK\");",
+                    "}")
+                .accept("OUT OF RANGE")
+                .hints("Is 0 below 1?", "One side of || is enough.")
+                .explain(
+                    "OUT OF RANGE. Port 0 is reserved and not valid here; the "
+                    + "boundary test from mission 5, at the bottom edge.")
+                .xp(15))
+            .recap(
+                "Gates in order, each able to rely on the ones before:\n"
+                + "\n"
+                + "    trim\n"
+                + "    empty?          REQUIRED\n"
+                + "    not digits?     NOT A NUMBER\n"
+                + "    too long?       OUT OF RANGE\n"
+                + "    parse           now safe\n"
+                + "    out of range?   OUT OF RANGE\n"
+                + "    otherwise       ACCEPTED")
+            .next("Next: the CONDITIONAL checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "CONDITIONAL COMPLETE", 5)
+            .brief(
+                "Thirty missions ago, your programs ran every line every time. "
+                + "Now they compare, decide, validate, refuse and route - the "
+                + "core of every security control there is.\n\n"
+                + "This checkpoint mixes the whole campaign. No new Java.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Decisions go wrong where ideas meet: == on text inside a "
+                + "compound rule, a boundary inside a switch, a check that runs "
+                + "after the use it was meant to guard. This is the practice "
+                + "for that.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "COMPARING\n"
+                + "    == != < > <= >=  on numbers, chars, booleans\n"
+                + "    equals, equalsIgnoreCase  on Strings - never ==\n"
+                + "    Math.abs(a - b) < tolerance  on doubles\n"
+                + "\n"
+                + "DECIDING\n"
+                + "    if / else - put the safe outcome in the else\n"
+                + "    else if chains - highest threshold first\n"
+                + "    switch - exact values, break or ->, default denies\n"
+                + "    ? : - choosing values, never actions\n"
+                + "\n"
+                + "COMBINING\n"
+                + "    && both   || either   ! not\n"
+                + "    && binds tighter - bracket || among &&s\n"
+                + "    guards on the left: check, then use\n"
+                + "    De Morgan: flip each part, swap the operator\n"
+                + "\n"
+                + "VALIDATING\n"
+                + "    indexOf found?     >= 0\n"
+                + "    digits only?       matches(\"[0-9]+\")\n"
+                + "    anything there?    isBlank\n"
+                + "    in range?          after parsing\n"
+                + "\n"
+                + "HABITS\n"
+                + "    translate policy words to operators carefully\n"
+                + "    test the boundary and the cases that must fail\n"
+                + "    deny by default")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String role = \" Analyst \".trim().toLowerCase();",
+                "        int failures = 5;",
+                "        boolean mfa = true;",
+                "        final int LIMIT = 5;",
+                "        String decision = switch (role) {",
+                "            case \"admin\", \"analyst\" ->",
+                "                (failures < LIMIT && mfa) ? \"ALLOW\" : \"DENY\";",
+                "            default -> \"DENY\";",
+                "        };",
+                "        System.out.println(role + \": \" + decision);",
+                "    }",
+                "}")
+            .exampleOutput("analyst: DENY")
+            .lineByLine(
+                new String[]{"trim().toLowerCase()",
+                    "Mission 23: normalise before switching."},
+                new String[]{"case \"admin\", \"analyst\" ->",
+                    "Mission 24: two values, one arrow case, no fall-through."},
+                new String[]{"failures < LIMIT",
+                    "Mission 4: at 5 failures the account is at the limit - not "
+                    + "below it - so DENY."},
+                new String[]{"default -> \"DENY\"",
+                    "Mission 25: every role not listed is refused."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String typed = \"GUEST\".toLowerCase();",
+                    "System.out.println(typed == \"guest\");",
+                    "System.out.println(typed.equals(\"guest\"));")
+                .accept("false true", "false, true", "false and true")
+                .hints("typed was built at run time.",
+                       "== compares locations; equals compares text.")
+                .explain(
+                    "    false\n"
+                    + "    true\n"
+                    + "\n"
+                    + "Mission 11, still the most important rule in the campaign.")
+                .xp(20))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "int failures = 6;",
+                    "if (failures > 5) {",
+                    "    String action = \"LOCK\";",
+                    "} else {",
+                    "    String action = \"OK\";",
+                    "}",
+                    "System.out.println(action);")
+                .accept("7", "line 7")
+                .hints("Where does each action variable live?",
+                       "Both blocks have ended by the println.")
+                .explain(
+                    "Line 7. Each action was declared inside its own block and "
+                    + "vanished at that block's closing brace. Declare it once, "
+                    + "before the if (mission 19).")
+                .xp(25))
+            .objective(
+                "Grant the admin console only to an unlocked admin.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String role = \"ADMIN\".toLowerCase();",
+                "        boolean locked = false;",
+                "        // write the if line: not locked, and role is admin",
+                "            System.out.println(\"CONSOLE OPEN\");",
+                "        } else {",
+                "            System.out.println(\"ACCESS DENIED\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line: true only when the account is not locked "
+                + "and role has the text admin. Lock check first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line: not locked, and role equals admin.")
+                .accept("if (!locked && role.equals(\"admin\")) {",
+                        "if(!locked && role.equals(\"admin\")) {",
+                        "if (!locked && role.equals(\"admin\")){",
+                        "if (!locked && \"admin\".equals(role)) {")
+                .hints(
+                    "Two conditions, both required.",
+                    "Text is compared with equals.",
+                    "if (!locked && role.equals(\"admin\")) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String role = \"ADMIN\".toLowerCase();",
+                    "        boolean locked = false;",
+                    "        if (!locked && role.equals(\"admin\")) {",
+                    "            System.out.println(\"CONSOLE OPEN\");",
+                    "        } else {",
+                    "            System.out.println(\"ACCESS DENIED\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The account is not locked and role, built at run time by "
+                    + "toLowerCase, has the text admin - which equals confirms "
+                    + "and == would not. Both hold, so the console opens; "
+                    + "anything else lands on ACCESS DENIED in the else.\n"
+                    + "\n"
+                    + "Four missions in one line: ! (9), && (7), equals (11), "
+                    + "and the safe outcome in the else (3).")
+                .explain(
+                    "!locked && role.equals(\"admin\"), with the refusal in the "
+                    + "else.")
+                .xp(40))
+            .mistakes(
+                new String[]{"== on text",
+                    "The rule with no exceptions: Strings are compared with "
+                    + "equals."},
+                new String[]{"Missing brackets or breaks",
+                    "&& binds before ||; a case without break falls through."},
+                new String[]{"A generous default",
+                    "Unknown means no: else and default refuse."})
+            .cyber(
+                "Every security control you will ever build or audit is, "
+                + "underneath, what this campaign taught: firewall rules, "
+                + "access checks, alert conditions, input filters, lockout "
+                + "policies. The bugs are the ones you have now seen: an "
+                + "operator one character wrong, text compared by location, a "
+                + "bracket missing, a default that says yes, a check placed "
+                + "after the use.\n"
+                + "\n"
+                + "What these programs still cannot do is repeat. A lockout "
+                + "needs to count many attempts; a parser needs to read many "
+                + "lines. Campaign 03 packages decisions into reusable methods; "
+                + "Campaign 04 makes them repeat.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int level = 1;",
+                    "switch (level) {",
+                    "    case 1:",
+                    "        System.out.println(\"READ\");",
+                    "    case 2:",
+                    "        System.out.println(\"WRITE\");",
+                    "        break;",
+                    "}")
+                .accept("READ WRITE", "READ, WRITE", "READ and WRITE")
+                .hints("Is there a break after READ?", "Fall-through.")
+                .explain(
+                    "    READ\n"
+                    + "    WRITE\n"
+                    + "\n"
+                    + "No break after READ, so level 1 falls into WRITE - the "
+                    + "privilege escalation from mission 22.")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "'Accounts lock once they reach 5 failures.' Which "
+                    + "condition locks?")
+                .choices("failures > 5", "failures >= 5", "failures == 5",
+                         "failures < 5")
+                .accept("2", "b")
+                .hints("At exactly 5, is the account locked?",
+                       "Reach includes the number itself.")
+                .explain(
+                    "failures >= 5. 'Reach' includes 5 itself (mission 4). == 5 "
+                    + "would unlock again at 6.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which is the same as  !(expired || revoked) ?")
+                .choices("!expired || !revoked", "!expired && !revoked",
+                         "expired && revoked", "!expired || revoked")
+                .accept("2", "b")
+                .hints("Flip each part.", "Swap || for &&.")
+                .explain(
+                    "!expired && !revoked - neither expired nor revoked (mission "
+                    + "26).")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 02 - CONDITIONAL complete.\n"
+                + "\n"
+                + "Your programs compare, decide, validate and refuse - and you "
+                + "know the ways each of those goes quietly wrong.\n"
+                + "\n"
+                + "Next they learn to be organised into reusable pieces: "
+                + "methods.")
+            .next("Next: CAMPAIGN 03 - METHODS."));
     }
 }
