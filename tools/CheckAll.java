@@ -260,6 +260,18 @@ public class CheckAll {
                 check(id + " has 3 or more hints", lab.getHints().length >= 3,
                       "got " + lab.getHints().length);
                 check(id + " has a solution", lab.getSolution().length >= 3, "");
+                if (campaign.getNumber() >= 3) {
+                    check(id + " names the methods it needs",
+                          !lab.getNeededMethods().isEmpty(),
+                          "a methods-era lab could be passed with only main");
+                }
+                for (String method : lab.getNeededMethods()) {
+                    check(id + " needed method fits the screen",
+                          4 + method.length() <= Terminal.WIDTH, method);
+                    check(id + " needed method is written as a static header",
+                          method.startsWith("static ") && method.endsWith(")")
+                              && method.contains("("), method);
+                }
                 check(id + " explains its solution", lab.getWalkthrough().length() > 150,
                       "a solution without reasoning teaches copying");
                 boolean sample = false;

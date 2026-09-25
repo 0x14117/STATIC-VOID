@@ -265,6 +265,19 @@ public class LabDesk {
             Terminal.wrappedAfterPrefix(spec[i], "      ", 6);
         }
 
+        if (!lab.getNeededMethods().isEmpty()) {
+            Terminal.blank();
+            Terminal.heading("METHODS YOUR PROGRAM MUST DECLARE");
+            Terminal.blank();
+            for (String method : lab.getNeededMethods()) {
+                Terminal.lineAs(Theme.CODE, "    " + method);
+            }
+            Terminal.blank();
+            Terminal.wrapped("The tests check these exist, with exactly these "
+                    + "return and parameter types. Parameter names are yours "
+                    + "to choose.", "  ");
+        }
+
         List<LabTest> tests = lab.getTests();
         int sampleNumber = 0;
         for (LabTest test : tests) {
@@ -363,6 +376,23 @@ public class LabDesk {
 
     private static void test(Lab lab, Player player) {
         if (!compileOrExplain(lab)) {
+            return;
+        }
+        List<String> missing = LabBench.missingMethods(lab, LabBench.folderFor(lab));
+        if (!missing.isEmpty()) {
+            Terminal.lineAs(Theme.GOOD, "  Compiled.");
+            Terminal.blank();
+            Terminal.lineAs(Theme.BAD, "  This lab needs methods your program does "
+                    + "not declare:");
+            Terminal.blank();
+            for (String method : missing) {
+                Terminal.lineAs(Theme.CODE, "    " + method);
+            }
+            Terminal.blank();
+            Terminal.wrapped("Check each one's name, its return type, its parameter "
+                    + "types and their order, and that it is static. Then test "
+                    + "again.", "  ");
+            Terminal.pause();
             return;
         }
         List<LabBench.Result> results = LabBench.runTests(lab, LabBench.folderFor(lab));

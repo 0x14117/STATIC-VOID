@@ -34,6 +34,7 @@ public class Lab {
     private String[] solution = new String[0];
     private String walkthrough = "";
     private final List<LabTest> tests = new ArrayList<>();
+    private final List<String> neededMethods = new ArrayList<>();
 
     public Lab(String id, String title, String size) {
         this.id = id;
@@ -100,6 +101,17 @@ public class Lab {
 
     public Lab walkthrough(String text) {
         this.walkthrough = text;
+        return this;
+    }
+
+    /**
+     * A method the program must declare, written like a header without the
+     * parameter names: "static boolean isValidPort(String)". Labs about
+     * methods use this, so a program that crams everything into main does
+     * not pass just by printing the right text.
+     */
+    public Lab needsMethod(String signature) {
+        neededMethods.add(signature);
         return this;
     }
 
@@ -179,6 +191,10 @@ public class Lab {
 
     public List<LabTest> getTests() {
         return tests;
+    }
+
+    public List<String> getNeededMethods() {
+        return neededMethods;
     }
 
     public boolean readsInput() {

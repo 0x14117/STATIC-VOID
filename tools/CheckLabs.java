@@ -14,6 +14,7 @@ import java.util.List;
  *                        in which case it must NOT compile), and must fail
  *                        at least one test - a starter that already passes
  *                        teaches nothing
+ *   needed methods       the solution declares every one the lab needs
  *   hidden tests         a program that prints the first sample's answer
  *                        word for word must fail at least one test, so
  *                        hard-coding the sample never passes a lab that
@@ -44,6 +45,9 @@ public class CheckLabs {
             LabBench.Compiled built = LabBench.compile(solution);
             check(id + " solution compiles", built.ok, built.messages);
             if (built.ok) {
+                check(id + " solution declares every needed method",
+                      LabBench.missingMethods(lab, solution).isEmpty(),
+                      "missing " + LabBench.missingMethods(lab, solution));
                 List<LabBench.Result> results = LabBench.runTests(lab, solution);
                 for (int i = 0; i < results.size(); i++) {
                     LabBench.Result r = results.get(i);

@@ -387,8 +387,10 @@ topic has not stuck, or before an assessment.
 3. **Test.** The game compiles your file with the real Java compiler and runs
    it against several tests. Some tests are the sample runs; others are
    **hidden** and use different values, so a program that just prints the
-   sample answer does not pass. Testing is free, so test as often as you
-   like.
+   sample answer does not pass. From Campaign 03 on, the brief also lists
+   the **methods your program must declare**, and the game checks they
+   exist - with the right return and parameter types - before running the
+   tests. Testing is free, so test as often as you like.
 4. **Read what went wrong.** A failed test shows what was typed, the output
    that was expected, what your program printed, and the first line that
    differs. If your program does not compile, you see the compiler's

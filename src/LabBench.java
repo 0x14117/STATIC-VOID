@@ -3,6 +3,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +158,58 @@ public class LabBench {
         result.firstDifference = firstDifference(expected, actual);
         result.passed = result.firstDifference < 0 && result.problem.isEmpty();
         return result;
+    }
+
+    /**
+     * The lab's needed methods that the compiled program does not declare,
+     * each as the lab wrote it. They are read from the class file; nothing
+     * in the learner's program runs.
+     */
+    public static List<String> missingMethods(Lab lab, File folder) {
+        List<String> missing = new ArrayList<>();
+        if (lab.getNeededMethods().isEmpty()) {
+            return missing;
+        }
+        List<String> declared = new ArrayList<>();
+        File build = new File(folder, "build");
+        try (URLClassLoader loader = new URLClassLoader(
+                new URL[]{build.toURI().toURL()}, null)) {
+            Class<?> main = Class.forName("Main", false, loader);
+            for (Method method : main.getDeclaredMethods()) {
+                declared.add(signatureOf(method));
+            }
+        } catch (Exception | LinkageError e) {
+            // Unreadable: every needed method counts as missing.
+        }
+        for (String needed : lab.getNeededMethods()) {
+            if (!declared.contains(tidySignature(needed))) {
+                missing.add(needed);
+            }
+        }
+        return missing;
+    }
+
+    /** "static boolean isValidPort(String)" for a compiled method. */
+    static String signatureOf(Method method) {
+        StringBuilder text = new StringBuilder();
+        if (Modifier.isStatic(method.getModifiers())) {
+            text.append("static ");
+        }
+        text.append(method.getReturnType().getSimpleName()).append(' ')
+            .append(method.getName()).append('(');
+        Class<?>[] types = method.getParameterTypes();
+        for (int i = 0; i < types.length; i++) {
+            text.append(i == 0 ? "" : ", ").append(types[i].getSimpleName());
+        }
+        return text.append(')').toString();
+    }
+
+    /** One space between words, ", " between parameters, none inside (). */
+    static String tidySignature(String signature) {
+        return signature.trim().replaceAll("\\s+", " ")
+                .replaceAll("\\s*,\\s*", ", ")
+                .replaceAll("\\s*\\(\\s*", "(")
+                .replaceAll("\\s*\\)", ")");
     }
 
     /**
