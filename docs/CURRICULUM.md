@@ -128,9 +128,9 @@ Each line is one mission, one idea.
 13. Pass by value: a method gets a copy
 14. Passing a String: immutability again
 15. Overloading: same name, different parameters
-16. The call stack: frames
-17. Reading a stack trace, top to bottom
-18. Methods calling methods
+16. Methods calling methods
+17. The call stack: frames
+18. Reading a stack trace, top to bottom
 19. A first look at recursion, and `StackOverflowError`
 20. Class constants with `static final`
 21. Static fields against local variables
