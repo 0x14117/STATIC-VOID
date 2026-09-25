@@ -220,17 +220,40 @@ public class CheckJava {
         return false;
     }
 
+    /**
+     * From Campaign 03 on, a snippet can show the inside of a class: methods
+     * side by side, main among them. Those go straight into the class. Both
+     * wrappers put three lines above the snippet, so WRAP_OFFSET holds.
+     */
     static String[] wrap(String[] snippet) {
         List<String> out = new ArrayList<>();
         out.add("import java.util.Scanner;");
         out.add("public class Main {");
-        out.add("    public static void main(String[] args) {");
-        for (String line : snippet) {
-            out.add("        " + line);
+        if (isClassBody(snippet)) {
+            out.add("");
+            for (String line : snippet) {
+                out.add("    " + line);
+            }
+        } else {
+            out.add("    public static void main(String[] args) {");
+            for (String line : snippet) {
+                out.add("        " + line);
+            }
+            out.add("    }");
         }
-        out.add("    }");
         out.add("}");
         return out.toArray(new String[0]);
+    }
+
+    /** A declaration at the left margin: static, or public/private static. */
+    static boolean isClassBody(String[] snippet) {
+        for (String line : snippet) {
+            if (line.startsWith("static ") || line.startsWith("public static ")
+                    || line.startsWith("private static ")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static class Result {
