@@ -2526,5 +2526,1810 @@ public class Campaign03Labs {
                 "m.reyes: active",
                 "svc-backup: LOCKED",
                 "Locked accounts: 2"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(21), "Mask a Card Number", Lab.MEDIUM)
+            .stretch()
+            .after("C03-M024")
+            .brief(
+                "Support staff need to confirm WHICH card a customer means "
+                + "without ever seeing the full number. Build the masking "
+                + "helper set: clean the input, check its shape, name the "
+                + "card brand, and show only the last four digits.")
+            .practises("Several small helpers", "Validating before using", "Masking sensitive data")
+            .spec(
+                "Prompt Card number: and read the line. People type spaces and hyphens, so digitsOnly removes both.",
+                "isValidCardShape: 13 to 19 characters, all digits. If the cleaned number fails, print INVALID CARD NUMBER and stop.",
+                "brand: VISA if it starts with 4; MASTERCARD if its first two digits are 51 to 55; AMEX if it starts with 34 or 37; otherwise OTHER.",
+                "mask returns **** followed by a space and the last four digits.",
+                "Print Brand: <brand>, Card: <mask> and Length: <n> digits.")
+            .needsMethod("static String digitsOnly(String)")
+            .needsMethod("static boolean isValidCardShape(String)")
+            .needsMethod("static String brand(String)")
+            .needsMethod("static String mask(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Card number: \");",
+                "        String typed = input.nextLine();",
+                "        System.out.println(\"Card: \" + typed);",
+                "    }",
+                "",
+                "    // digitsOnly, isValidCardShape, brand, mask",
+                "}")
+            .hints(
+                "digitsOnly is two replace calls in a row: remove \" \", then "
+                + "remove \"-\".",
+                "isValidCardShape: a length check with && matches(\"[0-9]+\").",
+                "For Mastercard, turn the first two digits into a number:\n"
+                + "\n"
+                + "    int two = Integer.parseInt(card.substring(0, 2));\n"
+                + "\n"
+                + "then check 51 to 55. That is safe, because brand is only "
+                + "called on numbers that passed isValidCardShape.",
+                "mask:  return \"**** \" + card.substring(card.length() - 4);")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Card number: \");",
+                "        String card = digitsOnly(input.nextLine());",
+                "        if (!isValidCardShape(card)) {",
+                "            System.out.println(\"INVALID CARD NUMBER\");",
+                "        } else {",
+                "            System.out.println(\"Brand: \" + brand(card));",
+                "            System.out.println(\"Card: \" + mask(card));",
+                "            int length = card.length();",
+                "            System.out.println(\"Length: \" + length + \" digits\");",
+                "        }",
+                "    }",
+                "",
+                "    /**",
+                "     * @param typed a card number as a person typed it",
+                "     * @return the same text with spaces and hyphens removed",
+                "     */",
+                "    static String digitsOnly(String typed) {",
+                "        return typed.replace(\" \", \"\").replace(\"-\", \"\");",
+                "    }",
+                "",
+                "    static boolean isValidCardShape(String card) {",
+                "        return card.length() >= 13 && card.length() <= 19",
+                "                && card.matches(\"[0-9]+\");",
+                "    }",
+                "",
+                "    /** @param card a number that passed isValidCardShape */",
+                "    static String brand(String card) {",
+                "        if (card.startsWith(\"4\")) {",
+                "            return \"VISA\";",
+                "        }",
+                "        int two = Integer.parseInt(card.substring(0, 2));",
+                "        if (two >= 51 && two <= 55) {",
+                "            return \"MASTERCARD\";",
+                "        }",
+                "        if (two == 34 || two == 37) {",
+                "            return \"AMEX\";",
+                "        }",
+                "        return \"OTHER\";",
+                "    }",
+                "",
+                "    static String mask(String card) {",
+                "        return \"**** \" + card.substring(card.length() - 4);",
+                "    }",
+                "}")
+            .walkthrough(
+                "The helpers form a pipeline - clean, check, then use - and "
+                + "the later ones rely on the earlier ones. brand parses the "
+                + "first two characters and mask takes the last four; both "
+                + "would crash on short or non-numeric text. The doc comment "
+                + "on brand states that assumption, and main guarantees it by "
+                + "only calling brand on numbers that passed the shape "
+                + "check.\n"
+                + "\n"
+                + "Card rules (PCI DSS) allow at most the first six and last "
+                + "four digits to be shown; this shows fewer. The full number "
+                + "exists only inside the program, never on screen - which is "
+                + "the point of masking.")
+            .sample(Lab.typing("4111 1111 1111 1111"),
+                "Card number: 4111 1111 1111 1111",
+                "Brand: VISA",
+                "Card: **** 1111",
+                "Length: 16 digits")
+            .hidden(Lab.typing("5500-0000-0000-0004"),
+                "Card number: 5500-0000-0000-0004",
+                "Brand: MASTERCARD",
+                "Card: **** 0004",
+                "Length: 16 digits")
+            .hidden(Lab.typing("340000000000009"),
+                "Card number: 340000000000009",
+                "Brand: AMEX",
+                "Card: **** 0009",
+                "Length: 15 digits")
+            .hidden(Lab.typing("6011000000000004"),
+                "Card number: 6011000000000004",
+                "Brand: OTHER",
+                "Card: **** 0004",
+                "Length: 16 digits")
+            .hidden(Lab.typing("56000000000000000"),
+                "Card number: 56000000000000000",
+                "Brand: OTHER",
+                "Card: **** 0000",
+                "Length: 17 digits")
+            .hidden(Lab.typing("4111"),
+                "Card number: 4111",
+                "INVALID CARD NUMBER")
+            .hidden(Lab.typing("4111 1111 1111 111a"),
+                "Card number: 4111 1111 1111 111a",
+                "INVALID CARD NUMBER")
+            .hidden(Lab.typing(""),
+                "Card number:",
+                "INVALID CARD NUMBER")
+            .hidden(Lab.typing("12345678901234567890"),
+                "Card number: 12345678901234567890",
+                "INVALID CARD NUMBER"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(22), "Time Formatter", Lab.MEDIUM)
+            .stretch()
+            .after("C03-M022")
+            .brief(
+                "The badge-reader log stores times as seconds since midnight. "
+                + "Investigators want 09:14:02 - and which shift was on duty. "
+                + "Break the job into small methods: validate, pad, format, "
+                + "classify.")
+            .practises("Decomposition", "Integer division and remainder", "Boundaries between ranges")
+            .spec(
+                "Prompt Seconds since midnight: and read a whole number.",
+                "isValidSeconds: 0 to 86399. Otherwise print INVALID TIME and stop.",
+                "twoDigits(n) returns n as two characters, with a leading 0 below 10. clock(seconds) returns HH:MM:SS.",
+                "shift(seconds): NIGHT before 08:00:00, DAY from 08:00:00 up to but not including 16:00:00, EVENING from 16:00:00.",
+                "Print Time: <clock> and Shift: <shift>.")
+            .needsMethod("static boolean isValidSeconds(int)")
+            .needsMethod("static String twoDigits(int)")
+            .needsMethod("static String clock(int)")
+            .needsMethod("static String shift(int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Seconds since midnight: \");",
+                "        int seconds = Integer.parseInt(input.nextLine().trim());",
+                "        // validate, then print the clock time and the shift",
+                "    }",
+                "",
+                "    // isValidSeconds, twoDigits, clock, shift",
+                "}")
+            .hints(
+                "Hours are seconds / 3600. Minutes are (seconds % 3600) / 60. "
+                + "Seconds are seconds % 60.",
+                "twoDigits:  return n < 10 ? \"0\" + n : \"\" + n;  - or "
+                + "String.format(\"%02d\", n).",
+                "clock joins three twoDigits calls with colons.",
+                "shift compares seconds with 8 * 3600 and 16 * 3600 - using "
+                + "< for 'before'.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Seconds since midnight: \");",
+                "        int seconds = Integer.parseInt(input.nextLine().trim());",
+                "        if (!isValidSeconds(seconds)) {",
+                "            System.out.println(\"INVALID TIME\");",
+                "        } else {",
+                "            System.out.println(\"Time: \" + clock(seconds));",
+                "            System.out.println(\"Shift: \" + shift(seconds));",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isValidSeconds(int seconds) {",
+                "        return seconds >= 0 && seconds <= 86399;",
+                "    }",
+                "",
+                "    static String twoDigits(int n) {",
+                "        return n < 10 ? \"0\" + n : \"\" + n;",
+                "    }",
+                "",
+                "    static String clock(int seconds) {",
+                "        int h = seconds / 3600;",
+                "        int m = (seconds % 3600) / 60;",
+                "        int s = seconds % 60;",
+                "        return twoDigits(h) + \":\" + twoDigits(m) + \":\" + twoDigits(s);",
+                "    }",
+                "",
+                "    static String shift(int seconds) {",
+                "        if (seconds < 8 * 3600) {",
+                "            return \"NIGHT\";",
+                "        }",
+                "        if (seconds < 16 * 3600) {",
+                "            return \"DAY\";",
+                "        }",
+                "        return \"EVENING\";",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each method does one small job, and clock is built from "
+                + "twoDigits three times - exactly the kind of repetition a "
+                + "method removes. shift works on the raw seconds rather than "
+                + "the formatted text: comparing numbers is exact, comparing "
+                + "strings like \"08:00:00\" only works by luck of formatting.\n"
+                + "\n"
+                + "The hidden tests sit on every boundary: 28799 and 28800 "
+                + "(07:59:59 and 08:00:00), 57599 and 57600, and both ends of "
+                + "the valid range. In an investigation, an event at 07:59:59 "
+                + "belongs to the night shift - getting that second wrong "
+                + "points at the wrong people.")
+            .sample(Lab.typing("33242"),
+                "Seconds since midnight: 33242",
+                "Time: 09:14:02",
+                "Shift: DAY")
+            .hidden(Lab.typing("0"),
+                "Seconds since midnight: 0",
+                "Time: 00:00:00",
+                "Shift: NIGHT")
+            .hidden(Lab.typing("28799"),
+                "Seconds since midnight: 28799",
+                "Time: 07:59:59",
+                "Shift: NIGHT")
+            .hidden(Lab.typing("28800"),
+                "Seconds since midnight: 28800",
+                "Time: 08:00:00",
+                "Shift: DAY")
+            .hidden(Lab.typing("57599"),
+                "Seconds since midnight: 57599",
+                "Time: 15:59:59",
+                "Shift: DAY")
+            .hidden(Lab.typing("57600"),
+                "Seconds since midnight: 57600",
+                "Time: 16:00:00",
+                "Shift: EVENING")
+            .hidden(Lab.typing("86399"),
+                "Seconds since midnight: 86399",
+                "Time: 23:59:59",
+                "Shift: EVENING")
+            .hidden(Lab.typing("86400"),
+                "Seconds since midnight: 86400",
+                "INVALID TIME")
+            .hidden(Lab.typing("-1"),
+                "Seconds since midnight: -1",
+                "INVALID TIME"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(23), "Report Builder", Lab.BIG)
+            .stretch()
+            .after("C03-M022")
+            .brief(
+                "The shift lead wants a neat boxed summary for each host at "
+                + "handover. Every row has the same layout, long values must "
+                + "not break the box, and the status line follows a rule. "
+                + "Build it from methods so the layout lives in one place.")
+            .practises("Decomposition", "String.format padding", "Keeping output inside fixed widths")
+            .spec(
+                "Prompt Host:, Alerts today:, Critical: and Analyst:. Host and analyst are trimmed; the counts are whole numbers.",
+                "If either count is negative, or critical is more than alerts, print INVALID COUNTS and stop.",
+                "status: ACTION NEEDED if there is any critical alert; BUSY if there are more than 50 alerts; otherwise NORMAL.",
+                "fit(text, width) returns text unchanged if it is at most width characters; otherwise its first width - 3 characters followed by ... .",
+                "printBorder prints + then 30 dashes then +. row(label, value) returns | , the label padded to 10, a space, fit(value, 17) padded to 17, then  | - 32 characters in all.",
+                "Print a border, rows HOST, ALERTS, CRITICAL, STATUS and ANALYST, and a border.")
+            .needsMethod("static void printBorder()")
+            .needsMethod("static String row(String, String)")
+            .needsMethod("static String fit(String, int)")
+            .needsMethod("static String status(int, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Host: \");",
+                "        String host = input.nextLine().trim();",
+                "        System.out.print(\"Alerts today: \");",
+                "        int alerts = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Critical: \");",
+                "        int critical = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Analyst: \");",
+                "        String analyst = input.nextLine().trim();",
+                "        // validate, then build the box from your methods",
+                "    }",
+                "",
+                "    // printBorder, row, fit, status",
+                "}")
+            .hints(
+                "printBorder can print one fixed String literal of + , 30 "
+                + "dashes and + - count them carefully, or build it once as a "
+                + "constant.",
+                "String.format pads for you:  \"%-10s\"  left-aligns text in "
+                + "10 characters. row is one line:\n"
+                + "\n"
+                + "    return String.format(\"| %-10s %-17s |\", label,\n"
+                + "                         fit(value, 17));",
+                "fit is a guard and a cut:  if (text.length() <= width) "
+                + "return text;  then  return text.substring(0, width - 3) + "
+                + "\"...\";",
+                "Numbers go into row as text: \"\" + alerts.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String BORDER = \"+------------------------------+\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Host: \");",
+                "        String host = input.nextLine().trim();",
+                "        System.out.print(\"Alerts today: \");",
+                "        int alerts = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Critical: \");",
+                "        int critical = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Analyst: \");",
+                "        String analyst = input.nextLine().trim();",
+                "        if (alerts < 0 || critical < 0 || critical > alerts) {",
+                "            System.out.println(\"INVALID COUNTS\");",
+                "            return;",
+                "        }",
+                "        printBorder();",
+                "        System.out.println(row(\"HOST\", host));",
+                "        System.out.println(row(\"ALERTS\", \"\" + alerts));",
+                "        System.out.println(row(\"CRITICAL\", \"\" + critical));",
+                "        System.out.println(row(\"STATUS\", status(alerts, critical)));",
+                "        System.out.println(row(\"ANALYST\", analyst));",
+                "        printBorder();",
+                "    }",
+                "",
+                "    static void printBorder() {",
+                "        System.out.println(BORDER);",
+                "    }",
+                "",
+                "    static String row(String label, String value) {",
+                "        String shown = fit(value, 17);",
+                "        return String.format(\"| %-10s %-17s |\", label, shown);",
+                "    }",
+                "",
+                "    static String fit(String text, int width) {",
+                "        if (text.length() <= width) {",
+                "            return text;",
+                "        }",
+                "        return text.substring(0, width - 3) + \"...\";",
+                "    }",
+                "",
+                "    static String status(int alerts, int critical) {",
+                "        if (critical > 0) {",
+                "            return \"ACTION NEEDED\";",
+                "        }",
+                "        if (alerts > 50) {",
+                "            return \"BUSY\";",
+                "        }",
+                "        return \"NORMAL\";",
+                "    }",
+                "}")
+            .walkthrough(
+                "The box's layout exists in exactly two places: BORDER and "
+                + "row's format string. Every row goes through row, and every "
+                + "value goes through fit, so no host name - however long - "
+                + "can push the right-hand edge out of line. Widen the box "
+                + "and you change two lines, not ten.\n"
+                + "\n"
+                + "main uses return; to stop early on invalid counts - a "
+                + "guard clause in main itself. status checks critical first "
+                + "because one critical alert matters more than any number of "
+                + "routine ones; a busy day with a critical alert is ACTION "
+                + "NEEDED, not BUSY. The hidden tests include 50 and 51 "
+                + "alerts, and values of exactly and just over 17 "
+                + "characters.")
+            .sample(Lab.typing("web-01", "12", "0", "Adaeze Okafor"),
+                "Host: web-01",
+                "Alerts today: 12",
+                "Critical: 0",
+                "Analyst: Adaeze Okafor",
+                "+------------------------------+",
+                "| HOST       web-01            |",
+                "| ALERTS     12                |",
+                "| CRITICAL   0                 |",
+                "| STATUS     NORMAL            |",
+                "| ANALYST    Adaeze Okafor     |",
+                "+------------------------------+")
+            .hidden(Lab.typing("db-02.northstar.example", "80", "2", "m.reyes"),
+                "Host: db-02.northstar.example",
+                "Alerts today: 80",
+                "Critical: 2",
+                "Analyst: m.reyes",
+                "+------------------------------+",
+                "| HOST       db-02.northsta... |",
+                "| ALERTS     80                |",
+                "| CRITICAL   2                 |",
+                "| STATUS     ACTION NEEDED     |",
+                "| ANALYST    m.reyes           |",
+                "+------------------------------+")
+            .hidden(Lab.typing("fw-01", "51", "0", "J"),
+                "Host: fw-01",
+                "Alerts today: 51",
+                "Critical: 0",
+                "Analyst: J",
+                "+------------------------------+",
+                "| HOST       fw-01             |",
+                "| ALERTS     51                |",
+                "| CRITICAL   0                 |",
+                "| STATUS     BUSY              |",
+                "| ANALYST    J                 |",
+                "+------------------------------+")
+            .hidden(Lab.typing("fw-01", "50", "0", "J"),
+                "Host: fw-01",
+                "Alerts today: 50",
+                "Critical: 0",
+                "Analyst: J",
+                "+------------------------------+",
+                "| HOST       fw-01             |",
+                "| ALERTS     50                |",
+                "| CRITICAL   0                 |",
+                "| STATUS     NORMAL            |",
+                "| ANALYST    J                 |",
+                "+------------------------------+")
+            .hidden(Lab.typing("mail-gateway-0001", "0", "0", "Adaeze Okafor-Reyes"),
+                "Host: mail-gateway-0001",
+                "Alerts today: 0",
+                "Critical: 0",
+                "Analyst: Adaeze Okafor-Reyes",
+                "+------------------------------+",
+                "| HOST       mail-gateway-0001 |",
+                "| ALERTS     0                 |",
+                "| CRITICAL   0                 |",
+                "| STATUS     NORMAL            |",
+                "| ANALYST    Adaeze Okafor-... |",
+                "+------------------------------+")
+            .hidden(Lab.typing("x", "-1", "0", "a"),
+                "Host: x",
+                "Alerts today: -1",
+                "Critical: 0",
+                "Analyst: a",
+                "INVALID COUNTS")
+            .hidden(Lab.typing("x", "3", "4", "a"),
+                "Host: x",
+                "Alerts today: 3",
+                "Critical: 4",
+                "Analyst: a",
+                "INVALID COUNTS"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(24), "Input Helpers", Lab.BIG)
+            .stretch()
+            .after("C03-M026")
+            .brief(
+                "Every onboarding form repeats the same fiddly work: blanks "
+                + "that mean 'use the default', numbers that might be words, "
+                + "yes-or-no answers typed six different ways. Write the "
+                + "helpers once, then build the new-analyst form with them.")
+            .practises("Reusable helpers", "Fallback values", "Validation before parsing")
+            .spec(
+                "Prompt Name:, Team (blank for SOC):, Shift hours (blank for 8): and On-call (y/n):.",
+                "orDefault(text, fallback) returns the trimmed text, or fallback if it is blank. isWholeNumber(text) is true for 1 to 9 digits. parseOr(text, fallback) returns the trimmed text as an int when it is a whole number, otherwise fallback. isYes(text) is true for y, yes or true, ignoring case and spaces.",
+                "Shift hours must be 1 to 12. Blank, not a whole number, or out of range: use 8 and add (default used).",
+                "Print Name: (orDefault, fallback (unknown)), Team: (fallback SOC), Shift: <n> hours, and On-call: yes or no.")
+            .needsMethod("static String orDefault(String, String)")
+            .needsMethod("static boolean isWholeNumber(String)")
+            .needsMethod("static int parseOr(String, int)")
+            .needsMethod("static boolean isYes(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Name: \");",
+                "        String name = input.nextLine();",
+                "        System.out.print(\"Team (blank for SOC): \");",
+                "        String team = input.nextLine();",
+                "        System.out.print(\"Shift hours (blank for 8): \");",
+                "        String hours = input.nextLine();",
+                "        System.out.print(\"On-call (y/n): \");",
+                "        String onCall = input.nextLine();",
+                "        // build the record with your helpers",
+                "    }",
+                "",
+                "    // orDefault, isWholeNumber, parseOr, isYes",
+                "}")
+            .hints(
+                "orDefault:  return text.isBlank() ? fallback : text.trim();",
+                "parseOr trims, then asks isWholeNumber before it ever calls "
+                + "parseInt - that is what makes it impossible to crash.",
+                "isYes is a switch expression on text.trim().toLowerCase(), "
+                + "with case \"y\", \"yes\", \"true\" -> true.",
+                "For the shift, parse with a fallback of -1, then check the "
+                + "range: anything outside 1 to 12 - including the -1 - means "
+                + "the default.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Name: \");",
+                "        String name = input.nextLine();",
+                "        System.out.print(\"Team (blank for SOC): \");",
+                "        String team = input.nextLine();",
+                "        System.out.print(\"Shift hours (blank for 8): \");",
+                "        String hours = input.nextLine();",
+                "        System.out.print(\"On-call (y/n): \");",
+                "        String onCall = input.nextLine();",
+                "",
+                "        int shift = parseOr(hours, -1);",
+                "        String note = \"\";",
+                "        if (shift < 1 || shift > 12) {",
+                "            shift = 8;",
+                "            note = \" (default used)\";",
+                "        }",
+                "        System.out.println(\"Name: \" + orDefault(name, \"(unknown)\"));",
+                "        System.out.println(\"Team: \" + orDefault(team, \"SOC\"));",
+                "        System.out.println(\"Shift: \" + shift + \" hours\" + note);",
+                "        String answer = isYes(onCall) ? \"yes\" : \"no\";",
+                "        System.out.println(\"On-call: \" + answer);",
+                "    }",
+                "",
+                "    static String orDefault(String text, String fallback) {",
+                "        return text.isBlank() ? fallback : text.trim();",
+                "    }",
+                "",
+                "    static boolean isWholeNumber(String text) {",
+                "        return text.length() >= 1 && text.length() <= 9",
+                "                && text.matches(\"[0-9]+\");",
+                "    }",
+                "",
+                "    static int parseOr(String text, int fallback) {",
+                "        String t = text.trim();",
+                "        if (!isWholeNumber(t)) {",
+                "            return fallback;",
+                "        }",
+                "        return Integer.parseInt(t);",
+                "    }",
+                "",
+                "    static boolean isYes(String text) {",
+                "        return switch (text.trim().toLowerCase()) {",
+                "            case \"y\", \"yes\", \"true\" -> true;",
+                "            default -> false;",
+                "        };",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each helper hides one fiddly detail behind a clear name, and "
+                + "none of them can crash: parseOr refuses anything "
+                + "isWholeNumber does not approve, so parseInt only ever sees "
+                + "one to nine digits. The fallback parameter lets the CALLER "
+                + "choose what 'no answer' means - -1 here, so main can tell "
+                + "a missing number from a real one.\n"
+                + "\n"
+                + "isYes is an allow-list: only three spellings mean yes, and "
+                + "everything else - including nope, a typo, or nothing - "
+                + "means no. For a question like on-call that is the safe "
+                + "default; for a question like 'delete everything?' it is "
+                + "essential.")
+            .sample(Lab.typing("Adaeze Okafor", "", "10", "yes"),
+                "Name: Adaeze Okafor",
+                "Team (blank for SOC):",
+                "Shift hours (blank for 8): 10",
+                "On-call (y/n): yes",
+                "Name: Adaeze Okafor",
+                "Team: SOC",
+                "Shift: 10 hours",
+                "On-call: yes")
+            .hidden(Lab.typing("", "Red Team", "", "n"),
+                "Name:",
+                "Team (blank for SOC): Red Team",
+                "Shift hours (blank for 8):",
+                "On-call (y/n): n",
+                "Name: (unknown)",
+                "Team: Red Team",
+                "Shift: 8 hours (default used)",
+                "On-call: no")
+            .hidden(Lab.typing("jsmith", "DFIR", "twelve", "Y"),
+                "Name: jsmith",
+                "Team (blank for SOC): DFIR",
+                "Shift hours (blank for 8): twelve",
+                "On-call (y/n): Y",
+                "Name: jsmith",
+                "Team: DFIR",
+                "Shift: 8 hours (default used)",
+                "On-call: yes")
+            .hidden(Lab.typing("jsmith", "   ", "13", " TRUE "),
+                "Name: jsmith",
+                "Team (blank for SOC):",
+                "Shift hours (blank for 8): 13",
+                "On-call (y/n):  TRUE",
+                "Name: jsmith",
+                "Team: SOC",
+                "Shift: 8 hours (default used)",
+                "On-call: yes")
+            .hidden(Lab.typing("m.reyes", "IR", "0", "nope"),
+                "Name: m.reyes",
+                "Team (blank for SOC): IR",
+                "Shift hours (blank for 8): 0",
+                "On-call (y/n): nope",
+                "Name: m.reyes",
+                "Team: IR",
+                "Shift: 8 hours (default used)",
+                "On-call: no")
+            .hidden(Lab.typing("m.reyes", "IR", " 12 ", "y"),
+                "Name: m.reyes",
+                "Team (blank for SOC): IR",
+                "Shift hours (blank for 8):  12",
+                "On-call (y/n): y",
+                "Name: m.reyes",
+                "Team: IR",
+                "Shift: 12 hours",
+                "On-call: yes")
+            .hidden(Lab.typing("m.reyes", "IR", "99999999999", "y"),
+                "Name: m.reyes",
+                "Team (blank for SOC): IR",
+                "Shift hours (blank for 8): 99999999999",
+                "On-call (y/n): y",
+                "Name: m.reyes",
+                "Team: IR",
+                "Shift: 8 hours (default used)",
+                "On-call: yes"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(25), "Log Line Toolkit", Lab.BIG)
+            .stretch()
+            .after("C03-M028")
+            .brief(
+                "Authentication logs arrive as one line per event: date, time, "
+                + "result, user and source address, separated by single "
+                + "spaces. Build the toolkit that checks a line is well formed, "
+                + "pulls out any field, and decides whether it needs an "
+                + "alert.")
+            .practises("Recursion on text", "Validating structure", "Combining helpers")
+            .spec(
+                "Prompt Log line: and read it, trimmed. The format is <date> <time> <result> <user> <ip>.",
+                "countSpaces returns how many spaces the line holds. A line is well formed when it has exactly 4 spaces, no two spaces side by side, and a result of OK or FAIL. Otherwise print MALFORMED LOG LINE and stop.",
+                "field(line, n) returns field number n, counting from 0. It must work by calling itself: field n of a line is field n - 1 of everything after the first space.",
+                "isExternal(ip) is true unless the address starts with 10. or 192.168.",
+                "Print Date:, Time:, User:, Result:, then Source: EXTERNAL or INTERNAL followed by the address in brackets, then Alert: YES for a FAIL from an external source, otherwise Alert: NO.")
+            .needsMethod("static int countSpaces(String)")
+            .needsMethod("static String field(String, int)")
+            .needsMethod("static boolean isExternal(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Log line: \");",
+                "        String line = input.nextLine().trim();",
+                "        // check the shape, then report each field",
+                "    }",
+                "",
+                "    // countSpaces, field, isExternal",
+                "}")
+            .hints(
+                "countSpaces without a loop: remove every space and see how "
+                + "much shorter the line got.\n"
+                + "\n"
+                + "    line.length() - line.replace(\" \", \"\").length()",
+                "field's base case is n == 0: return everything before the "
+                + "first space (or the whole line if there is none).",
+                "field's recursive case drops the first field and asks for "
+                + "one fewer:\n"
+                + "\n"
+                + "    return field(line.substring(space + 1), n - 1);",
+                "Check the result with equals, after the space checks - "
+                + "field(line, 2) is only safe once the shape is known.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Log line: \");",
+                "        String line = input.nextLine().trim();",
+                "        if (countSpaces(line) != 4 || line.contains(\"  \")) {",
+                "            System.out.println(\"MALFORMED LOG LINE\");",
+                "            return;",
+                "        }",
+                "        String result = field(line, 2);",
+                "        if (!result.equals(\"OK\") && !result.equals(\"FAIL\")) {",
+                "            System.out.println(\"MALFORMED LOG LINE\");",
+                "            return;",
+                "        }",
+                "        String ip = field(line, 4);",
+                "        boolean external = isExternal(ip);",
+                "        System.out.println(\"Date: \" + field(line, 0));",
+                "        System.out.println(\"Time: \" + field(line, 1));",
+                "        System.out.println(\"User: \" + field(line, 3));",
+                "        System.out.println(\"Result: \" + result);",
+                "        String where = external ? \"EXTERNAL\" : \"INTERNAL\";",
+                "        System.out.println(\"Source: \" + where + \" (\" + ip + \")\");",
+                "        boolean alert = result.equals(\"FAIL\") && external;",
+                "        System.out.println(\"Alert: \" + (alert ? \"YES\" : \"NO\"));",
+                "    }",
+                "",
+                "    static int countSpaces(String line) {",
+                "        return line.length() - line.replace(\" \", \"\").length();",
+                "    }",
+                "",
+                "    static String field(String line, int n) {",
+                "        int space = line.indexOf(\" \");",
+                "        if (n == 0) {",
+                "            return space == -1 ? line : line.substring(0, space);",
+                "        }",
+                "        return field(line.substring(space + 1), n - 1);",
+                "    }",
+                "",
+                "    static boolean isExternal(String ip) {",
+                "        return !ip.startsWith(\"10.\") && !ip.startsWith(\"192.168.\");",
+                "    }",
+                "}")
+            .walkthrough(
+                "field is recursion on text: to find field 3, drop the first "
+                + "field and find field 2 of what is left, and so on until "
+                + "n reaches 0. Each call works on a shorter line, so it "
+                + "always stops - as long as the line really has enough "
+                + "fields, which is why the shape check runs first.\n"
+                + "\n"
+                + "The shape check itself needs no loop: counting spaces by "
+                + "removing them, and refusing double spaces, guarantees "
+                + "exactly five non-empty fields. The result is checked "
+                + "against an allow-list of OK and FAIL. A parser that "
+                + "guessed its way through malformed lines is how attackers "
+                + "slip events past log-based detection - refusing them "
+                + "loudly is safer.")
+            .sample(Lab.typing("2024-03-11 09:14:02 FAIL jsmith 203.0.113.9"),
+                "Log line: 2024-03-11 09:14:02 FAIL jsmith 203.0.113.9",
+                "Date: 2024-03-11",
+                "Time: 09:14:02",
+                "User: jsmith",
+                "Result: FAIL",
+                "Source: EXTERNAL (203.0.113.9)",
+                "Alert: YES")
+            .hidden(Lab.typing("2024-03-11 09:15:40 OK m.reyes 10.0.0.7"),
+                "Log line: 2024-03-11 09:15:40 OK m.reyes 10.0.0.7",
+                "Date: 2024-03-11",
+                "Time: 09:15:40",
+                "User: m.reyes",
+                "Result: OK",
+                "Source: INTERNAL (10.0.0.7)",
+                "Alert: NO")
+            .hidden(Lab.typing("2024-03-11 23:59:59 FAIL svc-backup 192.168.1.20"),
+                "Log line: 2024-03-11 23:59:59 FAIL svc-backup 192.168.1.20",
+                "Date: 2024-03-11",
+                "Time: 23:59:59",
+                "User: svc-backup",
+                "Result: FAIL",
+                "Source: INTERNAL (192.168.1.20)",
+                "Alert: NO")
+            .hidden(Lab.typing("2024-03-12 00:00:01 OK admin 198.51.100.4"),
+                "Log line: 2024-03-12 00:00:01 OK admin 198.51.100.4",
+                "Date: 2024-03-12",
+                "Time: 00:00:01",
+                "User: admin",
+                "Result: OK",
+                "Source: EXTERNAL (198.51.100.4)",
+                "Alert: NO")
+            .hidden(Lab.typing("garbage"),
+                "Log line: garbage",
+                "MALFORMED LOG LINE")
+            .hidden(Lab.typing("2024-03-11 09:14:02 FAIL jsmith"),
+                "Log line: 2024-03-11 09:14:02 FAIL jsmith",
+                "MALFORMED LOG LINE")
+            .hidden(Lab.typing("2024-03-11 09:14:02 MAYBE jsmith 10.0.0.1"),
+                "Log line: 2024-03-11 09:14:02 MAYBE jsmith 10.0.0.1",
+                "MALFORMED LOG LINE")
+            .hidden(Lab.typing("2024-03-11  09:14:02 FAIL jsmith"),
+                "Log line: 2024-03-11  09:14:02 FAIL jsmith",
+                "MALFORMED LOG LINE")
+            .hidden(Lab.typing("  2024-03-13 12:00:00 FAIL eve 100.64.0.1  "),
+                "Log line:   2024-03-13 12:00:00 FAIL eve 100.64.0.1",
+                "Date: 2024-03-13",
+                "Time: 12:00:00",
+                "User: eve",
+                "Result: FAIL",
+                "Source: EXTERNAL (100.64.0.1)",
+                "Alert: YES"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(26), "Access Rule Methods", Lab.BIG)
+            .stretch()
+            .after("C03-M027")
+            .brief(
+                "Campaign 02's access matrix was one long chain inside main. "
+                + "Now it gets a time rule too - contractors only in working "
+                + "hours - and it has to be shared by three services. Rebuild "
+                + "it as methods: checks that know one thing each, and one "
+                + "decide method that applies them in order.")
+            .practises("Fail-closed ordering", "Boolean helper methods", "A decision method")
+            .spec(
+                "Prompt Role:, Resource:, Action: (each trimmed and lower-cased) and Hour (0-23): (a whole number).",
+                "Known roles: admin, analyst, auditor, contractor. Known resources: logs, tickets, config, payroll. Known actions: read, write, delete.",
+                "decide checks, in order: unknown role, resource or action - DENIED: unknown role <role> (or resource, or action); hour outside 0-23 - DENIED: bad hour; writing or deleting logs - DENIED: logs are read-only; a contractor outside 8 to 17 - DENIED: contractors work 08:00-17:59.",
+                "Then canAccess: admin anything; analyst reads anything except payroll and writes tickets; auditor reads anything; contractor reads or writes tickets. Allowed prints ALLOWED: <role> may <action> <resource>; otherwise DENIED: <role> may not <action> <resource>.")
+            .needsMethod("static boolean isKnownRole(String)")
+            .needsMethod("static boolean isKnownResource(String)")
+            .needsMethod("static boolean isKnownAction(String)")
+            .needsMethod("static boolean canAccess(String, String, String)")
+            .needsMethod("static String decide(String, String, String, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Role: \");",
+                "        String role = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Resource: \");",
+                "        String resource = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Action: \");",
+                "        String action = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Hour (0-23): \");",
+                "        int hour = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.println(decide(role, resource, action, hour));",
+                "    }",
+                "",
+                "    static String decide(String role, String resource,",
+                "                         String action, int hour) {",
+                "        return \"ALLOWED: \" + role + \" may \" + action + \" \" + resource;",
+                "    }",
+                "}")
+            .hints(
+                "The starter's decide fails OPEN: it allows everything. Every "
+                + "guard you add makes it stricter, and ALLOWED must end up "
+                + "as a result you can only reach past every check.",
+                "Each isKnown... method is a switch expression giving a "
+                + "boolean, with default -> false.",
+                "decide is a list of guards in the spec's order, each "
+                + "returning its DENIED message. The last lines ask "
+                + "canAccess and build the ALLOWED or DENIED text.",
+                "canAccess is a switch on the role, one case per role, with "
+                + "default -> false - an unlisted role gets nothing.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Role: \");",
+                "        String role = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Resource: \");",
+                "        String resource = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Action: \");",
+                "        String action = input.nextLine().trim().toLowerCase();",
+                "        System.out.print(\"Hour (0-23): \");",
+                "        int hour = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.println(decide(role, resource, action, hour));",
+                "    }",
+                "",
+                "    static boolean isKnownRole(String role) {",
+                "        return switch (role) {",
+                "            case \"admin\", \"analyst\", \"auditor\", \"contractor\" -> true;",
+                "            default -> false;",
+                "        };",
+                "    }",
+                "",
+                "    static boolean isKnownResource(String resource) {",
+                "        return switch (resource) {",
+                "            case \"logs\", \"tickets\", \"config\", \"payroll\" -> true;",
+                "            default -> false;",
+                "        };",
+                "    }",
+                "",
+                "    static boolean isKnownAction(String action) {",
+                "        return switch (action) {",
+                "            case \"read\", \"write\", \"delete\" -> true;",
+                "            default -> false;",
+                "        };",
+                "    }",
+                "",
+                "    static boolean canAccess(String role, String resource,",
+                "                             String action) {",
+                "        boolean reading = action.equals(\"read\");",
+                "        boolean tickets = resource.equals(\"tickets\");",
+                "        return switch (role) {",
+                "            case \"admin\" -> true;",
+                "            case \"analyst\" -> (reading && !resource.equals(\"payroll\"))",
+                "                    || (tickets && action.equals(\"write\"));",
+                "            case \"auditor\" -> reading;",
+                "            case \"contractor\" -> tickets && !action.equals(\"delete\");",
+                "            default -> false;",
+                "        };",
+                "    }",
+                "",
+                "    static String decide(String role, String resource,",
+                "                         String action, int hour) {",
+                "        if (!isKnownRole(role)) {",
+                "            return \"DENIED: unknown role \" + role;",
+                "        }",
+                "        if (!isKnownResource(resource)) {",
+                "            return \"DENIED: unknown resource \" + resource;",
+                "        }",
+                "        if (!isKnownAction(action)) {",
+                "            return \"DENIED: unknown action \" + action;",
+                "        }",
+                "        if (hour < 0 || hour > 23) {",
+                "            return \"DENIED: bad hour\";",
+                "        }",
+                "        if (resource.equals(\"logs\") && !action.equals(\"read\")) {",
+                "            return \"DENIED: logs are read-only\";",
+                "        }",
+                "        if (role.equals(\"contractor\") && (hour < 8 || hour > 17)) {",
+                "            return \"DENIED: contractors work 08:00-17:59\";",
+                "        }",
+                "        String request = action + \" \" + resource;",
+                "        if (canAccess(role, resource, action)) {",
+                "            return \"ALLOWED: \" + role + \" may \" + request;",
+                "        }",
+                "        return \"DENIED: \" + role + \" may not \" + request;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Compared with the Campaign 02 version, the rules are the same "
+                + "but their HOME is different. Each isKnown... method knows "
+                + "one list; canAccess knows only the matrix; decide knows "
+                + "only the ORDER. Three services can now call decide and "
+                + "get identical answers - and a new role is a change to two "
+                + "small methods.\n"
+                + "\n"
+                + "The order is the security. Unknown values are refused "
+                + "before anything else looks at them; the read-only logs "
+                + "rule beats every role, admin included; the time rule "
+                + "applies before the matrix, so a contractor at 18:00 is "
+                + "refused even for something they could normally do. The "
+                + "starter showed the opposite, a decide that fails open - "
+                + "exactly the bug a missing guard creates.")
+            .sample(Lab.typing("analyst", "tickets", "write", "10"),
+                "Role: analyst",
+                "Resource: tickets",
+                "Action: write",
+                "Hour (0-23): 10",
+                "ALLOWED: analyst may write tickets")
+            .hidden(Lab.typing("contractor", "tickets", "write", "7"),
+                "Role: contractor",
+                "Resource: tickets",
+                "Action: write",
+                "Hour (0-23): 7",
+                "DENIED: contractors work 08:00-17:59")
+            .hidden(Lab.typing("contractor", "tickets", "write", "17"),
+                "Role: contractor",
+                "Resource: tickets",
+                "Action: write",
+                "Hour (0-23): 17",
+                "ALLOWED: contractor may write tickets")
+            .hidden(Lab.typing("contractor", "tickets", "write", "18"),
+                "Role: contractor",
+                "Resource: tickets",
+                "Action: write",
+                "Hour (0-23): 18",
+                "DENIED: contractors work 08:00-17:59")
+            .hidden(Lab.typing("admin", "logs", "delete", "12"),
+                "Role: admin",
+                "Resource: logs",
+                "Action: delete",
+                "Hour (0-23): 12",
+                "DENIED: logs are read-only")
+            .hidden(Lab.typing("admin", "payroll", "write", "3"),
+                "Role: admin",
+                "Resource: payroll",
+                "Action: write",
+                "Hour (0-23): 3",
+                "ALLOWED: admin may write payroll")
+            .hidden(Lab.typing("auditor", "payroll", "read", "23"),
+                "Role: auditor",
+                "Resource: payroll",
+                "Action: read",
+                "Hour (0-23): 23",
+                "ALLOWED: auditor may read payroll")
+            .hidden(Lab.typing("auditor", "config", "write", "9"),
+                "Role: auditor",
+                "Resource: config",
+                "Action: write",
+                "Hour (0-23): 9",
+                "DENIED: auditor may not write config")
+            .hidden(Lab.typing("analyst", "payroll", "read", "9"),
+                "Role: analyst",
+                "Resource: payroll",
+                "Action: read",
+                "Hour (0-23): 9",
+                "DENIED: analyst may not read payroll")
+            .hidden(Lab.typing("intern", "tickets", "read", "9"),
+                "Role: intern",
+                "Resource: tickets",
+                "Action: read",
+                "Hour (0-23): 9",
+                "DENIED: unknown role intern")
+            .hidden(Lab.typing("analyst", "backups", "read", "9"),
+                "Role: analyst",
+                "Resource: backups",
+                "Action: read",
+                "Hour (0-23): 9",
+                "DENIED: unknown resource backups")
+            .hidden(Lab.typing("analyst", "tickets", "execute", "9"),
+                "Role: analyst",
+                "Resource: tickets",
+                "Action: execute",
+                "Hour (0-23): 9",
+                "DENIED: unknown action execute")
+            .hidden(Lab.typing("analyst", "tickets", "read", "24"),
+                "Role: analyst",
+                "Resource: tickets",
+                "Action: read",
+                "Hour (0-23): 24",
+                "DENIED: bad hour")
+            .hidden(Lab.typing(" ADMIN ", "CONFIG", "Delete", "0"),
+                "Role:  ADMIN",
+                "Resource: CONFIG",
+                "Action: Delete",
+                "Hour (0-23): 0",
+                "ALLOWED: admin may delete config"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(27), "Tested Calculator", Lab.BIG)
+            .stretch()
+            .after("C03-M023")
+            .brief(
+                "The incident team's calculator gets used for timestamps and "
+                + "byte counts, where overflow and division by zero are not "
+                + "theoretical. Build it with its own self-test: type "
+                + "selftest and it checks itself before anyone trusts it.")
+            .practises("Testing from main", "Overflow detection with long", "Error results instead of crashes")
+            .spec(
+                "Prompt First number (or selftest): and read the line, trimmed. If it is selftest, run selfTest and stop. Otherwise read Operator: and Second number: - the numbers will be whole numbers that fit in an int.",
+                "calculate(a, op, b) returns ERROR: unknown operator for anything but + - * / %; ERROR: division by zero for / or % by 0; ERROR: overflow when the true answer does not fit in an int; otherwise = <answer>. Work the answer out in long so overflow can be seen.",
+                "fitsInt(value) is true when a long is within the int range.",
+                "check(name, passed) prints PASS <name> or FAIL <name>. selfTest checks: 2 + 3 gives = 5; 7 / 2 gives = 3; -7 % 3 gives = -1; 1 / 0 gives the division error; 2147483647 + 1 gives the overflow error; 1 ^ 2 gives the operator error - in that order, then prints Self-test: <n>/6 passed.",
+                "For a calculation, print the result of calculate.")
+            .needsMethod("static String calculate(int, String, int)")
+            .needsMethod("static boolean fitsInt(long)")
+            .needsMethod("static void check(String, boolean)")
+            .needsMethod("static void selfTest()")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"First number (or selftest): \");",
+                "        String first = input.nextLine().trim();",
+                "        System.out.print(\"Operator: \");",
+                "        String op = input.nextLine().trim();",
+                "        System.out.print(\"Second number: \");",
+                "        int b = Integer.parseInt(input.nextLine().trim());",
+                "        int a = Integer.parseInt(first);",
+                "        System.out.println(\"= \" + (a + b));",
+                "    }",
+                "}")
+            .hints(
+                "Guards first in calculate: the operator check, then division "
+                + "by zero. Only then work the answer out.",
+                "Cast before the arithmetic, so it happens in long:  (long) a "
+                + "+ b. The int answer would already have wrapped round.",
+                "fitsInt:  return value >= Integer.MIN_VALUE && value <= "
+                + "Integer.MAX_VALUE;",
+                "Count passes in a static int field that check adds to, so "
+                + "selfTest can print the total at the end.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static int passed = 0;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"First number (or selftest): \");",
+                "        String first = input.nextLine().trim();",
+                "        if (first.equals(\"selftest\")) {",
+                "            selfTest();",
+                "            return;",
+                "        }",
+                "        System.out.print(\"Operator: \");",
+                "        String op = input.nextLine().trim();",
+                "        System.out.print(\"Second number: \");",
+                "        int b = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.println(calculate(Integer.parseInt(first), op, b));",
+                "    }",
+                "",
+                "    static String calculate(int a, String op, int b) {",
+                "        boolean known = switch (op) {",
+                "            case \"+\", \"-\", \"*\", \"/\", \"%\" -> true;",
+                "            default -> false;",
+                "        };",
+                "        if (!known) {",
+                "            return \"ERROR: unknown operator\";",
+                "        }",
+                "        if ((op.equals(\"/\") || op.equals(\"%\")) && b == 0) {",
+                "            return \"ERROR: division by zero\";",
+                "        }",
+                "        long result = switch (op) {",
+                "            case \"+\" -> (long) a + b;",
+                "            case \"-\" -> (long) a - b;",
+                "            case \"*\" -> (long) a * b;",
+                "            case \"/\" -> (long) a / b;",
+                "            default -> (long) a % b;",
+                "        };",
+                "        if (!fitsInt(result)) {",
+                "            return \"ERROR: overflow\";",
+                "        }",
+                "        return \"= \" + result;",
+                "    }",
+                "",
+                "    static boolean fitsInt(long value) {",
+                "        return value >= Integer.MIN_VALUE",
+                "                && value <= Integer.MAX_VALUE;",
+                "    }",
+                "",
+                "    static void check(String name, boolean ok) {",
+                "        if (ok) {",
+                "            passed++;",
+                "        }",
+                "        System.out.println((ok ? \"PASS \" : \"FAIL \") + name);",
+                "    }",
+                "",
+                "    static void selfTest() {",
+                "        check(\"2 + 3\", calculate(2, \"+\", 3).equals(\"= 5\"));",
+                "        check(\"7 / 2\", calculate(7, \"/\", 2).equals(\"= 3\"));",
+                "        check(\"-7 % 3\", calculate(-7, \"%\", 3).equals(\"= -1\"));",
+                "        check(\"1 / 0\", calculate(1, \"/\", 0)",
+                "                .equals(\"ERROR: division by zero\"));",
+                "        check(\"2147483647 + 1\", calculate(2147483647, \"+\", 1)",
+                "                .equals(\"ERROR: overflow\"));",
+                "        check(\"1 ^ 2\", calculate(1, \"^\", 2)",
+                "                .equals(\"ERROR: unknown operator\"));",
+                "        System.out.println(\"Self-test: \" + passed + \"/6 passed\");",
+                "    }",
+                "}")
+            .walkthrough(
+                "calculate never crashes and never lies. Unknown operators "
+                + "and division by zero are refused by guards before any "
+                + "arithmetic; everything else is worked out in long, where "
+                + "an int's overflow cannot happen, and fitsInt then decides "
+                + "whether the true answer can be given as an int. "
+                + "-2147483648 / -1 is the sneaky case: its true answer is "
+                + "one more than an int can hold.\n"
+                + "\n"
+                + "The self-test is mission 23 built into the product. Its "
+                + "tests include the cases most likely to break - integer "
+                + "division, a negative remainder, and every error path - and "
+                + "anyone can run it before trusting the numbers.")
+            .sample(Lab.typing("12", "*", "12"),
+                "First number (or selftest): 12",
+                "Operator: *",
+                "Second number: 12",
+                "= 144")
+            .hidden(Lab.typing("selftest"),
+                "First number (or selftest): selftest",
+                "PASS 2 + 3",
+                "PASS 7 / 2",
+                "PASS -7 % 3",
+                "PASS 1 / 0",
+                "PASS 2147483647 + 1",
+                "PASS 1 ^ 2",
+                "Self-test: 6/6 passed")
+            .hidden(Lab.typing("7", "/", "2"),
+                "First number (or selftest): 7",
+                "Operator: /",
+                "Second number: 2",
+                "= 3")
+            .hidden(Lab.typing("7", "%", "0"),
+                "First number (or selftest): 7",
+                "Operator: %",
+                "Second number: 0",
+                "ERROR: division by zero")
+            .hidden(Lab.typing("2147483647", "+", "1"),
+                "First number (or selftest): 2147483647",
+                "Operator: +",
+                "Second number: 1",
+                "ERROR: overflow")
+            .hidden(Lab.typing("-2147483648", "/", "-1"),
+                "First number (or selftest): -2147483648",
+                "Operator: /",
+                "Second number: -1",
+                "ERROR: overflow")
+            .hidden(Lab.typing("100000", "*", "100000"),
+                "First number (or selftest): 100000",
+                "Operator: *",
+                "Second number: 100000",
+                "ERROR: overflow")
+            .hidden(Lab.typing("5", "^", "2"),
+                "First number (or selftest): 5",
+                "Operator: ^",
+                "Second number: 2",
+                "ERROR: unknown operator")
+            .hidden(Lab.typing("-7", "%", "3"),
+                "First number (or selftest): -7",
+                "Operator: %",
+                "Second number: 3",
+                "= -1")
+            .hidden(Lab.typing("0", "-", "2147483647"),
+                "First number (or selftest): 0",
+                "Operator: -",
+                "Second number: 2147483647",
+                "= -2147483647"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(28), "Caesar Shift, One Letter", Lab.MEDIUM)
+            .stretch()
+            .after("C03-M020")
+            .brief(
+                "The Caesar cipher shifts every letter a fixed number of "
+                + "places along the alphabet: with a shift of 3, a becomes d "
+                + "and x wraps round to a. Encrypting a whole message needs a "
+                + "loop - but the heart of it is one method that shifts ONE "
+                + "letter. Build that, and prove it decrypts.")
+            .practises("Class constants", "indexOf and charAt as a lookup", "Wrapping round with %")
+            .spec(
+                "Prompt Letter: and read the line, trimmed. It must be exactly one character; otherwise print INVALID INPUT and stop. Then prompt Shift: and read a whole number, which may be negative or larger than 26.",
+                "shift(c, k) moves a letter k places, wrapping round the alphabet and keeping its case. Anything that is not a letter comes back unchanged.",
+                "Print Encrypted: <shifted>. For a letter, then print Decrypts back: yes if shifting the result by -k gives the original letter, otherwise no. For anything else, print Note: not a letter - unchanged instead.")
+            .needsMethod("static char shift(char, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String LOWER = \"abcdefghijklmnopqrstuvwxyz\";",
+                "    static final String UPPER = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Letter: \");",
+                "        String text = input.nextLine().trim();",
+                "        // validate, read the shift, encrypt, check it decrypts",
+                "    }",
+                "",
+                "    // declare shift(char c, int k) here",
+                "}")
+            .hints(
+                "The alphabet Strings are a lookup table. LOWER.indexOf(c) "
+                + "gives a letter's position, 0 to 25, or -1 if c is not in "
+                + "it. LOWER.charAt(position) turns a position back into a "
+                + "letter.",
+                "Wrapping: (position + k) % 26. But % keeps the sign in Java, "
+                + "so -1 % 26 is -1. Adding 26 and taking % again fixes "
+                + "negatives:\n"
+                + "\n"
+                + "    int moved = ((position + k) % 26 + 26) % 26;",
+                "Try LOWER first, then UPPER, and return c itself if it is in "
+                + "neither.",
+                "Decrypting is shifting back:  shift(encrypted, -k) == c  - "
+                + "chars compare with ==.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String LOWER = \"abcdefghijklmnopqrstuvwxyz\";",
+                "    static final String UPPER = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Letter: \");",
+                "        String text = input.nextLine().trim();",
+                "        if (text.length() != 1) {",
+                "            System.out.println(\"INVALID INPUT\");",
+                "            return;",
+                "        }",
+                "        System.out.print(\"Shift: \");",
+                "        int k = Integer.parseInt(input.nextLine().trim());",
+                "        char c = text.charAt(0);",
+                "        char encrypted = shift(c, k);",
+                "        System.out.println(\"Encrypted: \" + encrypted);",
+                "        if (encrypted == c && !Character.isLetter(c)) {",
+                "            System.out.println(\"Note: not a letter - unchanged\");",
+                "        } else {",
+                "            boolean back = shift(encrypted, -k) == c;",
+                "            String answer = back ? \"yes\" : \"no\";",
+                "            System.out.println(\"Decrypts back: \" + answer);",
+                "        }",
+                "    }",
+                "",
+                "    static char shift(char c, int k) {",
+                "        int position = LOWER.indexOf(c);",
+                "        if (position != -1) {",
+                "            return LOWER.charAt(((position + k) % 26 + 26) % 26);",
+                "        }",
+                "        position = UPPER.indexOf(c);",
+                "        if (position != -1) {",
+                "            return UPPER.charAt(((position + k) % 26 + 26) % 26);",
+                "        }",
+                "        return c;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The two constants turn the alphabet into a lookup table: "
+                + "indexOf maps a letter to a number, arithmetic moves the "
+                + "number, and charAt maps it back. Keeping case is simply a "
+                + "matter of using the table the letter came from.\n"
+                + "\n"
+                + "The double % is the important detail. Java's % keeps the "
+                + "sign of the left side, so a shift of -3 from 'c' gives -1, "
+                + "not 25; adding 26 and taking % again brings every result "
+                + "into 0 to 25, for any shift, however large or negative. "
+                + "The decrypt check proves shift is reversible - a cipher "
+                + "you cannot undo is just data loss.\n"
+                + "\n"
+                + "A Caesar cipher is trivially broken - there are only 25 "
+                + "keys to try - but every real cipher is built from the same "
+                + "idea: a reversible transformation controlled by a key.")
+            .sample(Lab.typing("a", "3"),
+                "Letter: a",
+                "Shift: 3",
+                "Encrypted: d",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("x", "3"),
+                "Letter: x",
+                "Shift: 3",
+                "Encrypted: a",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("Z", "1"),
+                "Letter: Z",
+                "Shift: 1",
+                "Encrypted: A",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("m", "13"),
+                "Letter: m",
+                "Shift: 13",
+                "Encrypted: z",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("c", "-3"),
+                "Letter: c",
+                "Shift: -3",
+                "Encrypted: z",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("b", "27"),
+                "Letter: b",
+                "Shift: 27",
+                "Encrypted: c",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("Q", "-26"),
+                "Letter: Q",
+                "Shift: -26",
+                "Encrypted: Q",
+                "Decrypts back: yes")
+            .hidden(Lab.typing("7", "5"),
+                "Letter: 7",
+                "Shift: 5",
+                "Encrypted: 7",
+                "Note: not a letter - unchanged")
+            .hidden(Lab.typing("ab"),
+                "Letter: ab",
+                "INVALID INPUT")
+            .hidden(Lab.typing(""),
+                "Letter:",
+                "INVALID INPUT"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(29), "Checksum Digit", Lab.MEDIUM)
+            .stretch()
+            .after("C03-M019")
+            .brief(
+                "Card numbers end in a check digit chosen by the Luhn "
+                + "algorithm, so a single mistyped digit is caught before any "
+                + "payment system sees it. Luhn walks the digits from the "
+                + "right - and with no loops yet, a method that calls itself "
+                + "can walk them for you.")
+            .practises("Recursion on text", "Alternating state through parameters", "Checksums")
+            .spec(
+                "Prompt Card number: and read it; remove spaces. It must be 8 to 19 digits, otherwise print INVALID INPUT and stop.",
+                "luhnSum(digits, doubleIt): the sum of the digits from the right, where every second digit - starting with the one given doubleIt - is doubled, subtracting 9 from any doubled value over 9. It must call itself on the digits without their last one, with doubleIt flipped.",
+                "A number is valid when luhnSum(number, false) is a multiple of 10. checkDigitFor(partial) returns the digit that would make partial valid: (10 - luhnSum(partial, true) % 10) % 10.",
+                "Print Luhn sum: <sum>, then Checksum: VALID or Checksum: INVALID, then Check digit for the first <n - 1> digits: <d>.")
+            .needsMethod("static boolean isCardDigits(String)")
+            .needsMethod("static int luhnSum(String, boolean)")
+            .needsMethod("static int checkDigitFor(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Card number: \");",
+                "        String digits = input.nextLine().replace(\" \", \"\");",
+                "        // validate, sum, check, and find the check digit",
+                "    }",
+                "",
+                "    // isCardDigits, luhnSum, checkDigitFor",
+                "}")
+            .hints(
+                "The base case is an empty String: its sum is 0.",
+                "The last digit as a number, without chars:\n"
+                + "\n"
+                + "    int last = Integer.parseInt(\n"
+                + "            digits.substring(digits.length() - 1));",
+                "Double it if doubleIt is true, subtract 9 if that went over "
+                + "9, then add the sum of the rest:\n"
+                + "\n"
+                + "    return value + luhnSum(rest, !doubleIt);",
+                "The partial number is everything but the last digit: "
+                + "digits.substring(0, digits.length() - 1).")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Card number: \");",
+                "        String digits = input.nextLine().replace(\" \", \"\");",
+                "        if (!isCardDigits(digits)) {",
+                "            System.out.println(\"INVALID INPUT\");",
+                "            return;",
+                "        }",
+                "        int sum = luhnSum(digits, false);",
+                "        System.out.println(\"Luhn sum: \" + sum);",
+                "        String verdict = sum % 10 == 0 ? \"VALID\" : \"INVALID\";",
+                "        System.out.println(\"Checksum: \" + verdict);",
+                "        String partial = digits.substring(0, digits.length() - 1);",
+                "        System.out.println(\"Check digit for the first \"",
+                "                + partial.length()",
+                "                + \" digits: \" + checkDigitFor(partial));",
+                "    }",
+                "",
+                "    static boolean isCardDigits(String digits) {",
+                "        return digits.length() >= 8 && digits.length() <= 19",
+                "                && digits.matches(\"[0-9]+\");",
+                "    }",
+                "",
+                "    static int luhnSum(String digits, boolean doubleIt) {",
+                "        if (digits.isEmpty()) {",
+                "            return 0;",
+                "        }",
+                "        int end = digits.length() - 1;",
+                "        int value = Integer.parseInt(digits.substring(end));",
+                "        if (doubleIt) {",
+                "            value = value * 2;",
+                "            if (value > 9) {",
+                "                value = value - 9;",
+                "            }",
+                "        }",
+                "        return value + luhnSum(digits.substring(0, end), !doubleIt);",
+                "    }",
+                "",
+                "    static int checkDigitFor(String partial) {",
+                "        return (10 - luhnSum(partial, true) % 10) % 10;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each call handles the LAST digit and hands the rest to "
+                + "another call, with doubleIt flipped - so the doubling "
+                + "alternates without any counter. The empty String is the "
+                + "base case, and every call is one digit shorter, so the "
+                + "recursion always ends after at most 19 frames.\n"
+                + "\n"
+                + "checkDigitFor passes true because, once a check digit is "
+                + "added after it, the partial number's last digit becomes "
+                + "the second from the right - the first to be doubled. Luhn "
+                + "catches every single-digit typo and most swapped pairs. It "
+                + "is an error check, NOT security: anyone can compute a valid "
+                + "check digit, as this method just did.")
+            .sample(Lab.typing("4111 1111 1111 1111"),
+                "Card number: 4111 1111 1111 1111",
+                "Luhn sum: 30",
+                "Checksum: VALID",
+                "Check digit for the first 15 digits: 1")
+            .hidden(Lab.typing("4111 1111 1111 1112"),
+                "Card number: 4111 1111 1111 1112",
+                "Luhn sum: 31",
+                "Checksum: INVALID",
+                "Check digit for the first 15 digits: 1")
+            .hidden(Lab.typing("79927398713"),
+                "Card number: 79927398713",
+                "Luhn sum: 70",
+                "Checksum: VALID",
+                "Check digit for the first 10 digits: 3")
+            .hidden(Lab.typing("5500 0000 0000 0004"),
+                "Card number: 5500 0000 0000 0004",
+                "Luhn sum: 10",
+                "Checksum: VALID",
+                "Check digit for the first 15 digits: 4")
+            .hidden(Lab.typing("340000000000009"),
+                "Card number: 340000000000009",
+                "Luhn sum: 20",
+                "Checksum: VALID",
+                "Check digit for the first 14 digits: 9")
+            .hidden(Lab.typing("1234"),
+                "Card number: 1234",
+                "INVALID INPUT")
+            .hidden(Lab.typing("4111-1111-1111-1111"),
+                "Card number: 4111-1111-1111-1111",
+                "INVALID INPUT"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(30), "Security Toolkit", Lab.CAPSTONE)
+            .after("C03-M030")
+            .brief(
+                "CAPSTONE. The VPN gateway needs its login check rebuilt from "
+                + "trustworthy parts: validators for every field, a blocklist, "
+                + "a lockout, a password and an MFA code - checked in a "
+                + "fail-closed order, with an audit line nothing typed can "
+                + "forge. Everything in this campaign goes in.")
+            .practises("Validation helpers", "Fail-fast, fail-closed ordering", "Sanitised audit output", "Conditional prompts", "A decision built from small methods")
+            .spec(
+                "Constants: MAX_FAILURES 5, BLOCKED_RANGE 203.0.113., SECRET Northstar#2026, MFA_CODE 481516.",
+                "Prompt Username: (read as typed), Source IP: (trimmed) and Failed attempts: (trimmed).",
+                "preCheck(user, ip, failures) returns the FIRST problem, or an empty String: invalid username (3-20 characters, no spaces, starts with a letter, checked on the trimmed, lower-cased name); invalid address (only digits and exactly three dots, no .., not starting or ending with ., at most 15 characters); blocked range; bad failure count (parseCount gives -1 unless the text is 1 to 3 digits); account locked (MAX_FAILURES or more).",
+                "Only if preCheck finds nothing, prompt Password: (as typed). Wrong password: wrong password. Otherwise prompt MFA code: (trimmed): not six digits - bad MFA code format; six digits but wrong - wrong MFA code.",
+                "Print DECISION: ALLOW or DECISION: DENY - never the reason. Then the audit record AUDIT|<u>|<i>|<ALLOW or DENY>|<reason, or ok>, where u and i are the trimmed username and the address passed through forLog: (empty) if blank, every | replaced by /, cut to 20 characters plus ... if longer.")
+            .needsMethod("static String normalise(String)")
+            .needsMethod("static boolean isValidUsername(String)")
+            .needsMethod("static boolean isValidIp(String)")
+            .needsMethod("static boolean isBlocked(String)")
+            .needsMethod("static int parseCount(String)")
+            .needsMethod("static boolean shouldLock(int)")
+            .needsMethod("static boolean isValidCode(String)")
+            .needsMethod("static String forLog(String)")
+            .needsMethod("static String preCheck(String, String, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "    static final String BLOCKED_RANGE = \"203.0.113.\";",
+                "    static final String SECRET = \"Northstar#2026\";",
+                "    static final String MFA_CODE = \"481516\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Username: \");",
+                "        String user = input.nextLine();",
+                "        System.out.print(\"Source IP: \");",
+                "        String ip = input.nextLine().trim();",
+                "        System.out.print(\"Failed attempts: \");",
+                "        String failures = input.nextLine().trim();",
+                "        // preCheck; then, only if it passes, password and MFA",
+                "        // then DECISION and AUDIT",
+                "    }",
+                "",
+                "    // the helpers, one job each",
+                "}")
+            .hints(
+                "Build and test the helpers one at a time - most of them are "
+                + "from earlier missions and labs: normalise (lab 5), "
+                + "isValidUsername (lab 12), forLog (lab 7), the IP shape "
+                + "(Campaign 02's capstone), shouldLock (mission 20).",
+                "isValidIp without a loop: remove the dots and compare "
+                + "lengths to count them, then check the rest is digits:\n"
+                + "\n"
+                + "    String digits = ip.replace(\".\", \"\");\n"
+                + "    int dots = ip.length() - digits.length();",
+                "preCheck is a list of guards returning reason texts, ending "
+                + "in  return \"\";  - an empty reason means no problem.",
+                "In main, keep one String reason. Set it from preCheck; only "
+                + "if it is empty, ask for the password; only if that is "
+                + "right, ask for the code. At the end, an empty reason means "
+                + "ALLOW - which is the only way to get it.",
+                "The audit record joins five parts with | - and only forLog's "
+                + "output goes between the bars, so no value can add a bar "
+                + "of its own.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "    static final String BLOCKED_RANGE = \"203.0.113.\";",
+                "    static final String SECRET = \"Northstar#2026\";",
+                "    static final String MFA_CODE = \"481516\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Username: \");",
+                "        String user = input.nextLine();",
+                "        System.out.print(\"Source IP: \");",
+                "        String ip = input.nextLine().trim();",
+                "        System.out.print(\"Failed attempts: \");",
+                "        String failures = input.nextLine().trim();",
+                "",
+                "        String reason = preCheck(user, ip, parseCount(failures));",
+                "        if (reason.isEmpty()) {",
+                "            System.out.print(\"Password: \");",
+                "            String password = input.nextLine();",
+                "            if (!password.equals(SECRET)) {",
+                "                reason = \"wrong password\";",
+                "            } else {",
+                "                System.out.print(\"MFA code: \");",
+                "                String code = input.nextLine().trim();",
+                "                if (!isValidCode(code)) {",
+                "                    reason = \"bad MFA code format\";",
+                "                } else if (!code.equals(MFA_CODE)) {",
+                "                    reason = \"wrong MFA code\";",
+                "                }",
+                "            }",
+                "        }",
+                "",
+                "        String result = reason.isEmpty() ? \"ALLOW\" : \"DENY\";",
+                "        System.out.println(\"DECISION: \" + result);",
+                "        String why = reason.isEmpty() ? \"ok\" : reason;",
+                "        System.out.println(\"AUDIT|\" + forLog(user.trim()) + \"|\"",
+                "                + forLog(ip) + \"|\" + result + \"|\" + why);",
+                "    }",
+                "",
+                "    static String normalise(String text) {",
+                "        return text.trim().toLowerCase();",
+                "    }",
+                "",
+                "    static boolean isValidUsername(String name) {",
+                "        if (name.length() < 3 || name.length() > 20) {",
+                "            return false;",
+                "        }",
+                "        return !name.contains(\" \")",
+                "                && Character.isLetter(name.charAt(0));",
+                "    }",
+                "",
+                "    static boolean isValidIp(String ip) {",
+                "        String digits = ip.replace(\".\", \"\");",
+                "        int dots = ip.length() - digits.length();",
+                "        return dots == 3 && digits.matches(\"[0-9]+\")",
+                "                && !ip.contains(\"..\") && !ip.startsWith(\".\")",
+                "                && !ip.endsWith(\".\") && ip.length() <= 15;",
+                "    }",
+                "",
+                "    static boolean isBlocked(String ip) {",
+                "        return ip.startsWith(BLOCKED_RANGE);",
+                "    }",
+                "",
+                "    static int parseCount(String text) {",
+                "        if (text.length() > 3 || !text.matches(\"[0-9]+\")) {",
+                "            return -1;",
+                "        }",
+                "        return Integer.parseInt(text);",
+                "    }",
+                "",
+                "    static boolean shouldLock(int failures) {",
+                "        return failures >= MAX_FAILURES;",
+                "    }",
+                "",
+                "    static boolean isValidCode(String code) {",
+                "        return code.length() == 6 && code.matches(\"[0-9]+\");",
+                "    }",
+                "",
+                "    static String forLog(String text) {",
+                "        if (text.isBlank()) {",
+                "            return \"(empty)\";",
+                "        }",
+                "        String clean = text.replace(\"|\", \"/\");",
+                "        if (clean.length() > 20) {",
+                "            clean = clean.substring(0, 20) + \"...\";",
+                "        }",
+                "        return clean;",
+                "    }",
+                "",
+                "    static String preCheck(String user, String ip, int failures) {",
+                "        if (!isValidUsername(normalise(user))) {",
+                "            return \"invalid username\";",
+                "        }",
+                "        if (!isValidIp(ip)) {",
+                "            return \"invalid address\";",
+                "        }",
+                "        if (isBlocked(ip)) {",
+                "            return \"blocked range\";",
+                "        }",
+                "        if (failures == -1) {",
+                "            return \"bad failure count\";",
+                "        }",
+                "        if (shouldLock(failures)) {",
+                "            return \"account locked\";",
+                "        }",
+                "        return \"\";",
+                "    }",
+                "}")
+            .walkthrough(
+                "Every rule lives in a small method with one job, and preCheck "
+                + "reads like the gateway's policy: who, from where, and "
+                + "whether the account may try at all - all BEFORE the "
+                + "password is looked at. A locked account or a blocked range "
+                + "never gets to test a password, so it learns nothing.\n"
+                + "\n"
+                + "The flow fails closed. reason starts as whatever preCheck "
+                + "found, every later step can only ADD a reason, and ALLOW is "
+                + "printed only when nothing did. The password and MFA "
+                + "prompts appear only when the step before succeeded - the "
+                + "hidden tests type exactly as many lines as a correct "
+                + "program asks for.\n"
+                + "\n"
+                + "The two output lines split what people see from what "
+                + "defenders see: DECISION never says why, so an attacker "
+                + "cannot tell a wrong password from a locked account, while "
+                + "AUDIT records the reason - through forLog, so a user name "
+                + "like eve|1.2.3.4|ALLOW|ok cannot forge a record in the "
+                + "evidence. "
+                + "That is defence in depth, built from methods you can test "
+                + "one at a time.")
+            .sample(Lab.typing("jsmith", "10.0.0.7", "0", "Northstar#2026", "481516"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "Password: Northstar#2026",
+                "MFA code: 481516",
+                "DECISION: ALLOW",
+                "AUDIT|jsmith|10.0.0.7|ALLOW|ok")
+            .hidden(Lab.typing(" JSmith ", "10.0.0.7", "2", "Northstar#2026", "481516"),
+                "Username:  JSmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 2",
+                "Password: Northstar#2026",
+                "MFA code: 481516",
+                "DECISION: ALLOW",
+                "AUDIT|JSmith|10.0.0.7|ALLOW|ok")
+            .hidden(Lab.typing("js", "10.0.0.7", "0"),
+                "Username: js",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|js|10.0.0.7|DENY|invalid username")
+            .hidden(Lab.typing("jsmith", "10.0.0", "0"),
+                "Username: jsmith",
+                "Source IP: 10.0.0",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0|DENY|invalid address")
+            .hidden(Lab.typing("jsmith", "203.0.113.9", "0"),
+                "Username: jsmith",
+                "Source IP: 203.0.113.9",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|jsmith|203.0.113.9|DENY|blocked range")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", "many"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: many",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|bad failure count")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", "5"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 5",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|account locked")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", "4", "northstar#2026"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 4",
+                "Password: northstar#2026",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|wrong password")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", "0", "Northstar#2026", "48151"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "Password: Northstar#2026",
+                "MFA code: 48151",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|bad MFA code format")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", "0", "Northstar#2026", "123456"),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "Password: Northstar#2026",
+                "MFA code: 123456",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|wrong MFA code")
+            .hidden(Lab.typing("eve|1.2.3.4|ALLOW|ok", "10.0.0.7", "0", "guess"),
+                "Username: eve|1.2.3.4|ALLOW|ok",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "Password: guess",
+                "DECISION: DENY",
+                "AUDIT|eve/1.2.3.4/ALLOW/ok|10.0.0.7|DENY|wrong password")
+            .hidden(Lab.typing("averyveryverylongusername1", "10.0.0.7", "0"),
+                "Username: averyveryverylongusername1",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|averyveryverylonguse...|10.0.0.7|DENY|invalid username")
+            .hidden(Lab.typing("   ", "10..0.1", "0"),
+                "Username:",
+                "Source IP: 10..0.1",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|(empty)|10..0.1|DENY|invalid username")
+            .hidden(Lab.typing("jsmith", "10.0.0.7", ""),
+                "Username: jsmith",
+                "Source IP: 10.0.0.7",
+                "Failed attempts:",
+                "DECISION: DENY",
+                "AUDIT|jsmith|10.0.0.7|DENY|bad failure count")
+            .hidden(Lab.typing("9lives", "10.0.0.7", "0"),
+                "Username: 9lives",
+                "Source IP: 10.0.0.7",
+                "Failed attempts: 0",
+                "DECISION: DENY",
+                "AUDIT|9lives|10.0.0.7|DENY|invalid username"));
     }
 }

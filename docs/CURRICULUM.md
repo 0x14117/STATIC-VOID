@@ -16,7 +16,7 @@ each one. Built items are marked; everything else is the plan.
 | Basic I/O | 01 JAVA ZERO (Scanner, parseInt, printf) | built |
 | Selection: Boolean operators & expressions | 02 CONDITIONAL | built |
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
-| Methods, parameters and the stack | 03 METHODS | missions built |
+| Methods, parameters and the stack | 03 METHODS | built |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | planned |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
@@ -356,6 +356,10 @@ assumes that mission has been completed.
 - The reference solution is checked by `tools/CheckLabs.java`: it must
   compile and pass every test. The starter must compile (unless the lab is
   about fixing a broken one) and must not already pass.
+- From Campaign 03 on, a lab names the methods the program must declare
+  (return type, name and parameter types). The game reads them from the
+  compiled class before running any test, so a methods lab cannot be passed
+  with everything in `main`.
 
 ---
 
@@ -448,7 +452,7 @@ Tier: **C** = core, **S** = stretch. "After" is the mission a lab assumes.
 | L29 | Change Approval Gate | BIG | S |
 | L30 | Firewall Rule Checker | CAPSTONE | C |
 
-### 03 METHODS: 30 labs
+### 03 METHODS: 30 labs (built)
 
 | Lab | Title | Size | Tier |
 |---|---|---|---|

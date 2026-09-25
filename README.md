@@ -20,10 +20,9 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 100 missions and 70 labs are playable (Campaigns 00 to 02
-> complete with their labs; Campaign 03's missions complete, its labs next)
-> out of 510 missions planned. The order
-> follows a first-year Java programming module; see
+> **Status:** 100 missions and 100 labs are playable (Campaigns 00 to 03
+> complete, labs included; Campaign 04 is next) out of 510 missions planned.
+> The order follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
 
 ---
@@ -499,7 +498,7 @@ PART 1 - THE MODULE                            missions  labs
 CAMPAIGN 00 - INIT            language, IDE      10       10   BUILT
 CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT
 CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   BUILT
-CAMPAIGN 03 - METHODS         methods, stack     30       30   MISSIONS BUILT
+CAMPAIGN 03 - METHODS         methods, stack     30       30   BUILT
 CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30
 CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30
 CAMPAIGN 06 - OBJECTS         classes            30       30
@@ -586,6 +585,7 @@ src/LabDesk.java          the Labs screens
 src/Campaign00Labs.java   the labs for CAMPAIGN 00
 src/Campaign01Labs.java   the labs for CAMPAIGN 01
 src/Campaign02Labs.java   the labs for CAMPAIGN 02
+src/Campaign03Labs.java   the labs for CAMPAIGN 03
 
 tools/CheckAll.java       checks every mission and lab is complete
 tools/CheckJava.java      checks the Java in every mission is true
