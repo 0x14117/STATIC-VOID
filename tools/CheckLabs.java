@@ -15,6 +15,8 @@ import java.util.List;
  *                        at least one test - a starter that already passes
  *                        teaches nothing
  *   needed methods       the solution declares every one the lab needs
+ *   forbidden answers    the solution does not type them; a program that
+ *                        prints the sample screen word for word does
  *   hidden tests         a program that prints the first sample's answer
  *                        word for word must fail at least one test, so
  *                        hard-coding the sample never passes a lab that
@@ -69,6 +71,18 @@ public class CheckLabs {
                     check(id + " starter does not already pass",
                           !allPass(LabBench.runTests(lab, starter)), "it passes");
                 }
+            }
+
+            // --- typed-in answers are refused -----------------------------
+            if (!lab.getForbidden().isEmpty()) {
+                check(id + " solution contains no forbidden answer",
+                      LabBench.forbiddenFound(lab, solution).isEmpty(),
+                      "found " + LabBench.forbiddenFound(lab, solution));
+                File typed = new File(work, id + "-typed");
+                write(typed, hardCoded(lab));
+                check(id + " printing the answers is refused",
+                      !LabBench.forbiddenFound(lab, typed).isEmpty(),
+                      "a program that prints the sample passes the source check");
             }
 
             // --- hard-coding the sample must not pass ---------------------

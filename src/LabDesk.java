@@ -395,6 +395,20 @@ public class LabDesk {
             Terminal.pause();
             return;
         }
+        List<String> typed = LabBench.forbiddenFound(lab, LabBench.folderFor(lab));
+        if (!typed.isEmpty()) {
+            Terminal.lineAs(Theme.GOOD, "  Compiled.");
+            Terminal.blank();
+            Terminal.wrappedAs(Theme.BAD, "This lab asks your program to WORK OUT "
+                    + "its answers, but these appear in your code as typed "
+                    + "text: " + String.join("  ", typed), "  ");
+            Terminal.blank();
+            Terminal.wrapped("Calculate them from the variables instead - that "
+                    + "is the skill the lab is practising. (Comments do not "
+                    + "count, so notes about the answer are fine.)", "  ");
+            Terminal.pause();
+            return;
+        }
         List<LabBench.Result> results = LabBench.runTests(lab, LabBench.folderFor(lab));
         Terminal.lineAs(Theme.GOOD, "  Compiled.");
         Terminal.blank();

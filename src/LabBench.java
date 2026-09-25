@@ -189,6 +189,68 @@ public class LabBench {
         return missing;
     }
 
+    /**
+     * The lab's forbidden fragments that appear in the learner's source,
+     * outside comments. Comments are ignored so that notes like
+     * "// should print 38" never count against anyone.
+     */
+    public static List<String> forbiddenFound(Lab lab, File folder) {
+        List<String> found = new ArrayList<>();
+        if (lab.getForbidden().isEmpty()) {
+            return found;
+        }
+        String code = "";
+        try {
+            code = new String(java.nio.file.Files.readAllBytes(
+                    new File(folder, "Main.java").toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return found;
+        }
+        code = withoutComments(code);
+        for (String fragment : lab.getForbidden()) {
+            if (code.contains(fragment)) {
+                found.add(fragment);
+            }
+        }
+        return found;
+    }
+
+    /** Source with block comments and // comments removed; strings kept. */
+    static String withoutComments(String code) {
+        StringBuilder out = new StringBuilder();
+        boolean inString = false;
+        boolean inChar = false;
+        int i = 0;
+        while (i < code.length()) {
+            char c = code.charAt(i);
+            char next = i + 1 < code.length() ? code.charAt(i + 1) : ' ';
+            if (!inString && !inChar && c == '/' && next == '*') {
+                int end = code.indexOf("*/", i + 2);
+                i = end < 0 ? code.length() : end + 2;
+                continue;
+            }
+            if (!inString && !inChar && c == '/' && next == '/') {
+                while (i < code.length() && code.charAt(i) != '\n') {
+                    i++;
+                }
+                continue;
+            }
+            if (c == '\\' && (inString || inChar) && i + 1 < code.length()) {
+                out.append(c).append(next);
+                i += 2;
+                continue;
+            }
+            if (c == '"' && !inChar) {
+                inString = !inString;
+            } else if (c == '\'' && !inString) {
+                inChar = !inChar;
+            }
+            out.append(c);
+            i++;
+        }
+        return out.toString();
+    }
+
     /** "static boolean isValidPort(String)" for a compiled method. */
     static String signatureOf(Method method) {
         StringBuilder text = new StringBuilder();

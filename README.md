@@ -20,7 +20,7 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 100 missions and 100 labs are playable (Campaigns 00 to 03
+> **Status:** 100 missions and 106 labs are playable (Campaigns 00 to 03
 > complete, labs included; Campaign 04 is next) out of 510 missions planned.
 > The order follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
@@ -374,6 +374,11 @@ Every campaign has its own labs, growing from small to big: ten small ones
 for Campaign 00, and thirty per campaign after that. **CORE** labs are the
 path through a campaign. **STRETCH** labs are extra practice for when a
 topic has not stuck, or before an assessment.
+
+Campaign 01 also has six **lecture-practice labs** (C01-L31 to L36) that
+follow the module's Variables lecture: no keyboard input, all values in
+the program. Their answers must be worked out by your code - a program
+that types the answers into its `println`s is refused.
 
 ### How a lab works
 

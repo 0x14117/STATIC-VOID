@@ -417,6 +417,20 @@ Tier: **C** = core, **S** = stretch. "After" is the mission a lab assumes.
 | L29 | Alert Summary Card | BIG | S | M029 |
 | L30 | Incident Ticket Formatter | CAPSTONE | C | M030 |
 
+**Lecture practice (Variables #1).** Six extra small labs matching the
+module's second lecture: no keyboard input, every value written into the
+program. Each answer must be calculated - the game refuses a program whose
+source contains the answers as typed text.
+
+| Lab | Title | Size | Tier | After |
+|---|---|---|---|---|
+| L31 | Legal Names (fix the identifiers) | SMALL | S | M007 |
+| L32 | Order of Operations | SMALL | S | M009 |
+| L33 | Mixed Expressions | SMALL | S | M013 |
+| L34 | Casting on Purpose | SMALL | S | M014 |
+| L35 | The Sum Trap | SMALL | S | M009 |
+| L36 | Shift Totals | SMALL | S | M014 |
+
 ### 02 CONDITIONAL: 30 labs (built)
 
 | Lab | Title | Size | Tier |

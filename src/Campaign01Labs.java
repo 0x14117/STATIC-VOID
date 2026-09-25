@@ -1443,17 +1443,17 @@ public class Campaign01Labs {
                 + "letters have a case. The hidden tests type names in lower "
                 + "case and in capitals; the badge comes out the same either "
                 + "way.")
-            .sample(Lab.typing("adaeze", "okafor"), 
+            .sample(Lab.typing("adaeze", "okafor"),
                 "First name: adaeze",
                 "Last name: okafor",
                 "Initials: AO",
                 "Badge: OKA-A")
-            .hidden(Lab.typing("MARIA", "REYES"), 
+            .hidden(Lab.typing("MARIA", "REYES"),
                 "First name: MARIA",
                 "Last name: REYES",
                 "Initials: MR",
                 "Badge: REY-M")
-            .hidden(Lab.typing(" John ", "Smith"), 
+            .hidden(Lab.typing(" John ", "Smith"),
                 "First name:  John",
                 "Last name: Smith",
                 "Initials: JS",
@@ -1514,17 +1514,17 @@ public class Campaign01Labs {
                 + "Converting the octet to an int is what lets a rule compare "
                 + "it with a number later. As text, \"10\" and \"100\" would sort "
                 + "and compare in all the wrong ways.")
-            .sample(Lab.typing("10.0.4.17"), 
+            .sample(Lab.typing("10.0.4.17"),
                 "IP address: 10.0.4.17",
                 "First octet: 10",
                 "Rest: 0.4.17",
                 "Octet plus one: 11")
-            .hidden(Lab.typing("192.168.1.20"), 
+            .hidden(Lab.typing("192.168.1.20"),
                 "IP address: 192.168.1.20",
                 "First octet: 192",
                 "Rest: 168.1.20",
                 "Octet plus one: 193")
-            .hidden(Lab.typing("8.8.8.8"), 
+            .hidden(Lab.typing("8.8.8.8"),
                 "IP address: 8.8.8.8",
                 "First octet: 8",
                 "Rest: 8.8.8",
@@ -1597,19 +1597,19 @@ public class Campaign01Labs {
                 + "time into minutes since midnight gives a single number that "
                 + "can be compared and subtracted - 554 is 09:14 - which is how "
                 + "the next lab measures a session's length.")
-            .sample(Lab.typing("2024-03-11 09:14:02"), 
+            .sample(Lab.typing("2024-03-11 09:14:02"),
                 "Timestamp: 2024-03-11 09:14:02",
                 "Date: 2024-03-11",
                 "Time: 09:14:02",
                 "Hour: 9",
                 "Minutes since midnight: 554")
-            .hidden(Lab.typing("2025-12-31 23:59:59"), 
+            .hidden(Lab.typing("2025-12-31 23:59:59"),
                 "Timestamp: 2025-12-31 23:59:59",
                 "Date: 2025-12-31",
                 "Time: 23:59:59",
                 "Hour: 23",
                 "Minutes since midnight: 1439")
-            .hidden(Lab.typing("2024-01-01 00:00:07"), 
+            .hidden(Lab.typing("2024-01-01 00:00:07"),
                 "Timestamp: 2024-01-01 00:00:07",
                 "Date: 2024-01-01",
                 "Time: 00:00:07",
@@ -1675,17 +1675,17 @@ public class Campaign01Labs {
                 + "That convert, calculate, convert back pattern is how almost "
                 + "all time arithmetic is done in real code. The next campaign "
                 + "handles sessions that cross midnight, which need a decision.")
-            .sample(Lab.typing("08:45", "17:20"), 
+            .sample(Lab.typing("08:45", "17:20"),
                 "Login (HH:MM): 08:45",
                 "Logout (HH:MM): 17:20",
                 "Session: 8h 35m",
                 "Minutes: 515")
-            .hidden(Lab.typing("09:00", "09:45"), 
+            .hidden(Lab.typing("09:00", "09:45"),
                 "Login (HH:MM): 09:00",
                 "Logout (HH:MM): 09:45",
                 "Session: 0h 45m",
                 "Minutes: 45")
-            .hidden(Lab.typing("00:00", "23:59"), 
+            .hidden(Lab.typing("00:00", "23:59"),
                 "Login (HH:MM): 00:00",
                 "Logout (HH:MM): 23:59",
                 "Session: 23h 59m",
@@ -1748,17 +1748,17 @@ public class Campaign01Labs {
                 + "Reading with Long.parseLong and multiplying by 1000000000L "
                 + "keeps every step in long. The hidden tests include a 2000 GB "
                 + "allowance, where an int version goes badly wrong.")
-            .sample(Lab.typing("500", "432109876543"), 
+            .sample(Lab.typing("500", "432109876543"),
                 "Allowance (GB): 500",
                 "Used (bytes): 432109876543",
                 "Remaining bytes: 67890123457",
                 "Remaining GB: 67")
-            .hidden(Lab.typing("1", "1"), 
+            .hidden(Lab.typing("1", "1"),
                 "Allowance (GB): 1",
                 "Used (bytes): 1",
                 "Remaining bytes: 999999999",
                 "Remaining GB: 0")
-            .hidden(Lab.typing("2000", "1999000000000"), 
+            .hidden(Lab.typing("2000", "1999000000000"),
                 "Allowance (GB): 2000",
                 "Used (bytes): 1999000000000",
                 "Remaining bytes: 1000000000",
@@ -1818,19 +1818,19 @@ public class Campaign01Labs {
                 + "The password is not trimmed on purpose: a space is a valid "
                 + "password character. The hidden tests include exactly 12 "
                 + "characters, 20 characters, and an empty line.")
-            .sample(Lab.typing("cyberops1"), 
+            .sample(Lab.typing("cyberops1"),
                 "Password: cyberops1",
                 "Length: 9",
                 "Still needed: 3")
-            .hidden(Lab.typing("correcthorse"), 
+            .hidden(Lab.typing("correcthorse"),
                 "Password: correcthorse",
                 "Length: 12",
                 "Still needed: 0")
-            .hidden(Lab.typing("battery staple horse"), 
+            .hidden(Lab.typing("battery staple horse"),
                 "Password: battery staple horse",
                 "Length: 20",
                 "Still needed: 0")
-            .hidden(Lab.typing(""), 
+            .hidden(Lab.typing(""),
                 "Password:",
                 "Length: 0",
                 "Still needed: 12"));
@@ -1887,17 +1887,17 @@ public class Campaign01Labs {
                 + "Writing 1024.0 at the start of the product makes the whole "
                 + "product a double, so even the gigabyte divisor, "
                 + "1073741824, is computed without any int overflow.")
-            .sample(Lab.typing("1536000"), 
+            .sample(Lab.typing("1536000"),
                 "Bytes: 1536000",
                 "KB: 1500.00",
                 "MB: 1.46",
                 "GB: 0.00")
-            .hidden(Lab.typing("1073741824"), 
+            .hidden(Lab.typing("1073741824"),
                 "Bytes: 1073741824",
                 "KB: 1048576.00",
                 "MB: 1024.00",
                 "GB: 1.00")
-            .hidden(Lab.typing("0"), 
+            .hidden(Lab.typing("0"),
                 "Bytes: 0",
                 "KB: 0.00",
                 "MB: 0.00",
@@ -1960,19 +1960,19 @@ public class Campaign01Labs {
                 + "from the first multiplication on, and / 15 keeps the "
                 + "fraction. If severity were an int, 4 * 1 * 2 / 15 would be "
                 + "0 - a real risk scored as none.")
-            .sample(Lab.typing("7.5", "3", "4"), 
+            .sample(Lab.typing("7.5", "3", "4"),
                 "Severity (0-10): 7.5",
                 "Exposure (1-3): 3",
                 "Asset value (1-5): 4",
                 "Risk score: 6.0 out of 10",
                 "Rounded: 6")
-            .hidden(Lab.typing("9.8", "3", "5"), 
+            .hidden(Lab.typing("9.8", "3", "5"),
                 "Severity (0-10): 9.8",
                 "Exposure (1-3): 3",
                 "Asset value (1-5): 5",
                 "Risk score: 9.8 out of 10",
                 "Rounded: 10")
-            .hidden(Lab.typing("4", "1", "2"), 
+            .hidden(Lab.typing("4", "1", "2"),
                 "Severity (0-10): 4",
                 "Exposure (1-3): 1",
                 "Asset value (1-5): 2",
@@ -2080,7 +2080,7 @@ public class Campaign01Labs {
                 + "text. A value longer than 17 characters would push the right "
                 + "edge out - the hidden tests stay inside the width, but a real "
                 + "tool would need to cut long values, which takes an if.")
-            .sample(Lab.typing("HIGH|WEB-01|jsmith|12"), 
+            .sample(Lab.typing("HIGH|WEB-01|jsmith|12"),
                 "Alert: HIGH|WEB-01|jsmith|12",
                 "+-----------------------------+",
                 "| ALERT CARD                  |",
@@ -2091,7 +2091,7 @@ public class Campaign01Labs {
                 "| Attempts : 12               |",
                 "| Per hour : 0.5              |",
                 "+-----------------------------+")
-            .hidden(Lab.typing("CRITICAL|DC-01|svc-backup|240"), 
+            .hidden(Lab.typing("CRITICAL|DC-01|svc-backup|240"),
                 "Alert: CRITICAL|DC-01|svc-backup|240",
                 "+-----------------------------+",
                 "| ALERT CARD                  |",
@@ -2102,7 +2102,7 @@ public class Campaign01Labs {
                 "| Attempts : 240              |",
                 "| Per hour : 10.0             |",
                 "+-----------------------------+")
-            .hidden(Lab.typing("LOW|FILE-01|m.reyes|3"), 
+            .hidden(Lab.typing("LOW|FILE-01|m.reyes|3"),
                 "Alert: LOW|FILE-01|m.reyes|3",
                 "+-----------------------------+",
                 "| ALERT CARD                  |",
@@ -2253,7 +2253,7 @@ public class Campaign01Labs {
                 + "time with no colon, or contained before detected. That is "
                 + "what the next campaign is for.")
             .sample(Lab.typing("a.okafor", "web-01", "Contractor", "brute force",
-                               "09:14", "10:02", "7.5"), 
+                               "09:14", "10:02", "7.5"),
                 "Reporter: a.okafor",
                 "Host: web-01",
                 "Account: Contractor",
@@ -2276,7 +2276,7 @@ public class Campaign01Labs {
                 " BRUTE FORCE on WEB-01 against \"contractor\"",
                 "==================================")
             .hidden(Lab.typing("m.reyes", "  db-01 ", "ADMIN", "Data Exfiltration",
-                               "23:05", "23:59", "9.8"), 
+                               "23:05", "23:59", "9.8"),
                 "Reporter: m.reyes",
                 "Host:   db-01",
                 "Account: ADMIN",
@@ -2299,7 +2299,7 @@ public class Campaign01Labs {
                 " DATA EXFILTRATION on DB-01 against \"admin\"",
                 "==================================")
             .hidden(Lab.typing("jsmith", "file-01", "svc-backup", "malware",
-                               "00:00", "00:07", "4"), 
+                               "00:00", "00:07", "4"),
                 "Reporter: jsmith",
                 "Host: file-01",
                 "Account: svc-backup",
@@ -2321,5 +2321,396 @@ public class Campaign01Labs {
                 "----------------------------------",
                 " MALWARE on FILE-01 against \"svc-backup\"",
                 "=================================="));
+
+        // ---------------------------------------------------------------
+        // Lecture practice: Variables #1. No keyboard input yet - every
+        // value is written into the program, as in the lecture. forbids()
+        // makes sure the answers are calculated, not typed.
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(31), "Legal Names", Lab.SMALL)
+            .stretch()
+            .after("C01-M007")
+            .brokenStarter()
+            .brief(
+                "Someone wrote the enrolment check using names Java refuses: "
+                + "one starts with a digit, one has a hyphen, one has a space. "
+                + "The compiler will not even start. Rename the variables so "
+                + "the program compiles and prints the record.")
+            .practises("Identifier rules", "Declaring variables", "Reassigning a variable")
+            .spec(
+                "Rename 2place to numPasses, fees-paid to feesPaid and pass grade to grade - everywhere they are used.",
+                "The program must then print: numPasses: 42, then feesPaid: false, then grade: B, then - after grade is given the value 'A' - grade: A.",
+                "Keep the values as they are. Only the names are wrong.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int 2place = 42;",
+                "        boolean fees-paid = false;",
+                "        char pass grade = 'B';",
+                "        System.out.println(\"numPasses: \" + 2place);",
+                "        System.out.println(\"feesPaid: \" + fees-paid);",
+                "        System.out.println(\"grade: \" + pass grade);",
+                "        pass grade = 'A';",
+                "        System.out.println(\"grade: \" + pass grade);",
+                "    }",
+                "}")
+            .hints(
+                "An identifier may use letters, digits, _ and $, and must NOT "
+                + "start with a digit. No spaces, no hyphens.",
+                "Test the starter first and read the compiler's FIRST error: "
+                + "it points at line 3, where 2place starts with a digit.",
+                "fees-paid looks like 'fees minus paid' to Java, and pass "
+                + "grade looks like two separate words. camelCase joins "
+                + "words without either problem.",
+                "Rename every use, not just the declaration - the println "
+                + "lines and the reassignment use the names too.")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int numPasses = 42;",
+                "        boolean feesPaid = false;",
+                "        char grade = 'B';",
+                "        System.out.println(\"numPasses: \" + numPasses);",
+                "        System.out.println(\"feesPaid: \" + feesPaid);",
+                "        System.out.println(\"grade: \" + grade);",
+                "        grade = 'A';",
+                "        System.out.println(\"grade: \" + grade);",
+                "    }",
+                "}")
+            .walkthrough(
+                "These are the lecture's illegal names. 2place breaks the "
+                + "first-character rule; fees-paid is read as the "
+                + "subtraction fees - paid; pass grade is two identifiers "
+                + "side by side. camelCase - numPasses, feesPaid - is the "
+                + "Java convention that avoids all three.\n"
+                + "\n"
+                + "The last two lines answer the lecture's 'what happens "
+                + "here?' question: a variable holds ONE value at a time. "
+                + "grade prints B, is given 'A', and then prints A - the B is "
+                + "gone.")
+            .sample(Lab.NO_INPUT, 
+                "numPasses: 42",
+                "feesPaid: false",
+                "grade: B",
+                "grade: A"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(32), "Order of Operations", Lab.SMALL)
+            .stretch()
+            .after("C01-M009")
+            .brief(
+                "The alert-scoring formulas only work if everyone agrees on "
+                + "the order Java works them out in. Prove the rules to "
+                + "yourself: make Java calculate each of the lecture's "
+                + "expressions and print it next to its answer.")
+            .practises("Operator precedence", "Left-to-right evaluation", "Brackets in expressions")
+            .spec(
+                "Use the variables a = 2, b = 3 and z = 1 from the starter.",
+                "Print these six lines, each answer worked out by Java - not typed: 2 + 3 * 5 = 17, then (2 + 3) * 5 = 25, then 3 + a - b / 7 = 5, then a + 2 * (b - z) + 18 = 24, then 10 - 4 - 3 = 3, then 10 % 4 * 3 = 6.",
+                "The text before each = is a String; the number after it must come from the expression itself.")
+            .forbids("= 17\"", "= 25\"", "= 5\"", "= 24\"", "= 3\"", "= 6\"")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int a = 2;",
+                "        int b = 3;",
+                "        int z = 1;",
+                "        // print each expression and the value Java works out",
+                "    }",
+                "}")
+            .hints(
+                "One line per expression: the text as a String, then + and "
+                + "the expression itself:\n"
+                + "\n"
+                + "    System.out.println(\"2 + 3 * 5 = \" + (2 + 3 * 5));",
+                "The brackets around the expression matter. Without them, "
+                + "Java joins \"... = \" and 2 into text first - the sum trap "
+                + "from the end of the lecture.",
+                "b / 7 is integer division: 3 / 7 is 0.",
+                "Same-precedence operators go left to right: 10 - 4 - 3 is "
+                + "(10 - 4) - 3, and 10 % 4 * 3 is (10 % 4) * 3.")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int a = 2;",
+                "        int b = 3;",
+                "        int z = 1;",
+                "        System.out.println(\"2 + 3 * 5 = \" + (2 + 3 * 5));",
+                "        System.out.println(\"(2 + 3) * 5 = \" + ((2 + 3) * 5));",
+                "        System.out.println(\"3 + a - b / 7 = \" + (3 + a - b / 7));",
+                "        System.out.println(\"a + 2 * (b - z) + 18 = \"",
+                "                + (a + 2 * (b - z) + 18));",
+                "        System.out.println(\"10 - 4 - 3 = \" + (10 - 4 - 3));",
+                "        System.out.println(\"10 % 4 * 3 = \" + (10 % 4 * 3));",
+                "    }",
+                "}")
+            .walkthrough(
+                "* / and % are worked out before + and -, so 2 + 3 * 5 is 2 + "
+                + "15. Brackets override that: (2 + 3) * 5 is 25. Operators "
+                + "of the same level go left to right, which is why 10 - 4 - "
+                + "3 is 3, not 9.\n"
+                + "\n"
+                + "3 + a - b / 7 hides integer division: b / 7 is 3 / 7, "
+                + "which is 0 in whole numbers, leaving 3 + 2 - 0. And every "
+                + "println wraps its expression in brackets - without them "
+                + "the + would join text instead of adding numbers. Getting "
+                + "precedence wrong in a real risk formula does not crash; "
+                + "it just gives the wrong score, quietly.")
+            .sample(Lab.NO_INPUT, 
+                "2 + 3 * 5 = 17",
+                "(2 + 3) * 5 = 25",
+                "3 + a - b / 7 = 5",
+                "a + 2 * (b - z) + 18 = 24",
+                "10 - 4 - 3 = 3",
+                "10 % 4 * 3 = 6"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(33), "Mixed Expressions", Lab.SMALL)
+            .stretch()
+            .after("C01-M013")
+            .brief(
+                "A bandwidth report mixes whole numbers and decimals, and one "
+                + "figure keeps coming out wrong. Have Java evaluate the "
+                + "lecture's mixed expressions, and watch exactly where a "
+                + "whole-number division loses the part after the point.")
+            .practises("Mixed expressions", "Promotion to double", "Integer division inside a bigger expression")
+            .spec(
+                "Print five lines, each answer worked out by Java: 2 + 3.5 = 5.5, then 6 / 4 + 3.9 = 4.9, then 6 / 4.0 + 3.9 = 5.4, then 7 / 2 = 3, then 7 / 2.0 = 3.5.",
+                "The text before each = is a String; the number after it comes from the expression.")
+            .forbids("= 5.5\"", "= 4.9\"", "= 5.4\"", "= 3\"", "= 3.5\"")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // print each expression and the value Java works out",
+                "    }",
+                "}")
+            .hints(
+                "Same shape as the precedence lab:\n"
+                + "\n"
+                + "    System.out.println(\"2 + 3.5 = \" + (2 + 3.5));",
+                "Look at 6 / 4 + 3.9 carefully. Java does 6 / 4 FIRST - two "
+                + "ints, so the answer is 1 - and only then meets 3.9.",
+                "Changing one operand to a decimal, 6 / 4.0, makes that "
+                + "division decimal: 1.5.")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"2 + 3.5 = \" + (2 + 3.5));",
+                "        System.out.println(\"6 / 4 + 3.9 = \" + (6 / 4 + 3.9));",
+                "        System.out.println(\"6 / 4.0 + 3.9 = \" + (6 / 4.0 + 3.9));",
+                "        System.out.println(\"7 / 2 = \" + (7 / 2));",
+                "        System.out.println(\"7 / 2.0 = \" + (7 / 2.0));",
+                "    }",
+                "}")
+            .walkthrough(
+                "When an int meets a double, the int is PROMOTED to a double "
+                + "and the answer is a double - 2 + 3.5 is 5.5. But promotion "
+                + "happens one operator at a time, following precedence. In "
+                + "6 / 4 + 3.9, the division comes first and both sides are "
+                + "ints, so it gives 1; only the + sees a double. That is how "
+                + "4.9 appears where 5.4 was meant.\n"
+                + "\n"
+                + "Making either operand of the division a double - 6 / 4.0 - "
+                + "fixes it. The same slip in a real report turns a 1.5 GB "
+                + "transfer into 1 GB, and an alert threshold that should "
+                + "fire never does.")
+            .sample(Lab.NO_INPUT, 
+                "2 + 3.5 = 5.5",
+                "6 / 4 + 3.9 = 4.9",
+                "6 / 4.0 + 3.9 = 5.4",
+                "7 / 2 = 3",
+                "7 / 2.0 = 3.5"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(34), "Casting on Purpose", Lab.SMALL)
+            .stretch()
+            .after("C01-M014")
+            .brief(
+                "A risk score of 8.9 should never be reported as 8 - but that "
+                + "is exactly what a careless cast does. Work through the "
+                + "lecture's casting examples, then see where the brackets "
+                + "go makes all the difference.")
+            .practises("Explicit casting", "Casting before or after dividing", "Truncation")
+            .spec(
+                "Print, each answer worked out by Java: (int)(7.9 + 6.7) = 14, then (int)(7.9) + (int)(6.7) = 13, then (double) 7 / 2 = 3.5, then (double) (7 / 2) = 3.0.",
+                "Then declare double risk = 8.9; and print Risk as an int: 8, using a cast on risk.")
+            .forbids("= 14\"", "= 13\"", "= 3.5\"", "= 3.0\"", ": 8\"")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // the four casting expressions",
+                "        double risk = 8.9;",
+                "        // risk as an int",
+                "    }",
+                "}")
+            .hints(
+                "A cast is the type in brackets in front of an expression: "
+                + "(int)(7.9 + 6.7) adds first, then casts 14.6.",
+                "(int)(7.9) + (int)(6.7) casts each one first: 7 + 6.",
+                "(double) 7 / 2 casts the 7 BEFORE dividing, so the division "
+                + "is decimal. (double) (7 / 2) divides first - as ints - and "
+                + "only then casts the 3.",
+                "Casting to int does not round. It chops off everything after "
+                + "the point:  (int) risk  is 8.")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"(int)(7.9 + 6.7) = \" + (int) (7.9 + 6.7));",
+                "        System.out.println(\"(int)(7.9) + (int)(6.7) = \"",
+                "                + ((int) 7.9 + (int) 6.7));",
+                "        System.out.println(\"(double) 7 / 2 = \" + ((double) 7 / 2));",
+                "        System.out.println(\"(double) (7 / 2) = \" + (double) (7 / 2));",
+                "        double risk = 8.9;",
+                "        System.out.println(\"Risk as an int: \" + (int) risk);",
+                "    }",
+                "}")
+            .walkthrough(
+                "A cast applies to what comes straight after it. "
+                + "(int)(7.9 + 6.7) casts the sum, 14.6, to 14. Casting each "
+                + "number first throws away both .9 and .7 before adding, "
+                + "giving 13 - a whole unit lost.\n"
+                + "\n"
+                + "The same rule decides division: (double) 7 / 2 turns 7 into "
+                + "7.0 first, so the division keeps its .5. (double) (7 / 2) "
+                + "divides as ints - getting 3 - and then dresses the 3 up as "
+                + "3.0; the half is already gone.\n"
+                + "\n"
+                + "(int) never rounds: 8.9 becomes 8. A risk band based on "
+                + "that number would put a nearly-critical finding in a lower "
+                + "category. When you want rounding, Math.round is the tool "
+                + "(Campaign 01, mission 24).")
+            .sample(Lab.NO_INPUT, 
+                "(int)(7.9 + 6.7) = 14",
+                "(int)(7.9) + (int)(6.7) = 13",
+                "(double) 7 / 2 = 3.5",
+                "(double) (7 / 2) = 3.0",
+                "Risk as an int: 8"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(35), "The Sum Trap", Lab.SMALL)
+            .stretch()
+            .after("C01-M009")
+            .brief(
+                "A monitoring email once reported 1226 failed logins "
+                + "overnight. The real number was 38. The + operator adds "
+                + "numbers AND joins text, and which one it does depends on "
+                + "what it meets first. Show both, and the fix.")
+            .practises("String concatenation", "Left-to-right evaluation", "Brackets to force addition")
+            .spec(
+                "Use int num1 = 12 and int num2 = 26 from the starter.",
+                "Print Wrong: The sum = 1226 - produced by joining num1 and num2 onto the text WITHOUT brackets, which is the bug.",
+                "Print Right: The sum = 38 - with brackets around the addition.",
+                "Print 38 is the sum - with the two numbers FIRST, then the text.",
+                "Every number must come from num1 and num2, never typed in.")
+            .forbids("1226", "38")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int num1 = 12;",
+                "        int num2 = 26;",
+                "        System.out.println(\"The sum = \" + num1 + num2);",
+                "    }",
+                "}")
+            .hints(
+                "Java works + left to right. \"Wrong: The sum = \" + num1 is "
+                + "text, and text + num2 joins again - 12 then 26.",
+                "Brackets make Java add first:  \"Right: The sum = \" + (num1 "
+                + "+ num2)",
+                "With the numbers first, the first + meets two ints and "
+                + "ADDS:  num1 + num2 + \" is the sum\"")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int num1 = 12;",
+                "        int num2 = 26;",
+                "        System.out.println(\"Wrong: The sum = \" + num1 + num2);",
+                "        System.out.println(\"Right: The sum = \" + (num1 + num2));",
+                "        System.out.println(num1 + num2 + \" is the sum\");",
+                "    }",
+                "}")
+            .walkthrough(
+                "+ is worked out left to right, and each + decides what to do "
+                + "from the two values in front of it. Text + a number joins. "
+                + "So \"...= \" + 12 becomes the text \"...= 12\", and adding 26 "
+                + "joins again: 1226.\n"
+                + "\n"
+                + "Brackets are worked out first, so (num1 + num2) is 38 "
+                + "before any text is involved. Putting the numbers first "
+                + "works too - the first + sees two ints and adds - but it is "
+                + "fragile, so brackets are the habit to keep. A report that "
+                + "joins instead of adds is not a crash; it is a wrong number "
+                + "that someone believes.")
+            .sample(Lab.NO_INPUT, 
+                "Wrong: The sum = 1226",
+                "Right: The sum = 38",
+                "38 is the sum"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(36), "Shift Totals", Lab.SMALL)
+            .stretch()
+            .after("C01-M014")
+            .brief(
+                "The lecture's five steps - plan, declare, assign, calculate, "
+                + "print - applied to the SOC's failed-login counts for three "
+                + "shifts. Add them up, and give the average two ways: whole "
+                + "shifts with a remainder, and exact.")
+            .practises("Declaring and assigning", "Integer division and %", "Casting for an exact average")
+            .spec(
+                "Declare three int variables, morning = 14, afternoon = 9 and night = 23, and print Morning: 14, Afternoon: 9 and Night: 23.",
+                "Print Total: 46, calculated from the three variables.",
+                "Print Whole average: 15 remainder 1, using integer division and % on the total.",
+                "Print Exact average: followed by the total divided by 3 as a double - cast before you divide.")
+            .forbids("46", "15 remainder", "15.3")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // 1. plan   2. declare   3. assign",
+                "        // 4. calculate   5. print",
+                "    }",
+                "}")
+            .hints(
+                "Declare and assign in one line:  int morning = 14;",
+                "Keep the total in its own variable:  int total = morning + "
+                + "afternoon + night;",
+                "total / 3 gives whole shifts; total % 3 gives what is left "
+                + "over.",
+                "(double) total / 3 casts BEFORE dividing, so nothing after "
+                + "the point is lost.")
+            .solution(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int morning = 14;",
+                "        int afternoon = 9;",
+                "        int night = 23;",
+                "        int total = morning + afternoon + night;",
+                "        System.out.println(\"Morning: \" + morning);",
+                "        System.out.println(\"Afternoon: \" + afternoon);",
+                "        System.out.println(\"Night: \" + night);",
+                "        System.out.println(\"Total: \" + total);",
+                "        System.out.println(\"Whole average: \" + total / 3",
+                "                + \" remainder \" + total % 3);",
+                "        System.out.println(\"Exact average: \" + (double) total / 3);",
+                "    }",
+                "}")
+            .walkthrough(
+                "total is calculated once and reused, so the three outputs "
+                + "that depend on it can never disagree. total / 3 and total "
+                + "% 3 are the whole-number pair: 46 is 15 threes with 1 left "
+                + "over.\n"
+                + "\n"
+                + "In \"Whole average: \" + total / 3 + ..., no brackets are "
+                + "needed: / is worked out before +, so the division happens "
+                + "first. The exact average casts total to a double before "
+                + "dividing; (double) (total / 3) would print 15.0 and hide "
+                + "the third of a failure per shift. The long decimal is the "
+                + "truth - Campaign 01's printf mission shows how to round it "
+                + "for display.")
+            .sample(Lab.NO_INPUT, 
+                "Morning: 14",
+                "Afternoon: 9",
+                "Night: 23",
+                "Total: 46",
+                "Whole average: 15 remainder 1",
+                "Exact average: 15.333333333333334"));
     }
 }

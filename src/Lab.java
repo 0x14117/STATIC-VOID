@@ -35,6 +35,7 @@ public class Lab {
     private String walkthrough = "";
     private final List<LabTest> tests = new ArrayList<>();
     private final List<String> neededMethods = new ArrayList<>();
+    private final List<String> forbidden = new ArrayList<>();
 
     public Lab(String id, String title, String size) {
         this.id = id;
@@ -112,6 +113,19 @@ public class Lab {
      */
     public Lab needsMethod(String signature) {
         neededMethods.add(signature);
+        return this;
+    }
+
+    /**
+     * Answers the program must CALCULATE, so they must not appear in its
+     * source as typed text. A lab with no keyboard input has no hidden
+     * tests with other values; this is what stops a program that simply
+     * prints the expected screen from passing.
+     */
+    public Lab forbids(String... fragments) {
+        for (String fragment : fragments) {
+            forbidden.add(fragment);
+        }
         return this;
     }
 
@@ -195,6 +209,10 @@ public class Lab {
 
     public List<String> getNeededMethods() {
         return neededMethods;
+    }
+
+    public List<String> getForbidden() {
+        return forbidden;
     }
 
     public boolean readsInput() {
