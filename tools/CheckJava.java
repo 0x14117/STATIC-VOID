@@ -120,8 +120,8 @@ public class CheckJava {
         if (ex.compiled) {
             // The mission shows the screen, where typed text appears. The
             // program's own output does not contain it, so take it out.
-            String want = removeTyped(String.join("\n", claimed), typed);
-            String got = expandTabs(ex.output);
+            String want = rtrimLines(removeTyped(String.join("\n", claimed), typed));
+            String got = rtrimLines(expandTabs(ex.output));
             check(id + " example prints what it claims", got.equals(want),
                   "\n      claims [" + want + "]\n      prints [" + got + "]");
         }
@@ -173,6 +173,16 @@ public class CheckJava {
             from = at;
         }
         return screen;
+    }
+
+    /** Spaces at the end of a line are invisible on screen, so ignored. */
+    static String rtrimLines(String text) {
+        StringBuilder out = new StringBuilder();
+        String[] lines = text.split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            out.append(i == 0 ? "" : "\n").append(lines[i].replaceAll("\\s+$", ""));
+        }
+        return out.toString();
     }
 
     static boolean isShell(String[] lines) {
