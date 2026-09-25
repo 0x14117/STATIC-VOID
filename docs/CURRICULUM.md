@@ -16,7 +16,7 @@ each one. Built items are marked; everything else is the plan.
 | Basic I/O | 01 JAVA ZERO (Scanner, parseInt, printf) | built |
 | Selection: Boolean operators & expressions | 02 CONDITIONAL | built |
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
-| Methods, parameters and the stack | 03 METHODS | planned |
+| Methods, parameters and the stack | 03 METHODS | missions built |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | planned |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
@@ -111,7 +111,7 @@ Each line is one mission, one idea.
 29. An input-validation pipeline
 30. CONDITIONAL COMPLETE: checkpoint
 
-### 03 METHODS
+### 03 METHODS (built)
 
 1. Why methods exist: the same code in three places
 2. Writing a `static void` method

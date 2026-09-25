@@ -4444,5 +4444,2399 @@ public class Campaign03 {
                 + "reassigned. UPPER_SNAKE_CASE. Constants replace magic "
                 + "numbers and keep every method on the same rule.")
             .next("Next: a class-level variable that CAN change."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "A Variable the Class Remembers", 5)
+            .brief(
+                "Every alert the SOC tool raises should get the next number: "
+                + "#1, #2, #3. A local counter starts again at 0 on every "
+                + "call. The count has to live somewhere that outlasts a "
+                + "single call - and that power comes with a warning.")
+            .willLearn("Static fields")
+            .whyUseful(
+                "Some state really is shared: a running total, a count of "
+                + "alerts, a flag that says the system is in lockdown. Static "
+                + "fields hold it - and knowing their risks keeps you from "
+                + "using them for everything.")
+            .concept("Static fields",
+                "A variable declared in the class, with static but WITHOUT "
+                + "final, is a STATIC FIELD:\n"
+                + "\n"
+                + "    public class Main {\n"
+                + "        static int alertsRaised = 0;\n"
+                + "        ...\n"
+                + "    }\n"
+                + "\n"
+                + "It is not in any frame. It is created once when the program "
+                + "starts and lasts until it ends, so it REMEMBERS between "
+                + "calls. Every method in the class can read it and change "
+                + "it.\n"
+                + "\n"
+                + "    local variable     one call, one method\n"
+                + "    static field       whole program, every method\n"
+                + "    static final       whole program, never changes\n"
+                + "\n"
+                + "SHADOWING. If a method declares a local with the same name "
+                + "as a field, the local HIDES the field inside that method. "
+                + "int count = 0; inside a method makes a new local count, "
+                + "and the field is left untouched - a quiet, confusing bug.\n"
+                + "\n"
+                + "THE WARNING. Because any method can change a static field, "
+                + "a wrong value could have come from anywhere. Methods that "
+                + "take parameters and return results can be understood on "
+                + "their own; methods that read and write shared fields "
+                + "cannot. Use static fields for state that genuinely belongs "
+                + "to the whole program - and pass everything else.")
+            .example(
+                "public class Main {",
+                "    static int alertsRaised = 0;",
+                "",
+                "    public static void main(String[] args) {",
+                "        raise(\"port scan\");",
+                "        raise(\"brute force\");",
+                "        raise(\"malware\");",
+                "        System.out.println(\"Total raised: \" + alertsRaised);",
+                "    }",
+                "",
+                "    static void raise(String name) {",
+                "        alertsRaised++;",
+                "        System.out.println(\"#\" + alertsRaised + \" \" + name);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "#1 port scan",
+                "#2 brute force",
+                "#3 malware",
+                "Total raised: 3")
+            .lineByLine(
+                new String[]{"static int alertsRaised = 0;",
+                    "Created once, when the program starts."},
+                new String[]{"alertsRaised++;",
+                    "Each call changes the same variable, so the count keeps "
+                    + "growing."},
+                new String[]{"Total raised: 3",
+                    "main sees the value every call left behind."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int count = 10;",
+                    "",
+                    "static void bump() {",
+                    "    int count = 0;",
+                    "    count++;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    bump();",
+                    "    System.out.println(count);",
+                    "}")
+                .accept("10")
+                .hints("int count = 0; inside bump declares something new.",
+                       "Which count does count++ change?")
+                .explain(
+                    "10. The local count in bump SHADOWS the field. bump "
+                    + "changes its own local, and the field stays 10. Deleting "
+                    + "the int in bump would make it change the field.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int visits = 0;",
+                    "",
+                    "static void visit() {",
+                    "    visits++;",
+                    "    System.out.println(\"visit \" + visits);",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    visit();",
+                    "    visit();",
+                    "}")
+                .accept("visit 1 visit 2")
+                .hints("Mission 12's version printed visit 1 every time.",
+                       "Where does visits live now?")
+                .explain(
+                    "    visit 1\n"
+                    + "    visit 2\n"
+                    + "\n"
+                    + "visits is a static field, not a local, so it survives "
+                    + "between calls.")
+                .xp(10))
+            .objective(
+                "Give the failed-login counter a home that lasts.")
+            .starter(
+                "public class Main {",
+                "    // declare failedLogins: a static int field, starting at 0",
+                "",
+                "    public static void main(String[] args) {",
+                "        recordFailure();",
+                "        recordFailure();",
+                "        System.out.println(\"Failed logins: \" + failedLogins);",
+                "    }",
+                "",
+                "    static void recordFailure() {",
+                "        failedLogins++;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare failedLogins as a static int field, starting at 0 - "
+                + "not final, because it has to change.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the field's declaration.")
+                .accept("static int failedLogins = 0;",
+                        "static int failedLogins=0;",
+                        "private static int failedLogins = 0;",
+                        "static int failedLogins;")
+                .hints(
+                    "Like a constant, but without final.",
+                    "static, the type, the name, the starting value.",
+                    "static int failedLogins = 0;")
+                .solution(
+                    "public class Main {",
+                    "    static int failedLogins = 0;",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        recordFailure();",
+                    "        recordFailure();",
+                    "        System.out.println(\"Failed logins: \" + failedLogins);",
+                    "    }",
+                    "",
+                    "    static void recordFailure() {",
+                    "        failedLogins++;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The field lives for the whole program, so both calls to "
+                    + "recordFailure add to the same variable, and main prints "
+                    + "Failed logins: 2.\n"
+                    + "\n"
+                    + "Leaving out = 0 also works for a field: fields start at "
+                    + "0 (or false, or null) automatically - unlike locals, "
+                    + "which must be given a value before use. Writing = 0 "
+                    + "says it on purpose.")
+                .explain(
+                    "static int failedLogins = 0; - class-level, and not "
+                    + "final.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Shadowing a field",
+                    "int count inside a method makes a new local and hides "
+                    + "the field."},
+                new String[]{"Fields for everything",
+                    "Pass values and return results. Keep fields for truly "
+                    + "shared state."},
+                new String[]{"Adding final to a counter",
+                    "A final field can never change - the ++ will not "
+                    + "compile."})
+            .cyber(
+                "Shared, changeable state is behind some of the hardest "
+                + "security bugs to find. When one field says whether the "
+                + "system is in lockdown, every method that can write it is "
+                + "a way to lift the lockdown - including ones nobody meant "
+                + "to.\n"
+                + "\n"
+                + "In programs that do several things at once - web servers "
+                + "handling many users - shared fields can also be read and "
+                + "changed by two requests at the same moment. One user's "
+                + "session data leaking into another user's response has "
+                + "happened exactly this way.")
+            .check(new Task(Task.CHOICE,
+                    "What is the difference between static int LIMIT = 5 and "
+                    + "static final int LIMIT = 5?")
+                .choices("None",
+                         "Only the final one can be changed",
+                         "Only the non-final one can be changed",
+                         "The final one is local")
+                .accept("3", "c")
+                .hints("What does final forbid?",
+                       "Both live in the class.")
+                .explain(
+                    "Only the non-final one can be changed. final makes it a "
+                    + "constant; without it, it is a field any method can "
+                    + "change.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why prefer parameters and return values to static "
+                    + "fields?")
+                .choices("Fields are slower",
+                         "Any method can change a field, so bugs are hard to "
+                         + "trace",
+                         "Fields cannot hold Strings",
+                         "Fields disappear after each call")
+                .accept("2", "b")
+                .hints("Who can change a field?",
+                       "Where would a wrong value have come from?")
+                .explain(
+                    "Any method can change a field. A method that only uses "
+                    + "its parameters can be understood - and trusted - on "
+                    + "its own.")
+                .xp(10))
+            .recap(
+                "    static int alertsRaised = 0;\n"
+                + "\n"
+                + "A static field lives for the whole program and every method "
+                + "can change it, so it remembers between calls. A local with "
+                + "the same name hides it.\n"
+                + "\n"
+                + "Use fields for genuinely shared state; pass everything "
+                + "else.")
+            .next("Next: turning a big job into a set of small methods."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Breaking a Problem Down", 5)
+            .brief(
+                "The new task: read a login record like "
+                + "jsmith,203.0.113.9,FAIL, pull out its parts, decide "
+                + "whether it needs review, and report. Written as one long "
+                + "main, it would be forty tangled lines. Written as small "
+                + "methods, main reads like the task description.")
+            .willLearn("Decomposition")
+            .whyUseful(
+                "Decomposition is how every program bigger than a page is "
+                + "written. It also makes code testable: each small method "
+                + "can be checked on its own before the whole is put "
+                + "together.")
+            .concept("Decomposition",
+                "DECOMPOSITION means splitting a job into steps, and giving "
+                + "each step its own method. Start from the task, in "
+                + "words:\n"
+                + "\n"
+                + "    1. take a field out of the record\n"
+                + "    2. decide whether an address is external\n"
+                + "    3. print a report line, and a review note if\n"
+                + "       an external login failed\n"
+                + "\n"
+                + "Each step becomes a method with an honest name - field, "
+                + "isExternal, report - and main just calls them in order. "
+                + "Reading main tells you WHAT happens; opening a method tells "
+                + "you HOW.\n"
+                + "\n"
+                + "Signs a method should be split:\n"
+                + "\n"
+                + "    - its name needs AND: parseAndCheckAndPrint\n"
+                + "    - it is longer than a screen\n"
+                + "    - part of it could be reused somewhere else\n"
+                + "    - you want to test part of it on its own\n"
+                + "\n"
+                + "Good decomposition gives each method ONE job, with its "
+                + "inputs as parameters and its answer as a return value. "
+                + "Methods like that are the building blocks every later "
+                + "campaign stacks on top of.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String entry = \"jsmith,203.0.113.9,FAIL\";",
+                "        String user = field(entry, 0);",
+                "        String ip = field(entry, 1);",
+                "        boolean failed = field(entry, 2).equals(\"FAIL\");",
+                "        report(user, ip, failed);",
+                "    }",
+                "",
+                "    static String field(String line, int which) {",
+                "        int first = line.indexOf(\",\");",
+                "        int last = line.lastIndexOf(\",\");",
+                "        if (which == 0) {",
+                "            return line.substring(0, first);",
+                "        }",
+                "        if (which == 1) {",
+                "            return line.substring(first + 1, last);",
+                "        }",
+                "        return line.substring(last + 1);",
+                "    }",
+                "",
+                "    static boolean isExternal(String ip) {",
+                "        return !ip.startsWith(\"10.\");",
+                "    }",
+                "",
+                "    static void report(String user, String ip, boolean failed) {",
+                "        String outcome = failed ? \"FAILED\" : \"OK\";",
+                "        System.out.println(user + \" from \" + ip + \": \" + outcome);",
+                "        if (failed && isExternal(ip)) {",
+                "            System.out.println(\"  review: external failure\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "jsmith from 203.0.113.9: FAILED",
+                "  review: external failure")
+            .lineByLine(
+                new String[]{"main",
+                    "Five lines that read like the task: get the parts, then "
+                    + "report."},
+                new String[]{"field(entry, 1)",
+                    "One method takes out any field, with guards choosing "
+                    + "which."},
+                new String[]{"isExternal(ip)",
+                    "One rule, one name, reusable anywhere."},
+                new String[]{"report(user, ip, failed)",
+                    "All the output decisions in one place."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static String first(String s) {",
+                    "    return s.substring(0, s.indexOf(\",\"));",
+                    "}",
+                    "",
+                    "static String rest(String s) {",
+                    "    return s.substring(s.indexOf(\",\") + 1);",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    String line = \"a,b,c\";",
+                    "    System.out.println(first(rest(line)));",
+                    "}")
+                .accept("b")
+                .hints("rest runs first: what is left after the first "
+                       + "comma?",
+                       "Then first takes the part before the next comma.")
+                .explain(
+                    "b. rest(\"a,b,c\") is \"b,c\", and first(\"b,c\") is "
+                    + "\"b\". Two tiny methods combine into a new operation: "
+                    + "the second field.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A method called processLogin reads input, checks the "
+                    + "password, updates the counter, writes the audit log "
+                    + "and prints a menu. What is the main problem?")
+                .choices("Its name is too short",
+                         "It does too many jobs",
+                         "It should return a boolean",
+                         "Nothing - one method is simplest")
+                .accept("2", "b")
+                .hints("Count the jobs.",
+                       "Could any part be tested or reused on its own?")
+                .explain(
+                    "It does five jobs. Split it - readLogin, "
+                    + "isPasswordCorrect, recordFailure, writeAudit, "
+                    + "printMenu - and each can be read, tested and reused "
+                    + "on its own.")
+                .xp(10))
+            .objective(
+                "Put the steps together in main.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String host = \" WEB-01 \";",
+                "        int failures = 7;",
+                "        // one line: print verdict for the CLEANED host",
+                "    }",
+                "",
+                "    static String clean(String host) {",
+                "        return host.trim().toLowerCase();",
+                "    }",
+                "",
+                "    static String verdict(String host, int failures) {",
+                "        return host + \": \" + (failures >= 5 ? \"LOCK\" : \"OK\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write one line that prints the verdict for the cleaned host "
+                + "and failures: clean goes inside verdict, verdict inside "
+                + "the println.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line.")
+                .accept("System.out.println(verdict(clean(host), failures));")
+                .hints(
+                    "Start from the inside: clean(host).",
+                    "That result is verdict's first argument.",
+                    "System.out.println(verdict(clean(host), failures));")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String host = \" WEB-01 \";",
+                    "        int failures = 7;",
+                    "        System.out.println(verdict(clean(host), failures));",
+                    "    }",
+                    "",
+                    "    static String clean(String host) {",
+                    "        return host.trim().toLowerCase();",
+                    "    }",
+                    "",
+                    "    static String verdict(String host, int failures) {",
+                    "        return host + \": \" + (failures >= 5 ? \"LOCK\" : \"OK\");",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Java works from the inside out: clean(host) returns "
+                    + "\"web-01\", verdict(\"web-01\", 7) returns \"web-01: "
+                    + "LOCK\", and println prints it.\n"
+                    + "\n"
+                    + "Each method does one job and knows nothing about the "
+                    + "others. main is where they are combined - which is "
+                    + "exactly what decomposition aims for.")
+                .explain(
+                    "Nest the steps: println(verdict(clean(host), failures)).")
+                .xp(25))
+            .mistakes(
+                new String[]{"One giant main",
+                    "Split it into steps with names."},
+                new String[]{"Methods that need 'and' in their name",
+                    "That is two jobs. Make two methods."},
+                new String[]{"Helpers that print instead of return",
+                    "A returning helper can be combined; a printing one "
+                    + "cannot."})
+            .cyber(
+                "Decomposed code is reviewable code. A security auditor can "
+                + "check isExternal once and trust it everywhere; in a "
+                + "forty-line main, the same rule might be written three "
+                + "slightly different ways.\n"
+                + "\n"
+                + "It also shrinks the ATTACK SURFACE of each change. When the "
+                + "log format changes, only field changes - the decision "
+                + "rules are not touched, so they cannot be broken by "
+                + "accident.")
+            .check(new Task(Task.CHOICE,
+                    "Which is a sign that a method should be split?")
+                .choices("It has a parameter",
+                         "Its honest name would need the word and",
+                         "It returns a value",
+                         "It is called from main")
+                .accept("2", "b")
+                .hints("One method, one job.",
+                       "checkAndLog...")
+                .explain(
+                    "A name that needs 'and' describes two jobs. Two methods "
+                    + "will each be simpler.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int tens(int n) {",
+                    "    return n / 10;",
+                    "}",
+                    "",
+                    "static int units(int n) {",
+                    "    return n % 10;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    int port = 47;",
+                    "    System.out.println(tens(port) + units(port));",
+                    "}")
+                .accept("11")
+                .hints("tens(47) is 4, units(47) is 7.",
+                       "Both are ints, so + adds.")
+                .explain(
+                    "11. tens gives 4 and units gives 7; two ints are added, "
+                    + "not joined.")
+                .xp(15))
+            .recap(
+                "Decomposition: list the steps, give each step a method with "
+                + "one job, and let main combine them.\n"
+                + "\n"
+                + "Split any method whose name needs 'and', that runs past a "
+                + "screen, or that holds a reusable part.")
+            .next("Next: proving a method works before trusting it."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "Testing a Method", 5)
+            .brief(
+                "isValidPort looks right. It compiles. It even works for 22 "
+                + "and 8080. But nobody tried port 1 - and port 1 is where "
+                + "it is wrong. A few lines in main can prove a method "
+                + "correct before anything depends on it.")
+            .willLearn("Testing a method")
+            .whyUseful(
+                "Tests turn 'I think it works' into 'I checked'. They catch "
+                + "boundary mistakes before attackers do, and they tell you "
+                + "immediately when a later change breaks something.")
+            .concept("Testing a method",
+                "A TEST calls a method with a known input and compares the "
+                + "result to what it SHOULD be:\n"
+                + "\n"
+                + "    check(\"1 is valid\", isValidPort(1));\n"
+                + "    check(\"0 is invalid\", !isValidPort(0));\n"
+                + "\n"
+                + "A tiny helper prints the verdict:\n"
+                + "\n"
+                + "    static void check(String name, boolean passed) {\n"
+                + "        System.out.println(\n"
+                + "            (passed ? \"PASS \" : \"FAIL \") + name);\n"
+                + "    }\n"
+                + "\n"
+                + "WHAT TO TEST - Campaign 02's boundary habit, applied:\n"
+                + "\n"
+                + "    normal      a typical value: 443\n"
+                + "    boundaries  each edge, and one past it:\n"
+                + "                0, 1, 65535, 65536\n"
+                + "    bad input   values that must be REJECTED\n"
+                + "\n"
+                + "Testing only values that should pass is not enough: a "
+                + "method that says yes to EVERYTHING would pass them all.\n"
+                + "\n"
+                + "A FAIL has two possible causes: the method is wrong, or "
+                + "the expected value in the test is wrong. Check both before "
+                + "changing anything.\n"
+                + "\n"
+                + "Professional Java uses a framework called JUnit for this. "
+                + "The idea is exactly the same: known input, expected "
+                + "output, compare.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        check(\"1 is valid\", isValidPort(1));",
+                "        check(\"0 is invalid\", !isValidPort(0));",
+                "        check(\"65535 is valid\", isValidPort(65535));",
+                "        check(\"65536 is invalid\", !isValidPort(65536));",
+                "    }",
+                "",
+                "    static boolean isValidPort(int port) {",
+                "        return port > 1 && port <= 65535;",
+                "    }",
+                "",
+                "    static void check(String name, boolean passed) {",
+                "        System.out.println((passed ? \"PASS \" : \"FAIL \") + name);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "FAIL 1 is valid",
+                "PASS 0 is invalid",
+                "PASS 65535 is valid",
+                "PASS 65536 is invalid")
+            .lineByLine(
+                new String[]{"check(\"0 is invalid\", !isValidPort(0));",
+                    "A rejection test: it passes when the method says NO."},
+                new String[]{"port > 1",
+                    "The bug: > where >= was needed. Port 1 is rejected."},
+                new String[]{"FAIL 1 is valid",
+                    "The boundary test caught it. 22 and 8080 never would "
+                    + "have."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int doubled(int n) {",
+                    "    return n + n;",
+                    "}",
+                    "",
+                    "static void check(String name, boolean passed) {",
+                    "    System.out.println((passed ? \"PASS \" : \"FAIL \") + name);",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    check(\"doubled(3)\", doubled(3) == 6);",
+                    "    check(\"doubled(0)\", doubled(0) == 1);",
+                    "}")
+                .accept("PASS doubled(3) FAIL doubled(0)")
+                .hints("doubled(0) is 0.",
+                       "Is 0 == 1?")
+                .explain(
+                    "    PASS doubled(3)\n"
+                    + "    FAIL doubled(0)\n"
+                    + "\n"
+                    + "The method is right. The TEST is wrong: 0 doubled is 0, "
+                    + "not 1. A failing test can point at the expectation.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which inputs best test  static boolean isAdult(int age) "
+                    + " (true from 18)?")
+                .choices("20, 30, 40", "17, 18, 19", "0, 100", "18")
+                .accept("2", "b")
+                .hints("Where can the rule go wrong?",
+                       "Test around the boundary.")
+                .explain(
+                    "17, 18, 19 - just below, on, and just above the "
+                    + "boundary. A mistaken > instead of >= fails at 18; "
+                    + "20, 30 and 40 would never notice.")
+                .xp(10))
+            .objective(
+                "Fix the bug the test found.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        check(\"1 is valid\", isValidPort(1));",
+                "        check(\"0 is invalid\", !isValidPort(0));",
+                "    }",
+                "",
+                "    static boolean isValidPort(int port) {",
+                "        return port > 1 && port <= 65535;    // fix this line",
+                "    }",
+                "",
+                "    static void check(String name, boolean passed) {",
+                "        System.out.println((passed ? \"PASS \" : \"FAIL \") + name);",
+                "    }",
+                "}")
+            .yourTask(
+                "The test says FAIL 1 is valid. Rewrite the marked return "
+                + "line so port 1 is valid and port 0 still is not.")
+            .mainTask(new Task(Task.WRITE,
+                    "Rewrite the return line.")
+                .accept("return port >= 1 && port <= 65535;",
+                        "return port > 0 && port <= 65535;",
+                        "return port>=1 && port<=65535;")
+                .hints(
+                    "Which operator includes the boundary itself?",
+                    "Change > to >=.",
+                    "return port >= 1 && port <= 65535;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        check(\"1 is valid\", isValidPort(1));",
+                    "        check(\"0 is invalid\", !isValidPort(0));",
+                    "    }",
+                    "",
+                    "    static boolean isValidPort(int port) {",
+                    "        return port >= 1 && port <= 65535;",
+                    "    }",
+                    "",
+                    "    static void check(String name, boolean passed) {",
+                    "        System.out.println((passed ? \"PASS \" : \"FAIL \") + name);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    ">= 1 includes 1 itself, so both tests now print PASS. The "
+                    + "second test matters as much as the first: a careless "
+                    + "fix like port >= 0 would pass '1 is valid' but fail "
+                    + "'0 is invalid'.\n"
+                    + "\n"
+                    + "Keep tests after the fix. The next time anyone touches "
+                    + "isValidPort, running them shows at once whether "
+                    + "anything broke.")
+                .explain(
+                    "port >= 1 includes the lower boundary.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Only testing values that should pass",
+                    "A method that accepts everything passes those too."},
+                new String[]{"Skipping the boundaries",
+                    "That is where > and >= differ."},
+                new String[]{"Assuming the method is wrong",
+                    "Sometimes the expected value is."})
+            .cyber(
+                "Security testing is largely negative testing: proving that "
+                + "things which should be REFUSED are refused. Penetration "
+                + "testers spend their time on exactly the inputs developers "
+                + "forget - 0, -1, the empty string, one past the limit.\n"
+                + "\n"
+                + "Keeping tests also guards against REGRESSIONS: a later "
+                + "change that quietly reopens a fixed vulnerability. Many "
+                + "real vulnerabilities have been reintroduced this way, "
+                + "years after being fixed, because no test pinned the fix "
+                + "in place.")
+            .check(new Task(Task.CHOICE,
+                    "A test prints FAIL. What are the two possible causes?")
+                .choices("The computer, or the compiler",
+                         "The method is wrong, or the expected value is wrong",
+                         "The test ran too early, or too late",
+                         "There is only one: the method")
+                .accept("2", "b")
+                .hints("A test compares two things.",
+                       "Either side could be the mistake.")
+                .explain(
+                    "The method, or the expectation. Check which before "
+                    + "changing code.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why test values that should be REJECTED?")
+                .choices("They run faster",
+                         "A method that accepts everything passes every "
+                         + "'valid' test",
+                         "Java requires it",
+                         "They cannot fail")
+                .accept("2", "b")
+                .hints("What would a broken validator look like?",
+                       "return true; for everything.")
+                .explain(
+                    "return true; would pass every 'should be valid' test. "
+                    + "Only rejection tests catch a validator that lets "
+                    + "everything through.")
+                .xp(10))
+            .recap(
+                "A test: known input, expected result, compare, print PASS or "
+                + "FAIL. Test normal values, every boundary, and values that "
+                + "must be rejected.\n"
+                + "\n"
+                + "A FAIL means the method or the expectation is wrong. Keep "
+                + "tests to catch regressions.")
+            .next("Next: comments that document a method's contract."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "Documenting a Method", 4)
+            .brief(
+                "maskCard works on 16-digit card numbers. Give it a 15-digit "
+                + "one and it quietly shows too much. Nothing in its name or "
+                + "header says so. A method's assumptions belong where every "
+                + "caller will see them: in its documentation.")
+            .willLearn("Documentation comments")
+            .whyUseful(
+                "A documentation comment is a method's contract: what it "
+                + "needs, what it returns, and what it assumes. Tools turn "
+                + "them into reference pages, and editors show them the "
+                + "moment you type a method's name.")
+            .concept("Documentation comments",
+                "A comment that starts with /** (two stars) and sits directly "
+                + "above a method is a DOCUMENTATION COMMENT, often called "
+                + "Javadoc:\n"
+                + "\n"
+                + "    /**\n"
+                + "     * Hides all but the last four digits.\n"
+                + "     *\n"
+                + "     * @param card a 16-digit card number\n"
+                + "     * @return twelve * then the last four digits\n"
+                + "     */\n"
+                + "    static String maskCard(String card) {\n"
+                + "\n"
+                + "    first sentence   what the method does\n"
+                + "    @param name      what one parameter must be\n"
+                + "    @return          what comes back\n"
+                + "\n"
+                + "Java ignores it when running, like any comment. But the "
+                + "javadoc tool builds web pages from these comments, and "
+                + "editors pop them up when you use the method.\n"
+                + "\n"
+                + "Document the CONTRACT, not the code: what goes in, what "
+                + "comes out, and every ASSUMPTION the caller must meet - "
+                + "\"16 digits\", \"already trimmed\", \"never empty\". "
+                + "Explaining how each line works is what the code and "
+                + "ordinary // comments are for.\n"
+                + "\n"
+                + "Keep them true. Java does not check comments, so a "
+                + "comment that promises one thing while the code does "
+                + "another is worse than none.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(maskCard(\"4111111111111111\"));",
+                "    }",
+                "",
+                "    /**",
+                "     * Hides all but the last four digits of a card number.",
+                "     *",
+                "     * @param card a 16-digit card number, digits only",
+                "     * @return twelve * characters, then the last four digits",
+                "     */",
+                "    static String maskCard(String card) {",
+                "        String lastFour = card.substring(card.length() - 4);",
+                "        return \"************\" + lastFour;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "************1111")
+            .lineByLine(
+                new String[]{"/**",
+                    "Two stars: a documentation comment, not an ordinary "
+                    + "one."},
+                new String[]{"@param card a 16-digit card number",
+                    "The assumption, stated where callers look."},
+                new String[]{"@return ...",
+                    "Exactly what the caller will get back."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "/**",
+                    " * Gives the standard HTTPS port.",
+                    " * @return 443",
+                    " */",
+                    "static int httpsPort() {",
+                    "    return 8443;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(httpsPort());",
+                    "}")
+                .accept("8443")
+                .hints("Does Java read comments?",
+                       "Only the code runs.")
+                .explain(
+                    "8443. The comment promises 443, but Java only runs code. "
+                    + "A comment that lies is a trap for every caller who "
+                    + "trusts it.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "Which tag describes what a method hands back?")
+                .choices("@param", "@return", "@give", "@output")
+                .accept("2", "b")
+                .hints("It is named after the keyword.",
+                       "What does a method use to hand a value back?")
+                .explain(
+                    "@return. @param describes one parameter; @give and "
+                    + "@output are not Javadoc tags.")
+                .xp(10))
+            .objective(
+                "Finish the lockout method's documentation.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(shouldLock(6));",
+                "    }",
+                "",
+                "    /**",
+                "     * Decides whether an account must be locked.",
+                "     *",
+                "     * @param failures failed logins since the last success",
+                "     * (write the @return line here)",
+                "     */",
+                "    static boolean shouldLock(int failures) {",
+                "        return failures >= 5;",
+                "    }",
+                "}")
+            .yourTask(
+                "Replace the placeholder with the @return line, worded "
+                + "exactly: * @return true if the account should be locked")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the @return line.")
+                .accept("* @return true if the account should be locked",
+                        "@return true if the account should be locked")
+                .hints(
+                    "Every line inside the comment starts with a *.",
+                    "Then the tag, then the description.",
+                    "* @return true if the account should be locked")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(shouldLock(6));",
+                    "    }",
+                    "",
+                    "    /**",
+                    "     * Decides whether an account must be locked.",
+                    "     *",
+                    "     * @param failures failed logins since the last success",
+                    "     * @return true if the account should be locked",
+                    "     */",
+                    "    static boolean shouldLock(int failures) {",
+                    "        return failures >= 5;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The comment now states the whole contract: what the "
+                    + "method decides, what failures means, and what true "
+                    + "stands for. A caller never has to open the body to use "
+                    + "it correctly. The program still prints true - comments "
+                    + "change nothing at run time.\n"
+                    + "\n"
+                    + "Note the @param line says 'since the last success'. "
+                    + "That is an assumption a caller must meet; stating it "
+                    + "is the point of the comment.")
+                .explain(
+                    "* @return, then what true means.")
+                .xp(15))
+            .mistakes(
+                new String[]{"One star",
+                    "/* ... */ is an ordinary comment. Javadoc needs /**."},
+                new String[]{"Describing the code line by line",
+                    "Document the contract; the code shows the steps."},
+                new String[]{"Letting comments go stale",
+                    "Change the code, change the comment."})
+            .cyber(
+                "Unstated assumptions are where many vulnerabilities live. A "
+                + "method written for trusted input gets reused, years later, "
+                + "for input from the internet - and nothing warned the new "
+                + "caller. Security-relevant documentation says things like "
+                + "'the caller must validate this', 'never pass user input', "
+                + "or 'the result is safe to show in HTML'.\n"
+                + "\n"
+                + "Masking, as in maskCard, is itself a standard control: the "
+                + "card industry's rules allow at most the first six and last "
+                + "four digits of a card number to be displayed.")
+            .check(new Task(Task.CHOICE,
+                    "What does /** start?")
+                .choices("An ordinary comment", "A documentation comment",
+                         "A block of code that is skipped", "A string")
+                .accept("2", "b")
+                .hints("Count the stars.",
+                       "It goes above a method.")
+                .explain(
+                    "A documentation comment - Javadoc - describing the "
+                    + "method below it.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What belongs in a method's documentation comment?")
+                .choices("How each line works",
+                         "What it needs, returns and assumes",
+                         "Who wrote it and when",
+                         "The output of a test run")
+                .accept("2", "b")
+                .hints("It is a contract for callers.",
+                       "What must a caller know to use it correctly?")
+                .explain(
+                    "The contract: what the method does, what each "
+                    + "parameter must be, what it returns, and what it "
+                    + "assumes.")
+                .xp(10))
+            .recap(
+                "    /**\n"
+                + "     * What it does.\n"
+                + "     * @param x  what x must be\n"
+                + "     * @return  what comes back\n"
+                + "     */\n"
+                + "\n"
+                + "Document the contract and every assumption. Java ignores "
+                + "comments - keep them true.")
+            .next("Next: improving code without changing what it does."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "Refactoring", 5)
+            .brief(
+                "The status page works - but it has the same lock rule typed "
+                + "three times, and a 5 nobody can explain. The task is to "
+                + "clean it up without changing a single character of what "
+                + "it prints.")
+            .willLearn("Refactoring")
+            .whyUseful(
+                "Most programming is changing existing code. Refactoring "
+                + "safely - improving the structure while keeping the "
+                + "behaviour - is how code stays readable, and how security "
+                + "fixes get made in one place instead of three.")
+            .concept("Refactoring",
+                "REFACTORING means changing how code is ORGANISED without "
+                + "changing what it DOES. Same inputs, same outputs - just "
+                + "clearer code.\n"
+                + "\n"
+                + "The common moves are all from this campaign:\n"
+                + "\n"
+                + "    extract method    repeated code becomes one\n"
+                + "                      method, called from each place\n"
+                + "    rename            vague names become honest ones\n"
+                + "    add a constant    a magic number gets a name\n"
+                + "    add a guard       nested ifs become early returns\n"
+                + "\n"
+                + "Before:\n"
+                + "\n"
+                + "    System.out.println(\"jsmith: \"\n"
+                + "        + (7 >= 5 ? \"LOCKED\" : \"active\"));\n"
+                + "    ...the same line twice more...\n"
+                + "\n"
+                + "After:\n"
+                + "\n"
+                + "    static final int MAX_FAILURES = 5;\n"
+                + "    static String status(int failures) {\n"
+                + "        return failures >= MAX_FAILURES\n"
+                + "            ? \"LOCKED\" : \"active\";\n"
+                + "    }\n"
+                + "\n"
+                + "THE SAFETY RULE: know the output before you start, change "
+                + "one thing at a time, and check the output is IDENTICAL "
+                + "after each step. Tests from mission 23 are ideal for this. "
+                + "A 'refactoring' that changes behaviour is not a "
+                + "refactoring - it is a new bug.")
+            .example(
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"jsmith: \" + status(7));",
+                "        System.out.println(\"m.reyes: \" + status(2));",
+                "        System.out.println(\"svc-backup: \" + status(5));",
+                "    }",
+                "",
+                "    static String status(int failures) {",
+                "        return failures >= MAX_FAILURES ? \"LOCKED\" : \"active\";",
+                "    }",
+                "}")
+            .exampleOutput(
+                "jsmith: LOCKED",
+                "m.reyes: active",
+                "svc-backup: LOCKED")
+            .lineByLine(
+                new String[]{"static final int MAX_FAILURES = 5;",
+                    "The magic 5, named."},
+                new String[]{"status(7)",
+                    "Three copies of the rule became three calls."},
+                new String[]{"return failures >= MAX_FAILURES ...",
+                    "The rule, once. The output is identical to before."})
+            .predict(new Task(Task.PREDICT,
+                    "This is a 'refactored' version of a rule that locked at "
+                    + "5 or more. What does it print?")
+                .code(
+                    "static String status(int failures) {",
+                    "    return failures > 5 ? \"LOCKED\" : \"active\";",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(status(5));",
+                    "}")
+                .accept("active")
+                .hints("Is 5 > 5?",
+                       "The original used >=.")
+                .explain(
+                    "active. The refactoring changed >= to > and silently "
+                    + "changed behaviour: 5 failures no longer lock. Checking "
+                    + "the output before and after - at the boundary - would "
+                    + "catch it.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What must stay the same during a refactoring?")
+                .choices("The number of lines",
+                         "The method names",
+                         "What the program does",
+                         "Nothing - that is the point")
+                .accept("3", "c")
+                .hints("Structure changes; what stays?",
+                       "Same inputs, same...")
+                .explain(
+                    "What the program does. Names, lines and structure can "
+                    + "all change; behaviour must not.")
+                .xp(10))
+            .objective(
+                "Pull the repeated rule into one method.")
+            .starter(
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"jsmith: \" + status(7));",
+                "        System.out.println(\"m.reyes: \" + status(2));",
+                "        System.out.println(\"svc-backup: \" + status(5));",
+                "    }",
+                "",
+                "    static String status(int failures) {",
+                "        // one line: LOCKED at MAX_FAILURES or more, else active",
+                "    }",
+                "}")
+            .yourTask(
+                "The three copies of the rule are gone from main. Write "
+                + "status's return line so the output is exactly as before: "
+                + "LOCKED at MAX_FAILURES or more, otherwise active.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write status's return line.")
+                .accept("return failures >= MAX_FAILURES ? \"LOCKED\" : \"active\";",
+                        "return (failures >= MAX_FAILURES) ? \"LOCKED\" : \"active\";",
+                        "return failures < MAX_FAILURES ? \"active\" : \"LOCKED\";")
+                .hints(
+                    "The conditional operator picks one of two values.",
+                    "Use the constant, not 5, and >= for 'or more'.",
+                    "return failures >= MAX_FAILURES ? \"LOCKED\" : \"active\";")
+                .solution(
+                    "public class Main {",
+                    "    static final int MAX_FAILURES = 5;",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(\"jsmith: \" + status(7));",
+                    "        System.out.println(\"m.reyes: \" + status(2));",
+                    "        System.out.println(\"svc-backup: \" + status(5));",
+                    "    }",
+                    "",
+                    "    static String status(int failures) {",
+                    "        return failures >= MAX_FAILURES ? \"LOCKED\" : \"active\";",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The rule now exists once, uses the named constant, and "
+                    + "returns rather than prints. The output is exactly the "
+                    + "same as the original: LOCKED, active, LOCKED - "
+                    + "including svc-backup at exactly 5, the boundary where a "
+                    + "careless > would have changed behaviour.\n"
+                    + "\n"
+                    + "From now on, a change to the lockout rule is a change "
+                    + "to one line.")
+                .explain(
+                    "One rule, using the constant, with >= for 'or more'.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Changing behaviour while tidying",
+                    "Check the output is identical after every step."},
+                new String[]{"Refactoring everything at once",
+                    "One small change at a time, checked each time."},
+                new String[]{"Refactoring without tests",
+                    "Without them, you cannot tell whether behaviour "
+                    + "changed."})
+            .cyber(
+                "Refactoring is how security debt gets paid down. A security "
+                + "review finds the same check written in five places, three "
+                + "of them subtly wrong; the fix is to extract one correct "
+                + "method and call it everywhere.\n"
+                + "\n"
+                + "The safety rule matters twice over here. A refactoring that "
+                + "quietly changes a boundary - as in the prediction task - "
+                + "can open exactly the hole the review was meant to close. "
+                + "Security teams insist on tests for every refactored check "
+                + "for that reason.")
+            .check(new Task(Task.CHOICE,
+                    "What should you have before you start refactoring?")
+                .choices("A new feature to add",
+                         "A way to check the behaviour has not changed",
+                         "A second copy of Java",
+                         "Permission to change the output")
+                .accept("2", "b")
+                .hints("How will you know nothing broke?",
+                       "Mission 23.")
+                .explain(
+                    "A way to check behaviour - tests, or at least the "
+                    + "known output - so every step can be verified.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Three methods each contain the same four lines. Which "
+                    + "refactoring fits?")
+                .choices("Rename", "Extract method", "Add a constant",
+                         "Delete two of the methods")
+                .accept("2", "b")
+                .hints("Repeated code...",
+                       "...becomes one method, called three times.")
+                .explain(
+                    "Extract method: move the four lines into a new, well-"
+                    + "named method and call it from all three places.")
+                .xp(10))
+            .recap(
+                "Refactoring changes structure, never behaviour: extract "
+                + "methods, rename, name magic numbers, add guards.\n"
+                + "\n"
+                + "Know the output first, change one thing at a time, and "
+                + "check the output is identical after each step.")
+            .next("Next: a small library of validation methods."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "A Validation Library", 5)
+            .brief(
+                "Every NORTHSTAR tool asks the same questions about its "
+                + "input: is this a sensible user name, a real port, a "
+                + "plausible host name? Instead of each tool inventing its "
+                + "own answer, the team wants one set of checks everyone "
+                + "shares.")
+            .willLearn("Validation helpers")
+            .whyUseful(
+                "A shared set of small validators means every part of a "
+                + "system applies the same rules. Fix or tighten a rule once "
+                + "and every caller is protected.")
+            .concept("Validation helpers",
+                "A VALIDATION LIBRARY is a group of boolean methods, each "
+                + "answering one question about one kind of input:\n"
+                + "\n"
+                + "    isValidUsername(String name)\n"
+                + "    isValidPort(String text)\n"
+                + "    isValidHost(String host)\n"
+                + "\n"
+                + "Each one follows the pattern from mission 10: guards "
+                + "return false for anything that rules the value out, and "
+                + "the last line returns the final rule. Each one gets "
+                + "tests (mission 23) and a doc comment (mission 24).\n"
+                + "\n"
+                + "Small validators COMBINE into bigger ones:\n"
+                + "\n"
+                + "    static boolean isValidRequest(String user,\n"
+                + "                                  String port) {\n"
+                + "        return isValidUsername(user)\n"
+                + "            && isValidPort(port);\n"
+                + "    }\n"
+                + "\n"
+                + "&& short-circuits, so the second check only runs if the "
+                + "first passed - handy when a later check assumes an "
+                + "earlier one.\n"
+                + "\n"
+                + "WHERE TO VALIDATE: at the BOUNDARY - as soon as data comes "
+                + "into the program, before anything uses it. Code further in "
+                + "can then rely on its inputs being sensible.\n"
+                + "\n"
+                + "ALLOW-LISTS beat block-lists: describe what IS allowed "
+                + "(3-20 characters, no spaces) rather than trying to list "
+                + "every bad thing. Attackers are better at inventing bad "
+                + "input than defenders are at listing it.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(isValidUsername(\"jsmith\"));",
+                "        System.out.println(isValidUsername(\"js\"));",
+                "        System.out.println(isValidUsername(\"j smith\"));",
+                "        System.out.println(isValidPort(\"443\"));",
+                "        System.out.println(isValidHost(\"-web01\"));",
+                "    }",
+                "",
+                "    static boolean isValidUsername(String name) {",
+                "        return name.length() >= 3 && name.length() <= 20",
+                "                && !name.contains(\" \");",
+                "    }",
+                "",
+                "    static boolean isValidPort(String text) {",
+                "        if (text.length() > 5 || !text.matches(\"[0-9]+\")) {",
+                "            return false;",
+                "        }",
+                "        int port = Integer.parseInt(text);",
+                "        return port >= 1 && port <= 65535;",
+                "    }",
+                "",
+                "    static boolean isValidHost(String host) {",
+                "        return !host.isBlank() && host.length() <= 253",
+                "                && !host.startsWith(\"-\") && !host.contains(\" \");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "true",
+                "false",
+                "false",
+                "true",
+                "false")
+            .lineByLine(
+                new String[]{"isValidUsername(\"js\")",
+                    "Too short: false."},
+                new String[]{"isValidUsername(\"j smith\")",
+                    "Contains a space: false."},
+                new String[]{"isValidHost(\"-web01\")",
+                    "Host names may not start with a hyphen: false."},
+                new String[]{"each method",
+                    "One question, guards first, the rule last."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static boolean isShortEnough(String s) {",
+                    "    return s.length() <= 8;",
+                    "}",
+                    "",
+                    "static boolean hasNoSpaces(String s) {",
+                    "    return !s.contains(\" \");",
+                    "}",
+                    "",
+                    "static boolean isValidTag(String s) {",
+                    "    return !s.isEmpty() && isShortEnough(s) && hasNoSpaces(s);",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(isValidTag(\"prod\"));",
+                    "    System.out.println(isValidTag(\"prod env\"));",
+                    "}")
+                .accept("true false")
+                .hints("\"prod\" passes all three.",
+                       "\"prod env\" has a space.")
+                .explain(
+                    "true false. \"prod\" is not empty, short enough and has "
+                    + "no spaces. \"prod env\" is 8 characters - short enough "
+                    + "- but fails hasNoSpaces.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Where should input be validated?")
+                .choices("Just before it is printed",
+                         "As soon as it enters the program",
+                         "Only if it looks suspicious",
+                         "At the end of main")
+                .accept("2", "b")
+                .hints("Before anything uses it.",
+                       "At the boundary.")
+                .explain(
+                    "As soon as it enters the program - at the boundary - so "
+                    + "nothing further in ever handles an unchecked value.")
+                .xp(10))
+            .objective(
+                "Combine two validators into one request check.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(isValidRequest(\"jsmith\", \"443\"));",
+                "        System.out.println(isValidRequest(\"jsmith\", \"0\"));",
+                "        System.out.println(isValidRequest(\"j\", \"443\"));",
+                "    }",
+                "",
+                "    static boolean isValidRequest(String user, String port) {",
+                "        // one line: both the user name and the port are valid",
+                "    }",
+                "",
+                "    static boolean isValidUsername(String name) {",
+                "        return name.length() >= 3 && name.length() <= 20",
+                "                && !name.contains(\" \");",
+                "    }",
+                "",
+                "    static boolean isValidPort(String text) {",
+                "        if (text.length() > 5 || !text.matches(\"[0-9]+\")) {",
+                "            return false;",
+                "        }",
+                "        int port = Integer.parseInt(text);",
+                "        return port >= 1 && port <= 65535;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write isValidRequest's return line: true only when "
+                + "isValidUsername says yes for user AND isValidPort says yes "
+                + "for port.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return isValidUsername(user) && isValidPort(port);",
+                        "return isValidPort(port) && isValidUsername(user);")
+                .hints(
+                    "Both must be true: &&.",
+                    "Each side is a call to one of the validators.",
+                    "return isValidUsername(user) && isValidPort(port);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(isValidRequest(\"jsmith\", \"443\"));",
+                    "        System.out.println(isValidRequest(\"jsmith\", \"0\"));",
+                    "        System.out.println(isValidRequest(\"j\", \"443\"));",
+                    "    }",
+                    "",
+                    "    static boolean isValidRequest(String user, String port) {",
+                    "        return isValidUsername(user) && isValidPort(port);",
+                    "    }",
+                    "",
+                    "    static boolean isValidUsername(String name) {",
+                    "        return name.length() >= 3 && name.length() <= 20",
+                    "                && !name.contains(\" \");",
+                    "    }",
+                    "",
+                    "    static boolean isValidPort(String text) {",
+                    "        if (text.length() > 5 || !text.matches(\"[0-9]+\")) {",
+                    "            return false;",
+                    "        }",
+                    "        int port = Integer.parseInt(text);",
+                    "        return port >= 1 && port <= 65535;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The request is valid only when both parts are, so the "
+                    + "two calls are joined with &&. The program prints true "
+                    + "(both valid), false (port 0), false (a one-letter "
+                    + "user).\n"
+                    + "\n"
+                    + "isValidRequest contains no rules of its own - it only "
+                    + "combines existing validators. Tighten the user name "
+                    + "rule once, and this check tightens with it.")
+                .explain(
+                    "Combine the two validators with &&.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Re-writing a rule inside a new method",
+                    "Call the existing validator instead."},
+                new String[]{"Block-lists",
+                    "Describe what is allowed, not every bad thing."},
+                new String[]{"Validating late",
+                    "Check at the boundary, before anything uses the value."})
+            .cyber(
+                "Input validation is the first line of defence against "
+                + "injection attacks, and the rules from this mission are the "
+                + "ones security standards teach: validate at the boundary, "
+                + "prefer allow-lists, and use one shared, tested "
+                + "implementation.\n"
+                + "\n"
+                + "Validation is not the whole defence - a valid user name "
+                + "can still be used in an attack if later code builds "
+                + "commands or queries from it carelessly. But it shrinks "
+                + "what an attacker can send down to what the program "
+                + "actually expects.")
+            .check(new Task(Task.CHOICE,
+                    "Why do all the tools share one set of validators?")
+                .choices("It uses less memory",
+                         "Every part of the system applies the same rules",
+                         "Java needs validators in one place",
+                         "Each tool runs faster")
+                .accept("2", "b")
+                .hints("Remember the three port checks, one of them wrong.",
+                       "One rule, many callers.")
+                .explain(
+                    "Every caller gets the same, tested rule - and a fix in "
+                    + "one place protects all of them.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What is an allow-list?")
+                .choices("A list of known attacks to refuse",
+                         "A description of what valid input looks like",
+                         "A list of users who may skip validation",
+                         "A list of allowed error messages")
+                .accept("2", "b")
+                .hints("Allowed, rather than blocked.",
+                       "3 to 20 characters, no spaces...")
+                .explain(
+                    "A description of what IS allowed. Anything outside it is "
+                    + "refused - including attacks nobody has thought of "
+                    + "yet.")
+                .xp(10))
+            .recap(
+                "A validation library: small boolean methods, one question "
+                + "each, guards then rule, tested and documented. Combine "
+                + "them with &&.\n"
+                + "\n"
+                + "Validate at the boundary. Describe what is allowed.")
+            .next("Next: a method that refuses bad requests in the right "
+                + "order."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "Failing Fast, Failing Closed", 5)
+            .brief(
+                "The login method checks the password, then checks whether "
+                + "the account is locked. That order has a flaw: a locked "
+                + "account still answers 'wrong password' or 'right "
+                + "password' - so an attacker can keep guessing forever. The "
+                + "checks are right. Their order is not.")
+            .willLearn("Fail fast", "Fail closed")
+            .whyUseful(
+                "Deciding the ORDER of guards, and what happens when nothing "
+                + "matches, is how a method turns a list of rules into a "
+                + "security control that cannot be walked around.")
+            .concept("Fail fast",
+                "A method that handles a request should FAIL FAST: check "
+                + "everything that could make the request invalid at the top, "
+                + "and return as soon as one fails.\n"
+                + "\n"
+                + "    static String login(String user, String password,\n"
+                + "                        int failures) {\n"
+                + "        if (user.isBlank()) {\n"
+                + "            return \"REFUSED: no user name\";\n"
+                + "        }\n"
+                + "        if (failures >= MAX_FAILURES) {\n"
+                + "            return \"REFUSED: account locked\";\n"
+                + "        }\n"
+                + "        if (!password.equals(SECRET)) {\n"
+                + "            return \"REFUSED: wrong password\";\n"
+                + "        }\n"
+                + "        return \"WELCOME \" + user;\n"
+                + "    }\n"
+                + "\n"
+                + "ORDER THE GUARDS ON PURPOSE:\n"
+                + "\n"
+                + "    shape first    is there anything to check at all?\n"
+                + "    state next     is this account allowed to try?\n"
+                + "    secrets last   only then compare the password\n"
+                + "\n"
+                + "A locked account must be refused BEFORE the password is "
+                + "looked at, or every guess still gets an answer.\n"
+                + "\n"
+                + "FAIL CLOSED. The only way to reach the success line is to "
+                + "pass every guard. If a new rule is added and forgotten, "
+                + "or a value is strange in a way nobody predicted, the "
+                + "method's default is to refuse. The opposite - allowing "
+                + "unless a rule says no - is FAIL OPEN, and it is how "
+                + "access controls get bypassed.")
+            .example(
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "    static final String SECRET = \"Northstar#2026\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(login(\"\", \"x\", 0));",
+                "        System.out.println(login(\"jsmith\", SECRET, 6));",
+                "        System.out.println(login(\"jsmith\", \"guess\", 1));",
+                "        System.out.println(login(\"jsmith\", SECRET, 1));",
+                "    }",
+                "",
+                "    static String login(String user, String password, int failures) {",
+                "        if (user.isBlank()) {",
+                "            return \"REFUSED: no user name\";",
+                "        }",
+                "        if (failures >= MAX_FAILURES) {",
+                "            return \"REFUSED: account locked\";",
+                "        }",
+                "        if (!password.equals(SECRET)) {",
+                "            return \"REFUSED: wrong password\";",
+                "        }",
+                "        return \"WELCOME \" + user;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "REFUSED: no user name",
+                "REFUSED: account locked",
+                "REFUSED: wrong password",
+                "WELCOME jsmith")
+            .lineByLine(
+                new String[]{"login(\"jsmith\", SECRET, 6)",
+                    "The RIGHT password - and still refused, because the lock "
+                    + "is checked first."},
+                new String[]{"return \"WELCOME \" + user;",
+                    "The only success, reachable only past every guard."},
+                new String[]{"three guards, in order",
+                    "Shape, then state, then the secret."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static String access(boolean locked, boolean passwordOk) {",
+                    "    if (!passwordOk) {",
+                    "        return \"wrong password\";",
+                    "    }",
+                    "    if (locked) {",
+                    "        return \"locked\";",
+                    "    }",
+                    "    return \"granted\";",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(access(true, false));",
+                    "    System.out.println(access(true, true));",
+                    "}")
+                .accept("wrong password locked")
+                .hints("The password is checked first here.",
+                       "What does a locked account reveal about each guess?")
+                .explain(
+                    "    wrong password\n"
+                    + "    locked\n"
+                    + "\n"
+                    + "The account is locked both times, but the answers "
+                    + "differ - so an attacker learns which guess was right. "
+                    + "Checking locked first would print locked twice.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What does 'fail closed' mean?")
+                .choices("Close the program when an error happens",
+                         "When in doubt, refuse",
+                         "Check the password last",
+                         "Lock every account after one failure")
+                .accept("2", "b")
+                .hints("What is the default outcome?",
+                       "Success must be earned by passing every check.")
+                .explain(
+                    "When in doubt, refuse. Access is only granted by "
+                    + "passing every check; anything unexpected ends in a "
+                    + "refusal.")
+                .xp(10))
+            .objective(
+                "Put the lock check where it belongs.")
+            .starter(
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "    static final String SECRET = \"Northstar#2026\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(login(\"jsmith\", SECRET, 6));",
+                "        System.out.println(login(\"jsmith\", SECRET, 0));",
+                "    }",
+                "",
+                "    static String login(String user, String password, int failures) {",
+                "        if (user.isBlank()) {",
+                "            return \"REFUSED: no user name\";",
+                "        }",
+                "        // the lock guard's if line goes here",
+                "            return \"REFUSED: account locked\";",
+                "        }",
+                "        if (!password.equals(SECRET)) {",
+                "            return \"REFUSED: wrong password\";",
+                "        }",
+                "        return \"WELCOME \" + user;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line for the lock guard: it refuses when "
+                + "failures has reached MAX_FAILURES. It sits before the "
+                + "password check.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the lock guard's if line.")
+                .accept("if (failures >= MAX_FAILURES) {",
+                        "if(failures >= MAX_FAILURES) {",
+                        "if (failures >= MAX_FAILURES){")
+                .hints(
+                    "Reaching the limit counts: >=.",
+                    "Use the constant, not 5.",
+                    "if (failures >= MAX_FAILURES) {")
+                .solution(
+                    "public class Main {",
+                    "    static final int MAX_FAILURES = 5;",
+                    "    static final String SECRET = \"Northstar#2026\";",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(login(\"jsmith\", SECRET, 6));",
+                    "        System.out.println(login(\"jsmith\", SECRET, 0));",
+                    "    }",
+                    "",
+                    "    static String login(String user, String password, int failures) {",
+                    "        if (user.isBlank()) {",
+                    "            return \"REFUSED: no user name\";",
+                    "        }",
+                    "        if (failures >= MAX_FAILURES) {",
+                    "            return \"REFUSED: account locked\";",
+                    "        }",
+                    "        if (!password.equals(SECRET)) {",
+                    "            return \"REFUSED: wrong password\";",
+                    "        }",
+                    "        return \"WELCOME \" + user;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "With 6 failures, the guard returns before the password "
+                    + "is ever compared - so even the right password gets "
+                    + "REFUSED: account locked, and an attacker learns "
+                    + "nothing. With 0 failures, every guard passes and the "
+                    + "program prints WELCOME jsmith.\n"
+                    + "\n"
+                    + "Using the constant keeps this guard in step with every "
+                    + "other place that talks about the lockout limit.")
+                .explain(
+                    "if (failures >= MAX_FAILURES) { before the password "
+                    + "check.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Checking secrets before state",
+                    "A locked account must not answer password guesses."},
+                new String[]{"Failing open",
+                    "Success should be the last line, reached only past every "
+                    + "guard."},
+                new String[]{"Messages that leak",
+                    "Real systems often say 'login failed' for every case, "
+                    + "and keep the detail in the audit log."})
+            .cyber(
+                "Guard order and fail-closed design are core ideas in "
+                + "authentication. Real attacks have used the flaw from the "
+                + "brief: a lockout that still reports whether a password was "
+                + "right lets attackers keep guessing, and only stops them "
+                + "logging in once they have the answer.\n"
+                + "\n"
+                + "Messages are part of it too. REFUSED: wrong password tells "
+                + "an attacker the user name exists. Production systems "
+                + "usually show one message for every failure - and keep the "
+                + "real reason in the audit log, as Campaign 02's login lab "
+                + "did.")
+            .check(new Task(Task.CHOICE,
+                    "Why must the lock be checked before the password?")
+                .choices("It is faster",
+                         "Otherwise a locked account still reveals whether "
+                         + "guesses are right",
+                         "Passwords cannot be checked first in Java",
+                         "It makes the method shorter")
+                .accept("2", "b")
+                .hints("What does each guess teach an attacker?",
+                       "Look at the prediction task.")
+                .explain(
+                    "If the password is checked first, a locked account still "
+                    + "answers every guess - and the lockout protects "
+                    + "nothing.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static String route(String role) {",
+                    "    if (role.equals(\"admin\")) {",
+                    "        return \"console\";",
+                    "    }",
+                    "    if (role.equals(\"analyst\")) {",
+                    "        return \"dashboard\";",
+                    "    }",
+                    "    return \"denied\";",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(route(\"Admin\") + \" \" + route(\"analyst\"));",
+                    "}")
+                .accept("denied dashboard")
+                .hints("equals cares about capitals.",
+                       "Which line do unknown roles reach?")
+                .explain(
+                    "denied dashboard. \"Admin\" matches no rule and falls to "
+                    + "the default: denied. That is failing closed - an "
+                    + "unrecognised role gets nothing.")
+                .xp(15))
+            .recap(
+                "Fail fast: every guard at the top, return on the first "
+                + "failure. Order them: shape, then state, then secrets.\n"
+                + "\n"
+                + "Fail closed: success is the last line, reached only past "
+                + "every check. Anything unexpected is refused.")
+            .next("Next: making text safe to write into a log."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "Cleaning Text for the Log", 5)
+            .brief(
+                "An attacker signs up with a user name containing a line "
+                + "break. When the failed login is logged, the audit file "
+                + "shows TWO lines - and the second one reads LOGIN OK "
+                + "admin. The log has been forged. One small method stops "
+                + "it.")
+            .willLearn("Output sanitising")
+            .whyUseful(
+                "Logs are evidence. If attackers can shape what they say, "
+                + "investigations are misled and alerts can be hidden. A "
+                + "sanitiser that every log line passes through keeps the "
+                + "evidence honest.")
+            .concept("Output sanitising",
+                "SANITISING means making a value safe for the place it is "
+                + "going. For a log line, three things matter:\n"
+                + "\n"
+                + "    line breaks   \\n and \\r start a new line, so an\n"
+                + "                  attacker can forge a whole entry\n"
+                + "    length        a 10 MB user name fills disks and\n"
+                + "                  pushes real entries out of view\n"
+                + "    emptiness     a blank value looks like a missing\n"
+                + "                  field, and hides what happened\n"
+                + "\n"
+                + "One method handles all three, and every log line goes "
+                + "through it:\n"
+                + "\n"
+                + "    static String forLog(String text) {\n"
+                + "        if (text.isBlank()) {\n"
+                + "            return \"(empty)\";\n"
+                + "        }\n"
+                + "        String clean = text.replace(\"\\r\", \" \")\n"
+                + "                           .replace(\"\\n\", \" \");\n"
+                + "        if (clean.length() > MAX_LENGTH) {\n"
+                + "            clean = clean.substring(0, MAX_LENGTH)\n"
+                + "                    + \"...\";\n"
+                + "        }\n"
+                + "        return clean;\n"
+                + "    }\n"
+                + "\n"
+                + "Mission 14's rule applies: it RETURNS the cleaned text, and "
+                + "callers use what comes back.\n"
+                + "\n"
+                + "Sanitising depends on the DESTINATION. Text safe for a log "
+                + "may still be dangerous in a web page, a database query or "
+                + "a shell command - each has its own special characters, "
+                + "and its own sanitiser.")
+            .example(
+                "public class Main {",
+                "    static final int MAX_LENGTH = 20;",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"user=\" + forLog(\"jsmith\"));",
+                "        System.out.println(\"user=\" + forLog(\"bob\\nLOGIN OK admin\"));",
+                "        System.out.println(\"user=\" + forLog(\"   \"));",
+                "        String huge = \"aaaaaaaaaaaaaaaaaaaaaaaaa\";",
+                "        System.out.println(\"user=\" + forLog(huge));",
+                "    }",
+                "",
+                "    static String forLog(String text) {",
+                "        if (text.isBlank()) {",
+                "            return \"(empty)\";",
+                "        }",
+                "        String clean = text.replace(\"\\r\", \" \").replace(\"\\n\", \" \");",
+                "        if (clean.length() > MAX_LENGTH) {",
+                "            clean = clean.substring(0, MAX_LENGTH) + \"...\";",
+                "        }",
+                "        return clean;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "user=jsmith",
+                "user=bob LOGIN OK admin",
+                "user=(empty)",
+                "user=aaaaaaaaaaaaaaaaaaaa...")
+            .lineByLine(
+                new String[]{"forLog(\"bob\\nLOGIN OK admin\")",
+                    "The forged line becomes part of one harmless line."},
+                new String[]{"return \"(empty)\";",
+                    "A blank value is made visible instead of silent."},
+                new String[]{"clean.substring(0, MAX_LENGTH) + \"...\"",
+                    "Over-long input is cut, and the cut is marked."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static String forLog(String text) {",
+                    "    return text.replace(\"\\n\", \" | \");",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(forLog(\"a\\nb\"));",
+                    "}")
+                .accept("a | b")
+                .hints("\\n is one character: a line break.",
+                       "replace swaps it for \" | \".")
+                .explain(
+                    "a | b. The line break is replaced, so the output is one "
+                    + "line.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "How many lines does this print?")
+                .code(
+                    "String user = \"bob\\nLOGIN OK admin\";",
+                    "System.out.println(\"FAILED login: \" + user);")
+                .accept("2", "two")
+                .hints("What does \\n do inside a String?",
+                       "Nothing sanitises it.")
+                .explain(
+                    "2. The \\n in the user name starts a new line, so the log "
+                    + "shows 'FAILED login: bob' and then a forged 'LOGIN OK "
+                    + "admin'.")
+                .xp(15))
+            .objective(
+                "Write the core of a log sanitiser.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String user = \"bob\\nLOGIN OK admin\";",
+                "        System.out.println(\"FAILED login: \" + forLog(user));",
+                "    }",
+                "",
+                "    static String forLog(String text) {",
+                "        // return text with every \\n replaced by a space",
+                "    }",
+                "}")
+            .yourTask(
+                "Write forLog's return line: the text with every line break "
+                + "(\\n) replaced by a single space.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return text.replace(\"\\n\", \" \");")
+                .hints(
+                    "replace takes what to find, then what to put instead.",
+                    "A line break is written \"\\n\" in Java.",
+                    "return text.replace(\"\\n\", \" \");")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String user = \"bob\\nLOGIN OK admin\";",
+                    "        System.out.println(\"FAILED login: \" + forLog(user));",
+                    "    }",
+                    "",
+                    "    static String forLog(String text) {",
+                    "        return text.replace(\"\\n\", \" \");",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "replace builds a new String with every line break turned "
+                    + "into a space, and forLog returns it. The log now shows "
+                    + "one line: FAILED login: bob LOGIN OK admin - obviously "
+                    + "one strange user name, not a successful admin login.\n"
+                    + "\n"
+                    + "A full sanitiser also handles \\r, over-long text and "
+                    + "blank values, as in the example. Because it is one "
+                    + "method, every addition protects every log line.")
+                .explain(
+                    "text.replace(\"\\n\", \" \"), returned.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Only replacing \\n",
+                    "\\r can break lines too. Handle both."},
+                new String[]{"Sanitising in some places",
+                    "Every log line must go through the same method."},
+                new String[]{"One sanitiser for every destination",
+                    "Logs, web pages and databases each need their own."})
+            .cyber(
+                "Log injection - also called log forging - is a recognised "
+                + "weakness in secure-coding standards. Besides fake entries, "
+                + "attackers have used it to hide their own activity among "
+                + "junk lines and to attack the tools that later display the "
+                + "logs.\n"
+                + "\n"
+                + "The same idea, applied to other destinations, gives you "
+                + "defences against much bigger attacks: escaping for HTML "
+                + "stops cross-site scripting, and keeping data out of SQL "
+                + "text stops SQL injection. Different characters, same "
+                + "principle: make data safe for where it is going.")
+            .check(new Task(Task.CHOICE,
+                    "What is log injection?")
+                .choices("Adding too many log lines",
+                         "Input that creates fake or misleading log entries",
+                         "Deleting the log file",
+                         "Logging in with a stolen password")
+                .accept("2", "b")
+                .hints("What did the line break do?",
+                       "The log said something that never happened.")
+                .explain(
+                    "Input crafted so the log shows entries that never "
+                    + "happened - usually by smuggling in line breaks.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why cap the length of text written to a log?")
+                .choices("Long text cannot be logged",
+                         "Huge input can fill disks and push real entries out "
+                         + "of view",
+                         "Java strings have a maximum of 20 characters",
+                         "To save typing")
+                .accept("2", "b")
+                .hints("What if a user name is 10 MB?",
+                       "Think of the disk, and the analyst reading it.")
+                .explain(
+                    "Enormous values can exhaust storage and bury the entries "
+                    + "that matter. Cutting them - and marking the cut - keeps "
+                    + "the log usable.")
+                .xp(10))
+            .recap(
+                "A log sanitiser: blank becomes (empty), line breaks become "
+                + "spaces, long text is cut and marked. It returns the clean "
+                + "text, and every log line uses it.\n"
+                + "\n"
+                + "Sanitise for the destination: logs, HTML and queries each "
+                + "have their own dangers.")
+            .next("Next: putting the whole toolkit together."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "A Small Security Toolkit", 6)
+            .brief(
+                "Validators, guards, a sanitiser, constants - each has been "
+                + "built on its own. Now they work together: one method "
+                + "handles a login request from start to finish by calling "
+                + "the right helper at each step. This is what a real piece "
+                + "of security code looks like.")
+            .willLearn("Designing a toolkit")
+            .whyUseful(
+                "Real security code is rarely one clever method. It is a set "
+                + "of small, trustworthy pieces - each tested and documented "
+                + "- combined by a short method that reads like the policy.")
+            .concept("Designing a toolkit",
+                "A TOOLKIT is a set of methods designed to work together. "
+                + "Each one does one job:\n"
+                + "\n"
+                + "    constants     MAX_FAILURES, BLOCKED_RANGE\n"
+                + "    validators    isValidUsername\n"
+                + "    rules         isBlocked, shouldLock\n"
+                + "    sanitiser     forLog\n"
+                + "    decision      handle - calls the others\n"
+                + "\n"
+                + "The decision method is short, and reads as the POLICY:\n"
+                + "\n"
+                + "    if (!isValidUsername(user))  refuse\n"
+                + "    if (isBlocked(ip))            refuse\n"
+                + "    if (shouldLock(failures))     refuse\n"
+                + "    otherwise                     allow\n"
+                + "\n"
+                + "Every refusal and every success is logged through forLog, "
+                + "so nothing an attacker types can forge the audit trail.\n"
+                + "\n"
+                + "The design rules from the whole campaign, in one list:\n"
+                + "\n"
+                + "    one job per method, named honestly\n"
+                + "    inputs as parameters, answers as returns\n"
+                + "    shared rules as constants\n"
+                + "    guards first, fail closed\n"
+                + "    validate at the boundary, sanitise at output\n"
+                + "    test the boundaries; document the contract\n"
+                + "\n"
+                + "None of the helpers knows about the others. That is the "
+                + "point: each can be tested, fixed and trusted alone.")
+            .example(
+                "public class Main {",
+                "    static final int MAX_FAILURES = 5;",
+                "    static final String BLOCKED_RANGE = \"203.0.113.\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        handle(\"jsmith\", \"10.0.0.7\", 0);",
+                "        handle(\"eve\\nOK\", \"10.0.0.8\", 0);",
+                "        handle(\"m.reyes\", \"203.0.113.5\", 0);",
+                "        handle(\"svc-backup\", \"10.0.0.9\", 5);",
+                "    }",
+                "",
+                "    static void handle(String user, String ip, int failures) {",
+                "        String who = forLog(user) + \"@\" + ip;",
+                "        if (!isValidUsername(user)) {",
+                "            System.out.println(\"DENY bad name: \" + who);",
+                "        } else if (isBlocked(ip)) {",
+                "            System.out.println(\"DENY blocked range: \" + who);",
+                "        } else if (shouldLock(failures)) {",
+                "            System.out.println(\"DENY locked: \" + who);",
+                "        } else {",
+                "            System.out.println(\"ALLOW \" + who);",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isValidUsername(String name) {",
+                "        return name.length() >= 3 && name.length() <= 20",
+                "                && !name.contains(\" \") && !name.contains(\"\\n\");",
+                "    }",
+                "",
+                "    static boolean isBlocked(String ip) {",
+                "        return ip.startsWith(BLOCKED_RANGE);",
+                "    }",
+                "",
+                "    static boolean shouldLock(int failures) {",
+                "        return failures >= MAX_FAILURES;",
+                "    }",
+                "",
+                "    static String forLog(String text) {",
+                "        return text.replace(\"\\r\", \" \").replace(\"\\n\", \" \");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "ALLOW jsmith@10.0.0.7",
+                "DENY bad name: eve OK@10.0.0.8",
+                "DENY blocked range: m.reyes@203.0.113.5",
+                "DENY locked: svc-backup@10.0.0.9")
+            .lineByLine(
+                new String[]{"String who = forLog(user) + \"@\" + ip;",
+                    "Sanitised once, before any line is printed."},
+                new String[]{"the else-if chain",
+                    "The policy in four lines: name, range, lock, allow."},
+                new String[]{"DENY bad name: eve OK@10.0.0.8",
+                    "The forged line break was refused AND neutralised in the "
+                    + "log."})
+            .predict(new Task(Task.PREDICT,
+                    "Using the example's methods, what does this print?")
+                .code(
+                    "static final int MAX_FAILURES = 5;",
+                    "",
+                    "static boolean shouldLock(int failures) {",
+                    "    return failures >= MAX_FAILURES;",
+                    "}",
+                    "",
+                    "static String verdict(int failures) {",
+                    "    return shouldLock(failures) ? \"DENY\" : \"ALLOW\";",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(verdict(4) + \" \" + verdict(5));",
+                    "}")
+                .accept("ALLOW DENY")
+                .hints("4 is below the limit.",
+                       "5 reaches it.")
+                .explain(
+                    "ALLOW DENY. shouldLock(4) is false and shouldLock(5) is "
+                    + "true - the boundary, handled by one rule.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "In the example, why is forLog called before the "
+                    + "if-chain rather than inside each branch?")
+                .choices("It is faster to call it early",
+                         "Every branch prints, so every line is protected at "
+                         + "once",
+                         "forLog changes user",
+                         "Java requires it")
+                .accept("2", "b")
+                .hints("How many branches print the user?",
+                       "Could a new branch forget to sanitise?")
+                .explain(
+                    "Every branch prints who, so cleaning it once protects "
+                    + "all four lines - and any branch added later.")
+                .xp(15))
+            .objective(
+                "Add the blocklist step to the request handler.")
+            .starter(
+                "public class Main {",
+                "    static final String BLOCKED_RANGE = \"203.0.113.\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        System.out.println(decide(\"jsmith\", \"203.0.113.5\"));",
+                "        System.out.println(decide(\"jsmith\", \"10.0.0.7\"));",
+                "    }",
+                "",
+                "    static String decide(String user, String ip) {",
+                "        if (user.isBlank()) {",
+                "            return \"DENY\";",
+                "        }",
+                "        // the blocklist guard's if line goes here",
+                "            return \"DENY\";",
+                "        }",
+                "        return \"ALLOW\";",
+                "    }",
+                "",
+                "    static boolean isBlocked(String ip) {",
+                "        return ip.startsWith(BLOCKED_RANGE);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line of the blocklist guard, using the "
+                + "isBlocked helper rather than repeating its rule.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the blocklist guard's if line.")
+                .accept("if (isBlocked(ip)) {", "if(isBlocked(ip)) {",
+                        "if (isBlocked(ip)){")
+                .hints(
+                    "The rule already exists as a method.",
+                    "Call it inside the if.",
+                    "if (isBlocked(ip)) {")
+                .solution(
+                    "public class Main {",
+                    "    static final String BLOCKED_RANGE = \"203.0.113.\";",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(decide(\"jsmith\", \"203.0.113.5\"));",
+                    "        System.out.println(decide(\"jsmith\", \"10.0.0.7\"));",
+                    "    }",
+                    "",
+                    "    static String decide(String user, String ip) {",
+                    "        if (user.isBlank()) {",
+                    "            return \"DENY\";",
+                    "        }",
+                    "        if (isBlocked(ip)) {",
+                    "            return \"DENY\";",
+                    "        }",
+                    "        return \"ALLOW\";",
+                    "    }",
+                    "",
+                    "    static boolean isBlocked(String ip) {",
+                    "        return ip.startsWith(BLOCKED_RANGE);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The guard asks the existing helper, so the blocklist rule "
+                    + "is still written in exactly one place. The program "
+                    + "prints DENY for the blocked address and ALLOW for the "
+                    + "internal one.\n"
+                    + "\n"
+                    + "Writing ip.startsWith(\"203.0.113.\") here instead would "
+                    + "work today - and drift the day someone updates "
+                    + "BLOCKED_RANGE.")
+                .explain(
+                    "Reuse the helper: if (isBlocked(ip)) {")
+                .xp(20))
+            .mistakes(
+                new String[]{"Repeating a helper's rule inline",
+                    "Call the helper. One rule, one place."},
+                new String[]{"Sanitising in some branches only",
+                    "Clean once, before the branches."},
+                new String[]{"A decision method full of details",
+                    "Keep it reading like the policy; push details into "
+                    + "helpers."})
+            .cyber(
+                "This is the shape of real authentication and access-control "
+                + "code: a short decision method that reads like the policy, "
+                + "backed by helpers that each do one job well. Security "
+                + "reviews and audits are far easier on code like this - "
+                + "each helper is checked once, and the policy is checked by "
+                + "reading a handful of lines.\n"
+                + "\n"
+                + "It is also DEFENCE IN DEPTH in miniature: the bad user name "
+                + "is refused by the validator AND neutralised by the "
+                + "sanitiser. If one layer is ever wrong, the other still "
+                + "helps.")
+            .check(new Task(Task.CHOICE,
+                    "What should the decision method in a toolkit mostly "
+                    + "contain?")
+                .choices("All the detailed rules, written out",
+                         "Calls to helpers, in the order the policy states",
+                         "Only print statements",
+                         "Nothing - main should decide")
+                .accept("2", "b")
+                .hints("It should read like the policy.",
+                       "Details live in helpers.")
+                .explain(
+                    "Calls to helpers, in policy order. The details live in "
+                    + "the helpers, where they are tested once.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "The bad name is refused by the validator AND cleaned by "
+                    + "the sanitiser. What is this called?")
+                .choices("Duplication", "Defence in depth", "Overloading",
+                         "Recursion")
+                .accept("2", "b")
+                .hints("Layers of protection.",
+                       "If one fails, another still helps.")
+                .explain(
+                    "Defence in depth - several independent layers, so one "
+                    + "mistake does not open the door.")
+                .xp(10))
+            .recap(
+                "A toolkit: constants, validators, rules and a sanitiser, "
+                + "each doing one job - and a short decision method that "
+                + "calls them in the order the policy states.\n"
+                + "\n"
+                + "One rule, one place. Clean once. Fail closed. Layers.")
+            .next("Next: the campaign checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "METHODS COMPLETE", 6)
+            .brief(
+                "Thirty missions ago, every program was one long main. Now "
+                + "they are built from named, tested, documented pieces - and "
+                + "you know what Java does underneath every call.\n\n"
+                + "This checkpoint mixes the whole campaign. No new Java.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Methods go wrong where ideas meet: a copy changed instead of "
+                + "the original, a result nobody stored, a guard in the wrong "
+                + "order. This is practice for exactly those.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "WRITING\n"
+                + "    static type name(Type param, ...) { ... }\n"
+                + "    void - nothing back;  return - a value back\n"
+                + "    methods sit side by side, never nested\n"
+                + "\n"
+                + "CALLING\n"
+                + "    round trip: pause, run, come back after\n"
+                + "    arguments match parameters BY POSITION\n"
+                + "    nested calls run inside out\n"
+                + "    overloads: same name, different parameters\n"
+                + "\n"
+                + "VALUES\n"
+                + "    locals live in their frame only\n"
+                + "    pass by value: the method gets a copy\n"
+                + "    Strings: return the new text, store it\n"
+                + "    static final - constants;  static - shared\n"
+                + "\n"
+                + "THE STACK\n"
+                + "    call pushes a frame, return pops it\n"
+                + "    stack trace: top = where, below = how\n"
+                + "    recursion needs a base case\n"
+                + "\n"
+                + "DESIGN\n"
+                + "    one job, honest name, documented contract\n"
+                + "    guards first, fail closed\n"
+                + "    validate at the boundary, sanitise output\n"
+                + "    test boundaries; refactor with tests")
+            .example(
+                "public class Main {",
+                "    static final int LIMIT = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        int tries = 0;",
+                "        tries = attempt(tries, \"guess1\");",
+                "        tries = attempt(tries, \"guess2\");",
+                "        System.out.println(\"Tries: \" + tries);",
+                "    }",
+                "",
+                "    static int attempt(int tries, String guess) {",
+                "        if (tries >= LIMIT) {",
+                "            return tries;",
+                "        }",
+                "        System.out.println(\"checking \" + guess);",
+                "        return tries + 1;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "checking guess1",
+                "checking guess2",
+                "Tries: 2")
+            .lineByLine(
+                new String[]{"tries = attempt(tries, \"guess1\");",
+                    "Mission 13: the method gets a copy, so the new count is "
+                    + "returned and stored."},
+                new String[]{"if (tries >= LIMIT)",
+                    "Missions 9 and 20: a guard using a class constant."},
+                new String[]{"return tries + 1;",
+                    "Mission 6: the answer goes back to the caller."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static void addOne(int n) {",
+                    "    n++;",
+                    "}",
+                    "",
+                    "static int plusOne(int n) {",
+                    "    return n + 1;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    int x = 5;",
+                    "    addOne(x);",
+                    "    x = plusOne(x);",
+                    "    System.out.println(x);",
+                    "}")
+                .accept("6")
+                .hints("addOne changes a copy.",
+                       "plusOne's result is stored.")
+                .explain(
+                    "6. addOne changes its own copy and loses it. plusOne "
+                    + "returns 6, which main stores. Mission 13, still the "
+                    + "most common method bug.")
+                .xp(20))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does javac report?")
+                .code(
+                    "static String grade(int score) {",
+                    "    if (score >= 90) {",
+                    "        return \"HIGH\";",
+                    "    } else if (score >= 50) {",
+                    "        return \"MEDIUM\";",
+                    "    }",
+                    "}")
+                .accept("7", "line 7")
+                .hints("What does grade return for a score of 10?",
+                       "Every path must return.")
+                .explain(
+                    "Line 7: 'missing return statement'. A score below 50 "
+                    + "reaches the closing brace with nothing to return. A "
+                    + "final return \"LOW\"; - or an else - fixes it "
+                    + "(mission 6).")
+                .xp(25))
+            .objective(
+                "Finish a documented, guarded validator.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(isStrongEnough(\"   \"));",
+                "        System.out.println(isStrongEnough(\"correct-horse-battery\"));",
+                "    }",
+                "",
+                "    /**",
+                "     * Checks the minimum password rule.",
+                "     *",
+                "     * @param password the password exactly as typed",
+                "     * @return true if it is not blank and has 12+ characters",
+                "     */",
+                "    static boolean isStrongEnough(String password) {",
+                "        if (password.isBlank()) {",
+                "            return false;",
+                "        }",
+                "        // the final rule: 12 or more characters",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the last line: return whether the password has at "
+                + "least 12 characters.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the final return line.")
+                .accept("return password.length() >= 12;",
+                        "return password.length() > 11;",
+                        "return 12 <= password.length();")
+                .hints(
+                    "Return the condition itself.",
+                    "'At least 12' includes 12: >=.",
+                    "return password.length() >= 12;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(isStrongEnough(\"   \"));",
+                    "        System.out.println(isStrongEnough(\"correct-horse-battery\"));",
+                    "    }",
+                    "",
+                    "    /**",
+                    "     * Checks the minimum password rule.",
+                    "     *",
+                    "     * @param password the password exactly as typed",
+                    "     * @return true if it is not blank and has 12+ characters",
+                    "     */",
+                    "    static boolean isStrongEnough(String password) {",
+                    "        if (password.isBlank()) {",
+                    "            return false;",
+                    "        }",
+                    "        return password.length() >= 12;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The guard refuses blank passwords first; the last line "
+                    + "returns the rule directly. The program prints false, "
+                    + "then true.\n"
+                    + "\n"
+                    + "Five missions in one method: a documented contract "
+                    + "(24), a guard clause (9), a boolean method returning "
+                    + "its condition (10), the boundary included with >= "
+                    + "(23), and no trimming - the password is checked "
+                    + "exactly as typed.")
+                .explain(
+                    "return password.length() >= 12; - the rule, returned "
+                    + "directly.")
+                .xp(40))
+            .mistakes(
+                new String[]{"Changing a copy",
+                    "Return the new value and store it."},
+                new String[]{"A missing return path",
+                    "Every path through a non-void method must return."},
+                new String[]{"Guards in the wrong order",
+                    "State before secrets. Fail closed."})
+            .cyber(
+                "Everything in security tooling is built from what this "
+                + "campaign taught: validators, sanitisers, decision methods, "
+                + "constants for policy, tests for boundaries, and stack "
+                + "traces to debug them - safely, never shown to users.\n"
+                + "\n"
+                + "What these programs still cannot do is REPEAT. A lockout "
+                + "should count attempts as they happen; a log parser should "
+                + "read every line in a file. Campaign 04 adds loops - and "
+                + "every method you can now write becomes something a loop "
+                + "can call a thousand times.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static String tidy(String s) {",
+                    "    return s.trim().toUpperCase();",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    String host = \" web-01 \";",
+                    "    tidy(host);",
+                    "    System.out.println(\"[\" + tidy(host) + \"|\" + host.trim() + \"]\");",
+                    "}")
+                .accept("[WEB-01|web-01]")
+                .hints("The first tidy result is thrown away.",
+                       "host itself never changes.")
+                .explain(
+                    "[WEB-01|web-01]. The second tidy call is used directly; "
+                    + "host is still \" web-01 \", so host.trim() gives "
+                    + "lower-case web-01 (mission 14).")
+                .xp(20))
+            .check(new Task(Task.CHOICE,
+                    "A trace ends:  at Main.parse(Main.java:14)  then  at "
+                    + "Main.main(Main.java:5). Where did the problem "
+                    + "happen?")
+                .choices("Line 5, in main", "Line 14, in parse",
+                         "In both at once", "It cannot be told")
+                .accept("2", "b")
+                .hints("The top frame was running.",
+                       "main was waiting at line 5.")
+                .explain(
+                    "Line 14, in parse - the top frame. main was paused at "
+                    + "line 5, where it called parse (mission 18).")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which pair can NOT both exist in one class?")
+                .choices("void log(String m) and void log(String m, int n)",
+                         "int size(String s) and String size(String t)",
+                         "void scan(int p) and void scan(String h)",
+                         "int twice(int n) and double twice(double d)")
+                .accept("2", "b")
+                .hints("Compare parameter types only.",
+                       "Names and return types do not count.")
+                .explain(
+                    "int size(String s) and String size(String t) - both take "
+                    + "one String, so their signatures are the same (mission "
+                    + "15).")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 03 - METHODS complete.\n"
+                + "\n"
+                + "Your programs are built from named, tested, documented "
+                + "methods - and you can follow every call down the stack "
+                + "and back.\n"
+                + "\n"
+                + "Next they learn to repeat: loops.")
+            .next("Next: CAMPAIGN 04 - LOOP//CONTROL."));
     }
 }
