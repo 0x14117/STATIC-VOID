@@ -2037,5 +2037,1078 @@ public class Campaign04 {
                 + "Integer.MIN_VALUE and Integer.MAX_VALUE - never at a guess "
                 + "like 0. Handle the case with no values at all.")
             .next("Next: a loop that always runs at least once."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(11), "At Least Once", 4)
+            .brief(
+                "The upload tool splits a file into chunks, halving the chunk "
+                + "size until it is small enough for the network - but it must "
+                + "always try the first size at least once, even if that is "
+                + "already small. A while loop might never start. Java has a "
+                + "loop that checks at the END.")
+            .willLearn("do-while loop")
+            .whyUseful(
+                "Some jobs must happen once before you can even ask whether "
+                + "to repeat them: show a prompt, try a connection, read an "
+                + "answer. do-while fits those exactly.")
+            .concept("do-while loop",
+                "A do-while loop runs its body FIRST and checks the condition "
+                + "AFTER:\n"
+                + "\n"
+                + "    do {\n"
+                + "        System.out.println(\"Chunk size: \" + size);\n"
+                + "        size = size / 2;\n"
+                + "    } while (size > 100);\n"
+                + "\n"
+                + "    do { ... }            the body - always runs once\n"
+                + "    while (size > 100);   then the test - repeat?\n"
+                + "\n"
+                + "So the body runs AT LEAST ONCE, even if the condition is "
+                + "false from the very start. That is the only difference from "
+                + "while:\n"
+                + "\n"
+                + "    while       test, body, test, body ...  (0 or more)\n"
+                + "    do-while    body, test, body, test ...  (1 or more)\n"
+                + "\n"
+                + "Note the SEMICOLON after the while (...) at the end. A "
+                + "do-while is a single statement that finishes there; "
+                + "leaving it out does not compile. (A while loop must NOT "
+                + "have one - that was mission 4's trap.)")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int size = 1000;",
+                "        do {",
+                "            System.out.println(\"Chunk size: \" + size);",
+                "            size = size / 2;",
+                "        } while (size > 100);",
+                "        System.out.println(\"Final size: \" + size);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Chunk size: 1000",
+                "Chunk size: 500",
+                "Chunk size: 250",
+                "Chunk size: 125",
+                "Final size: 62")
+            .lineByLine(
+                new String[]{"do {",
+                    "No test yet - the body just runs."},
+                new String[]{"} while (size > 100);",
+                    "The test comes after each pass. Note the semicolon."},
+                new String[]{"Final size: 62",
+                    "125 was halved to 62, which failed the test."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int n = 10;",
+                    "do {",
+                    "    System.out.println(n);",
+                    "    n++;",
+                    "} while (n < 5);")
+                .accept("10")
+                .hints("Is the body run before the test?",
+                       "10 < 5 is false - but when is that checked?")
+                .explain(
+                    "10. The body runs once before the test. A while loop "
+                    + "with the same condition would print nothing.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What is the ONLY difference between while and do-while?")
+                .choices("do-while is faster",
+                         "do-while always runs its body at least once",
+                         "do-while cannot use break",
+                         "do-while counts down")
+                .accept("2", "b")
+                .hints("Where is the test?",
+                       "Before or after the first pass?")
+                .explain(
+                    "do-while tests after the body, so the body always runs "
+                    + "at least once.")
+                .xp(10))
+            .objective(
+                "Close the chunking loop.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int size = 1000;",
+                "        do {",
+                "            System.out.println(\"Chunk size: \" + size);",
+                "            size = size / 2;",
+                "        // the closing line: repeat while size is more than 100",
+                "        System.out.println(\"Final size: \" + size);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that closes the do-while: repeat while size "
+                + "is more than 100.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the closing line.")
+                .accept("} while (size > 100);", "}while (size > 100);",
+                        "} while(size > 100);", "} while (size>100);")
+                .hints(
+                    "It closes the body's brace, then gives the test.",
+                    "It ends with a semicolon.",
+                    "} while (size > 100);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int size = 1000;",
+                    "        do {",
+                    "            System.out.println(\"Chunk size: \" + size);",
+                    "            size = size / 2;",
+                    "        } while (size > 100);",
+                    "        System.out.println(\"Final size: \" + size);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The brace closes the body, while (size > 100) is the "
+                    + "test, and the semicolon ends the statement. The body "
+                    + "runs for 1000, 500, 250 and 125; after halving to 62, "
+                    + "the test fails.\n"
+                    + "\n"
+                    + "Had size started at 50, the body would still run once "
+                    + "and print Chunk size: 50 - the whole point of "
+                    + "do-while.")
+                .explain(
+                    "} while (size > 100); - with the semicolon.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Forgetting the final semicolon",
+                    "javac: ';' expected."},
+                new String[]{"Using do-while when zero passes is right",
+                    "If the body must sometimes not run, use while."},
+                new String[]{"Forgetting it always runs once",
+                    "Even with a condition that is false from the start."})
+            .cyber(
+                "'At least once' matters in security code. A prompt for a "
+                + "password, a challenge sent to a device, a heartbeat sent "
+                + "to a monitoring server - each must happen before there is "
+                + "anything to test. The opposite matters too: code that must "
+                + "NOT run when a check fails belongs in a while or behind an "
+                + "if, never in a do-while that runs before checking.")
+            .check(new Task(Task.DEBUG,
+                    "Which line does javac report?")
+                .code(
+                    "int n = 0;",
+                    "do {",
+                    "    n++;",
+                    "} while (n < 3)",
+                    "System.out.println(n);")
+                .accept("4", "line 4")
+                .hints("How does a do-while statement end?",
+                       "Look at the end of the while line.")
+                .explain(
+                    "Line 4: ';' expected. A do-while ends with a semicolon "
+                    + "after its condition.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int tries = 0;",
+                    "do {",
+                    "    tries++;",
+                    "} while (tries < 0);",
+                    "System.out.println(tries);")
+                .accept("1")
+                .hints("The body runs before the test.",
+                       "tries < 0 is false after one pass.")
+                .explain(
+                    "1. One pass, then the test fails.")
+                .xp(10))
+            .recap(
+                "    do {\n"
+                + "        body\n"
+                + "    } while (condition);\n"
+                + "\n"
+                + "Body first, test after - so at least one pass. End with a "
+                + "semicolon. Use it when the job must happen once before you "
+                + "can ask whether to repeat.")
+            .next("Next: asking again until the answer is valid."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(12), "Ask Again", 5)
+            .brief(
+                "The scanner asks for a port. People type http, 70000, or "
+                + "nothing. Instead of crashing or giving up at the first "
+                + "mistake, the program should ask again - but not for ever: "
+                + "three bad answers and it stops.")
+            .willLearn("Input retry loops")
+            .whyUseful(
+                "Retry loops make programs forgiving without making them "
+                + "fragile: every answer is validated, a mistake gets a "
+                + "second chance, and a limit stops a person - or a script - "
+                + "from retrying for ever.")
+            .concept("Input retry loops",
+                "A retry loop is a do-while - the question must be asked at "
+                + "least once - with validation inside and TWO reasons to "
+                + "stop:\n"
+                + "\n"
+                + "    String text;\n"
+                + "    boolean valid;\n"
+                + "    int tries = 0;\n"
+                + "    do {\n"
+                + "        text = input.nextLine().trim();\n"
+                + "        tries++;\n"
+                + "        valid = isValidPort(text);\n"
+                + "    } while (!valid && tries < 3);\n"
+                + "\n"
+                + "The loop stops when the answer is valid, OR when the tries "
+                + "run out. After the loop, check WHICH happened - valid tells "
+                + "you.\n"
+                + "\n"
+                + "SCOPE matters here. Variables the condition needs - text, "
+                + "valid, tries - must be declared BEFORE the do. A variable "
+                + "declared inside the braces vanishes at the closing brace, "
+                + "and the while (...) after it cannot see it: 'cannot find "
+                + "symbol'.\n"
+                + "\n"
+                + "The validation itself is a boolean method (Campaign 03), "
+                + "so the loop reads like a sentence: keep asking while it is "
+                + "not valid and there are tries left.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String text;",
+                "        boolean valid;",
+                "        int tries = 0;",
+                "        do {",
+                "            System.out.print(\"Port (1-65535): \");",
+                "            text = input.nextLine().trim();",
+                "            tries++;",
+                "            valid = isValidPort(text);",
+                "            if (!valid) {",
+                "                System.out.println(\"Not a valid port\");",
+                "            }",
+                "        } while (!valid && tries < 3);",
+                "        if (valid) {",
+                "            System.out.println(\"Using port \" + text);",
+                "        } else {",
+                "            System.out.println(\"Too many invalid attempts\");",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isValidPort(String text) {",
+                "        if (text.length() > 5 || !text.matches(\"[0-9]+\")) {",
+                "            return false;",
+                "        }",
+                "        int port = Integer.parseInt(text);",
+                "        return port >= 1 && port <= 65535;",
+                "    }",
+                "}")
+            .exampleInput("http", "70000", "8080")
+            .exampleOutput(
+                "Port (1-65535): http",
+                "Not a valid port",
+                "Port (1-65535): 70000",
+                "Not a valid port",
+                "Port (1-65535): 8080",
+                "Using port 8080")
+            .lineByLine(
+                new String[]{"String text; boolean valid; int tries = 0;",
+                    "Declared before the do, so the while can see them."},
+                new String[]{"valid = isValidPort(text);",
+                    "A Campaign 03 validator, called on every try."},
+                new String[]{"while (!valid && tries < 3);",
+                    "Stop on a good answer OR when the tries run out."},
+                new String[]{"if (valid)",
+                    "After the loop, find out which reason stopped it."})
+            .predict(new Task(Task.PREDICT,
+                    "The person types abc, then 7. What does this print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "String text;",
+                    "int tries = 0;",
+                    "do {",
+                    "    text = input.nextLine();",
+                    "    tries++;",
+                    "} while (!text.matches(\"[0-9]+\"));",
+                    "System.out.println(text + \" after \" + tries + \" tries\");")
+                .input("abc", "7")
+                .accept("7 after 2 tries")
+                .hints("abc is not digits, so the loop repeats.",
+                       "7 is digits, so it stops.")
+                .explain(
+                    "7 after 2 tries. The first answer failed the test, the "
+                    + "second passed.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "do {",
+                    "    String answer = input.nextLine();",
+                    "} while (!answer.equals(\"y\"));")
+                .accept("4", "line 4")
+                .hints("Where was answer declared?",
+                       "Does it still exist after the closing brace?")
+                .explain(
+                    "Line 4: 'cannot find symbol'. answer was declared inside "
+                    + "the braces and is gone before the condition is "
+                    + "checked. Declare it before the do.")
+                .xp(20))
+            .objective(
+                "Give the port prompt a retry limit.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String text;",
+                "        boolean valid;",
+                "        int tries = 0;",
+                "        do {",
+                "            System.out.print(\"Port: \");",
+                "            text = input.nextLine().trim();",
+                "            tries++;",
+                "            valid = text.matches(\"[0-9]+\") && text.length() <= 5;",
+                "        // closing line: repeat while not valid and tries < 3",
+                "        System.out.println(valid ? \"OK \" + text : \"Giving up\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the closing line: repeat while the answer is not valid "
+                + "AND fewer than 3 tries have been used.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the closing line.")
+                .accept("} while (!valid && tries < 3);",
+                        "} while(!valid && tries < 3);",
+                        "}while (!valid && tries < 3);",
+                        "} while (tries < 3 && !valid);")
+                .hints(
+                    "Both must be true to go round again: &&.",
+                    "Not valid is !valid.",
+                    "} while (!valid && tries < 3);")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        String text;",
+                    "        boolean valid;",
+                    "        int tries = 0;",
+                    "        do {",
+                    "            System.out.print(\"Port: \");",
+                    "            text = input.nextLine().trim();",
+                    "            tries++;",
+                    "            valid = text.matches(\"[0-9]+\") && text.length() <= 5;",
+                    "        } while (!valid && tries < 3);",
+                    "        System.out.println(valid ? \"OK \" + text : \"Giving up\");",
+                    "    }",
+                    "}")
+                .input("x", "y", "z")
+                .whyItWorks(
+                    "The loop goes round again only when BOTH are true: the "
+                    + "answer is bad and tries remain. Typing x, y and z uses "
+                    + "all three tries and prints Giving up; typing 443 "
+                    + "first time prints OK 443 after one.\n"
+                    + "\n"
+                    + "With || instead of &&, a bad answer would keep the "
+                    + "loop going for ever, ignoring the limit - the limit "
+                    + "only works if either reason can stop the loop.")
+                .explain(
+                    "} while (!valid && tries < 3); - either reason stops it.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Declaring loop variables inside do { }",
+                    "The while condition cannot see them."},
+                new String[]{"No retry limit",
+                    "A script can retry for ever."},
+                new String[]{"|| instead of &&",
+                    "Then the limit never stops a bad answer."})
+            .cyber(
+                "A retry limit is a security control, not just a courtesy. "
+                + "Without one, a login prompt lets an attacker's script try "
+                + "passwords for ever. Three strikes and the session ends; "
+                + "real systems add a delay or a lockout on top (missions 21 "
+                + "and 22).\n"
+                + "\n"
+                + "Validating inside the loop also means that nothing after "
+                + "it ever sees bad input: when the loop ends with valid "
+                + "true, the rest of the program can trust the value.")
+            .check(new Task(Task.CHOICE,
+                    "A retry loop ends. How do you know whether the user "
+                    + "succeeded?")
+                .choices("Check tries == 3",
+                         "Check the valid flag",
+                         "It always succeeded",
+                         "Check the last line printed")
+                .accept("2", "b")
+                .hints("Two things can end the loop.",
+                       "The flag says which.")
+                .explain(
+                    "Check valid. tries == 3 could also mean the third try "
+                    + "WAS valid.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why does a retry loop need a limit?")
+                .choices("Java requires one",
+                         "So a person or a script cannot retry for ever",
+                         "To make it faster",
+                         "do-while loops cannot end otherwise")
+                .accept("2", "b")
+                .hints("Who might retry thousands of times?",
+                       "Think of password guessing.")
+                .explain(
+                    "Without a limit, an automated attacker can retry for "
+                    + "ever.")
+                .xp(10))
+            .recap(
+                "A retry loop: do-while, read and validate inside, stop when "
+                + "valid OR out of tries - while (!valid && tries < 3). "
+                + "Declare what the condition uses BEFORE the do. Check valid "
+                + "afterwards.")
+            .next("Next: leaving a loop in the middle."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(13), "Leaving Early", 5)
+            .brief(
+                "The log reader keeps reading lines until it meets END. The "
+                + "sentinel loop from mission 5 works, but reading in two "
+                + "places is clumsy. Sometimes the cleanest loop has no test "
+                + "at the top at all - and leaves from the middle.")
+            .willLearn("break")
+            .whyUseful(
+                "break stops a loop the moment the job is done: the first "
+                + "match found, the end marker reached, the attack detected. "
+                + "No wasted passes, and no flags to thread through the "
+                + "condition.")
+            .concept("break",
+                "break ends the innermost loop IMMEDIATELY. The program "
+                + "carries on at the first line after the loop's closing "
+                + "brace.\n"
+                + "\n"
+                + "    for (int i = 0; i < text.length(); i++) {\n"
+                + "        if (Character.isDigit(text.charAt(i))) {\n"
+                + "            firstDigit = i;\n"
+                + "            break;              found it - stop looking\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "(Campaign 02 used break to leave a switch. Inside a loop, "
+                + "it leaves the loop.)\n"
+                + "\n"
+                + "THE LOOP-AND-A-HALF. With break, a loop can test in the "
+                + "middle:\n"
+                + "\n"
+                + "    while (true) {\n"
+                + "        String line = input.nextLine();\n"
+                + "        if (line.equals(\"END\")) {\n"
+                + "            break;\n"
+                + "        }\n"
+                + "        ... use line ...\n"
+                + "    }\n"
+                + "\n"
+                + "while (true) looks infinite - and it is, unless a break is "
+                + "reachable. One read, one test, no priming read. The rule: "
+                + "every while (true) must have a break that is certain to "
+                + "happen eventually.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int count = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Log line: \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            count++;",
+                "        }",
+                "        System.out.println(count + \" lines read\");",
+                "    }",
+                "}")
+            .exampleInput("login jsmith", "logout jsmith", "END")
+            .exampleOutput(
+                "Log line: login jsmith",
+                "Log line: logout jsmith",
+                "Log line: END",
+                "2 lines read")
+            .lineByLine(
+                new String[]{"while (true)",
+                    "No test at the top. The break decides."},
+                new String[]{"String line = input.nextLine().trim();",
+                    "One read, inside the loop - no priming read needed."},
+                new String[]{"break;",
+                    "END ends the loop at once. count++ is skipped."},
+                new String[]{"2 lines read",
+                    "The line after the loop runs next."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int i = 1; i <= 10; i++) {",
+                    "    if (i * i > 20) {",
+                    "        break;",
+                    "    }",
+                    "    System.out.println(i);",
+                    "}")
+                .accept("1 2 3 4")
+                .hints("5 * 5 is 25.",
+                       "The break happens before the println.")
+                .explain(
+                    "1 2 3 4 (one per line). At i = 5, 25 > 20 and the loop "
+                    + "ends before printing.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What does break do inside a loop?")
+                .choices("Skips to the next pass",
+                         "Ends the loop at once; the program carries on "
+                         + "after it",
+                         "Ends the whole program",
+                         "Pauses the loop")
+                .accept("2", "b")
+                .hints("It is not the same as skipping.",
+                       "Where does the program carry on?")
+                .explain(
+                    "It ends the loop immediately; the program continues "
+                    + "after the loop's closing brace.")
+                .xp(10))
+            .objective(
+                "Stop reading the log at END.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int count = 0;",
+                "        while (true) {",
+                "            String line = input.nextLine().trim();",
+                "            // the if line: leave when the line is END",
+                "                break;",
+                "            }",
+                "            count++;",
+                "        }",
+                "        System.out.println(count + \" lines read\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that leads to the break: true when line is "
+                + "the text END.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (line.equals(\"END\")) {",
+                        "if(line.equals(\"END\")) {",
+                        "if (line.equals(\"END\")){",
+                        "if (\"END\".equals(line)) {")
+                .hints(
+                    "Compare text with equals.",
+                    "The capitals matter: END.",
+                    "if (line.equals(\"END\")) {")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        int count = 0;",
+                    "        while (true) {",
+                    "            String line = input.nextLine().trim();",
+                    "            if (line.equals(\"END\")) {",
+                    "                break;",
+                    "            }",
+                    "            count++;",
+                    "        }",
+                    "        System.out.println(count + \" lines read\");",
+                    "    }",
+                    "}")
+                .input("a", "b", "c", "END")
+                .whyItWorks(
+                    "Each pass reads one line. END triggers the break, so the "
+                    + "loop ends before count++ and the program prints how "
+                    + "many real lines came first - 3 for a, b, c, END.\n"
+                    + "\n"
+                    + "Without this if, while (true) has no way out, and the "
+                    + "program would wait for input for ever.")
+                .explain(
+                    "if (line.equals(\"END\")) { - then the break.")
+                .xp(20))
+            .mistakes(
+                new String[]{"while (true) with no reachable break",
+                    "An infinite loop by design."},
+                new String[]{"Code after break in the same block",
+                    "It can never run. javac: 'unreachable statement'."},
+                new String[]{"Expecting break to end the program",
+                    "It only leaves the innermost loop."})
+            .cyber(
+                "Stopping at the first match is how search-based tools stay "
+                + "fast: a malware scanner that finds a signature does not "
+                + "need to read the rest of the file to decide it is bad.\n"
+                + "\n"
+                + "The while (true) rule has a security side too. Network "
+                + "servers are usually a while (true) around 'wait for a "
+                + "request, handle it' - and the break or the exit condition "
+                + "must be something an attacker cannot suppress, or the "
+                + "server can be kept busy for ever.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int n = 1;",
+                    "while (true) {",
+                    "    n *= 3;",
+                    "    if (n > 50) {",
+                    "        break;",
+                    "    }",
+                    "}",
+                    "System.out.println(n);")
+                .accept("81")
+                .hints("n goes 3, 9, 27, ...",
+                       "The first value over 50 breaks out.")
+                .explain(
+                    "81. n becomes 3, 9, 27, then 81 - which is over 50, so "
+                    + "the loop breaks.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What must every while (true) loop contain?")
+                .choices("A counter", "A break that will eventually be reached",
+                         "A do", "A println")
+                .accept("2", "b")
+                .hints("How else does it end?",
+                       "The condition is always true.")
+                .explain(
+                    "A reachable break - otherwise it really is infinite.")
+                .xp(10))
+            .recap(
+                "break ends the innermost loop at once. while (true) with a "
+                + "break in the middle - the loop-and-a-half - reads once, "
+                + "tests, then uses. Every while (true) needs a break that "
+                + "will surely happen.")
+            .next("Next: skipping one pass without leaving."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(14), "Skipping One", 5)
+            .brief(
+                "The config file mixes real rules with comment lines starting "
+                + "with #. The loader should count and apply the rules, and "
+                + "simply skip the comments - not stop at them. break is "
+                + "too strong. Java has a gentler exit.")
+            .willLearn("continue")
+            .whyUseful(
+                "continue skips the rest of ONE pass: ignore a blank line, a "
+                + "comment, a port that is out of scope - and carry on with "
+                + "the next. It keeps the main work of the loop from being "
+                + "buried in an if.")
+            .concept("continue",
+                "continue ends the CURRENT pass straight away and goes on to "
+                + "the next one:\n"
+                + "\n"
+                + "    for (int port = 20; port <= 25; port++) {\n"
+                + "        if (port == 23) {\n"
+                + "            continue;          skip telnet only\n"
+                + "        }\n"
+                + "        System.out.println(\"Scanning \" + port);\n"
+                + "    }\n"
+                + "\n"
+                + "    break      leaves the loop entirely\n"
+                + "    continue   leaves this pass; the loop goes on\n"
+                + "\n"
+                + "Where the loop 'goes on' from depends on the loop:\n"
+                + "\n"
+                + "    for        runs the update (port++), then the test\n"
+                + "    while      jumps straight to the test\n"
+                + "\n"
+                + "That difference is a TRAP. In a while loop whose update is "
+                + "at the bottom of the body, continue skips the update too - "
+                + "and the loop tests the same value for ever. In a for loop "
+                + "the update is safe in the header.\n"
+                + "\n"
+                + "continue works like a guard clause for one pass: deal with "
+                + "the case you want to ignore at the top, and the rest of "
+                + "the body handles the normal case, unindented.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int port = 20; port <= 25; port++) {",
+                "            if (port == 23) {",
+                "                System.out.println(\"Skipping 23 (telnet, blocked)\");",
+                "                continue;",
+                "            }",
+                "            System.out.println(\"Scanning \" + port);",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Scanning 20",
+                "Scanning 21",
+                "Scanning 22",
+                "Skipping 23 (telnet, blocked)",
+                "Scanning 24",
+                "Scanning 25")
+            .lineByLine(
+                new String[]{"if (port == 23)",
+                    "The case to skip, handled first."},
+                new String[]{"continue;",
+                    "The rest of this pass is skipped; port++ still runs."},
+                new String[]{"Scanning 24",
+                    "The loop carried on - unlike break."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int sum = 0;",
+                    "for (int i = 1; i <= 6; i++) {",
+                    "    if (i % 2 == 0) {",
+                    "        continue;",
+                    "    }",
+                    "    sum += i;",
+                    "}",
+                    "System.out.println(sum);")
+                .accept("9")
+                .hints("Even numbers are skipped.",
+                       "1 + 3 + 5.")
+                .explain(
+                    "9. The evens hit continue before the sum; only 1, 3 and "
+                    + "5 are added.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What happens when this runs?")
+                .code(
+                    "int i = 0;",
+                    "while (i < 5) {",
+                    "    if (i == 2) {",
+                    "        continue;",
+                    "    }",
+                    "    i++;",
+                    "}")
+                .choices("It skips 2 and ends",
+                         "It never ends",
+                         "It does not compile",
+                         "It ends at 2")
+                .accept("2", "b")
+                .hints("What does continue skip in a while loop?",
+                       "Does i++ run when i is 2?")
+                .explain(
+                    "It never ends. At i = 2, continue skips i++, so i stays "
+                    + "2 and the test is true for ever. A for loop with i++ "
+                    + "in the header would not have this problem.")
+                .xp(20))
+            .objective(
+                "Skip comment lines in the config loader.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int rules = 0;",
+                "        while (true) {",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            // the if line: skip lines starting with #",
+                "                continue;",
+                "            }",
+                "            rules++;",
+                "            System.out.println(\"Rule: \" + line);",
+                "        }",
+                "        System.out.println(rules + \" rules loaded\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that leads to continue: true when line "
+                + "starts with #.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (line.startsWith(\"#\")) {",
+                        "if(line.startsWith(\"#\")) {",
+                        "if (line.startsWith(\"#\")){")
+                .hints(
+                    "Which String method checks the beginning?",
+                    "startsWith(\"#\").",
+                    "if (line.startsWith(\"#\")) {")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        int rules = 0;",
+                    "        while (true) {",
+                    "            String line = input.nextLine().trim();",
+                    "            if (line.equals(\"END\")) {",
+                    "                break;",
+                    "            }",
+                    "            if (line.startsWith(\"#\")) {",
+                    "                continue;",
+                    "            }",
+                    "            rules++;",
+                    "            System.out.println(\"Rule: \" + line);",
+                    "        }",
+                    "        System.out.println(rules + \" rules loaded\");",
+                    "    }",
+                    "}")
+                .input("# allow web", "allow 443", "# deny telnet", "deny 23", "END")
+                .whyItWorks(
+                    "Comment lines hit continue, which skips the counting and "
+                    + "printing for that pass only; the loop goes on and reads "
+                    + "the next line. Two rules out of four lines are loaded.\n"
+                    + "\n"
+                    + "This while (true) has its read at the TOP of the body, "
+                    + "so continue cannot skip it - which is why this pattern "
+                    + "is safe with continue, and a bottom-update while is "
+                    + "not.")
+                .explain(
+                    "if (line.startsWith(\"#\")) { - then continue.")
+                .xp(20))
+            .mistakes(
+                new String[]{"continue before a while loop's update",
+                    "The update is skipped and the loop never ends."},
+                new String[]{"break where continue was meant",
+                    "The loop stops at the first comment."},
+                new String[]{"Deep nesting instead",
+                    "continue at the top keeps the main work flat."})
+            .cyber(
+                "Skipping lines is where parsers make security mistakes. If a "
+                + "firewall config loader skips lines starting with #, then a "
+                + "rule written as '#deny 23' is silently ignored - and an "
+                + "attacker who can add a comment character to a rule can "
+                + "disable it. Skip rules must be exact and deliberate, and a "
+                + "good loader reports what it skipped as well as what it "
+                + "loaded.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int i = 1; i <= 5; i++) {",
+                    "    if (i == 3) {",
+                    "        continue;",
+                    "    }",
+                    "    System.out.print(i + \" \");",
+                    "}",
+                    "System.out.println();")
+                .accept("1 2 4 5")
+                .hints("Only 3 is skipped.",
+                       "The loop goes on after it.")
+                .explain(
+                    "1 2 4 5. continue skipped the print for 3 only.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "A loop over log lines should ignore blank lines but "
+                    + "stop completely at the line END. Which pair?")
+                .choices("continue for blank, break for END",
+                         "break for blank, continue for END",
+                         "break for both",
+                         "continue for both")
+                .accept("1", "a")
+                .hints("Ignore one line: skip this pass.",
+                       "Stop completely: leave the loop.")
+                .explain(
+                    "continue skips a blank line and carries on; break leaves "
+                    + "at END.")
+                .xp(10))
+            .recap(
+                "continue ends this pass; the loop carries on. In a for loop "
+                + "the update still runs; in a while loop it jumps straight to "
+                + "the test - so never continue past a while loop's update. "
+                + "break leaves; continue skips.")
+            .next("Next: a loop inside a loop."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(15), "Loops Inside Loops", 5)
+            .brief(
+                "The audit covers three hosts, and on each host three ports. "
+                + "That is nine checks - one loop over hosts, and inside it, "
+                + "for every host, a loop over ports. Loops can contain "
+                + "loops.")
+            .willLearn("Nested loops")
+            .whyUseful(
+                "Nested loops cover every COMBINATION: every port on every "
+                + "host, every character against every rule, every "
+                + "two-letter password. They are also where running time "
+                + "grows fastest - which matters for attackers and "
+                + "defenders alike.")
+            .concept("Nested loops",
+                "A loop inside another loop's body is NESTED. For every "
+                + "single pass of the outer loop, the inner loop runs "
+                + "COMPLETELY:\n"
+                + "\n"
+                + "    for (int host = 1; host <= 2; host++) {\n"
+                + "        for (int port = 21; port <= 23; port++) {\n"
+                + "            check(host, port);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "    host 1:  port 21, 22, 23\n"
+                + "    host 2:  port 21, 22, 23\n"
+                + "\n"
+                + "Total passes of the inner body = outer passes x inner "
+                + "passes: 2 x 3 = 6. With 254 hosts and 1024 ports it is "
+                + "260,096 - nested loops multiply.\n"
+                + "\n"
+                + "Use DIFFERENT loop variables - host and port, or i and j. "
+                + "Reusing i for both makes the inner loop wreck the outer "
+                + "one's counter.\n"
+                + "\n"
+                + "break and continue affect only the INNERMOST loop they are "
+                + "in. A break inside the port loop moves on to the next "
+                + "host; it does not end the whole scan.\n"
+                + "\n"
+                + "The inner loop can depend on the outer variable - for "
+                + "(int k = 1; k <= row; k++) - to make each inner run a "
+                + "different length.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int host = 1; host <= 2; host++) {",
+                "            for (int port = 21; port <= 23; port++) {",
+                "                System.out.println(\"10.0.0.\" + host + \":\" + port);",
+                "            }",
+                "        }",
+                "        System.out.println(\"6 checks done\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "10.0.0.1:21",
+                "10.0.0.1:22",
+                "10.0.0.1:23",
+                "10.0.0.2:21",
+                "10.0.0.2:22",
+                "10.0.0.2:23",
+                "6 checks done")
+            .lineByLine(
+                new String[]{"for (int host = 1; host <= 2; host++)",
+                    "The outer loop: two passes."},
+                new String[]{"for (int port = 21; port <= 23; port++)",
+                    "The inner loop: runs in full, three passes, for EACH "
+                    + "host."},
+                new String[]{"6 checks done",
+                    "2 hosts x 3 ports."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int i = 1; i <= 2; i++) {",
+                    "    for (int j = 1; j <= 3; j++) {",
+                    "        System.out.print(i * j + \" \");",
+                    "    }",
+                    "    System.out.println();",
+                    "}")
+                .accept("1 2 3 2 4 6")
+                .hints("First row: i is 1, j goes 1 to 3.",
+                       "Second row: i is 2.")
+                .explain(
+                    "    1 2 3\n"
+                    + "    2 4 6\n"
+                    + "\n"
+                    + "Each outer pass prints one full row from the inner "
+                    + "loop, then ends the line.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "An outer loop runs 4 times and its inner loop 5 times. "
+                    + "How many times does the inner body run in total?")
+                .choices("9", "20", "5", "45")
+                .accept("2", "b")
+                .hints("The inner loop runs completely each outer pass.",
+                       "Multiply.")
+                .explain(
+                    "20: 4 x 5. Nested loops multiply, they do not add.")
+                .xp(10))
+            .objective(
+                "Complete the host-by-port audit.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int host = 1; host <= 3; host++) {",
+                "            // the inner for header: port from 21 to 23",
+                "                System.out.println(\"10.0.0.\" + host + \":\" + port);",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the inner for header: port from 21 up to and including "
+                + "23.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the inner for header.")
+                .accept("for (int port = 21; port <= 23; port++) {",
+                        "for(int port = 21; port <= 23; port++) {",
+                        "for (int port = 21; port <= 23; port++){",
+                        "for (int port = 21; port < 24; port++) {")
+                .hints(
+                    "Its own variable: port, not host.",
+                    "21 to 23 inclusive.",
+                    "for (int port = 21; port <= 23; port++) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        for (int host = 1; host <= 3; host++) {",
+                    "            for (int port = 21; port <= 23; port++) {",
+                    "                System.out.println(\"10.0.0.\" + host + \":\" + port);",
+                    "            }",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "For each of the three hosts, the inner loop runs through "
+                    + "ports 21, 22 and 23 - nine lines in all, 10.0.0.1:21 "
+                    + "to 10.0.0.3:23.\n"
+                    + "\n"
+                    + "The inner loop has its own variable, port. The body "
+                    + "uses both: host from the outer loop, which stays fixed "
+                    + "for a whole inner run, and port, which changes every "
+                    + "pass.")
+                .explain(
+                    "for (int port = 21; port <= 23; port++) {")
+                .xp(20))
+            .mistakes(
+                new String[]{"Reusing the outer variable",
+                    "The inner loop overwrites the outer counter."},
+                new String[]{"Expecting break to leave both loops",
+                    "It leaves only the innermost."},
+                new String[]{"Underestimating the work",
+                    "Passes multiply: 1000 x 1000 is a million."})
+            .cyber(
+                "Nested loops are the shape of brute force. Two nested loops "
+                + "over 26 letters try every two-letter password: 676. Four "
+                + "loops over 10 digits try every PIN: 10,000. Every extra "
+                + "character is another nested loop, and another "
+                + "multiplication - which is exactly why long passwords "
+                + "defeat brute force (mission 20).\n"
+                + "\n"
+                + "Network scanners are nested loops too: hosts outside, "
+                + "ports inside, and the multiplication is why a full scan of "
+                + "a large network takes so long - and makes so much noise.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int row = 1; row <= 3; row++) {",
+                    "    for (int k = 1; k <= row; k++) {",
+                    "        System.out.print(\"*\");",
+                    "    }",
+                    "    System.out.println();",
+                    "}")
+                .accept("* ** ***")
+                .hints("The inner loop runs row times.",
+                       "Row 1: one star. Row 3: three.")
+                .explain(
+                    "    *\n"
+                    + "    **\n"
+                    + "    ***\n"
+                    + "\n"
+                    + "The inner limit depends on the outer variable.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "A break runs inside the inner loop of two nested loops. "
+                    + "What ends?")
+                .choices("Both loops", "Only the inner loop",
+                         "Only the outer loop", "The program")
+                .accept("2", "b")
+                .hints("break affects the innermost loop.",
+                       "The outer loop carries on.")
+                .explain(
+                    "Only the inner loop. The outer loop goes on to its next "
+                    + "pass.")
+                .xp(10))
+            .recap(
+                "A nested loop runs completely for every pass of the outer "
+                + "one, so passes multiply. Give each loop its own variable. "
+                + "break and continue affect only the innermost loop.")
+            .next("Next: choosing the right loop for the job."));
     }
 }
