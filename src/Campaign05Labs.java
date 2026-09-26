@@ -84,7 +84,6 @@ public class Campaign05Labs {
                 + "of passing the array in. Negative readings and zeros need "
                 + "no special handling - they are just values.")
             .sample(Lab.typing("21", "22", "24", "23", "21"),
-                
                 "Reading 1: 21",
                 "Reading 2: 22",
                 "Reading 3: 24",
@@ -93,7 +92,6 @@ public class Campaign05Labs {
                 "Readings: 21 22 24 23 21",
                 "Total: 111")
             .hidden(Lab.typing("0", "0", "0", "0", "0"),
-                
                 "Reading 1: 0",
                 "Reading 2: 0",
                 "Reading 3: 0",
@@ -102,7 +100,6 @@ public class Campaign05Labs {
                 "Readings: 0 0 0 0 0",
                 "Total: 0")
             .hidden(Lab.typing("-3", "5", "-2", "0", "10"),
-                
                 "Reading 1: -3",
                 "Reading 2: 5",
                 "Reading 3: -2",
@@ -111,7 +108,6 @@ public class Campaign05Labs {
                 "Readings: -3 5 -2 0 10",
                 "Total: 10")
             .hidden(Lab.typing(" 40", "41 ", "39", "45", "50"),
-                
                 "Reading 1:  40",
                 "Reading 2: 41",
                 "Reading 3: 39",
@@ -211,7 +207,6 @@ public class Campaign05Labs {
                 + "Campaign 04's separator pattern: a separator before every "
                 + "item except the first.")
             .sample(Lab.typing("3", "office-gw", "isp-edge", "cdn-7"),
-                
                 "Hops (1-8): 3",
                 "Hop 1: office-gw",
                 "Hop 2: isp-edge",
@@ -219,13 +214,11 @@ public class Campaign05Labs {
                 "Out:  office-gw -> isp-edge -> cdn-7",
                 "Back: cdn-7 -> isp-edge -> office-gw")
             .hidden(Lab.typing("1", "office-gw"),
-                
                 "Hops (1-8): 1",
                 "Hop 1: office-gw",
                 "Out:  office-gw",
                 "Back: office-gw")
             .hidden(Lab.typing("4", " a ", "b", "c", "d"),
-                
                 "Hops (1-8): 4",
                 "Hop 1:  a",
                 "Hop 2: b",
@@ -234,11 +227,9 @@ public class Campaign05Labs {
                 "Out:  a -> b -> c -> d",
                 "Back: d -> c -> b -> a")
             .hidden(Lab.typing("0"),
-                
                 "Hops (1-8): 0",
                 "INVALID")
             .hidden(Lab.typing("9"),
-                
                 "Hops (1-8): 9",
                 "INVALID"));
 
@@ -333,7 +324,6 @@ public class Campaign05Labs {
                 + "as a pair: the method's assumption is the caller's "
                 + "check.")
             .sample(Lab.typing("4", "2", "-3", "5", "0"),
-                
                 "Readings (1-10): 4",
                 "Change 1: 2",
                 "Change 2: -3",
@@ -342,7 +332,6 @@ public class Campaign05Labs {
                 "Highest: 5",
                 "Lowest: -3")
             .hidden(Lab.typing("3", "-4", "-9", "-2"),
-                
                 "Readings (1-10): 3",
                 "Change 1: -4",
                 "Change 2: -9",
@@ -350,7 +339,6 @@ public class Campaign05Labs {
                 "Highest: -2",
                 "Lowest: -9")
             .hidden(Lab.typing("3", "7", "3", "12"),
-                
                 "Readings (1-10): 3",
                 "Change 1: 7",
                 "Change 2: 3",
@@ -358,13 +346,11 @@ public class Campaign05Labs {
                 "Highest: 12",
                 "Lowest: 3")
             .hidden(Lab.typing("1", "-6"),
-                
                 "Readings (1-10): 1",
                 "Change 1: -6",
                 "Highest: -6",
                 "Lowest: -6")
             .hidden(Lab.typing("11"),
-                
                 "Readings (1-10): 11",
                 "INVALID"));
 
@@ -449,7 +435,6 @@ public class Campaign05Labs {
                 + "is a policy decision; the code must match what the "
                 + "policy says, here 'strictly greater'.")
             .sample(Lab.typing("5", "120", "4800", "500", "90", "730", "500"),
-                
                 "Uploads (1-10): 5",
                 "Size 1 (KB): 120",
                 "Size 2 (KB): 4800",
@@ -459,7 +444,6 @@ public class Campaign05Labs {
                 "Threshold (KB): 500",
                 "Over 500 KB: 2 of 5")
             .hidden(Lab.typing("3", "500", "500", "500", "500"),
-                
                 "Uploads (1-10): 3",
                 "Size 1 (KB): 500",
                 "Size 2 (KB): 500",
@@ -467,14 +451,12 @@ public class Campaign05Labs {
                 "Threshold (KB): 500",
                 "Over 500 KB: 0 of 3")
             .hidden(Lab.typing("2", "9000", "12000", "0"),
-                
                 "Uploads (1-10): 2",
                 "Size 1 (KB): 9000",
                 "Size 2 (KB): 12000",
                 "Threshold (KB): 0",
                 "Over 0 KB: 2 of 2")
             .hidden(Lab.typing("0"),
-                
                 "Uploads (1-10): 0",
                 "INVALID"));
 
@@ -552,23 +534,18 @@ public class Campaign05Labs {
                 + "once, before the search, is what lets \"  FW1 \" find "
                 + "fw1.")
             .sample(Lab.typing("db1"),
-                
                 "Host: db1",
                 "db1 is in slot 2")
             .hidden(Lab.typing("web1"),
-                
                 "Host: web1",
                 "web1 is in slot 0")
             .hidden(Lab.typing("vpn1"),
-                
                 "Host: vpn1",
                 "vpn1 is in slot 5")
             .hidden(Lab.typing("  FW1 "),
-                
                 "Host:   FW1",
                 "fw1 is in slot 4")
             .hidden(Lab.typing("db9"),
-                
                 "Host: db9",
                 "db9 not found"));
     }
