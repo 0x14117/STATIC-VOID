@@ -4144,5 +4144,1089 @@ public class Campaign05 {
                 + "All compare with equals. After a remove, the rest move "
                 + "down one.")
             .next("Next: looping over a list - and removing safely."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "Walking a List", 4)
+            .brief(
+                "Every hour, expired sessions must be cleared from the "
+                + "active list. The first version looped forward and removed "
+                + "each expired one - and the next audit still found expired "
+                + "sessions in the list. Nothing crashed. The loop simply "
+                + "stepped over some of them.")
+            .willLearn("Looping over an ArrayList")
+            .whyUseful(
+                "Reading every item of a list is easy - both loops you know "
+                + "work. Removing items WHILE looping is where lists bite, "
+                + "and the safe way to do it is short once you see why the "
+                + "obvious way fails.")
+            .concept("Looping over an ArrayList",
+                "Both loops work for READING a list:\n"
+                + "\n"
+                + "    for (String s : sessions) { ... s ... }\n"
+                + "\n"
+                + "    for (int i = 0; i < sessions.size(); i++) {\n"
+                + "        ... sessions.get(i) ...\n"
+                + "    }\n"
+                + "\n"
+                + "REMOVING while looping is different.\n"
+                + "\n"
+                + "Enhanced for: Java forbids changing a list while an "
+                + "enhanced for walks it, and usually stops the program with "
+                + "a ConcurrentModificationException.\n"
+                + "\n"
+                + "Forward index loop: no crash, but a silent skip. Remove "
+                + "index 1 and the item from index 2 slides into index 1 - "
+                + "then i++ moves on to 2, and the slid item is never "
+                + "checked.\n"
+                + "\n"
+                + "    before   [ok, EXP, EXP, ok]   i = 1: remove\n"
+                + "    after    [ok, EXP, ok]        i = 2: skipped one\n"
+                + "\n"
+                + "The fix: walk BACKWARDS. Removing at i only moves items "
+                + "that come after i - and those have already been "
+                + "checked:\n"
+                + "\n"
+                + "    for (int i = list.size() - 1; i >= 0; i--) {\n"
+                + "        if (should go) {\n"
+                + "            list.remove(i);\n"
+                + "        }\n"
+                + "    }")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> a = new ArrayList<>();",
+                "        ArrayList<String> b = new ArrayList<>();",
+                "        String[] start = {\"ok\", \"EXP\", \"EXP\", \"ok\", \"EXP\"};",
+                "        for (String s : start) {",
+                "            a.add(s);",
+                "            b.add(s);",
+                "        }",
+                "        for (int i = 0; i < a.size(); i++) {",
+                "            if (a.get(i).equals(\"EXP\")) {",
+                "                a.remove(i);",
+                "            }",
+                "        }",
+                "        for (int i = b.size() - 1; i >= 0; i--) {",
+                "            if (b.get(i).equals(\"EXP\")) {",
+                "                b.remove(i);",
+                "            }",
+                "        }",
+                "        System.out.println(\"Forward:   \" + a);",
+                "        System.out.println(\"Backwards: \" + b);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Forward:   [ok, EXP, ok]",
+                "Backwards: [ok, ok]")
+            .lineByLine(
+                new String[]{"the forward loop",
+                    "Removing index 1 slides the second EXP into index 1, "
+                    + "and i++ steps past it."},
+                new String[]{"i = b.size() - 1; i >= 0; i--",
+                    "Starts at the last item and works towards the front."},
+                new String[]{"b.remove(i)",
+                    "Only items already checked move. Nothing is skipped."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> h = new java.util.ArrayList<>();",
+                    "h.add(\"web\");",
+                    "h.add(\"db\");",
+                    "h.add(\"fw\");",
+                    "int total = 0;",
+                    "for (String s : h) {",
+                    "    total += s.length();",
+                    "}",
+                    "System.out.println(total);")
+                .accept("7")
+                .hints("Reading with an enhanced for is fine.",
+                       "3 + 2 + 2.")
+                .explain(
+                    "7. The loop reads each name's length. Reading a list "
+                    + "with an enhanced for is safe; only changing it during "
+                    + "the loop is not.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A forward index loop removes items as it goes. What "
+                    + "goes wrong?")
+                .choices("It never compiles",
+                         "It removes every item",
+                         "The item after each removal is not checked",
+                         "It checks the last item twice")
+                .accept("3", "c")
+                .hints("What moves into the gap?",
+                       "Then what does i++ do?")
+                .explain(
+                    "c. The next item slides into the removed slot, and i++ "
+                    + "moves past it - so it is never tested.")
+                .xp(15))
+            .objective(
+                "Clear every expired session.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> sessions = new ArrayList<>();",
+                "        sessions.add(\"s1:EXP\");",
+                "        sessions.add(\"s2:EXP\");",
+                "        sessions.add(\"s3:LIVE\");",
+                "        sessions.add(\"s4:EXP\");",
+                "        // the for header: from the last index down to 0",
+                "            if (sessions.get(i).endsWith(\":EXP\")) {",
+                "                sessions.remove(i);",
+                "            }",
+                "        }",
+                "        System.out.println(sessions);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the for header that walks sessions backwards: i "
+                + "starts at the last index and goes down to 0.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the for header.")
+                .accept("for (int i = sessions.size() - 1; i >= 0; i--) {",
+                        "for(int i = sessions.size() - 1; i >= 0; i--) {",
+                        "for (int i = sessions.size() - 1; i >= 0; i--){",
+                        "for (int i = sessions.size() - 1; i > -1; i--) {")
+                .hints(
+                    "The last index is size() - 1.",
+                    "Keep going while i >= 0, and count down.",
+                    "for (int i = sessions.size() - 1; i >= 0; i--) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> sessions = new ArrayList<>();",
+                    "        sessions.add(\"s1:EXP\");",
+                    "        sessions.add(\"s2:EXP\");",
+                    "        sessions.add(\"s3:LIVE\");",
+                    "        sessions.add(\"s4:EXP\");",
+                    "        for (int i = sessions.size() - 1; i >= 0; i--) {",
+                    "            if (sessions.get(i).endsWith(\":EXP\")) {",
+                    "                sessions.remove(i);",
+                    "            }",
+                    "        }",
+                    "        System.out.println(sessions);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "i visits 3, 2, 1, 0. s4 goes first; s3 stays; then s2 "
+                    + "and s1 go. Each removal only shifts items that were "
+                    + "already checked, so all three expired sessions are "
+                    + "cleared: [s3:LIVE].\n"
+                    + "\n"
+                    + "Looping forward, s2 would slide into index 0 just "
+                    + "after s1 was removed, and survive.")
+                .explain(
+                    "for (int i = sessions.size() - 1; i >= 0; i--) {")
+                .xp(20))
+            .mistakes(
+                new String[]{"Removing inside an enhanced for",
+                    "ConcurrentModificationException."},
+                new String[]{"Removing in a forward index loop",
+                    "Skips the item after each removal."},
+                new String[]{"Starting at size()",
+                    "The last index is size() - 1."})
+            .cyber(
+                "Clean-up code is security code: expired sessions, revoked "
+                + "tokens, stale firewall rules. A clean-up that silently "
+                + "skips entries leaves exactly the ones that should be "
+                + "gone - a session token that still works after expiry is "
+                + "a gift to anyone who stole it. Walk backwards when you "
+                + "remove, and check the result afterwards.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"x\");",
+                    "a.add(\"x\");",
+                    "a.add(\"y\");",
+                    "for (int i = 0; i < a.size(); i++) {",
+                    "    if (a.get(i).equals(\"x\")) {",
+                    "        a.remove(i);",
+                    "    }",
+                    "}",
+                    "System.out.println(a);")
+                .accept("[x, y]")
+                .hints("After removing index 0, what is at index 0?",
+                       "i is 1 next.")
+                .explain(
+                    "[x, y]. The second x slid into index 0 just as i moved "
+                    + "on to 1, so it was never checked.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Which loop can safely remove items from a list?")
+                .choices("for (String s : list)",
+                         "for (int i = 0; i < list.size(); i++)",
+                         "for (int i = list.size() - 1; i >= 0; i--)",
+                         "None of them")
+                .accept("3", "c")
+                .hints("Which one only shifts checked items?",
+                       "Backwards.")
+                .explain(
+                    "c. Going backwards, a removal only moves items behind "
+                    + "i, which have already been checked.")
+                .xp(10))
+            .recap(
+                "    reading:   either loop\n"
+                + "    removing:  for (int i = list.size() - 1; i >= 0; i--)\n"
+                + "\n"
+                + "Never remove inside an enhanced for. A forward index loop "
+                + "skips the item after each removal.")
+            .next("Next: why a list of numbers says Integer, not int."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Numbers in a List", 4)
+            .brief(
+                "The port monitor wants a growing list of every port that "
+                + "received traffic. ArrayList<int> will not compile. Lists "
+                + "hold objects, and int is not one - so Java wraps each "
+                + "number in a small object called Integer. Mostly you will "
+                + "not notice. The two places you will, matter.")
+            .willLearn("Wrapper classes")
+            .whyUseful(
+                "Lists of numbers are everywhere - ports, counts, response "
+                + "times. Knowing what Integer is explains the type you "
+                + "write, and the two traps it brings: comparing with == "
+                + "and the empty value null.")
+            .concept("Wrapper classes",
+                "Each primitive type has a WRAPPER CLASS - an object that "
+                + "holds one value of it:\n"
+                + "\n"
+                + "    int      Integer         double   Double\n"
+                + "    boolean  Boolean         char     Character\n"
+                + "\n"
+                + "A list of numbers is written with the wrapper:\n"
+                + "\n"
+                + "    ArrayList<Integer> ports = new ArrayList<>();\n"
+                + "\n"
+                + "Java converts between the two by itself:\n"
+                + "\n"
+                + "    ports.add(443);          int -> Integer (AUTOBOXING)\n"
+                + "    int p = ports.get(0);    Integer -> int (UNBOXING)\n"
+                + "\n"
+                + "So arithmetic, comparisons with < and >, and enhanced for "
+                + "loops with int all just work. Two things do not:\n"
+                + "\n"
+                + "TRAP 1: == on two Integers compares the OBJECTS, like == "
+                + "on Strings. Java keeps one shared object for each small "
+                + "value (-128 to 127), so == seems to work in testing - "
+                + "then fails for 443 or 8080. Use equals, or unbox to int "
+                + "first.\n"
+                + "\n"
+                + "TRAP 2: an Integer can be null. Unboxing null into an int "
+                + "crashes with a NullPointerException.\n"
+                + "\n"
+                + "You have met the wrapper classes before: Integer.parseInt "
+                + "is a static method of Integer, and Character.isDigit one "
+                + "of Character.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Integer> ports = new ArrayList<>();",
+                "        ports.add(22);",
+                "        ports.add(8080);",
+                "        ports.add(8080);",
+                "        int total = 0;",
+                "        for (int p : ports) {",
+                "            total += p;",
+                "        }",
+                "        System.out.println(ports + \" sum \" + total);",
+                "        Integer a = ports.get(1);",
+                "        Integer b = ports.get(2);",
+                "        System.out.println(\"== says \" + (a == b));",
+                "        System.out.println(\"equals says \" + a.equals(b));",
+                "        int x = a;",
+                "        int y = b;",
+                "        System.out.println(\"ints say \" + (x == y));",
+                "    }",
+                "}")
+            .exampleOutput(
+                "[22, 8080, 8080] sum 16182",
+                "== says false",
+                "equals says true",
+                "ints say true")
+            .lineByLine(
+                new String[]{"ArrayList<Integer>",
+                    "The wrapper in the angle brackets; int is not allowed "
+                    + "there."},
+                new String[]{"ports.add(22);",
+                    "Autoboxing: the int 22 is wrapped for you."},
+                new String[]{"a == b",
+                    "Two separate Integer objects that both hold 8080: "
+                    + "false."},
+                new String[]{"int x = a;",
+                    "Unboxing. Two ints compare by value, so == is right "
+                    + "again."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<Integer> t = new java.util.ArrayList<>();",
+                    "t.add(120);",
+                    "t.add(80);",
+                    "int first = t.get(0);",
+                    "System.out.println(first + t.get(1));")
+                .accept("200")
+                .hints("Unboxed Integers are just numbers.",
+                       "120 + 80.")
+                .explain(
+                    "200. get(1) is unboxed for the addition, so + adds the "
+                    + "two numbers.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "java.util.ArrayList<Integer> a = new java.util.ArrayList<>();",
+                    "java.util.ArrayList<int> b = new java.util.ArrayList<>();",
+                    "a.add(5);",
+                    "System.out.println(a);")
+                .accept("2", "line 2")
+                .hints("What may go in the angle brackets?",
+                       "Only object types.")
+                .explain(
+                    "Line 2: 'unexpected type'. A list's type must be a "
+                    + "class, so a list of ints is ArrayList<Integer>.")
+                .xp(20))
+            .objective(
+                "Check a port against the list - correctly for any number.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Integer> open = new ArrayList<>();",
+                "        open.add(443);",
+                "        open.add(8443);",
+                "        Integer seen = 8443;",
+                "        // the if: open.get(1) and seen hold the same number",
+                "            System.out.println(\"Port \" + seen + \" is expected\");",
+                "        } else {",
+                "            System.out.println(\"Port \" + seen + \" is NOT expected\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that compares open.get(1) with seen by VALUE, "
+                + "using equals.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (open.get(1).equals(seen)) {",
+                        "if(open.get(1).equals(seen)) {",
+                        "if (open.get(1).equals(seen)){",
+                        "if (seen.equals(open.get(1))) {")
+                .hints(
+                    "== would compare two objects.",
+                    "Call equals on one Integer, passing the other.",
+                    "if (open.get(1).equals(seen)) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<Integer> open = new ArrayList<>();",
+                    "        open.add(443);",
+                    "        open.add(8443);",
+                    "        Integer seen = 8443;",
+                    "        if (open.get(1).equals(seen)) {",
+                    "            System.out.println(\"Port \" + seen + \" is expected\");",
+                    "        } else {",
+                    "            System.out.println(\"Port \" + seen + \" is NOT expected\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "equals compares the numbers inside the two Integer "
+                    + "objects: 8443 and 8443, so it prints 'Port 8443 is "
+                    + "expected'.\n"
+                    + "\n"
+                    + "With == the two objects are different, and a port that "
+                    + "IS on the list would be reported as unexpected. The "
+                    + "same test with port 80 would have passed with == - "
+                    + "which is how this bug survives testing.")
+                .explain(
+                    "if (open.get(1).equals(seen)) { - compares the values.")
+                .xp(20))
+            .mistakes(
+                new String[]{"ArrayList<int>",
+                    "Use the wrapper: ArrayList<Integer>."},
+                new String[]{"== between two Integers",
+                    "Right for small numbers only. Use equals."},
+                new String[]{"Unboxing a null",
+                    "NullPointerException. Check for null first."})
+            .cyber(
+                "The == trap is dangerous because it passes the tests. "
+                + "Checks written against small test values - user 1, "
+                + "port 22, role 3 - behave, and the same code compares "
+                + "wrongly in production with user 48213 or port 8443. An "
+                + "access check that fails wrongly locks people out; one "
+                + "written as 'not equal means allowed' lets them in. Use "
+                + "equals, or compare ints.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "Integer a = 100;",
+                    "Integer b = 100;",
+                    "Integer c = 1000;",
+                    "Integer d = 1000;",
+                    "System.out.println((a == b) + \" \" + (c == d));")
+                .accept("true false")
+                .hints("Small values share one object.",
+                       "1000 is outside -128 to 127.")
+                .explain(
+                    "true false. 100 comes from Java's shared set of small "
+                    + "Integers, so a and b are the same object; 1000 is not, "
+                    + "so c and d are two objects. This is why == only "
+                    + "SEEMS to work.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What is the wrapper class for double?")
+                .choices("Dbl", "Double", "double", "Float")
+                .accept("2", "b")
+                .hints("Wrapper names start with a capital.",
+                       "Most are just the primitive name, capitalised.")
+                .explain(
+                    "b. Double. Only int (Integer) and char (Character) have "
+                    + "wrapper names that are not simply capitalised.")
+                .xp(10))
+            .recap(
+                "    ArrayList<Integer>    not ArrayList<int>\n"
+                + "    add(5)                autoboxing\n"
+                + "    int x = list.get(0)   unboxing\n"
+                + "    a.equals(b)           compare Integers by value\n"
+                + "\n"
+                + "== on Integers is only safe for -128 to 127. Unboxing "
+                + "null crashes.")
+            .next("Next: the trap in remove with a list of numbers."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "The remove(int) Trap", 4)
+            .brief(
+                "Port 1 was closed, so the engineer wrote ports.remove(1) "
+                + "to take it off the open-ports list. The code ran without "
+                + "complaint - and port 80 vanished instead, while port 1 "
+                + "stayed. With a list of Integers, remove has two meanings, "
+                + "and Java picked the other one.")
+            .willLearn("The remove(int) trap")
+            .whyUseful(
+                "This is one of the best-known traps in Java: it compiles, "
+                + "it usually runs, and it removes the wrong thing. Once you "
+                + "know the rule behind it, the fix is one word.")
+            .concept("The remove(int) trap",
+                "Mission 20 met remove's two forms:\n"
+                + "\n"
+                + "    remove(int index)       removes the item AT index\n"
+                + "    remove(Object value)    removes the first match\n"
+                + "\n"
+                + "With a list of Strings, remove(\"temp01\") can only mean "
+                + "the value. With a list of Integers, remove(1) could mean "
+                + "either - and Java always picks the int form, because 1 "
+                + "is an int and needs no boxing. So:\n"
+                + "\n"
+                + "    ports = [1, 80, 443]\n"
+                + "    ports.remove(1)     removes INDEX 1: the 80\n"
+                + "    ports.remove(443)   index 443: crash\n"
+                + "\n"
+                + "To remove a VALUE, hand remove an Integer object, not an "
+                + "int:\n"
+                + "\n"
+                + "    ports.remove(Integer.valueOf(1))    removes the 1\n"
+                + "\n"
+                + "Integer.valueOf(1) makes the wrapped value, so the Object "
+                + "form is the one chosen.\n"
+                + "\n"
+                + "contains and indexOf have no second form, so contains(1) "
+                + "and indexOf(1) do look for the value 1. Only remove is a "
+                + "trap.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Integer> ports = new ArrayList<>();",
+                "        ports.add(1);",
+                "        ports.add(80);",
+                "        ports.add(443);",
+                "        ports.remove(1);",
+                "        System.out.println(\"remove(1):  \" + ports);",
+                "        ports.add(1, 80);",
+                "        ports.remove(Integer.valueOf(1));",
+                "        System.out.println(\"valueOf(1): \" + ports);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "remove(1):  [1, 443]",
+                "valueOf(1): [80, 443]")
+            .lineByLine(
+                new String[]{"ports.remove(1);",
+                    "1 is an int, so it is taken as an INDEX: the 80 goes."},
+                new String[]{"ports.add(1, 80);",
+                    "Puts 80 back at index 1 to try again."},
+                new String[]{"ports.remove(Integer.valueOf(1));",
+                    "An Integer object is a VALUE: the first 1 goes."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<Integer> a = new java.util.ArrayList<>();",
+                    "a.add(5);",
+                    "a.add(0);",
+                    "a.add(9);",
+                    "a.remove(0);",
+                    "System.out.println(a);")
+                .accept("[0, 9]")
+                .hints("remove(0) with an int argument...",
+                       "...removes index 0.")
+                .explain(
+                    "[0, 9]. The 5 at index 0 went; the value 0 is still "
+                    + "there. Integer.valueOf(0) would have removed the 0.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "ids is [7, 3, 12]. Which call removes the value 3?")
+                .choices("ids.remove(3)",
+                         "ids.remove(1)",
+                         "ids.remove(Integer.valueOf(3))",
+                         "Both b and c")
+                .accept("4", "d")
+                .hints("remove(1) removes index 1 - what is there?",
+                       "valueOf(3) removes the value 3.")
+                .explain(
+                    "d. 3 happens to sit at index 1, so both work here. But "
+                    + "only c says what it means - and a would crash, since "
+                    + "index 3 does not exist.")
+                .xp(15))
+            .objective(
+                "Close a port by its number, not its position.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Integer> open = new ArrayList<>();",
+                "        open.add(2);",
+                "        open.add(22);",
+                "        open.add(0);",
+                "        int closing = 2;",
+                "        // remove the VALUE closing from open",
+                "        System.out.println(open);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that removes the port number held in "
+                + "closing - the value, not the item at that index.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the remove line.")
+                .accept("open.remove(Integer.valueOf(closing));",
+                        "open.remove((Integer) closing);")
+                .hints(
+                    "open.remove(closing) would remove index 2.",
+                    "Wrap closing in an Integer first.",
+                    "open.remove(Integer.valueOf(closing));")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<Integer> open = new ArrayList<>();",
+                    "        open.add(2);",
+                    "        open.add(22);",
+                    "        open.add(0);",
+                    "        int closing = 2;",
+                    "        open.remove(Integer.valueOf(closing));",
+                    "        System.out.println(open);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Integer.valueOf(closing) is an Integer holding 2, so "
+                    + "remove looks for the value 2 and takes it out: "
+                    + "[22, 0].\n"
+                    + "\n"
+                    + "open.remove(closing) would also compile and run - but "
+                    + "it removes index 2, the 0, and prints [2, 22]. Port 2 "
+                    + "stays open and a different entry disappears.")
+                .explain(
+                    "open.remove(Integer.valueOf(closing)); - by value.")
+                .xp(20))
+            .mistakes(
+                new String[]{"remove(port) on an Integer list",
+                    "Removes the item at that INDEX."},
+                new String[]{"Assuming contains has the trap",
+                    "contains and indexOf always look for the value."},
+                new String[]{"Testing with values that are also indexes",
+                    "The bug hides. Test with 443 and it crashes."})
+            .cyber(
+                "A firewall tool that removes the wrong entry does two "
+                + "kinds of damage at once: the port that should be closed "
+                + "stays open, and an unrelated rule silently disappears. "
+                + "No error is raised, so nothing prompts anyone to look. "
+                + "Code that edits security lists should say exactly what "
+                + "it removes, and check the list afterwards.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<Integer> a = new java.util.ArrayList<>();",
+                    "a.add(10);",
+                    "a.add(20);",
+                    "System.out.println(a.contains(20) + \" \" + a.indexOf(10));")
+                .accept("true 0")
+                .hints("contains and indexOf look for values.",
+                       "10 is at index 0.")
+                .explain(
+                    "true 0. Unlike remove, contains and indexOf have no "
+                    + "index form, so they always search for the value.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why does list.remove(1) on an ArrayList<Integer> "
+                    + "remove by index?")
+                .choices("Lists cannot remove values",
+                         "1 is an int, and remove(int index) fits it without "
+                         + "boxing",
+                         "Java picks at random",
+                         "Integers are always indexes")
+                .accept("2", "b")
+                .hints("Which form needs no conversion?",
+                       "An int fits remove(int) exactly.")
+                .explain(
+                    "b. Java prefers the form that fits the argument as it "
+                    + "is. An int matches remove(int index) directly; the "
+                    + "value form would need boxing first.")
+                .xp(10))
+            .recap(
+                "    list.remove(i)                   by INDEX (int)\n"
+                + "    list.remove(Integer.valueOf(v))  by VALUE\n"
+                + "\n"
+                + "Only a list of Integers has this trap. contains and "
+                + "indexOf always search by value.")
+            .next("Next: choosing between an array and a list."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "Array or List?", 3)
+            .brief(
+                "Two new tools are being designed. One keeps a count for "
+                + "each of the 24 hours of the day. The other collects every "
+                + "address that failed a check tonight. Both are 'many "
+                + "values', but the right container is different - and "
+                + "real programs often move data from one to the other.")
+            .willLearn("Arrays or ArrayList")
+            .whyUseful(
+                "Choosing the right container makes code shorter and "
+                + "clearer. And since split and many library methods give "
+                + "back arrays, turning an array into a list - and back - "
+                + "is a daily job.")
+            .concept("Arrays or ArrayList",
+                "Choose by asking what the data does:\n"
+                + "\n"
+                + "    ARRAY when                 ARRAYLIST when\n"
+                + "    the size is fixed          the size changes\n"
+                + "    and known up front         as you go\n"
+                + "    primitives, like int[]     adding and removing\n"
+                + "    a grid: int[][]            searching with contains\n"
+                + "\n"
+                + "24 hours, 7 days, the 4 fields of a log line: arrays. "
+                + "Tonight's failures, a watchlist, an incident queue: "
+                + "lists.\n"
+                + "\n"
+                + "ARRAY TO LIST - add each item in a loop, often filtering "
+                + "as you go:\n"
+                + "\n"
+                + "    for (String p : parts) {\n"
+                + "        if (!p.isEmpty()) {\n"
+                + "            list.add(p);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "LIST TO ARRAY - make an array of the list's size, then "
+                + "copy by index:\n"
+                + "\n"
+                + "    int[] out = new int[list.size()];\n"
+                + "    for (int i = 0; i < list.size(); i++) {\n"
+                + "        out[i] = list.get(i);\n"
+                + "    }\n"
+                + "\n"
+                + "A common shape: collect into a list while the size is "
+                + "unknown, then turn it into an array once it is final.")
+            .example(
+                "import java.util.ArrayList;",
+                "import java.util.Arrays;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"22,,80,443,,8080\";",
+                "        String[] parts = line.split(\",\");",
+                "        ArrayList<Integer> ports = new ArrayList<>();",
+                "        for (String p : parts) {",
+                "            if (!p.isEmpty()) {",
+                "                ports.add(Integer.parseInt(p));",
+                "            }",
+                "        }",
+                "        int[] fixed = new int[ports.size()];",
+                "        for (int i = 0; i < ports.size(); i++) {",
+                "            fixed[i] = ports.get(i);",
+                "        }",
+                "        System.out.println(parts.length + \" pieces\");",
+                "        System.out.println(ports.size() + \" ports: \" + ports);",
+                "        System.out.println(Arrays.toString(fixed));",
+                "    }",
+                "}")
+            .exampleOutput(
+                "6 pieces",
+                "4 ports: [22, 80, 443, 8080]",
+                "[22, 80, 443, 8080]")
+            .lineByLine(
+                new String[]{"line.split(\",\")",
+                    "Six pieces, two of them empty (mission 17)."},
+                new String[]{"if (!p.isEmpty())",
+                    "Skips the empty pieces, so only real ports go in."},
+                new String[]{"new int[ports.size()]",
+                    "Now the count is known, a fixed array fits exactly."},
+                new String[]{"fixed[i] = ports.get(i);",
+                    "Each Integer is unboxed into an int slot."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] words = {\"a\", \"\", \"b\", \"\"};",
+                    "java.util.ArrayList<String> kept = new java.util.ArrayList<>();",
+                    "for (String w : words) {",
+                    "    if (!w.isEmpty()) {",
+                    "        kept.add(w);",
+                    "    }",
+                    "}",
+                    "System.out.println(words.length + \" \" + kept.size());")
+                .accept("4 2")
+                .hints("The array keeps every slot.",
+                       "The list only got the non-empty ones.")
+                .explain(
+                    "4 2. The array still has 4 slots; the list grew to "
+                    + "exactly the 2 items that passed the filter.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which is the best fit for an ARRAY?")
+                .choices("Accounts to disable, found during a scan",
+                         "Failed logins per day of the week",
+                         "Alerts waiting for an analyst",
+                         "Addresses added to a blocklist over time")
+                .accept("2", "b")
+                .hints("Which has a size fixed in advance?",
+                       "There are always 7 days.")
+                .explain(
+                    "b. Seven days, always - a tally array of 7 ints. The "
+                    + "others grow and shrink, which is a list's job.")
+                .xp(10))
+            .objective(
+                "Collect the flagged users into a list.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] users = {\"ann\", \"bob\", \"cy\", \"dee\"};",
+                "        int[] fails = {0, 6, 1, 9};",
+                "        ArrayList<String> flagged = new ArrayList<>();",
+                "        for (int i = 0; i < users.length; i++) {",
+                "            if (fails[i] > 5) {",
+                "                // add this user to flagged",
+                "            }",
+                "        }",
+                "        System.out.println(flagged);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that adds the user at index i to the list "
+                + "flagged.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the add line.")
+                .accept("flagged.add(users[i]);")
+                .hints(
+                    "Lists grow with add.",
+                    "The user at index i is users[i].",
+                    "flagged.add(users[i]);")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] users = {\"ann\", \"bob\", \"cy\", \"dee\"};",
+                    "        int[] fails = {0, 6, 1, 9};",
+                    "        ArrayList<String> flagged = new ArrayList<>();",
+                    "        for (int i = 0; i < users.length; i++) {",
+                    "            if (fails[i] > 5) {",
+                    "                flagged.add(users[i]);",
+                    "            }",
+                    "        }",
+                    "        System.out.println(flagged);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The arrays are fixed data, read by index. The list "
+                    + "starts empty and gains an entry only when a user is "
+                    + "over the limit: [bob, dee].\n"
+                    + "\n"
+                    + "An array for the result would need its size before "
+                    + "the loop - which is exactly what nobody knows yet.")
+                .explain(
+                    "flagged.add(users[i]); - the list grows by one.")
+                .xp(15))
+            .mistakes(
+                new String[]{"An array for results of unknown size",
+                    "Guessing a size wastes slots or runs out."},
+                new String[]{"A list for a fixed tally",
+                    "int[24] is simpler and clearer."},
+                new String[]{"out[i] = list.get(i) into a too-small array",
+                    "Size it from list.size()."})
+            .cyber(
+                "Collection choice shows up in security reviews. A fixed "
+                + "array for findings of unknown size either drops results "
+                + "when it fills - silently losing alerts - or crashes. A "
+                + "list with no limit can be grown by an attacker until "
+                + "memory runs out. Pick the container for how the data "
+                + "really behaves, and put a sensible cap on anything that "
+                + "grows with outside input.")
+            .check(new Task(Task.CHOICE,
+                    "How do you make an int[] from an ArrayList<Integer> "
+                    + "called list?")
+                .choices("int[] a = list;",
+                         "int[] a = new int[list.size()]; then copy with a "
+                         + "loop",
+                         "int[] a = list.toString();",
+                         "int[] a = new int[list.length];")
+                .accept("2", "b")
+                .hints("A list is not an array.",
+                       "Size the array, then copy each item.")
+                .explain(
+                    "b. The array is made at the list's size, then filled "
+                    + "with a[i] = list.get(i). d fails: lists have size(), "
+                    + "not length.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Which is the best fit for an ArrayList?")
+                .choices("The 4 fields of one log line",
+                         "Counts for each of 24 hours",
+                         "Usernames that fail tonight's password audit",
+                         "A 7 by 24 grid of logins")
+                .accept("3", "c")
+                .hints("Which one's size is unknown?",
+                       "Nobody knows how many will fail.")
+                .explain(
+                    "c. How many fail is unknown until the audit runs. The "
+                    + "others have sizes fixed in advance.")
+                .xp(10))
+            .recap(
+                "    fixed size, primitives, grids   array\n"
+                + "    grows and shrinks, searching    ArrayList\n"
+                + "\n"
+                + "Array to list: loop and add. List to array: new "
+                + "int[list.size()], then copy by index.")
+            .next("Next: putting things in order."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "Putting Things in Order", 4)
+            .brief(
+                "The performance review wants the median response time - "
+                + "the middle one when they are in order - and the account "
+                + "list printed alphabetically. Sorting by hand is a "
+                + "classic exercise for later. Java's library already sorts "
+                + "arrays and lists in one call, with two surprises worth "
+                + "knowing.")
+            .willLearn("Sorting")
+            .whyUseful(
+                "Sorted data makes the smallest, the largest, the middle "
+                + "and the duplicates easy to find, and sorted reports are "
+                + "far easier to read. The library sort is fast and "
+                + "correct - but it sorts text in a way people do not "
+                + "expect.")
+            .concept("Sorting",
+                "Arrays and lists each have a sort, in their own helper "
+                + "class:\n"
+                + "\n"
+                + "    import java.util.Arrays;\n"
+                + "    Arrays.sort(ms);            an array, in place\n"
+                + "\n"
+                + "    import java.util.Collections;\n"
+                + "    Collections.sort(users);    a list, in place\n"
+                + "\n"
+                + "Both sort smallest first, and both change the ORIGINAL - "
+                + "nothing is returned. If the old order matters (a log's "
+                + "order is its timeline), sort a copy (mission 11).\n"
+                + "\n"
+                + "Numbers sort as numbers. Text sorts character by "
+                + "character, by character code, which brings two "
+                + "surprises:\n"
+                + "\n"
+                + "    capitals first    [Zed, alice, bob]\n"
+                + "    digits as text    [10, 100, 9]\n"
+                + "\n"
+                + "Every capital letter comes before every small letter, and "
+                + "\"100\" comes before \"9\" because '1' comes before '9'. "
+                + "Numbers stored as text must be parsed to sort as "
+                + "numbers.\n"
+                + "\n"
+                + "Parallel arrays (mission 15) cannot be sorted this way: "
+                + "sorting one array leaves the other behind.")
+            .example(
+                "import java.util.ArrayList;",
+                "import java.util.Arrays;",
+                "import java.util.Collections;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] ms = {310, 95, 120, 88, 142};",
+                "        int[] sorted = Arrays.copyOf(ms, ms.length);",
+                "        Arrays.sort(sorted);",
+                "        System.out.println(\"Sorted: \" + Arrays.toString(sorted));",
+                "        System.out.println(\"Median: \" + sorted[sorted.length / 2]);",
+                "        System.out.println(\"Log order: \" + Arrays.toString(ms));",
+                "        ArrayList<String> users = new ArrayList<>();",
+                "        users.add(\"mpatel\");",
+                "        users.add(\"Zed\");",
+                "        users.add(\"alice\");",
+                "        Collections.sort(users);",
+                "        System.out.println(users);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Sorted: [88, 95, 120, 142, 310]",
+                "Median: 120",
+                "Log order: [310, 95, 120, 88, 142]",
+                "[Zed, alice, mpatel]")
+            .lineByLine(
+                new String[]{"Arrays.sort(sorted);",
+                    "Sorts the copy in place. Nothing is returned."},
+                new String[]{"sorted[sorted.length / 2]",
+                    "5 / 2 is 2: the middle of five sorted values."},
+                new String[]{"Log order: ...",
+                    "The original is untouched, because a copy was sorted."},
+                new String[]{"[Zed, alice, mpatel]",
+                    "Capital Z sorts before every small letter."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] v = {\"9\", \"10\", \"100\"};",
+                    "java.util.Arrays.sort(v);",
+                    "System.out.println(java.util.Arrays.toString(v));")
+                .accept("[10, 100, 9]")
+                .hints("These are Strings, compared character by character.",
+                       "'1' comes before '9'.")
+                .explain(
+                    "[10, 100, 9]. Text is compared from the first "
+                    + "character: both 1s beat 9, and \"10\" is a prefix of "
+                    + "\"100\", so it comes first.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {5, 1, 4};",
+                    "int[] b = a;",
+                    "java.util.Arrays.sort(b);",
+                    "System.out.println(a[0]);")
+                .accept("1")
+                .hints("Is b a copy? (mission 10)",
+                       "b = a shares one array.")
+                .explain(
+                    "1. b is just another name for a's array, so sorting "
+                    + "\"b\" sorted a. A real copy needs Arrays.copyOf.")
+                .xp(20))
+            .objective(
+                "Print the allowlist in order.")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> allow = new ArrayList<>();",
+                "        allow.add(\"web02\");",
+                "        allow.add(\"db01\");",
+                "        allow.add(\"web01\");",
+                "        // sort allow",
+                "        System.out.println(allow);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that sorts the list allow.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the sort line.")
+                .accept("Collections.sort(allow);")
+                .hints(
+                    "Lists are sorted by Collections, not Arrays.",
+                    "It takes the list and returns nothing.",
+                    "Collections.sort(allow);")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "import java.util.Collections;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> allow = new ArrayList<>();",
+                    "        allow.add(\"web02\");",
+                    "        allow.add(\"db01\");",
+                    "        allow.add(\"web01\");",
+                    "        Collections.sort(allow);",
+                    "        System.out.println(allow);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Collections.sort rearranges the list itself: [db01, "
+                    + "web01, web02]. d comes before w, and web01 before "
+                    + "web02 because '1' comes before '2'.\n"
+                    + "\n"
+                    + "The zero in web01 matters: with names like web2 and "
+                    + "web10, text order would put web10 first. Padding "
+                    + "numbers in names keeps text order sensible.")
+                .explain(
+                    "Collections.sort(allow); - sorts the list in place.")
+                .xp(15))
+            .mistakes(
+                new String[]{"allow = Collections.sort(allow);",
+                    "sort returns nothing: it changes the list itself."},
+                new String[]{"Sorting the original log",
+                    "Its order was the timeline. Sort a copy."},
+                new String[]{"Sorting numbers kept as text",
+                    "\"100\" sorts before \"9\". Parse them first."})
+            .cyber(
+                "Order is evidence. A log sorted in place has lost the "
+                + "sequence of events - which login came before which "
+                + "download - and an incident timeline can no longer be "
+                + "rebuilt from it. Sort copies for reports, keep the "
+                + "original as recorded. And watch text order in reports: "
+                + "sorting 'Admin' away from 'admin' can hide that two "
+                + "look-alike accounts exist.")
+            .check(new Task(Task.CHOICE,
+                    "Which call sorts an int[] called times?")
+                .choices("Collections.sort(times);",
+                         "Arrays.sort(times);",
+                         "times.sort();",
+                         "times = Arrays.sort(times);")
+                .accept("2", "b")
+                .hints("Arrays for arrays, Collections for lists.",
+                       "sort returns nothing.")
+                .explain(
+                    "b. Arrays.sort sorts an array in place. d does not "
+                    + "compile, because sort returns nothing to assign.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {7, 2, 9, 4};",
+                    "java.util.Arrays.sort(a);",
+                    "System.out.println(a[0] + \" \" + a[a.length - 1]);")
+                .accept("2 9")
+                .hints("After sorting, the smallest is first.",
+                       "And the largest is last.")
+                .explain(
+                    "2 9. Once sorted, the minimum and maximum sit at the "
+                    + "two ends of the array.")
+                .xp(10))
+            .recap(
+                "    Arrays.sort(array)          import java.util.Arrays\n"
+                + "    Collections.sort(list)      import java.util.Collections\n"
+                + "\n"
+                + "Both sort in place and return nothing. Text: capitals "
+                + "first, digits as characters. Sort a copy to keep the "
+                + "original order.")
+            .next("Next: putting it together - a live watchlist."));
     }
 }
