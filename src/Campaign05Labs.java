@@ -1243,5 +1243,724 @@ public class Campaign05Labs {
                 "Names seen: 5",
                 "Distinct: 2",
                 "List: zed, ann"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(11), "Sorted Scores", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M025")
+            .brief(
+                "A vulnerability scan gives each host a risk score from 0 to "
+                + "100, in scan order. The report needs the scores sorted "
+                + "and the median - the middle value, which one extreme "
+                + "host cannot drag around the way it drags an average. "
+                + "The scan order is evidence, so it must survive.")
+            .practises("Sorting", "Copying arrays", "Validating every piece")
+            .spec(
+                "Prompt Scores: and read one line of whole numbers separated by single spaces.",
+                "Any piece that is not digits only, or is above 100, or an empty line: print INVALID and stop.",
+                "sortedCopy(scores) returns a sorted copy and leaves scores unchanged.",
+                "median(sorted) returns the middle value of a sorted array as a double; with an even count, the average of the two middle values.",
+                "Print As found: , Sorted: (both as Arrays.toString shows them) and Median: <value>.")
+            .needsMethod("static int[] sortedCopy(int[])")
+            .needsMethod("static double median(int[])")
+            .starter(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Scores: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // validate every piece, parse, then report",
+                "    }",
+                "",
+                "    // declare sortedCopy(int[] a) and median(int[] sorted)",
+                "}")
+            .hints(
+                "An empty line splits into ONE empty piece, so an "
+                + "'is it all digits and not empty' check on each piece "
+                + "catches it too.",
+                "sortedCopy: Arrays.copyOf(a, a.length), then Arrays.sort "
+                + "on the copy, then return the copy.",
+                "Odd length n: the middle is sorted[n / 2]. Even: average "
+                + "sorted[n / 2 - 1] and sorted[n / 2].",
+                "Divide by 2.0, not 2, so the half is kept.")
+            .solution(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Scores: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] scores = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            if (!isScore(parts[i])) {",
+                "                System.out.println(\"INVALID\");",
+                "                return;",
+                "            }",
+                "            scores[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        int[] sorted = sortedCopy(scores);",
+                "        System.out.println(\"As found: \" + Arrays.toString(scores));",
+                "        System.out.println(\"Sorted: \" + Arrays.toString(sorted));",
+                "        System.out.println(\"Median: \" + median(sorted));",
+                "    }",
+                "",
+                "    static boolean isScore(String s) {",
+                "        if (s.isEmpty() || s.length() > 3) {",
+                "            return false;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        return Integer.parseInt(s) <= 100;",
+                "    }",
+                "",
+                "    static int[] sortedCopy(int[] a) {",
+                "        int[] copy = Arrays.copyOf(a, a.length);",
+                "        Arrays.sort(copy);",
+                "        return copy;",
+                "    }",
+                "",
+                "    static double median(int[] sorted) {",
+                "        int n = sorted.length;",
+                "        if (n % 2 == 1) {",
+                "            return sorted[n / 2];",
+                "        }",
+                "        return (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Every piece is validated before anything is parsed, so "
+                + "\"7x\" or an empty line gets INVALID instead of a crash "
+                + "from parseInt. Checking the length (at most 3 digits) "
+                + "before parsing also keeps a huge number from overflowing "
+                + "int before the range check can see it.\n"
+                + "\n"
+                + "sortedCopy sorts a copy because Arrays.sort works in "
+                + "place - sorting scores itself would destroy the As found "
+                + "line. median relies on its argument already being sorted; "
+                + "for an even count it averages the two middle values, "
+                + "dividing by 2.0 so 47.5 is not cut down to 47. The sample "
+                + "shows why the median is used: one host scoring 100 barely "
+                + "moves it.")
+            .sample(Lab.typing("40 12 100 35 38"),
+                "Scores: 40 12 100 35 38",
+                "As found: [40, 12, 100, 35, 38]",
+                "Sorted: [12, 35, 38, 40, 100]",
+                "Median: 38.0")
+            .hidden(Lab.typing("50 45"),
+                "Scores: 50 45",
+                "As found: [50, 45]",
+                "Sorted: [45, 50]",
+                "Median: 47.5")
+            .hidden(Lab.typing("7"),
+                "Scores: 7",
+                "As found: [7]",
+                "Sorted: [7]",
+                "Median: 7.0")
+            .hidden(Lab.typing("0 100 0 100"),
+                "Scores: 0 100 0 100",
+                "As found: [0, 100, 0, 100]",
+                "Sorted: [0, 0, 100, 100]",
+                "Median: 50.0")
+            .hidden(Lab.typing("40 7x 12"),
+                "Scores: 40 7x 12",
+                "INVALID")
+            .hidden(Lab.typing("40 101"),
+                "Scores: 40 101",
+                "INVALID")
+            .hidden(Lab.typing(""),
+                "Scores:",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(12), "Top Offender", Lab.MEDIUM)
+            .after("C05-M028")
+            .brief(
+                "Read the overnight authentication log one line at a time "
+                + "until END. Count the failed logins per account in two "
+                + "lists that grow together, report every account that "
+                + "failed, and name the top offender - counting, not "
+                + "crashing on, the lines that are malformed.")
+            .practises("Counting per key", "ArrayList", "Skipping malformed input")
+            .spec(
+                "Keep two static lists: names (ArrayList<String>) and counts (ArrayList<Integer>).",
+                "Repeatedly prompt Log: and read a line (trim it) until the line is END.",
+                "A line must be exactly two pieces split at a single space: a result (FAIL or OK) and a user. Anything else counts as malformed.",
+                "record(user) adds one failure for user (lower-cased): a new user joins both lists with 1; a known one's count goes up by 1.",
+                "After END, print <user>: <count> for each user with failures, in order of first failure.",
+                "topIndex(counts) returns the index of the highest count (the first on a tie). Print Top: <user> (<count>), or Top: (none) when there were no failures.",
+                "Print Malformed: <count>.")
+            .needsMethod("static void record(String)")
+            .needsMethod("static int topIndex(ArrayList<Integer>)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> names = new ArrayList<>();",
+                "    static ArrayList<Integer> counts = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int malformed = 0;",
+                "        // read until END, then report",
+                "    }",
+                "",
+                "    // declare record(String user) and topIndex(...) here",
+                "}")
+            .hints(
+                "Split each line with split(\" \"). Malformed means the "
+                + "length is not 2, or the first piece is neither FAIL nor OK.",
+                "In record: int at = names.indexOf(user); -1 means new - add "
+                + "to BOTH lists.",
+                "A known user: counts.set(at, counts.get(at) + 1);",
+                "Check counts.isEmpty() before calling topIndex - an empty "
+                + "night has no top offender.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> names = new ArrayList<>();",
+                "    static ArrayList<Integer> counts = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int malformed = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Log: \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String[] p = line.split(\" \");",
+                "            String r = p[0];",
+                "            boolean ok = p.length == 2",
+                "                    && (r.equals(\"FAIL\") || r.equals(\"OK\"));",
+                "            if (!ok) {",
+                "                malformed++;",
+                "            } else if (r.equals(\"FAIL\")) {",
+                "                record(p[1].toLowerCase());",
+                "            }",
+                "        }",
+                "        for (int i = 0; i < names.size(); i++) {",
+                "            System.out.println(names.get(i) + \": \" + counts.get(i));",
+                "        }",
+                "        if (counts.isEmpty()) {",
+                "            System.out.println(\"Top: (none)\");",
+                "        } else {",
+                "            int t = topIndex(counts);",
+                "            System.out.println(\"Top: \" + names.get(t)",
+                "                    + \" (\" + counts.get(t) + \")\");",
+                "        }",
+                "        System.out.println(\"Malformed: \" + malformed);",
+                "    }",
+                "",
+                "    static void record(String user) {",
+                "        int at = names.indexOf(user);",
+                "        if (at == -1) {",
+                "            names.add(user);",
+                "            counts.add(1);",
+                "        } else {",
+                "            counts.set(at, counts.get(at) + 1);",
+                "        }",
+                "    }",
+                "",
+                "    static int topIndex(ArrayList<Integer> c) {",
+                "        int best = 0;",
+                "        for (int i = 1; i < c.size(); i++) {",
+                "            if (c.get(i) > c.get(best)) {",
+                "                best = i;",
+                "            }",
+                "        }",
+                "        return best;",
+                "    }",
+                "}")
+            .walkthrough(
+                "record is the only code that changes the two lists, and it "
+                + "always changes them together: a new user is added to "
+                + "names AND counts, a known user's count is replaced with "
+                + "one more. With a single place that writes them, the lists "
+                + "cannot drift out of step. Keeping them as static fields "
+                + "(Campaign 03) lets record reach them without passing both "
+                + "on every call.\n"
+                + "\n"
+                + "split always returns at least one piece, so p[0] is safe "
+                + "to read; p[1] is only used once && has confirmed exactly "
+                + "two. Malformed lines are counted, not ignored - a burst "
+                + "of them is itself worth reporting. Comparing counts with "
+                + "> inside topIndex unboxes the two Integers, so it "
+                + "compares numbers; == would not have been safe. And an "
+                + "empty night is handled before topIndex, which would "
+                + "otherwise read get(0) from an empty list.")
+            .sample(Lab.typing("FAIL jsmith", "OK mpatel", "FAIL admin", "FAIL Admin", "FAIL jsmith", "FAIL admin", "END"),
+                "Log: FAIL jsmith",
+                "Log: OK mpatel",
+                "Log: FAIL admin",
+                "Log: FAIL Admin",
+                "Log: FAIL jsmith",
+                "Log: FAIL admin",
+                "Log: END",
+                "jsmith: 2",
+                "admin: 3",
+                "Top: admin (3)",
+                "Malformed: 0")
+            .hidden(Lab.typing("OK a", "OK b", "END"),
+                "Log: OK a",
+                "Log: OK b",
+                "Log: END",
+                "Top: (none)",
+                "Malformed: 0")
+            .hidden(Lab.typing("FAIL x", "garbage", "FAIL", "DENY y", "FAIL a b", "FAIL y", "END"),
+                "Log: FAIL x",
+                "Log: garbage",
+                "Log: FAIL",
+                "Log: DENY y",
+                "Log: FAIL a b",
+                "Log: FAIL y",
+                "Log: END",
+                "x: 1",
+                "y: 1",
+                "Top: x (1)",
+                "Malformed: 4")
+            .hidden(Lab.typing("FAIL bob", "FAIL ann", "FAIL ann", "FAIL bob", "END"),
+                "Log: FAIL bob",
+                "Log: FAIL ann",
+                "Log: FAIL ann",
+                "Log: FAIL bob",
+                "Log: END",
+                "bob: 2",
+                "ann: 2",
+                "Top: bob (2)",
+                "Malformed: 0")
+            .hidden(Lab.typing("END"),
+                "Log: END",
+                "Top: (none)",
+                "Malformed: 0"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(13), "Allowlist", Lab.MEDIUM)
+            .after("C05-M029")
+            .brief(
+                "The payment servers may only call out to three approved "
+                + "domains. Check a batch of requested domains against the "
+                + "allowlist: deny by default, normalise first, and match "
+                + "exactly - so the look-alikes a tester will try are all "
+                + "refused.")
+            .practises("Allowlists", "ArrayList", "Exact matching")
+            .spec(
+                "The program's allowlist holds pay.example.com, api.example.com and updates.example.com.",
+                "Prompt Requests (1-6): and read a whole number. Outside 1 to 6: INVALID.",
+                "For each request i from 1, prompt Domain i: and read a line. Tidy it: trim and lower-case.",
+                "isAllowed(allow, domain) is true only when the tidied domain EQUALS an entry.",
+                "After each domain print ALLOW <tidied> or DENY <tidied>.",
+                "Finally print Allowed: <a>, denied: <d>.")
+            .needsMethod("static boolean isAllowed(ArrayList<String>, String)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> allow = new ArrayList<>();",
+                "        allow.add(\"pay.example.com\");",
+                "        allow.add(\"api.example.com\");",
+                "        allow.add(\"updates.example.com\");",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read the count, check each domain, then the totals",
+                "    }",
+                "",
+                "    // declare isAllowed(ArrayList<String> allow, String d)",
+                "}")
+            .hints(
+                "Tidy once in main: input.nextLine().trim().toLowerCase().",
+                "The list's contains compares with equals - exact match, "
+                + "and false for anything not listed.",
+                "Never String's contains, startsWith or endsWith: each "
+                + "lets a look-alike through.",
+                "Two counters, one for each verdict.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> allow = new ArrayList<>();",
+                "        allow.add(\"pay.example.com\");",
+                "        allow.add(\"api.example.com\");",
+                "        allow.add(\"updates.example.com\");",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Requests (1-6): \");",
+                "        int n = Integer.parseInt(input.nextLine().trim());",
+                "        if (n < 1 || n > 6) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        int allowed = 0;",
+                "        int denied = 0;",
+                "        for (int i = 1; i <= n; i++) {",
+                "            System.out.print(\"Domain \" + i + \": \");",
+                "            String d = input.nextLine().trim().toLowerCase();",
+                "            if (isAllowed(allow, d)) {",
+                "                System.out.println(\"ALLOW \" + d);",
+                "                allowed++;",
+                "            } else {",
+                "                System.out.println(\"DENY \" + d);",
+                "                denied++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Allowed: \" + allowed",
+                "                + \", denied: \" + denied);",
+                "    }",
+                "",
+                "    static boolean isAllowed(ArrayList<String> allow, String d) {",
+                "        return allow.contains(d);",
+                "    }",
+                "}")
+            .walkthrough(
+                "The whole check is allow.contains(d): the LIST's contains, "
+                + "which compares the domain with each entry using equals. "
+                + "It is true only for an exact match and false for "
+                + "everything else - including every look-alike and the "
+                + "empty string. That is deny by default in one line.\n"
+                + "\n"
+                + "Normalising in main, before the check, is what lets "
+                + "\" PAY.Example.COM \" through while still refusing "
+                + "pay.example.com.attacker.net and badexample.com. The "
+                + "hidden tests are the tricks a real tester would try: a "
+                + "listed name as a prefix, as a suffix, a parent domain, "
+                + "and nothing at all.")
+            .sample(Lab.typing("3", "pay.example.com", " API.Example.com ", "pay.example.com.attacker.net"),
+                "Requests (1-6): 3",
+                "Domain 1: pay.example.com",
+                "ALLOW pay.example.com",
+                "Domain 2:  API.Example.com",
+                "ALLOW api.example.com",
+                "Domain 3: pay.example.com.attacker.net",
+                "DENY pay.example.com.attacker.net",
+                "Allowed: 2, denied: 1")
+            .hidden(Lab.typing("4", "example.com", "badpay.example.com", "updates.example.com", "updates.example.co"),
+                "Requests (1-6): 4",
+                "Domain 1: example.com",
+                "DENY example.com",
+                "Domain 2: badpay.example.com",
+                "DENY badpay.example.com",
+                "Domain 3: updates.example.com",
+                "ALLOW updates.example.com",
+                "Domain 4: updates.example.co",
+                "DENY updates.example.co",
+                "Allowed: 1, denied: 3")
+            .hidden(Lab.typing("2", "", "pay.example.com."),
+                "Requests (1-6): 2",
+                "Domain 1:",
+                "DENY",
+                "Domain 2: pay.example.com.",
+                "DENY pay.example.com.",
+                "Allowed: 0, denied: 2")
+            .hidden(Lab.typing("1", "UPDATES.EXAMPLE.COM"),
+                "Requests (1-6): 1",
+                "Domain 1: UPDATES.EXAMPLE.COM",
+                "ALLOW updates.example.com",
+                "Allowed: 1, denied: 0")
+            .hidden(Lab.typing("7"),
+                "Requests (1-6): 7",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(14), "Merge Two Lists", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M027")
+            .brief(
+                "Two threat feeds each send a list of bad domains. Before "
+                + "merging them into the blocklist, the analyst wants to "
+                + "see what each feed saw alone, what both agree on, and "
+                + "the merged list - sorted, and with no domain twice.")
+            .practises("Removing duplicates", "remove, contains and indexOf", "Sorting")
+            .spec(
+                "Prompt Feed A: and Feed B: and read one comma-separated line each.",
+                "toList(line) splits at commas, trims and lower-cases each piece, skips empty pieces and duplicates, and returns an ArrayList in first-seen order.",
+                "merged(a, b) returns a new list holding every domain from a and b once, sorted.",
+                "show(list) returns the list's domains sorted and separated by \", \" - or (none) when it is empty - without changing the list.",
+                "Print Only A: , Only B: , Both: and Merged: lines, each followed by show of its list.")
+            .needsMethod("static ArrayList<String> toList(String)")
+            .needsMethod("static String show(ArrayList<String>)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Feed A: \");",
+                "        String lineA = input.nextLine();",
+                "        System.out.print(\"Feed B: \");",
+                "        String lineB = input.nextLine();",
+                "        // build both lists, then the four report lines",
+                "    }",
+                "",
+                "    // declare toList(String line), merged(a, b) and show(list)",
+                "}")
+            .hints(
+                "toList is mission 27's distinct loop over line.split(\",\").",
+                "Only A: each item of a that b does not contain. Both: each "
+                + "item of a that b DOES contain.",
+                "merged: copy a into a new list, add each item of b it does "
+                + "not already contain, then Collections.sort it.",
+                "A small show(list) helper that sorts a copy and joins with "
+                + "\", \" - or returns (none) - keeps main short.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Feed A: \");",
+                "        String lineA = input.nextLine();",
+                "        System.out.print(\"Feed B: \");",
+                "        String lineB = input.nextLine();",
+                "        ArrayList<String> a = toList(lineA);",
+                "        ArrayList<String> b = toList(lineB);",
+                "        ArrayList<String> onlyA = new ArrayList<>();",
+                "        ArrayList<String> both = new ArrayList<>();",
+                "        for (String d : a) {",
+                "            if (b.contains(d)) {",
+                "                both.add(d);",
+                "            } else {",
+                "                onlyA.add(d);",
+                "            }",
+                "        }",
+                "        ArrayList<String> onlyB = new ArrayList<>();",
+                "        for (String d : b) {",
+                "            if (!a.contains(d)) {",
+                "                onlyB.add(d);",
+                "            }",
+                "        }",
+                "        System.out.println(\"Only A: \" + show(onlyA));",
+                "        System.out.println(\"Only B: \" + show(onlyB));",
+                "        System.out.println(\"Both: \" + show(both));",
+                "        System.out.println(\"Merged: \" + show(merged(a, b)));",
+                "    }",
+                "",
+                "    static ArrayList<String> toList(String line) {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (String piece : line.split(\",\")) {",
+                "            String d = piece.trim().toLowerCase();",
+                "            if (!d.isEmpty() && !out.contains(d)) {",
+                "                out.add(d);",
+                "            }",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static ArrayList<String> merged(ArrayList<String> a,",
+                "            ArrayList<String> b) {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (String d : a) {",
+                "            out.add(d);",
+                "        }",
+                "        for (String d : b) {",
+                "            if (!out.contains(d)) {",
+                "                out.add(d);",
+                "            }",
+                "        }",
+                "        Collections.sort(out);",
+                "        return out;",
+                "    }",
+                "",
+                "    static String show(ArrayList<String> list) {",
+                "        if (list.isEmpty()) {",
+                "            return \"(none)\";",
+                "        }",
+                "        ArrayList<String> copy = new ArrayList<>();",
+                "        for (String d : list) {",
+                "            copy.add(d);",
+                "        }",
+                "        Collections.sort(copy);",
+                "        String text = \"\";",
+                "        for (int i = 0; i < copy.size(); i++) {",
+                "            text += (i > 0 ? \", \" : \"\") + copy.get(i);",
+                "        }",
+                "        return text;",
+                "    }",
+                "}")
+            .walkthrough(
+                "toList turns a messy feed line into a clean list: every "
+                + "piece tidied, empty ones dropped, each domain once. After "
+                + "that, the three comparisons are just contains in each "
+                + "direction - a domain from A that B also holds is in both; "
+                + "one it lacks is only in A; and the mirror for B.\n"
+                + "\n"
+                + "merged starts from a NEW list, so neither feed's list is "
+                + "changed by the merge, then adds B's domains only where "
+                + "they are missing. show sorts a copy for the same reason: "
+                + "printing should never rearrange the data it prints. The "
+                + "overlap is often the most useful line - two independent "
+                + "feeds agreeing is strong evidence.")
+            .sample(Lab.typing("evil.test, Phish.example ,malware.test", "malware.test,cnc.test, evil.test"),
+                "Feed A: evil.test, Phish.example ,malware.test",
+                "Feed B: malware.test,cnc.test, evil.test",
+                "Only A: phish.example",
+                "Only B: cnc.test",
+                "Both: evil.test, malware.test",
+                "Merged: cnc.test, evil.test, malware.test, phish.example")
+            .hidden(Lab.typing("a.test,b.test", "c.test,d.test"),
+                "Feed A: a.test,b.test",
+                "Feed B: c.test,d.test",
+                "Only A: a.test, b.test",
+                "Only B: c.test, d.test",
+                "Both: (none)",
+                "Merged: a.test, b.test, c.test, d.test")
+            .hidden(Lab.typing("x.test, X.TEST ,,x.test", "x.test"),
+                "Feed A: x.test, X.TEST ,,x.test",
+                "Feed B: x.test",
+                "Only A: (none)",
+                "Only B: (none)",
+                "Both: x.test",
+                "Merged: x.test")
+            .hidden(Lab.typing("", "z.test,a.test"),
+                "Feed A:",
+                "Feed B: z.test,a.test",
+                "Only A: (none)",
+                "Only B: a.test, z.test",
+                "Both: (none)",
+                "Merged: a.test, z.test")
+            .hidden(Lab.typing(" , ", ""),
+                "Feed A:  ,",
+                "Feed B:",
+                "Only A: (none)",
+                "Only B: (none)",
+                "Both: (none)",
+                "Merged: (none)"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(15), "Rotate an Array", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M011")
+            .brief(
+                "The on-call rota is a list of analysts; each week the "
+                + "first one moves to the back. After k weeks, who is "
+                + "first? Rotating an array by k places - without losing "
+                + "anyone, even when k is bigger than the team - is a neat "
+                + "use of %.")
+            .practises("Returning an array", "Index arithmetic with %", "Copying arrays")
+            .spec(
+                "Prompt Team: and read one comma-separated line of names. Trim each; if any is empty, print INVALID and stop.",
+                "Prompt Weeks: and read a whole number. Negative: print INVALID and stop.",
+                "rotated(team, k) returns a NEW array where slot i holds team[(i + k) % team.length]. team is not changed.",
+                "Print Now: and Rotated by <k>: lines, each listing names separated by \", \".")
+            .needsMethod("static String[] rotated(String[], int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Team: \");",
+                "        String[] team = input.nextLine().split(\",\");",
+                "        // trim and check the names, read weeks, then report",
+                "    }",
+                "",
+                "    // declare rotated(String[] team, int k) here",
+                "}")
+            .hints(
+                "Trim in place with an index loop: team[i] = team[i].trim();",
+                "The new array has team.length slots; fill slot i from "
+                + "(i + k) % team.length.",
+                "% keeps every index in range however large k is: rotating "
+                + "a team of 3 by 7 is the same as by 1.",
+                "A join helper with a \", \" separator prints both lines.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Team: \");",
+                "        String[] team = input.nextLine().split(\",\");",
+                "        for (int i = 0; i < team.length; i++) {",
+                "            team[i] = team[i].trim();",
+                "            if (team[i].isEmpty()) {",
+                "                System.out.println(\"INVALID\");",
+                "                return;",
+                "            }",
+                "        }",
+                "        System.out.print(\"Weeks: \");",
+                "        int k = Integer.parseInt(input.nextLine().trim());",
+                "        if (k < 0) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        System.out.println(\"Now: \" + joined(team));",
+                "        System.out.println(\"Rotated by \" + k + \": \"",
+                "                + joined(rotated(team, k)));",
+                "    }",
+                "",
+                "    static String[] rotated(String[] team, int k) {",
+                "        String[] out = new String[team.length];",
+                "        for (int i = 0; i < team.length; i++) {",
+                "            out[i] = team[(i + k) % team.length];",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static String joined(String[] items) {",
+                "        String text = \"\";",
+                "        for (int i = 0; i < items.length; i++) {",
+                "            text += (i > 0 ? \", \" : \"\") + items[i];",
+                "        }",
+                "        return text;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Slot i of the rotated rota takes the person k places "
+                + "further along the original - and when that runs off the "
+                + "end, % wraps it back to the start. For a team of 4 and "
+                + "k = 1: slot 0 gets team[1], slot 3 gets team[4 % 4], "
+                + "which is team[0]. No index can ever be out of bounds, "
+                + "and a k of 9 or 400 works as well as 1.\n"
+                + "\n"
+                + "Building a new array keeps the Now: line correct; "
+                + "shuffling names within team itself would need a "
+                + "temporary variable and care not to overwrite anyone "
+                + "before they were moved. An empty name is refused before "
+                + "anything is printed, since a rota with a blank slot is "
+                + "a week nobody is on call.")
+            .sample(Lab.typing("ana,ben,cal,dee", "1"),
+                "Team: ana,ben,cal,dee",
+                "Weeks: 1",
+                "Now: ana, ben, cal, dee",
+                "Rotated by 1: ben, cal, dee, ana")
+            .hidden(Lab.typing("ana, ben ,cal", "0"),
+                "Team: ana, ben ,cal",
+                "Weeks: 0",
+                "Now: ana, ben, cal",
+                "Rotated by 0: ana, ben, cal")
+            .hidden(Lab.typing("ana,ben,cal", "7"),
+                "Team: ana,ben,cal",
+                "Weeks: 7",
+                "Now: ana, ben, cal",
+                "Rotated by 7: ben, cal, ana")
+            .hidden(Lab.typing("solo", "5"),
+                "Team: solo",
+                "Weeks: 5",
+                "Now: solo",
+                "Rotated by 5: solo")
+            .hidden(Lab.typing("ana,,cal", "1"),
+                "Team: ana,,cal",
+                "INVALID")
+            .hidden(Lab.typing("ana,ben", "-1"),
+                "Team: ana,ben",
+                "Weeks: -1",
+                "INVALID"));
     }
 }
