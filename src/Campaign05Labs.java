@@ -1962,5 +1962,716 @@ public class Campaign05Labs {
                 "Team: ana,ben",
                 "Weeks: -1",
                 "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(16), "Histogram", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M014")
+            .brief(
+                "A list of login hours means little as numbers. As a bar "
+                + "chart, a 3 a.m. login jumps off the screen. Tally the "
+                + "hours into 24 counters, draw a bar for every hour that "
+                + "had logins, and count the night-time ones - ignoring, "
+                + "not crashing on, hours that cannot exist.")
+            .practises("Tally arrays", "Range checks before indexing", "Building a String in a loop")
+            .spec(
+                "Prompt Hours: and read one line of whole numbers separated by single spaces.",
+                "tally(hours) returns an int[24] where slot h counts how many times hour h appears. Values outside 0 to 23 are skipped.",
+                "bar(n) returns a String of n # characters.",
+                "For every hour with a count above 0, in order, print the hour as two digits, \" | \", the bar, a space and the count.",
+                "Print Night (00-05): <total for hours 0 to 5>, then Ignored: <how many values were out of range>.")
+            .needsMethod("static int[] tally(int[])")
+            .needsMethod("static String bar(int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Hours: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // parse, tally, draw the chart, then the two totals",
+                "    }",
+                "",
+                "    // declare tally(int[] hours) and bar(int n) here",
+                "}")
+            .hints(
+                "Parse every piece into an int[] first; tests only use whole "
+                + "numbers here.",
+                "In tally: if (h >= 0 && h < 24) { counts[h]++; } - the "
+                + "range check keeps a 24 or -1 from crashing.",
+                "String.format(\"%02d\", hour) turns 3 into 03.",
+                "Ignored is the number of values minus the sum of all 24 "
+                + "counters - or count them separately.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Hours: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] hours = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            hours[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        int[] counts = tally(hours);",
+                "        int counted = 0;",
+                "        int night = 0;",
+                "        for (int h = 0; h < counts.length; h++) {",
+                "            counted += counts[h];",
+                "            if (h <= 5) {",
+                "                night += counts[h];",
+                "            }",
+                "            if (counts[h] > 0) {",
+                "                System.out.println(String.format(\"%02d\", h) + \" | \"",
+                "                        + bar(counts[h]) + \" \" + counts[h]);",
+                "            }",
+                "        }",
+                "        System.out.println(\"Night (00-05): \" + night);",
+                "        System.out.println(\"Ignored: \" + (hours.length - counted));",
+                "    }",
+                "",
+                "    static int[] tally(int[] hours) {",
+                "        int[] counts = new int[24];",
+                "        for (int h : hours) {",
+                "            if (h >= 0 && h < counts.length) {",
+                "                counts[h]++;",
+                "            }",
+                "        }",
+                "        return counts;",
+                "    }",
+                "",
+                "    static String bar(int n) {",
+                "        String text = \"\";",
+                "        for (int i = 0; i < n; i++) {",
+                "            text += \"#\";",
+                "        }",
+                "        return text;",
+                "    }",
+                "}")
+            .walkthrough(
+                "tally is mission 14's pattern: the hour itself is the "
+                + "index, so counts[h]++ files each login in its own slot in "
+                + "one step. The range check in front of it is what makes "
+                + "the tool safe to feed - an hour of 24 or -1 is skipped "
+                + "and reported, rather than throwing "
+                + "ArrayIndexOutOfBoundsException and losing the whole "
+                + "chart.\n"
+                + "\n"
+                + "One pass over the 24 counters does everything else: "
+                + "draws the non-empty bars in hour order, adds up the "
+                + "night hours, and totals what was counted so the ignored "
+                + "values can be worked out without a second counter.")
+            .sample(Lab.typing("9 9 10 3 14 9 23 10"),
+                "Hours: 9 9 10 3 14 9 23 10",
+                "03 | # 1",
+                "09 | ### 3",
+                "10 | ## 2",
+                "14 | # 1",
+                "23 | # 1",
+                "Night (00-05): 1",
+                "Ignored: 0")
+            .hidden(Lab.typing("0 5 6 23"),
+                "Hours: 0 5 6 23",
+                "00 | # 1",
+                "05 | # 1",
+                "06 | # 1",
+                "23 | # 1",
+                "Night (00-05): 2",
+                "Ignored: 0")
+            .hidden(Lab.typing("24 -1 12 99"),
+                "Hours: 24 -1 12 99",
+                "12 | # 1",
+                "Night (00-05): 0",
+                "Ignored: 3")
+            .hidden(Lab.typing("2 2 2 2 2 2"),
+                "Hours: 2 2 2 2 2 2",
+                "02 | ###### 6",
+                "Night (00-05): 6",
+                "Ignored: 0"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(17), "Frequency Table", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M025")
+            .brief(
+                "The web server's status codes for the last minute arrive "
+                + "as a line of numbers. Build a frequency table - each "
+                + "distinct code once, in order, with how often it appeared "
+                + "- and name the most common. Codes run to 599, so this "
+                + "time the distinct values come first and the counting "
+                + "second.")
+            .practises("Removing duplicates", "Sorting", "Returning an array")
+            .spec(
+                "Prompt Codes: and read one line of whole numbers separated by single spaces.",
+                "distinctSorted(codes) returns a new int[] holding each distinct code once, smallest first.",
+                "countOf(codes, code) returns how many times code appears in codes.",
+                "Print one line per distinct code: the code, \" x\" and its count.",
+                "Print Most common: <code> (<count>) - the smallest code, if several share the highest count.")
+            .needsMethod("static int[] distinctSorted(int[])")
+            .needsMethod("static int countOf(int[], int)")
+            .starter(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Codes: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // parse, find the distinct codes, count each one",
+                "    }",
+                "",
+                "    // declare distinctSorted(int[] a) and countOf(int[] a, int v)",
+                "}")
+            .hints(
+                "Sort a copy first: then equal codes sit next to each other.",
+                "Walking the sorted copy, a code is new when it is the first "
+                + "one or differs from the one before it.",
+                "Count the new ones first to size the result array, then "
+                + "fill it - or collect them in an ArrayList<Integer> and "
+                + "copy that into an int[].",
+                "Scanning distinct codes smallest first with a strict > "
+                + "leaves the smallest code on a tie.")
+            .solution(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Codes: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] codes = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            codes[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        int[] kinds = distinctSorted(codes);",
+                "        int best = kinds[0];",
+                "        for (int k : kinds) {",
+                "            int n = countOf(codes, k);",
+                "            System.out.println(k + \" x\" + n);",
+                "            if (n > countOf(codes, best)) {",
+                "                best = k;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Most common: \" + best + \" (\"",
+                "                + countOf(codes, best) + \")\");",
+                "    }",
+                "",
+                "    static int[] distinctSorted(int[] a) {",
+                "        int[] s = Arrays.copyOf(a, a.length);",
+                "        Arrays.sort(s);",
+                "        int kinds = 0;",
+                "        for (int i = 0; i < s.length; i++) {",
+                "            if (i == 0 || s[i] != s[i - 1]) {",
+                "                kinds++;",
+                "            }",
+                "        }",
+                "        int[] out = new int[kinds];",
+                "        int next = 0;",
+                "        for (int i = 0; i < s.length; i++) {",
+                "            if (i == 0 || s[i] != s[i - 1]) {",
+                "                out[next] = s[i];",
+                "                next++;",
+                "            }",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static int countOf(int[] a, int v) {",
+                "        int n = 0;",
+                "        for (int x : a) {",
+                "            if (x == v) {",
+                "                n++;",
+                "            }",
+                "        }",
+                "        return n;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Sorting a copy puts equal codes side by side, so a code is "
+                + "new exactly when it differs from its left neighbour. "
+                + "distinctSorted makes two passes: one to count the "
+                + "distinct codes, so the result array can be the right "
+                + "size, and one to fill it. That is the price of arrays "
+                + "having a fixed size - an ArrayList would have grown "
+                + "instead.\n"
+                + "\n"
+                + "The original codes array is never sorted, and countOf "
+                + "reads it directly. Walking the distinct codes smallest "
+                + "first with a strict > means a later code with an equal "
+                + "count never replaces an earlier one, which is the "
+                + "tie rule in the spec. The i == 0 guard stops s[i - 1] "
+                + "from being read at index -1.")
+            .sample(Lab.typing("200 404 200 500 200 404 301"),
+                "Codes: 200 404 200 500 200 404 301",
+                "200 x3",
+                "301 x1",
+                "404 x2",
+                "500 x1",
+                "Most common: 200 (3)")
+            .hidden(Lab.typing("503"),
+                "Codes: 503",
+                "503 x1",
+                "Most common: 503 (1)")
+            .hidden(Lab.typing("404 200 404 200"),
+                "Codes: 404 200 404 200",
+                "200 x2",
+                "404 x2",
+                "Most common: 200 (2)")
+            .hidden(Lab.typing("500 500 500 403 401 403"),
+                "Codes: 500 500 500 403 401 403",
+                "401 x1",
+                "403 x2",
+                "500 x3",
+                "Most common: 500 (3)"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(18), "Second Largest", Lab.SMALL)
+            .stretch()
+            .after("C05-M013")
+            .brief(
+                "Capacity planning wants the busiest server's request count "
+                + "- and the runner-up, the second-largest DIFFERENT value. "
+                + "Two servers tied at the top do not make a runner-up. "
+                + "Find it in one pass, without sorting.")
+            .practises("Max, min and average", "Tracking two values", "Validating every piece")
+            .spec(
+                "Prompt Requests: and read one line of whole numbers separated by single spaces. Any piece that is not all digits (or an empty line): INVALID.",
+                "hasSecond(values) is true when there are at least two different values.",
+                "secondLargest(values) returns the largest value that is smaller than the maximum.",
+                "Print Largest: <max>, then Second: <value> - or Second: none when hasSecond is false.")
+            .needsMethod("static boolean hasSecond(int[])")
+            .needsMethod("static int secondLargest(int[])")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Requests: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // validate and parse, then report",
+                "    }",
+                "",
+                "    // declare hasSecond(int[] v) and secondLargest(int[] v)",
+                "}")
+            .hints(
+                "hasSecond: are any two values different? Compare each with "
+                + "values[0].",
+                "Find the maximum first. Then the second is the largest "
+                + "value that is strictly below it.",
+                "In one pass: keep max and second; a new maximum pushes the "
+                + "old one down into second.",
+                "Start second at -1: counts are never negative, and "
+                + "hasSecond guarantees it is replaced.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Requests: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] v = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            if (!isCount(parts[i])) {",
+                "                System.out.println(\"INVALID\");",
+                "                return;",
+                "            }",
+                "            v[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        int max = v[0];",
+                "        for (int x : v) {",
+                "            max = Math.max(max, x);",
+                "        }",
+                "        System.out.println(\"Largest: \" + max);",
+                "        if (hasSecond(v)) {",
+                "            System.out.println(\"Second: \" + secondLargest(v));",
+                "        } else {",
+                "            System.out.println(\"Second: none\");",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isCount(String s) {",
+                "        if (s.isEmpty() || s.length() > 9) {",
+                "            return false;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        return true;",
+                "    }",
+                "",
+                "    static boolean hasSecond(int[] v) {",
+                "        for (int x : v) {",
+                "            if (x != v[0]) {",
+                "                return true;",
+                "            }",
+                "        }",
+                "        return false;",
+                "    }",
+                "",
+                "    static int secondLargest(int[] v) {",
+                "        int max = v[0];",
+                "        int second = -1;",
+                "        for (int x : v) {",
+                "            if (x > max) {",
+                "                second = max;",
+                "                max = x;",
+                "            } else if (x < max && x > second) {",
+                "                second = x;",
+                "            }",
+                "        }",
+                "        return second;",
+                "    }",
+                "}")
+            .walkthrough(
+                "secondLargest keeps two running values. A new maximum "
+                + "pushes the old maximum down into second, so nothing is "
+                + "lost when the biggest value arrives late. A value equal "
+                + "to the maximum changes nothing - that is what makes the "
+                + "answer the second DIFFERENT value - and anything between "
+                + "second and max becomes the new second.\n"
+                + "\n"
+                + "Starting second at -1 is safe only because these are "
+                + "counts, never negative, and because hasSecond is checked "
+                + "first: when every value is the same there is no "
+                + "runner-up, and the program says none instead of "
+                + "printing a -1 that looks like data.")
+            .sample(Lab.typing("120 4800 95 310 4800"),
+                "Requests: 120 4800 95 310 4800",
+                "Largest: 4800",
+                "Second: 310")
+            .hidden(Lab.typing("7 7 7"),
+                "Requests: 7 7 7",
+                "Largest: 7",
+                "Second: none")
+            .hidden(Lab.typing("5"),
+                "Requests: 5",
+                "Largest: 5",
+                "Second: none")
+            .hidden(Lab.typing("1 2 3 4 5"),
+                "Requests: 1 2 3 4 5",
+                "Largest: 5",
+                "Second: 4")
+            .hidden(Lab.typing("9 0"),
+                "Requests: 9 0",
+                "Largest: 9",
+                "Second: 0")
+            .hidden(Lab.typing("12 -4 3"),
+                "Requests: 12 -4 3",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(19), "CSV Row Parser", Lab.MEDIUM)
+            .after("C05-M017")
+            .brief(
+                "A firewall export arrives as CSV rows: host, port, "
+                + "protocol, bytes. Before any row is trusted, every field "
+                + "must be checked - the right count, a real port, a known "
+                + "protocol, a number where a number belongs. Report the "
+                + "FIRST problem found, or the clean fields.")
+            .practises("split", "Validating every field", "Returning a reason")
+            .spec(
+                "Prompt Row: and read one line. Split it at commas and trim each piece.",
+                "problem(fields) returns \"\" when the row is good, otherwise the first problem, checked in this order:",
+                "not exactly 4 fields: field count; empty host: host; port not all digits or outside 1 to 65535: port; protocol not tcp or udp (any case): protocol; bytes not all digits: bytes.",
+                "A problem: print INVALID <problem>. A good row: print Host: , Port: , Proto: (lower case) and Bytes: lines.",
+                "isNumber(s) is true for a non-empty String of digits only, at most 9 long.")
+            .needsMethod("static String problem(String[])")
+            .needsMethod("static boolean isNumber(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Row: \");",
+                "        String[] f = input.nextLine().split(\",\");",
+                "        // trim each field, then ask problem(f) and report",
+                "    }",
+                "",
+                "    // declare problem(String[] f) and isNumber(String s) here",
+                "}")
+            .hints(
+                "problem is a list of guards, each returning early: the "
+                + "field count first, because every later check reads f[3].",
+                "Port: check isNumber BEFORE Integer.parseInt, then the "
+                + "range.",
+                "Protocol: f[2].equalsIgnoreCase(\"tcp\") || "
+                + "f[2].equalsIgnoreCase(\"udp\").",
+                "Only when every guard has passed does it return \"\".")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Row: \");",
+                "        String[] f = input.nextLine().split(\",\");",
+                "        for (int i = 0; i < f.length; i++) {",
+                "            f[i] = f[i].trim();",
+                "        }",
+                "        String p = problem(f);",
+                "        if (!p.isEmpty()) {",
+                "            System.out.println(\"INVALID \" + p);",
+                "            return;",
+                "        }",
+                "        System.out.println(\"Host: \" + f[0]);",
+                "        System.out.println(\"Port: \" + f[1]);",
+                "        System.out.println(\"Proto: \" + f[2].toLowerCase());",
+                "        System.out.println(\"Bytes: \" + f[3]);",
+                "    }",
+                "",
+                "    static String problem(String[] f) {",
+                "        if (f.length != 4) {",
+                "            return \"field count\";",
+                "        }",
+                "        if (f[0].isEmpty()) {",
+                "            return \"host\";",
+                "        }",
+                "        if (!isNumber(f[1])) {",
+                "            return \"port\";",
+                "        }",
+                "        int port = Integer.parseInt(f[1]);",
+                "        if (port < 1 || port > 65535) {",
+                "            return \"port\";",
+                "        }",
+                "        String proto = f[2].toLowerCase();",
+                "        if (!proto.equals(\"tcp\") && !proto.equals(\"udp\")) {",
+                "            return \"protocol\";",
+                "        }",
+                "        if (!isNumber(f[3])) {",
+                "            return \"bytes\";",
+                "        }",
+                "        return \"\";",
+                "    }",
+                "",
+                "    static boolean isNumber(String s) {",
+                "        if (s.isEmpty() || s.length() > 9) {",
+                "            return false;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        return true;",
+                "    }",
+                "}")
+            .walkthrough(
+                "problem is Campaign 03's fail-fast shape applied to an "
+                + "array: one guard per rule, in an order where each guard "
+                + "makes the next one safe. The count comes first because "
+                + "every other check reads a field; isNumber comes before "
+                + "parseInt because parseInt crashes on \"80a\"; the length "
+                + "limit inside isNumber stops a 20-digit port from "
+                + "overflowing int before the range check sees it.\n"
+                + "\n"
+                + "Returning the reason, rather than true or false, lets "
+                + "main say exactly what was wrong - and \"\" for a good "
+                + "row keeps the success case simple. Only after every "
+                + "guard has passed are the fields printed, and the "
+                + "protocol in one agreed case.")
+            .sample(Lab.typing("web1, 443, TCP, 5120"),
+                "Row: web1, 443, TCP, 5120",
+                "Host: web1",
+                "Port: 443",
+                "Proto: tcp",
+                "Bytes: 5120")
+            .hidden(Lab.typing("dns1,53,udp,0"),
+                "Row: dns1,53,udp,0",
+                "Host: dns1",
+                "Port: 53",
+                "Proto: udp",
+                "Bytes: 0")
+            .hidden(Lab.typing("web1,443,tcp"),
+                "Row: web1,443,tcp",
+                "INVALID field count")
+            .hidden(Lab.typing(" ,22,tcp,10"),
+                "Row:  ,22,tcp,10",
+                "INVALID host")
+            .hidden(Lab.typing("db1,70000,tcp,10"),
+                "Row: db1,70000,tcp,10",
+                "INVALID port")
+            .hidden(Lab.typing("db1,0,tcp,10"),
+                "Row: db1,0,tcp,10",
+                "INVALID port")
+            .hidden(Lab.typing("db1,80a,tcp,10"),
+                "Row: db1,80a,tcp,10",
+                "INVALID port")
+            .hidden(Lab.typing("db1,5432,icmp,10"),
+                "Row: db1,5432,icmp,10",
+                "INVALID protocol")
+            .hidden(Lab.typing("db1,5432,tcp,-5"),
+                "Row: db1,5432,tcp,-5",
+                "INVALID bytes")
+            .hidden(Lab.typing("db1,99999999999999999999,tcp,1"),
+                "Row: db1,99999999999999999999,tcp,1",
+                "INVALID port"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(20), "Queue of Tickets", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M019")
+            .brief(
+                "The service desk queue: new tickets join the back, urgent "
+                + "ones jump to the front, and an analyst takes the next "
+                + "ticket from the front. An ArrayList with add, add(0, x) "
+                + "and remove(0) is exactly this - as long as nobody takes "
+                + "a ticket from an empty queue.")
+            .practises("get and set", "ArrayList", "Commands with a free-text argument")
+            .spec(
+                "Repeatedly prompt > and read a line (trim it) until END.",
+                "NEW <title> adds the title at the back; URGENT <title> adds it at the front. The title is everything after the first space, trimmed; an empty title: MALFORMED. Reply Queued: <title>.",
+                "NEXT: take the ticket at the front and print Working on: <title> - or Queue empty.",
+                "SHOW: print Queue (<size>): followed by the queue as println shows it.",
+                "Anything else: UNKNOWN COMMAND.",
+                "add(queue, title, urgent) adds a ticket; next(queue) removes and returns the front one.")
+            .needsMethod("static void add(ArrayList<String>, String, boolean)")
+            .needsMethod("static String next(ArrayList<String>)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> queue = new ArrayList<>();",
+                "        // the command loop",
+                "    }",
+                "",
+                "    // declare add(ArrayList<String> q, String t, boolean urgent)",
+                "    // and next(ArrayList<String> q) here",
+                "}")
+            .hints(
+                "Split a line into command and title with indexOf(' ') and "
+                + "substring - the title may contain spaces.",
+                "No space at all: the command is the whole line and the "
+                + "title is empty.",
+                "add: when urgent, q.add(0, t) puts it at the front; "
+                + "otherwise q.add(t) puts it at the back.",
+                "next: remove(0) returns the item it took out. Check "
+                + "isEmpty() in main before calling it.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> queue = new ArrayList<>();",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String cmd = line;",
+                "            String title = \"\";",
+                "            int space = line.indexOf(' ');",
+                "            if (space != -1) {",
+                "                cmd = line.substring(0, space);",
+                "                title = line.substring(space + 1).trim();",
+                "            }",
+                "            if (cmd.equals(\"NEW\") || cmd.equals(\"URGENT\")) {",
+                "                if (title.isEmpty()) {",
+                "                    System.out.println(\"MALFORMED\");",
+                "                } else {",
+                "                    add(queue, title, cmd.equals(\"URGENT\"));",
+                "                    System.out.println(\"Queued: \" + title);",
+                "                }",
+                "            } else if (cmd.equals(\"NEXT\")) {",
+                "                if (queue.isEmpty()) {",
+                "                    System.out.println(\"Queue empty\");",
+                "                } else {",
+                "                    System.out.println(\"Working on: \" + next(queue));",
+                "                }",
+                "            } else if (cmd.equals(\"SHOW\")) {",
+                "                System.out.println(\"Queue (\" + queue.size() + \"): \"",
+                "                        + queue);",
+                "            } else {",
+                "                System.out.println(\"UNKNOWN COMMAND\");",
+                "            }",
+                "        }",
+                "    }",
+                "",
+                "    static void add(ArrayList<String> q, String t, boolean urgent) {",
+                "        if (urgent) {",
+                "            q.add(0, t);",
+                "        } else {",
+                "            q.add(t);",
+                "        }",
+                "    }",
+                "",
+                "    static String next(ArrayList<String> q) {",
+                "        return q.remove(0);",
+                "    }",
+                "}")
+            .walkthrough(
+                "The queue is an ArrayList used from both ends: add puts a "
+                + "normal ticket at the back and an urgent one at index 0, "
+                + "where every other ticket shifts up one place; next uses "
+                + "remove(0), which hands back the ticket it took out, so "
+                + "one call both reads and removes.\n"
+                + "\n"
+                + "Titles may contain spaces, so split would cut them up. "
+                + "indexOf finds the FIRST space instead: before it is the "
+                + "command, after it the whole title. The empty-queue check "
+                + "sits in main, before next is called, because remove(0) "
+                + "on an empty list throws IndexOutOfBoundsException - an "
+                + "analyst pressing NEXT on a quiet day should get an "
+                + "answer, not a crash.")
+            .sample(Lab.typing("NEW Printer jam", "URGENT Ransomware note", "SHOW", "NEXT", "NEXT", "NEXT", "END"),
+                "> NEW Printer jam",
+                "Queued: Printer jam",
+                "> URGENT Ransomware note",
+                "Queued: Ransomware note",
+                "> SHOW",
+                "Queue (2): [Ransomware note, Printer jam]",
+                "> NEXT",
+                "Working on: Ransomware note",
+                "> NEXT",
+                "Working on: Printer jam",
+                "> NEXT",
+                "Queue empty",
+                "> END")
+            .hidden(Lab.typing("NEXT", "SHOW", "END"),
+                "> NEXT",
+                "Queue empty",
+                "> SHOW",
+                "Queue (0): []",
+                "> END")
+            .hidden(Lab.typing("NEW", "URGENT   ", "NEW  Disk full on db2  ", "SHOW", "END"),
+                "> NEW",
+                "MALFORMED",
+                "> URGENT",
+                "MALFORMED",
+                "> NEW  Disk full on db2",
+                "Queued: Disk full on db2",
+                "> SHOW",
+                "Queue (1): [Disk full on db2]",
+                "> END")
+            .hidden(Lab.typing("NEW a", "NEW b", "URGENT c", "URGENT d", "SHOW", "PURGE", "new e", "END"),
+                "> NEW a",
+                "Queued: a",
+                "> NEW b",
+                "Queued: b",
+                "> URGENT c",
+                "Queued: c",
+                "> URGENT d",
+                "Queued: d",
+                "> SHOW",
+                "Queue (4): [d, c, a, b]",
+                "> PURGE",
+                "UNKNOWN COMMAND",
+                "> new e",
+                "UNKNOWN COMMAND",
+                "> END"));
     }
 }
