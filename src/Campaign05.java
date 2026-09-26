@@ -3094,5 +3094,1055 @@ public class Campaign05 {
                 + "Keep the lengths equal and change both together. "
                 + "Campaign 06 replaces this with objects.")
             .next("Next: a grid of values - two-dimensional arrays."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(16), "Rows and Columns", 4)
+            .brief(
+                "The weekly login report is a table: one row per day, one "
+                + "column per shift - night, day, evening. A table is an "
+                + "array of rows, and each row is an array of numbers. Java "
+                + "calls it a two-dimensional array, and Campaign 04's "
+                + "nested loops were made for it.")
+            .willLearn("Two-dimensional arrays")
+            .whyUseful(
+                "Many security views are grids: days by hours, hosts by "
+                + "ports, users by systems. A 2D array holds the whole grid, "
+                + "and a row or a column can be totalled with one loop "
+                + "inside another.")
+            .concept("Two-dimensional arrays",
+                "A TWO-DIMENSIONAL array is an array whose slots are "
+                + "arrays - rows of columns:\n"
+                + "\n"
+                + "    int[][] logins = {\n"
+                + "        {4, 30, 12},     row 0: Monday\n"
+                + "        {9, 28, 10},     row 1: Tuesday\n"
+                + "        {41, 25, 11}     row 2: Wednesday\n"
+                + "    };\n"
+                + "\n"
+                + "Two indexes pick one number: ROW first, then COLUMN.\n"
+                + "\n"
+                + "    logins[2][0]         41 (Wednesday, night)\n"
+                + "    logins.length        3, the number of rows\n"
+                + "    logins[0].length     3, the columns in row 0\n"
+                + "    new int[7][24]       7 rows of 24, all 0\n"
+                + "\n"
+                + "Visiting every cell takes a loop over the rows with a "
+                + "loop over the columns inside it:\n"
+                + "\n"
+                + "    for (int r = 0; r < logins.length; r++) {\n"
+                + "        for (int c = 0; c < logins[r].length; c++) {\n"
+                + "            ... logins[r][c] ...\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "The inner limit is logins[r].length - the length of THIS "
+                + "row. Mixing up r and c is the classic bug: it reads the "
+                + "wrong cell, or runs off the end of a row.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[][] logins = {",
+                "            {4, 30, 12},",
+                "            {9, 28, 10},",
+                "            {41, 25, 11}",
+                "        };",
+                "        for (int r = 0; r < logins.length; r++) {",
+                "            int total = 0;",
+                "            for (int c = 0; c < logins[r].length; c++) {",
+                "                total += logins[r][c];",
+                "            }",
+                "            System.out.println(\"Day \" + r + \": \" + total);",
+                "        }",
+                "        int night = 0;",
+                "        for (int r = 0; r < logins.length; r++) {",
+                "            night += logins[r][0];",
+                "        }",
+                "        System.out.println(\"Night shift: \" + night);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Day 0: 46",
+                "Day 1: 47",
+                "Day 2: 77",
+                "Night shift: 54")
+            .lineByLine(
+                new String[]{"int[][] logins = {...};",
+                    "Three rows, each an array of three counts."},
+                new String[]{"int total = 0; inside the row loop",
+                    "Restarts at 0 for each day, so every row gets its own "
+                    + "total."},
+                new String[]{"logins[r][c]",
+                    "Row r, column c."},
+                new String[]{"logins[r][0]",
+                    "Column 0 of every row: the night shift, down the "
+                    + "table."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[][] g = {{1, 2, 3}, {4, 5, 6}};",
+                    "System.out.println(g[1][0] + \" \" + g[0][2]);")
+                .accept("4 3")
+                .hints("Row first, then column.",
+                       "g[1] is {4, 5, 6}; g[0] is {1, 2, 3}.")
+                .explain(
+                    "4 3. g[1][0] is row 1, column 0: 4. g[0][2] is row 0, "
+                    + "column 2: 3.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "int[][] week = new int[7][24]; What is week.length, "
+                    + "and what is week[0].length?")
+                .choices("24 and 7", "7 and 24", "168 and 24", "7 and 7")
+                .accept("2", "b")
+                .hints("The first size is the number of rows.",
+                       "Each row has the second size.")
+                .explain(
+                    "b. 7 rows (days), each an array of 24 (hours). The "
+                    + "grid holds 168 counts, but no length is 168.")
+                .xp(10))
+            .objective(
+                "Total a host's blocked connections across every port.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // rows: hosts; columns: ports 22, 80, 443",
+                "        int[][] blocked = {",
+                "            {12, 0, 3},",
+                "            {0, 7, 1},",
+                "            {40, 2, 9}",
+                "        };",
+                "        int host = 2;",
+                "        int sum = 0;",
+                "        for (int c = 0; c < blocked[host].length; c++) {",
+                "            // add this host's count for column c",
+                "        }",
+                "        System.out.println(\"Host \" + host + \" blocked: \" + sum);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that adds the count at row host, column c "
+                + "to sum.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line inside the loop.")
+                .accept("sum += blocked[host][c];",
+                        "sum+=blocked[host][c];",
+                        "sum = sum + blocked[host][c];")
+                .hints(
+                    "Row first, then column.",
+                    "The row is host; the column is c.",
+                    "sum += blocked[host][c];")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        // rows: hosts; columns: ports 22, 80, 443",
+                    "        int[][] blocked = {",
+                    "            {12, 0, 3},",
+                    "            {0, 7, 1},",
+                    "            {40, 2, 9}",
+                    "        };",
+                    "        int host = 2;",
+                    "        int sum = 0;",
+                    "        for (int c = 0; c < blocked[host].length; c++) {",
+                    "            sum += blocked[host][c];",
+                    "        }",
+                    "        System.out.println(\"Host \" + host + \" blocked: \" + sum);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The row stays fixed at host 2 while c walks its three "
+                    + "columns: 40 + 2 + 9. Output: Host 2 blocked: 51.\n"
+                    + "\n"
+                    + "Swapping the indexes, blocked[c][host], would total "
+                    + "COLUMN 2 instead - port 443 across all hosts - and "
+                    + "print 13 with no error to warn you.")
+                .explain(
+                    "sum += blocked[host][c]; - row host, column c.")
+                .xp(20))
+            .mistakes(
+                new String[]{"g[c][r] instead of g[r][c]",
+                    "Reads the wrong cell - or crashes on a narrow grid."},
+                new String[]{"Inner limit g.length",
+                    "Use g[r].length, the length of the row."},
+                new String[]{"Total declared outside the row loop",
+                    "Rows add up into one running number."})
+            .cyber(
+                "Grids are how analysts spot patterns a list hides. A "
+                + "day-by-hour table of logins makes a 3 a.m. burst stand "
+                + "out; a host-by-port table of blocked connections shows "
+                + "one host being probed on every port - a scan - where a "
+                + "flat total would only show 'a lot'. Row totals and "
+                + "column totals answer different questions, so get the "
+                + "indexes the right way round.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[][] g = {{1, 2}, {3, 4}, {5, 6}};",
+                    "int sum = 0;",
+                    "for (int r = 0; r < g.length; r++) {",
+                    "    sum += g[r][1];",
+                    "}",
+                    "System.out.println(sum);")
+                .accept("12")
+                .hints("Column 1 of every row.",
+                       "2 + 4 + 6.")
+                .explain(
+                    "12. The column stays at 1 while r walks the rows: "
+                    + "2 + 4 + 6.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "In a nested loop over a 2D array g, what should the "
+                    + "inner loop's limit be?")
+                .choices("g.length",
+                         "g[r].length",
+                         "g[c].length",
+                         "g.length - 1")
+                .accept("2", "b")
+                .hints("The inner loop walks one row.",
+                       "How long is row r?")
+                .explain(
+                    "b. The inner loop visits the columns of row r, and row "
+                    + "r has g[r].length of them.")
+                .xp(10))
+            .recap(
+                "    int[][] g = new int[rows][cols];\n"
+                + "    g[r][c]          row first, then column\n"
+                + "    g.length         rows\n"
+                + "    g[r].length      columns in row r\n"
+                + "\n"
+                + "Every cell: a loop over rows, a loop over columns "
+                + "inside it.")
+            .next("Next: turning one line of text into an array."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(17), "From a Line to an Array", 4)
+            .brief(
+                "Each line of the VPN log holds four fields separated by "
+                + "commas: time, user, source address, result. Campaign 01 "
+                + "pulled fields out with indexOf and substring, one careful "
+                + "cut at a time. split cuts the whole line at once and "
+                + "hands back an array of the pieces.")
+            .willLearn("split")
+            .whyUseful(
+                "Nearly every log, CSV export and config file is lines of "
+                + "fields with a separator. split turns each line into a "
+                + "String[] in one call - and knowing its two traps keeps "
+                + "a parser from breaking on real data.")
+            .concept("split",
+                "split is a String method. It cuts the text at every "
+                + "separator and returns the pieces as an array:\n"
+                + "\n"
+                + "    String line = \"09:14,jsmith,10.0.0.5,FAIL\";\n"
+                + "    String[] parts = line.split(\",\");\n"
+                + "\n"
+                + "    parts[0]  \"09:14\"     parts[2]  \"10.0.0.5\"\n"
+                + "    parts[1]  \"jsmith\"    parts[3]  \"FAIL\"\n"
+                + "\n"
+                + "The pieces are Strings. A number field still needs "
+                + "Integer.parseInt(parts[i]).\n"
+                + "\n"
+                + "TRAP 1: a few characters have a special meaning to split, "
+                + "notably the dot and the bar. To split on them, put two "
+                + "backslashes in front:\n"
+                + "\n"
+                + "    \"10.0.0.5\".split(\"\\\\.\")     4 pieces\n"
+                + "    \"10.0.0.5\".split(\".\")       0 pieces - a bug\n"
+                + "    \"a|b\".split(\"\\\\|\")          2 pieces\n"
+                + "\n"
+                + "(split reads its separator as a REGULAR EXPRESSION, a "
+                + "pattern language beyond this module. Commas, colons, "
+                + "spaces and = are safe as they are.)\n"
+                + "\n"
+                + "TRAP 2: a line may not have as many fields as you expect "
+                + "- truncated, corrupt, or crafted. Reading parts[3] from a "
+                + "2-piece line is mission 7's crash. Check parts.length "
+                + "before reading the fields.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"09:14,jsmith,10.0.0.5,FAIL\";",
+                "        String[] parts = line.split(\",\");",
+                "        if (parts.length == 4) {",
+                "            System.out.println(\"User: \" + parts[1]);",
+                "            System.out.println(\"From: \" + parts[2]);",
+                "            System.out.println(\"Result: \" + parts[3]);",
+                "            String[] octets = parts[2].split(\"\\\\.\");",
+                "            int last = Integer.parseInt(octets[3]);",
+                "            System.out.println(\"Host number: \" + last);",
+                "        } else {",
+                "            System.out.println(\"Malformed line\");",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "User: jsmith",
+                "From: 10.0.0.5",
+                "Result: FAIL",
+                "Host number: 5")
+            .lineByLine(
+                new String[]{"line.split(\",\")",
+                    "Four pieces, one for each field between the commas."},
+                new String[]{"if (parts.length == 4)",
+                    "Only read the fields once you know they are there."},
+                new String[]{"split(\"\\\\.\")",
+                    "The dot needs two backslashes. \"10.0.0.5\" becomes "
+                    + "four octets."},
+                new String[]{"Integer.parseInt(octets[3])",
+                    "The piece \"5\" is text until it is parsed."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String cfg = \"port=8443\";",
+                    "String[] kv = cfg.split(\"=\");",
+                    "System.out.println(kv.length + \" \" + kv[1]);")
+                .accept("2 8443")
+                .hints("One = means two pieces.",
+                       "kv[1] is what comes after the =.")
+                .explain(
+                    "2 8443. The = cuts the text into \"port\" and \"8443\".")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String ip = \"192.168.1.20\";",
+                    "System.out.println(ip.split(\".\").length);")
+                .accept("0")
+                .hints("The dot is one of the special characters.",
+                       "Unescaped, it matches every character.")
+                .explain(
+                    "0. An unescaped dot means 'any character', so every "
+                    + "character is a separator and nothing is left. "
+                    + "split(\"\\\\.\") gives the 4 octets.")
+                .xp(20))
+            .objective(
+                "Split an auth log line and check it has every field.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"2026-03-02 22:41:07 admin DENIED\";",
+                "        // parts: the line split at each space",
+                "        if (parts.length == 4) {",
+                "            System.out.println(parts[2] + \" -> \" + parts[3]);",
+                "        } else {",
+                "            System.out.println(\"Malformed: \" + parts.length",
+                "                    + \" fields\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare parts: the line split at each space.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that declares parts.")
+                .accept("String[] parts = line.split(\" \");",
+                        "String[] parts=line.split(\" \");")
+                .hints(
+                    "split returns a String[].",
+                    "The separator is a single space, in quotes.",
+                    "String[] parts = line.split(\" \");")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String line = \"2026-03-02 22:41:07 admin DENIED\";",
+                    "        String[] parts = line.split(\" \");",
+                    "        if (parts.length == 4) {",
+                    "            System.out.println(parts[2] + \" -> \" + parts[3]);",
+                    "        } else {",
+                    "            System.out.println(\"Malformed: \" + parts.length",
+                    "                    + \" fields\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Three spaces cut the line into four pieces: the date, "
+                    + "the time, the user and the result. The length check "
+                    + "passes, so it prints admin -> DENIED.\n"
+                    + "\n"
+                    + "Feed it a truncated line such as \"2026-03-02 "
+                    + "22:41:07\" and it reports 'Malformed: 2 fields' "
+                    + "instead of crashing on parts[2].")
+                .explain(
+                    "String[] parts = line.split(\" \"); - cut at each space.")
+                .xp(15))
+            .mistakes(
+                new String[]{"split(\".\") on an address",
+                    "Returns nothing. Use split(\"\\\\.\")."},
+                new String[]{"Reading fields without a length check",
+                    "A short line crashes the parser."},
+                new String[]{"Treating a piece as a number",
+                    "It is a String until Integer.parseInt."})
+            .cyber(
+                "Parsers are attacked through their input. A log line with "
+                + "a missing field, an extra separator inside a username, or "
+                + "nothing at all will reach your split sooner or later - "
+                + "sometimes sent on purpose to crash the monitoring tool "
+                + "so that what follows goes unrecorded. Check parts.length, "
+                + "and decide what to do with a malformed line (count it, "
+                + "report it) instead of letting it take the tool down.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"a,b,,d\";",
+                    "String[] p = s.split(\",\");",
+                    "System.out.println(p.length + \" [\" + p[2] + \"]\");")
+                .accept("4 []")
+                .hints("Two commas side by side have nothing between them.",
+                       "That nothing is still a piece.")
+                .explain(
+                    "4 []. The empty field between the two commas is a real "
+                    + "piece: an empty String. Missing values in logs look "
+                    + "exactly like this.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Which call splits \"10.0.0.5\" into its four numbers?")
+                .choices("split(\".\")",
+                         "split(\"\\\\.\")",
+                         "split(\",\")",
+                         "split(\" \")")
+                .accept("2", "b")
+                .hints("The dot is special to split.",
+                       "It needs two backslashes in front.")
+                .explain(
+                    "b. \\\\. means a real dot. A plain \".\" means any "
+                    + "character, and c and d find no separator at all, "
+                    + "giving one piece.")
+                .xp(10))
+            .recap(
+                "    String[] parts = line.split(\",\");\n"
+                + "    if (parts.length == 4) { ... parts[3] ... }\n"
+                + "\n"
+                + "Dots and bars need \\\\. and \\\\|. Pieces are text: "
+                + "parse numbers. Always check the length first.")
+            .next("Next: a list that grows - ArrayList."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(18), "A List That Grows", 3)
+            .brief(
+                "The night shift builds a list of accounts to review as the "
+                + "log is read. Nobody knows at the start how many there "
+                + "will be - none, or forty. An array must be given its "
+                + "size up front and never grows. Java's ArrayList starts "
+                + "empty and grows with every add.")
+            .willLearn("ArrayList")
+            .whyUseful(
+                "Most real collections have no size known in advance: "
+                + "suspicious addresses, alerts raised, users found. "
+                + "ArrayList handles the growing for you, and it is the "
+                + "list type used throughout real Java code.")
+            .concept("ArrayList",
+                "ArrayList lives in java.util, so it needs an import:\n"
+                + "\n"
+                + "    import java.util.ArrayList;\n"
+                + "\n"
+                + "Creating an empty list of Strings:\n"
+                + "\n"
+                + "    ArrayList<String> review = new ArrayList<>();\n"
+                + "\n"
+                + "    ArrayList<String>   a list of Strings\n"
+                + "    new ArrayList<>()   an empty one; <> repeats the type\n"
+                + "\n"
+                + "The type in the angle brackets says what the list holds. "
+                + "Add to the end with add, and ask the size with size():\n"
+                + "\n"
+                + "    review.add(\"jsmith\");      size() is 1\n"
+                + "    review.add(\"svc_old\");     size() is 2\n"
+                + "\n"
+                + "Unlike an array, a list prints its contents directly:\n"
+                + "\n"
+                + "    System.out.println(review);    [jsmith, svc_old]\n"
+                + "\n"
+                + "Note the differences from arrays: size() with brackets "
+                + "(length belongs to arrays), and methods instead of "
+                + "square brackets. The list only holds objects - "
+                + "ArrayList<String> is fine, but numbers need "
+                + "ArrayList<Integer>, which mission 22 explains.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] results = {\"jsmith:OK\", \"admin:FAIL\",",
+                "                \"mpatel:OK\", \"temp01:FAIL\"};",
+                "        ArrayList<String> review = new ArrayList<>();",
+                "        System.out.println(\"Start: \" + review.size());",
+                "        for (String r : results) {",
+                "            String[] parts = r.split(\":\");",
+                "            if (parts[1].equals(\"FAIL\")) {",
+                "                review.add(parts[0]);",
+                "            }",
+                "        }",
+                "        System.out.println(\"To review: \" + review.size());",
+                "        System.out.println(review);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Start: 0",
+                "To review: 2",
+                "[admin, temp01]")
+            .lineByLine(
+                new String[]{"new ArrayList<>()",
+                    "An empty list. No size is given - it grows as needed."},
+                new String[]{"review.add(parts[0]);",
+                    "Adds the user to the end of the list."},
+                new String[]{"review.size()",
+                    "How many items the list holds right now."},
+                new String[]{"System.out.println(review);",
+                    "Lists print their contents, in order, in [ ]."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> hosts = new java.util.ArrayList<>();",
+                    "hosts.add(\"web1\");",
+                    "hosts.add(\"db1\");",
+                    "hosts.add(\"web1\");",
+                    "System.out.println(hosts.size() + \" \" + hosts);")
+                .accept("3 [web1, db1, web1]")
+                .hints("Every add puts one more item at the end.",
+                       "A list may hold the same value twice.")
+                .explain(
+                    "3 [web1, db1, web1]. Three adds, three items, kept in the "
+                    + "order they were added - duplicates included.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which asks how many items the list alerts holds?")
+                .choices("alerts.length",
+                         "alerts.length()",
+                         "alerts.size()",
+                         "alerts.count")
+                .accept("3", "c")
+                .hints("It is a method, so it has brackets.",
+                       "length is for arrays and Strings.")
+                .explain(
+                    "c. ArrayList uses size(). length belongs to arrays, and "
+                    + "length() to Strings.")
+                .xp(10))
+            .objective(
+                "Collect every address that was refused.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] ips = {\"10.0.0.4\", \"10.0.0.9\", \"10.0.0.12\"};",
+                "        boolean[] refused = {false, true, true};",
+                "        // blocked: a new, empty ArrayList of Strings",
+                "        for (int i = 0; i < ips.length; i++) {",
+                "            if (refused[i]) {",
+                "                blocked.add(ips[i]);",
+                "            }",
+                "        }",
+                "        System.out.println(blocked);",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare blocked as a new, empty ArrayList that holds "
+                + "Strings.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that declares blocked.")
+                .accept("ArrayList<String> blocked = new ArrayList<>();",
+                        "ArrayList<String> blocked = new ArrayList<String>();",
+                        "ArrayList<String> blocked=new ArrayList<>();")
+                .hints(
+                    "The type is ArrayList<String>.",
+                    "new ArrayList<>() makes an empty one.",
+                    "ArrayList<String> blocked = new ArrayList<>();")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] ips = {\"10.0.0.4\", \"10.0.0.9\", \"10.0.0.12\"};",
+                    "        boolean[] refused = {false, true, true};",
+                    "        ArrayList<String> blocked = new ArrayList<>();",
+                    "        for (int i = 0; i < ips.length; i++) {",
+                    "            if (refused[i]) {",
+                    "                blocked.add(ips[i]);",
+                    "            }",
+                    "        }",
+                    "        System.out.println(blocked);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "blocked starts empty. Two of the three addresses were "
+                    + "refused, so two adds run and the list grows to hold "
+                    + "exactly them: [10.0.0.9, 10.0.0.12].\n"
+                    + "\n"
+                    + "With an array you would have had to guess a size - or "
+                    + "count first and fill second. The list simply grows.")
+                .explain(
+                    "ArrayList<String> blocked = new ArrayList<>(); - empty.")
+                .xp(15))
+            .mistakes(
+                new String[]{"Forgetting the import",
+                    "import java.util.ArrayList; at the top."},
+                new String[]{"list.length",
+                    "Lists use size()."},
+                new String[]{"ArrayList<int>",
+                    "Only object types: ArrayList<Integer> (mission 22)."})
+            .cyber(
+                "Findings arrive one at a time and their number is unknown "
+                + "until the scan ends - which is why real security tools "
+                + "collect them in lists. One caution carries over from "
+                + "Campaign 04: a list that grows with the input can grow "
+                + "with an attacker's input too. A tool that adds every "
+                + "request to a list forever will run out of memory; cap "
+                + "what you keep.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "System.out.println(a.size() + \" \" + a);")
+                .accept("0 []")
+                .hints("Nothing has been added.",
+                       "An empty list prints as [].")
+                .explain(
+                    "0 []. A new list is empty, and prints as a pair of "
+                    + "brackets with nothing inside.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why use an ArrayList instead of an array for a list of "
+                    + "suspicious addresses?")
+                .choices("It is always faster",
+                         "The number found is not known in advance",
+                         "Arrays cannot hold Strings",
+                         "Lists never run out of memory")
+                .accept("2", "b")
+                .hints("What can an array never do?",
+                       "An array's size is fixed when it is made.")
+                .explain(
+                    "b. An array needs its size up front. A list grows as "
+                    + "each address is found - though, as the cyber note "
+                    + "says, not without limit.")
+                .xp(10))
+            .recap(
+                "    import java.util.ArrayList;\n"
+                + "    ArrayList<String> list = new ArrayList<>();\n"
+                + "    list.add(x)        add to the end\n"
+                + "    list.size()        how many now\n"
+                + "    println(list)      [a, b, c]\n"
+                + "\n"
+                + "Starts empty, grows with every add.")
+            .next("Next: reading and changing items in a list."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(19), "Reading and Changing a List", 3)
+            .brief(
+                "The incident queue is an ArrayList of ticket titles, most "
+                + "urgent first. The lead needs to read the top one, relabel "
+                + "the second, and push a new critical ticket in at the very "
+                + "front. With an array, that last one means shifting every "
+                + "slot by hand. A list does it in one call.")
+            .willLearn("get and set")
+            .whyUseful(
+                "Reading one item and replacing one item are the everyday "
+                + "list operations. Inserting at a position - which an "
+                + "array cannot do at all without a copy - is one method "
+                + "call.")
+            .concept("get and set",
+                "List positions are indexes from 0, like arrays - but they "
+                + "are reached with methods, not square brackets:\n"
+                + "\n"
+                + "    array            ArrayList\n"
+                + "    a[i]             list.get(i)\n"
+                + "    a[i] = x;        list.set(i, x);\n"
+                + "    a.length         list.size()\n"
+                + "\n"
+                + "add has a second form that INSERTS at a position; "
+                + "everything from there on moves up one place:\n"
+                + "\n"
+                + "    list.add(\"x\");        to the end\n"
+                + "    list.add(0, \"x\");     to the front; the rest shift\n"
+                + "\n"
+                + "The last item is list.get(list.size() - 1). An index "
+                + "outside 0 to size() - 1 crashes, as with arrays - here "
+                + "the exception is IndexOutOfBoundsException.\n"
+                + "\n"
+                + "One more helper: list.isEmpty() is true when size() is "
+                + "0. Use it before get(0) - an empty list has no first "
+                + "item.\n"
+                + "\n"
+                + "The index loop from mission 5 works unchanged, with "
+                + "size() and get(i):\n"
+                + "\n"
+                + "    for (int i = 0; i < list.size(); i++) {\n"
+                + "        System.out.println(i + \": \" + list.get(i));\n"
+                + "    }")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> queue = new ArrayList<>();",
+                "        queue.add(\"Phishing report\");",
+                "        queue.add(\"Disk alert\");",
+                "        queue.add(\"Password reset\");",
+                "        System.out.println(\"Top: \" + queue.get(0));",
+                "        queue.set(1, \"Disk alert (db2)\");",
+                "        queue.add(0, \"Ransomware note found\");",
+                "        for (int i = 0; i < queue.size(); i++) {",
+                "            System.out.println(i + \": \" + queue.get(i));",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Top: Phishing report",
+                "0: Ransomware note found",
+                "1: Phishing report",
+                "2: Disk alert (db2)",
+                "3: Password reset")
+            .lineByLine(
+                new String[]{"queue.get(0)",
+                    "The item at index 0, read without removing it."},
+                new String[]{"queue.set(1, \"Disk alert (db2)\")",
+                    "Replaces the item at index 1. The size stays 3."},
+                new String[]{"queue.add(0, \"Ransomware note found\")",
+                    "Inserts at the front. Every other ticket moves up one: "
+                    + "the size is now 4."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"x\");",
+                    "a.add(\"y\");",
+                    "a.add(1, \"z\");",
+                    "System.out.println(a);")
+                .accept("[x, z, y]")
+                .hints("add(1, ...) inserts at index 1.",
+                       "y moves up to make room.")
+                .explain(
+                    "[x, z, y]. z goes into index 1, and y shifts from index "
+                    + "1 to index 2.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A list holds 4 items. Which call crashes?")
+                .choices("list.get(0)",
+                         "list.get(3)",
+                         "list.get(list.size() - 1)",
+                         "list.get(4)")
+                .accept("4", "d")
+                .hints("Indexes run from 0 to size() - 1.",
+                       "size() is 4.")
+                .explain(
+                    "d. Four items sit at indexes 0 to 3. get(4) throws "
+                    + "IndexOutOfBoundsException.")
+                .xp(10))
+            .objective(
+                "Mark a ticket as closed, in place.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> tickets = new ArrayList<>();",
+                "        tickets.add(\"OPEN phishing\");",
+                "        tickets.add(\"OPEN malware\");",
+                "        tickets.add(\"OPEN disk\");",
+                "        int done = 1;",
+                "        String old = tickets.get(done);",
+                "        // replace the item at index done with its CLOSED version",
+                "        System.out.println(tickets);",
+                "    }",
+                "}")
+            .yourTask(
+                "Replace the item at index done with \"CLOSED \" followed by "
+                + "old.substring(5) - the ticket's name without OPEN.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that replaces the item.")
+                .accept("tickets.set(done, \"CLOSED \" + old.substring(5));",
+                        "tickets.set(done,\"CLOSED \" + old.substring(5));",
+                        "tickets.set(1, \"CLOSED \" + old.substring(5));")
+                .hints(
+                    "set(index, newValue) replaces an item.",
+                    "The new value is \"CLOSED \" + old.substring(5).",
+                    "tickets.set(done, \"CLOSED \" + old.substring(5));")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> tickets = new ArrayList<>();",
+                    "        tickets.add(\"OPEN phishing\");",
+                    "        tickets.add(\"OPEN malware\");",
+                    "        tickets.add(\"OPEN disk\");",
+                    "        int done = 1;",
+                    "        String old = tickets.get(done);",
+                    "        tickets.set(done, \"CLOSED \" + old.substring(5));",
+                    "        System.out.println(tickets);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "old is \"OPEN malware\"; substring(5) skips \"OPEN \" "
+                    + "and leaves \"malware\". set puts \"CLOSED malware\" at "
+                    + "index 1 in place of the old text, and the list keeps "
+                    + "its size and order: [OPEN phishing, CLOSED malware, "
+                    + "OPEN disk].\n"
+                    + "\n"
+                    + "add(done, ...) would have INSERTED a fourth ticket "
+                    + "and left the open one behind it.")
+                .explain(
+                    "tickets.set(done, \"CLOSED \" + old.substring(5));")
+                .xp(15))
+            .mistakes(
+                new String[]{"list[i]",
+                    "Lists use get(i). Square brackets are for arrays."},
+                new String[]{"add(i, x) to replace",
+                    "add inserts and shifts; set replaces."},
+                new String[]{"get(0) on an empty list",
+                    "Check isEmpty() first."})
+            .cyber(
+                "An incident queue in the wrong order is an incident "
+                + "handled late. Inserting at the front puts the critical "
+                + "item where the next analyst will look, and set changes "
+                + "a status in place without losing its position. The "
+                + "difference between set and add(i, x) is exactly the kind "
+                + "of slip that leaves a closed ticket AND an open one - "
+                + "and two people working the same incident.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"p\");",
+                    "a.add(\"q\");",
+                    "a.set(0, \"r\");",
+                    "System.out.println(a.get(0) + a.size());")
+                .accept("r2")
+                .hints("set replaces; the size does not change.",
+                       "Two adds, so size() is 2.")
+                .explain(
+                    "r2. set swapped p for r in index 0, and the list still "
+                    + "holds two items.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "How do you read the LAST item of a non-empty list?")
+                .choices("list.get(list.size())",
+                         "list.get(list.size() - 1)",
+                         "list.get(-1)",
+                         "list.last")
+                .accept("2", "b")
+                .hints("Indexes start at 0.",
+                       "The last index is size() - 1.")
+                .explain(
+                    "b. As with arrays, the last index is one less than the "
+                    + "count. get(list.size()) is one past the end.")
+                .xp(10))
+            .recap(
+                "    list.get(i)          read\n"
+                + "    list.set(i, x)       replace\n"
+                + "    list.add(i, x)       insert; the rest shift up\n"
+                + "    list.isEmpty()       size() == 0\n"
+                + "\n"
+                + "Valid indexes: 0 to size() - 1.")
+            .next("Next: removing and finding items."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(20), "Remove, Contains, IndexOf", 4)
+            .brief(
+                "A contractor's project ended yesterday. Their account "
+                + "temp01 must come off the admin list today, and the audit "
+                + "wants proof: is temp01 still on it, and where? Mission 12 "
+                + "wrote a linear search by hand. ArrayList has one built "
+                + "in - and removal that closes the gap for you.")
+            .willLearn("remove, contains and indexOf")
+            .whyUseful(
+                "Revoking access, checking membership and finding a "
+                + "position are the core of every allowlist and blocklist. "
+                + "The list methods do the loop for you, using equals, so "
+                + "text is compared properly.")
+            .concept("remove, contains and indexOf",
+                "Three methods search the list for you, comparing with "
+                + "equals - never == - so text matches by content:\n"
+                + "\n"
+                + "    list.contains(x)   true if x is anywhere in it\n"
+                + "    list.indexOf(x)    the first position of x, or -1\n"
+                + "    list.remove(x)     removes the first x; true if\n"
+                + "                       one was found\n"
+                + "\n"
+                + "remove also has a form that takes an INDEX, and returns "
+                + "the item it took out:\n"
+                + "\n"
+                + "    String gone = list.remove(0);   removes the first\n"
+                + "\n"
+                + "After any remove, everything behind the gap moves DOWN "
+                + "one place, and size() drops by one. Indexes you worked "
+                + "out before the removal may now point at a different item.\n"
+                + "\n"
+                + "remove(x) takes out only the FIRST match. If a value can "
+                + "appear more than once, keep removing while contains says "
+                + "it is still there:\n"
+                + "\n"
+                + "    while (list.contains(\"temp01\")) {\n"
+                + "        list.remove(\"temp01\");\n"
+                + "    }")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> admins = new ArrayList<>();",
+                "        admins.add(\"root\");",
+                "        admins.add(\"temp01\");",
+                "        admins.add(\"jsmith\");",
+                "        System.out.println(\"temp01 at: \" + admins.indexOf(\"temp01\"));",
+                "        boolean removed = admins.remove(\"temp01\");",
+                "        System.out.println(\"Removed: \" + removed);",
+                "        boolean still = admins.contains(\"temp01\");",
+                "        System.out.println(\"Still admin: \" + still);",
+                "        System.out.println(\"jsmith at: \" + admins.indexOf(\"jsmith\"));",
+                "        System.out.println(admins);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "temp01 at: 1",
+                "Removed: true",
+                "Still admin: false",
+                "jsmith at: 1",
+                "[root, jsmith]")
+            .lineByLine(
+                new String[]{"admins.indexOf(\"temp01\")",
+                    "A built-in linear search: 1, or -1 if absent."},
+                new String[]{"admins.remove(\"temp01\")",
+                    "Takes out the first match and reports true."},
+                new String[]{"admins.contains(\"temp01\")",
+                    "The audit's proof that the account is gone."},
+                new String[]{"jsmith at: 1",
+                    "jsmith was at 2. After the removal it moved down to 1."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"ann\");",
+                    "a.add(\"bob\");",
+                    "a.add(\"cy\");",
+                    "String gone = a.remove(0);",
+                    "System.out.println(gone + \" \" + a.get(0));")
+                .accept("ann bob")
+                .hints("remove(0) returns what it removed.",
+                       "Then everything moves down one place.")
+                .explain(
+                    "ann bob. remove(0) takes out and returns ann, and bob "
+                    + "moves down into index 0.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"x\");",
+                    "a.add(\"y\");",
+                    "a.add(\"x\");",
+                    "a.remove(\"x\");",
+                    "System.out.println(a.contains(\"x\") + \" \" + a);")
+                .accept("true [y, x]")
+                .hints("remove(value) takes out only the first match.",
+                       "The second x is still there.")
+                .explain(
+                    "true [y, x]. Only the first x went. A revoked account "
+                    + "listed twice is still on the list - keep removing "
+                    + "while contains is true.")
+                .xp(20))
+            .objective(
+                "Revoke an account, however many times it is listed.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> access = new ArrayList<>();",
+                "        access.add(\"temp01\");",
+                "        access.add(\"root\");",
+                "        access.add(\"temp01\");",
+                "        // the while header: temp01 is still in access",
+                "            access.remove(\"temp01\");",
+                "        }",
+                "        System.out.println(access);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the while header that keeps the loop going as long "
+                + "as access still contains \"temp01\".")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the while header.")
+                .accept("while (access.contains(\"temp01\")) {",
+                        "while(access.contains(\"temp01\")) {",
+                        "while (access.contains(\"temp01\")){",
+                        "while (access.indexOf(\"temp01\") != -1) {",
+                        "while (access.indexOf(\"temp01\") >= 0) {")
+                .hints(
+                    "Which method answers 'is it in the list?'",
+                    "contains returns a boolean - a perfect condition.",
+                    "while (access.contains(\"temp01\")) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> access = new ArrayList<>();",
+                    "        access.add(\"temp01\");",
+                    "        access.add(\"root\");",
+                    "        access.add(\"temp01\");",
+                    "        while (access.contains(\"temp01\")) {",
+                    "            access.remove(\"temp01\");",
+                    "        }",
+                    "        System.out.println(access);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The first pass removes the temp01 at index 0; contains "
+                    + "is still true, so a second pass removes the other one. "
+                    + "Then contains is false and the loop ends: [root].\n"
+                    + "\n"
+                    + "One remove would have left a copy behind - and a "
+                    + "revocation that misses one entry has not revoked "
+                    + "anything.")
+                .explain(
+                    "while (access.contains(\"temp01\")) {")
+                .xp(20))
+            .mistakes(
+                new String[]{"One remove for a repeated value",
+                    "Only the first match goes."},
+                new String[]{"Reusing an index after remove",
+                    "Everything behind the gap moved down one."},
+                new String[]{"Ignoring what remove returns",
+                    "false means nothing was there to remove."})
+            .cyber(
+                "Deprovisioning - removing access when someone leaves - is "
+                + "one of the most audited controls in any organisation, "
+                + "because forgotten accounts are a favourite way in. The "
+                + "code must remove EVERY entry, and the audit must prove "
+                + "it: contains afterwards, or a false from remove, is the "
+                + "evidence. An account that survives on a second line of "
+                + "the list is still an open door.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> a = new java.util.ArrayList<>();",
+                    "a.add(\"web\");",
+                    "System.out.println(a.indexOf(\"db\") + \" \" + a.remove(\"db\"));")
+                .accept("-1 false")
+                .hints("db is not in the list.",
+                       "Nothing found: -1, and nothing removed.")
+                .explain(
+                    "-1 false. indexOf reports 'not found' with -1, and "
+                    + "remove returns false because there was nothing to "
+                    + "take out.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "How does contains decide that two Strings match?")
+                .choices("With ==",
+                         "With equals",
+                         "With equalsIgnoreCase",
+                         "By length")
+                .accept("2", "b")
+                .hints("It compares the text, not where it is kept.",
+                       "Case still matters.")
+                .explain(
+                    "b. The list methods use equals: same characters, same "
+                    + "case. \"Root\" does not match \"root\".")
+                .xp(10))
+            .recap(
+                "    list.contains(x)     true / false\n"
+                + "    list.indexOf(x)      first position, or -1\n"
+                + "    list.remove(x)       first match; true if found\n"
+                + "    list.remove(i)       by index; returns the item\n"
+                + "\n"
+                + "All compare with equals. After a remove, the rest move "
+                + "down one.")
+            .next("Next: looping over a list - and removing safely."));
     }
 }
