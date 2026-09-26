@@ -2308,5 +2308,1239 @@ public class Campaign06 {
                 + "Class's name, no return type. Runs during new.")
             .next("Next: the constructor you get for free - until you "
                 + "don't."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(11), "The Free Constructor", 3)
+            .brief(
+                "Missions 1 to 9 wrote new Host() without any constructor "
+                + "in sight - and it worked. Then mission 10 added one, and "
+                + "an old line elsewhere, new Ticket(), stopped compiling. "
+                + "Java had been supplying a constructor quietly, and "
+                + "stopped the moment you wrote your own.")
+            .willLearn("The default constructor")
+            .whyUseful(
+                "Knowing when Java provides a constructor - and when it "
+                + "withdraws it - explains a confusing compile error, and "
+                + "lets you decide on purpose whether an object may be made "
+                + "with no arguments at all.")
+            .concept("The default constructor",
+                "A class with NO constructors gets one from Java, the "
+                + "DEFAULT constructor: no parameters, and it does nothing "
+                + "beyond the field defaults. That is why new Host() worked "
+                + "in missions 1 to 9.\n"
+                + "\n"
+                + "The moment you write ANY constructor, Java stops "
+                + "supplying it:\n"
+                + "\n"
+                + "    class Ticket {\n"
+                + "        String title;\n"
+                + "        Ticket(String title) { this.title = title; }\n"
+                + "    }\n"
+                + "\n"
+                + "    new Ticket(\"Disk full\")    fine\n"
+                + "    new Ticket()               does not compile\n"
+                + "\n"
+                + "Usually that is what you want: a Ticket must have a "
+                + "title. If a no-argument version really makes sense, "
+                + "write it yourself - and give the fields sensible "
+                + "starting values instead of null:\n"
+                + "\n"
+                + "    Ticket() {\n"
+                + "        this.title = \"(untitled)\";\n"
+                + "    }\n"
+                + "\n"
+                + "A class can have both; mission 12 is about several "
+                + "constructors side by side.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Note n = new Note();",
+                "        System.out.println(\"Note text: \" + n.text);",
+                "        Ticket t = new Ticket();",
+                "        Ticket u = new Ticket(\"Disk full on db2\");",
+                "        System.out.println(t.title);",
+                "        System.out.println(u.title);",
+                "    }",
+                "}",
+                "",
+                "class Note {",
+                "    String text;",
+                "}",
+                "",
+                "class Ticket {",
+                "    String title;",
+                "",
+                "    Ticket() {",
+                "        this.title = \"(untitled)\";",
+                "    }",
+                "",
+                "    Ticket(String title) {",
+                "        this.title = title;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Note text: null",
+                "(untitled)",
+                "Disk full on db2")
+            .lineByLine(
+                new String[]{"class Note { String text; }",
+                    "No constructor written, so Java supplies one: new "
+                    + "Note() works, and text is null."},
+                new String[]{"Ticket() { ... }",
+                    "Written by hand, because Ticket has another "
+                    + "constructor - and it avoids a null title."},
+                new String[]{"new Ticket(\"Disk full on db2\")",
+                    "The one-argument constructor."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Cfg {",
+                    "    int retries;",
+                    "    boolean verbose;",
+                    "}",
+                    "",
+                    "Cfg c = new Cfg();",
+                    "System.out.println(c.retries + \" \" + c.verbose);")
+                .accept("0 false")
+                .hints("Cfg has no constructor. What does Java supply?",
+                       "One that leaves the defaults.")
+                .explain(
+                    "0 false. The default constructor sets nothing, so the "
+                    + "fields keep their defaults.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Host {",
+                    "    String name;",
+                    "",
+                    "    Host(String name) {",
+                    "        this.name = name;",
+                    "    }",
+                    "}",
+                    "",
+                    "Host a = new Host(\"web1\");",
+                    "Host b = new Host();",
+                    "System.out.println(a.name);")
+                .accept("10", "line 10")
+                .hints("Which constructors does Host have?",
+                       "Only one, and it needs a name.")
+                .explain(
+                    "Line 10. Writing Host(String name) took away the free "
+                    + "no-argument constructor, so new Host() fits nothing.")
+                .xp(20))
+            .objective(
+                "Let a Ticket be made with no title - safely.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Ticket blank = new Ticket();",
+                "        System.out.println(\"[\" + blank.title + \"]\");",
+                "    }",
+                "}",
+                "",
+                "class Ticket {",
+                "    String title;",
+                "",
+                "    // a constructor with no parameters",
+                "        this.title = \"(untitled)\";",
+                "    }",
+                "",
+                "    Ticket(String title) {",
+                "        this.title = title;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the header of a constructor that takes no "
+                + "parameters, so new Ticket() compiles again.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the constructor header.")
+                .accept("Ticket() {",
+                        "Ticket(){",
+                        "public Ticket() {")
+                .hints(
+                    "Same name as the class, no return type.",
+                    "Empty brackets: no parameters.",
+                    "Ticket() {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Ticket blank = new Ticket();",
+                    "        System.out.println(\"[\" + blank.title + \"]\");",
+                    "    }",
+                    "}",
+                    "",
+                    "class Ticket {",
+                    "    String title;",
+                    "",
+                    "    Ticket() {",
+                    "        this.title = \"(untitled)\";",
+                    "    }",
+                    "",
+                    "    Ticket(String title) {",
+                    "        this.title = title;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "With Ticket() written by hand, new Ticket() has a "
+                    + "constructor to run, and it sets a readable title: "
+                    + "[(untitled)].\n"
+                    + "\n"
+                    + "Java's free constructor would have left title as "
+                    + "null - and any later title.length() would crash. "
+                    + "Writing it yourself lets you choose a safe start.")
+                .explain(
+                    "Ticket() { - a no-argument constructor, by hand.")
+                .xp(15))
+            .mistakes(
+                new String[]{"Expecting new X() after adding a constructor",
+                    "Java withdraws the free one. Write it if needed."},
+                new String[]{"Adding a no-arg constructor by reflex",
+                    "Only if an object without those values makes sense."},
+                new String[]{"Leaving fields null in it",
+                    "Give them safe starting values."})
+            .cyber(
+                "Whether an object can be made with no arguments is a "
+                + "design decision with security weight. If a Session can "
+                + "be created without a user, some code path eventually "
+                + "will - and then has to guess what an anonymous session "
+                + "may do. Leave the no-argument constructor out unless an "
+                + "empty object is genuinely safe.")
+            .check(new Task(Task.CHOICE,
+                    "When does Java supply the default constructor?")
+                .choices("Always",
+                         "Only when the class declares no constructors",
+                         "Only when every field is an int",
+                         "Never")
+                .accept("2", "b")
+                .hints("What happened in mission 10?",
+                       "Writing one takes it away.")
+                .explain(
+                    "b. Only for a class with no constructors of its own.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Session has only Session(String user). Which line "
+                    + "compiles?")
+                .choices("new Session()",
+                         "new Session(\"jsmith\")",
+                         "new Session(42)",
+                         "Session()")
+                .accept("2", "b")
+                .hints("Match the only constructor.",
+                       "It needs one String.")
+                .explain(
+                    "b. The arguments must match a constructor that exists: "
+                    + "one String.")
+                .xp(10))
+            .recap(
+                "    no constructors written  ->  Java supplies X()\n"
+                + "    any constructor written  ->  it does not\n"
+                + "\n"
+                + "Write X() yourself only when an object without those "
+                + "values is safe - and set useful starting values.")
+            .next("Next: several constructors in one class."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(12), "Several Ways to Make One", 4)
+            .brief(
+                "Most alerts arrive with a rule and a severity. Some come "
+                + "from an older tool that sends only the rule, and those "
+                + "should default to severity 5. Two kinds of caller, one "
+                + "class: give Alert two constructors, and let Java pick the "
+                + "one that fits the arguments.")
+            .willLearn("Constructor overloading")
+            .whyUseful(
+                "Several constructors let callers supply what they have, "
+                + "while the class fills in sensible defaults for the rest. "
+                + "It is Campaign 03's overloading, applied to making "
+                + "objects.")
+            .concept("Constructor overloading",
+                "A class can have several constructors, as long as their "
+                + "PARAMETER LISTS differ - in number, types or order. "
+                + "Java picks the one that matches the arguments:\n"
+                + "\n"
+                + "    Alert(String rule) {\n"
+                + "        this.rule = rule;\n"
+                + "        this.severity = 5;          a default\n"
+                + "    }\n"
+                + "\n"
+                + "    Alert(String rule, int severity) {\n"
+                + "        this.rule = rule;\n"
+                + "        this.severity = severity;\n"
+                + "    }\n"
+                + "\n"
+                + "    new Alert(\"Port scan\")         the first\n"
+                + "    new Alert(\"Port scan\", 7)      the second\n"
+                + "\n"
+                + "This is OVERLOADING, exactly as with methods in Campaign "
+                + "03: same name, different parameters. Parameter NAMES do "
+                + "not count - two constructors both taking (String) clash, "
+                + "whatever their parameters are called.\n"
+                + "\n"
+                + "Notice the repetition: both constructors set rule. "
+                + "Mission 13 removes it, so each default and each rule "
+                + "lives in one place.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert(\"Port scan\");",
+                "        Alert b = new Alert(\"Admin created\", 9);",
+                "        System.out.println(a.rule + \": \" + a.severity);",
+                "        System.out.println(b.rule + \": \" + b.severity);",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    String rule;",
+                "    int severity;",
+                "",
+                "    Alert(String rule) {",
+                "        this.rule = rule;",
+                "        this.severity = 5;",
+                "    }",
+                "",
+                "    Alert(String rule, int severity) {",
+                "        this.rule = rule;",
+                "        this.severity = severity;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Port scan: 5",
+                "Admin created: 9")
+            .lineByLine(
+                new String[]{"new Alert(\"Port scan\")",
+                    "One String: the first constructor, with the default 5."},
+                new String[]{"new Alert(\"Admin created\", 9)",
+                    "A String and an int: the second constructor."},
+                new String[]{"this.severity = 5;",
+                    "The default lives in the class, not in every caller."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Rule {",
+                    "    int port;",
+                    "    String proto;",
+                    "",
+                    "    Rule(int port) {",
+                    "        this.port = port;",
+                    "        this.proto = \"tcp\";",
+                    "    }",
+                    "",
+                    "    Rule(int port, String proto) {",
+                    "        this.port = port;",
+                    "        this.proto = proto;",
+                    "    }",
+                    "}",
+                    "",
+                    "Rule a = new Rule(53, \"udp\");",
+                    "Rule b = new Rule(22);",
+                    "System.out.println(a.proto + \" \" + b.proto);")
+                .accept("udp tcp")
+                .hints("Match each new to a constructor.",
+                       "One argument gets the default protocol.")
+                .explain(
+                    "udp tcp. a used the two-argument constructor; b used "
+                    + "the one that fills in tcp.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class User {",
+                    "    String name;",
+                    "    String role;",
+                    "",
+                    "    User(String name) {",
+                    "        this.name = name;",
+                    "    }",
+                    "",
+                    "    User(String role) {",
+                    "        this.role = role;",
+                    "    }",
+                    "}",
+                    "",
+                    "User u = new User(\"ana\");",
+                    "System.out.println(u.name);")
+                .accept("9", "line 9")
+                .hints("Do the parameter lists differ?",
+                       "Names do not count, only types.")
+                .explain(
+                    "Line 9: 'constructor User(String) is already defined'. "
+                    + "Both take one String; Java could never tell which was "
+                    + "meant.")
+                .xp(20))
+            .objective(
+                "Make a session with the standard timeout.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Session s = new Session(\"jsmith\");",
+                "        Session t = new Session(\"admin\", 5);",
+                "        System.out.println(s.user + \" \" + s.minutes);",
+                "        System.out.println(t.user + \" \" + t.minutes);",
+                "    }",
+                "}",
+                "",
+                "class Session {",
+                "    String user;",
+                "    int minutes;",
+                "",
+                "    // a constructor taking only a String user",
+                "        this.user = user;",
+                "        this.minutes = 30;",
+                "    }",
+                "",
+                "    Session(String user, int minutes) {",
+                "        this.user = user;",
+                "        this.minutes = minutes;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the header of the constructor that takes only the "
+                + "user, so new Session(\"jsmith\") gets the standard 30 "
+                + "minutes.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the constructor header.")
+                .accept("Session(String user) {",
+                        "Session(String user){",
+                        "public Session(String user) {")
+                .hints(
+                    "Same name, different parameters.",
+                    "Just one String, called user.",
+                    "Session(String user) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Session s = new Session(\"jsmith\");",
+                    "        Session t = new Session(\"admin\", 5);",
+                    "        System.out.println(s.user + \" \" + s.minutes);",
+                    "        System.out.println(t.user + \" \" + t.minutes);",
+                    "    }",
+                    "}",
+                    "",
+                    "class Session {",
+                    "    String user;",
+                    "    int minutes;",
+                    "",
+                    "    Session(String user) {",
+                    "        this.user = user;",
+                    "        this.minutes = 30;",
+                    "    }",
+                    "",
+                    "    Session(String user, int minutes) {",
+                    "        this.user = user;",
+                    "        this.minutes = minutes;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "One String matches the new constructor, which fills in "
+                    + "30 minutes: jsmith 30. The admin session asks for 5 "
+                    + "explicitly and gets the other constructor: admin 5.\n"
+                    + "\n"
+                    + "Short sessions for privileged users are a common "
+                    + "policy; the two constructors let the caller choose "
+                    + "without every caller repeating the standard value.")
+                .explain(
+                    "Session(String user) { - one String, default minutes.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Two constructors, same parameter types",
+                    "'already defined'. The types must differ."},
+                new String[]{"Changing only parameter names",
+                    "Names never tell constructors apart."},
+                new String[]{"The same default typed in many places",
+                    "Mission 13 keeps it in one."})
+            .cyber(
+                "Defaults supplied by constructors are policy: 30-minute "
+                + "sessions, severity 5, deny-by-default rules. Kept inside "
+                + "the class, a policy change is one edit. Scattered across "
+                + "callers as literal numbers, some copy is always missed, "
+                + "and the system enforces two policies at once.")
+            .check(new Task(Task.CHOICE,
+                    "Alert has Alert(String) and Alert(String, int). Which "
+                    + "does new Alert(\"x\", 3) run?")
+                .choices("Alert(String)",
+                         "Alert(String, int)",
+                         "Both, one after the other",
+                         "Neither")
+                .accept("2", "b")
+                .hints("Count the arguments.",
+                       "A String and an int.")
+                .explain(
+                    "b. Java picks the constructor whose parameters match "
+                    + "the arguments.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Which pair of constructors can live in one class?")
+                .choices("Host(String a) and Host(String b)",
+                         "Host(int port) and Host(String name)",
+                         "Host(int x) and void Host(int y)",
+                         "None: only one constructor is allowed")
+                .accept("2", "b")
+                .hints("The types must differ.",
+                       "int and String differ.")
+                .explain(
+                    "b. Different parameter types. a clashes; c's second is "
+                    + "a method, not a constructor; d is false.")
+                .xp(10))
+            .recap(
+                "    Alert(String rule)                 default severity\n"
+                + "    Alert(String rule, int severity)   chosen severity\n"
+                + "\n"
+                + "Same name, different parameter types; Java picks by the "
+                + "arguments.")
+            .next("Next: one constructor calling another."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(13), "Constructors Calling Constructors", 4)
+            .brief(
+                "Session now has two constructors, and both copy the user "
+                + "and set the time. When a rule was added - trim and "
+                + "lower-case every username - it went into one "
+                + "constructor and not the other. Sessions made the short "
+                + "way kept stray capitals. Let one constructor do the work "
+                + "and the others pass it along.")
+            .willLearn("Constructor chaining")
+            .whyUseful(
+                "this(...) lets every constructor funnel into one that does "
+                + "the real work, so validation and tidying happen in "
+                + "exactly one place however the object is made.")
+            .concept("Constructor chaining",
+                "Inside a constructor, this(...) calls ANOTHER constructor "
+                + "of the same class:\n"
+                + "\n"
+                + "    Session(String user) {\n"
+                + "        this(user, 30);              hand over\n"
+                + "    }\n"
+                + "\n"
+                + "    Session(String user, int minutes) {\n"
+                + "        this.user = user.trim().toLowerCase();\n"
+                + "        this.minutes = minutes;\n"
+                + "    }\n"
+                + "\n"
+                + "new Session(\"JSmith\") runs the first constructor, which "
+                + "immediately runs the second with 30. All the real work - "
+                + "tidying, storing - is written once, in the most complete "
+                + "constructor.\n"
+                + "\n"
+                + "Two rules:\n"
+                + "\n"
+                + "    this(...) must be the FIRST statement\n"
+                + "    this(...) is not this.field: brackets right\n"
+                + "    after this mean 'another constructor'\n"
+                + "\n"
+                + "The pattern: short constructors supply defaults and "
+                + "chain; one full constructor does everything else.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Session a = new Session(\"  JSmith \");",
+                "        Session b = new Session(\"ADMIN\", 5);",
+                "        System.out.println(a.user + \" \" + a.minutes);",
+                "        System.out.println(b.user + \" \" + b.minutes);",
+                "    }",
+                "}",
+                "",
+                "class Session {",
+                "    String user;",
+                "    int minutes;",
+                "",
+                "    Session(String user) {",
+                "        this(user, 30);",
+                "    }",
+                "",
+                "    Session(String user, int minutes) {",
+                "        this.user = user.trim().toLowerCase();",
+                "        this.minutes = minutes;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "jsmith 30",
+                "admin 5")
+            .lineByLine(
+                new String[]{"this(user, 30);",
+                    "Runs the two-argument constructor with the default."},
+                new String[]{"user.trim().toLowerCase()",
+                    "The tidying rule, written once - both ways of making a "
+                    + "Session get it."},
+                new String[]{"jsmith 30",
+                    "The short constructor supplied 30 and chained."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Alert {",
+                    "    String rule;",
+                    "    int severity;",
+                    "",
+                    "    Alert(String rule) {",
+                    "        this(rule, 5);",
+                    "    }",
+                    "",
+                    "    Alert(String rule, int severity) {",
+                    "        this.rule = rule.toUpperCase();",
+                    "        this.severity = severity;",
+                    "    }",
+                    "}",
+                    "",
+                    "Alert a = new Alert(\"scan\");",
+                    "System.out.println(a.rule + \" \" + a.severity);")
+                .accept("SCAN 5")
+                .hints("The one-argument constructor chains.",
+                       "The full constructor upper-cases the rule.")
+                .explain(
+                    "SCAN 5. The short constructor passes 5 along, and the "
+                    + "full one does the upper-casing for both.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Host {",
+                    "    String name;",
+                    "    int port;",
+                    "",
+                    "    Host(String name) {",
+                    "        System.out.println(\"making\");",
+                    "        this(name, 443);",
+                    "    }",
+                    "",
+                    "    Host(String name, int port) {",
+                    "        this.name = name;",
+                    "        this.port = port;",
+                    "    }",
+                    "}",
+                    "",
+                    "Host h = new Host(\"web1\");")
+                .accept("7", "line 7")
+                .hints("Where must this(...) appear?",
+                       "Nothing may come before it.")
+                .explain(
+                    "Line 7: the call to this(...) must be the first "
+                    + "statement in the constructor.")
+                .xp(20))
+            .objective(
+                "Chain the short constructor to the full one.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert(\"Port scan\");",
+                "        System.out.println(a.rule + \": \" + a.severity);",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    String rule;",
+                "    int severity;",
+                "",
+                "    Alert(String rule) {",
+                "        // hand over to the full constructor, severity 5",
+                "    }",
+                "",
+                "    Alert(String rule, int severity) {",
+                "        this.rule = rule.trim();",
+                "        this.severity = severity;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the single line that makes Alert(String rule) run "
+                + "the full constructor with a severity of 5.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line.")
+                .accept("this(rule, 5);",
+                        "this(rule,5);")
+                .hints(
+                    "this, followed straight away by brackets.",
+                    "The arguments: the rule, then 5.",
+                    "this(rule, 5);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Alert a = new Alert(\"Port scan\");",
+                    "        System.out.println(a.rule + \": \" + a.severity);",
+                    "    }",
+                    "}",
+                    "",
+                    "class Alert {",
+                    "    String rule;",
+                    "    int severity;",
+                    "",
+                    "    Alert(String rule) {",
+                    "        this(rule, 5);",
+                    "    }",
+                    "",
+                    "    Alert(String rule, int severity) {",
+                    "        this.rule = rule.trim();",
+                    "        this.severity = severity;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "new Alert(\"Port scan\") runs the short constructor, "
+                    + "which hands over to the full one with severity 5. The "
+                    + "full one trims and stores both: Port scan: 5.\n"
+                    + "\n"
+                    + "Any rule added to the full constructor later - a "
+                    + "range check on severity, say - now covers alerts made "
+                    + "either way, with no second copy to forget.")
+                .explain(
+                    "this(rule, 5); - the full constructor does the work.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Statements before this(...)",
+                    "It must be the first line."},
+                new String[]{"Copying the work into every constructor",
+                    "Chain to one; fix rules in one place."},
+                new String[]{"this.(rule, 5) or Alert(rule, 5)",
+                    "It is written this(rule, 5)."})
+            .cyber(
+                "Constructors are where input first becomes an object, so "
+                + "they are where validation belongs. If there are three "
+                + "constructors and only two validate, attackers will find "
+                + "the third. Chaining every constructor into one that "
+                + "checks everything means no way of making the object "
+                + "skips the checks.")
+            .check(new Task(Task.CHOICE,
+                    "What does this(user, 30) do inside a constructor?")
+                .choices("Sets the field this to user",
+                         "Calls another constructor of the same class",
+                         "Makes a second object",
+                         "Calls a method called this")
+                .accept("2", "b")
+                .hints("Brackets straight after this.",
+                       "It is not this.field.")
+                .explain(
+                    "b. It runs the matching constructor on the SAME object "
+                    + "- no second object is made.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Box {",
+                    "    int w;",
+                    "    int h;",
+                    "",
+                    "    Box(int side) {",
+                    "        this(side, side);",
+                    "    }",
+                    "",
+                    "    Box(int w, int h) {",
+                    "        this.w = w;",
+                    "        this.h = h;",
+                    "    }",
+                    "}",
+                    "",
+                    "Box b = new Box(4);",
+                    "System.out.println(b.w * b.h);")
+                .accept("16")
+                .hints("One argument, passed twice.",
+                       "4 by 4.")
+                .explain(
+                    "16. The one-argument constructor chains with side for "
+                    + "both width and height.")
+                .xp(10))
+            .recap(
+                "    Session(String user) {\n"
+                + "        this(user, 30);      first line, always\n"
+                + "    }\n"
+                + "\n"
+                + "Short constructors supply defaults and chain; one full "
+                + "constructor does the real work.")
+            .next("Next: private - fields nobody else can touch."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(14), "private: Hands Off", 4)
+            .brief(
+                "The Account class has a careful recordFailure method that "
+                + "locks at three. It did not matter: a password-reset page "
+                + "elsewhere wrote acct.failures = 0 and acct.locked = "
+                + "false directly, and a locked account under attack was "
+                + "quietly unlocked. The rules lived in the class; the "
+                + "fields were open to everyone.")
+            .willLearn("private")
+            .whyUseful(
+                "private fields can only be touched by the class's own "
+                + "methods. The rules in those methods then cannot be "
+                + "bypassed - by mistake, by a rushed fix, or by anyone.")
+            .concept("private",
+                "Marking a field PRIVATE limits it to code inside its own "
+                + "class:\n"
+                + "\n"
+                + "    class Account {\n"
+                + "        private int failures;\n"
+                + "        private boolean locked;\n"
+                + "\n"
+                + "        void recordFailure() {\n"
+                + "            failures++;                 fine: inside\n"
+                + "            ...\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "    acct.failures = 0;      does not compile: outside\n"
+                + "\n"
+                + "Outside code must go through the methods the class "
+                + "chooses to offer - and those methods enforce the rules. "
+                + "If there is no unlock method, nothing outside can unlock.\n"
+                + "\n"
+                + "The fields without a modifier, used so far, are open to "
+                + "any class in the same package (Campaign 10). From now "
+                + "on, fields are private by default, and every exception "
+                + "is a decision.\n"
+                + "\n"
+                + "private works on methods too: a helper that only the "
+                + "class itself should call. And private is checked by the "
+                + "COMPILER - it is about which code may use a member, not "
+                + "about hiding secrets from someone reading the source.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Account a = new Account(\"admin\");",
+                "        a.recordFailure();",
+                "        a.recordFailure();",
+                "        a.recordFailure();",
+                "        System.out.println(a.describe());",
+                "        a.recordSuccess();",
+                "        System.out.println(a.describe());",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private String user;",
+                "    private int failures;",
+                "    private boolean locked;",
+                "",
+                "    Account(String user) {",
+                "        this.user = user;",
+                "    }",
+                "",
+                "    void recordFailure() {",
+                "        failures++;",
+                "        if (failures >= 3) {",
+                "            locked = true;",
+                "        }",
+                "    }",
+                "",
+                "    void recordSuccess() {",
+                "        if (!locked) {",
+                "            failures = 0;",
+                "        }",
+                "    }",
+                "",
+                "    String describe() {",
+                "        return user + \": \" + failures + (locked ? \" LOCKED\" : \"\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "admin: 3 LOCKED",
+                "admin: 3 LOCKED")
+            .lineByLine(
+                new String[]{"private int failures;",
+                    "Only Account's own methods can read or change it."},
+                new String[]{"recordSuccess()",
+                    "The only way to reset the count - and it refuses while "
+                    + "the account is locked."},
+                new String[]{"admin: 3 LOCKED (twice)",
+                    "A login success cannot quietly clear a lock; there is "
+                    + "no other door to the fields."})
+            .predict(new Task(Task.CHOICE,
+                    "Account has private int failures. Which line, written "
+                    + "in Main, compiles?")
+                .code(
+                    "a.failures = 0;",
+                    "a.recordFailure();",
+                    "System.out.println(a.failures);",
+                    "a.failures++;")
+                .choices("Line 1", "Line 2", "Line 3", "Line 4")
+                .accept("2", "b")
+                .hints("Which line does not touch the field directly?",
+                       "Methods are the way in.")
+                .explain(
+                    "b. Lines 1, 3 and 4 use the private field from outside "
+                    + "the class and are refused. Calling a method the class "
+                    + "offers is allowed.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Vault {",
+                    "    private String code = \"7291\";",
+                    "",
+                    "    boolean check(String guess) {",
+                    "        return code.equals(guess);",
+                    "    }",
+                    "}",
+                    "",
+                    "Vault v = new Vault();",
+                    "System.out.println(v.check(\"0000\"));",
+                    "System.out.println(v.code);")
+                .accept("11", "line 11")
+                .hints("Line 5 uses code too - but where is it?",
+                       "Which use is outside the class?")
+                .explain(
+                    "Line 11: 'code has private access in Vault'. The class's "
+                    + "own method may use code; Main may not.")
+                .xp(20))
+            .objective(
+                "Protect the balance.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Wallet w = new Wallet();",
+                "        w.deposit(50);",
+                "        w.withdraw(80);",
+                "        System.out.println(w.report());",
+                "    }",
+                "}",
+                "",
+                "class Wallet {",
+                "    // the balance: an int that only Wallet may touch",
+                "",
+                "    void deposit(int n) {",
+                "        if (n > 0) {",
+                "            balance += n;",
+                "        }",
+                "    }",
+                "",
+                "    void withdraw(int n) {",
+                "        if (n > 0 && n <= balance) {",
+                "            balance -= n;",
+                "        }",
+                "    }",
+                "",
+                "    String report() {",
+                "        return \"Balance: \" + balance;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare the balance field as a private int, so the only way "
+                + "to change it is through deposit and withdraw.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the field line.")
+                .accept("private int balance;",
+                        "private int balance = 0;")
+                .hints(
+                    "A field with one extra word in front.",
+                    "private, then the type and name.",
+                    "private int balance;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Wallet w = new Wallet();",
+                    "        w.deposit(50);",
+                    "        w.withdraw(80);",
+                    "        System.out.println(w.report());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Wallet {",
+                    "    private int balance;",
+                    "",
+                    "    void deposit(int n) {",
+                    "        if (n > 0) {",
+                    "            balance += n;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    void withdraw(int n) {",
+                    "        if (n > 0 && n <= balance) {",
+                    "            balance -= n;",
+                    "        }",
+                    "    }",
+                    "",
+                    "    String report() {",
+                    "        return \"Balance: \" + balance;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The withdrawal of 80 is refused, because withdraw "
+                    + "checks there is enough: Balance: 50. And because "
+                    + "balance is private, main could not skip the check by "
+                    + "writing w.balance -= 80 - that line would not "
+                    + "compile.\n"
+                    + "\n"
+                    + "A rule is only as strong as the ways around it. "
+                    + "private closes every way except the ones the class "
+                    + "provides.")
+                .explain(
+                    "private int balance; - only Wallet's methods reach it.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Rules in methods, fields left open",
+                    "Anyone can go around the rules. Make them private."},
+                new String[]{"private as secrecy",
+                    "It limits which code may use a field, not who reads it."},
+                new String[]{"A setter for every private field",
+                    "That reopens the door. Offer only what is needed."})
+            .cyber(
+                "Encapsulation is an access control inside the program. "
+                + "Just as an operating system stops one user reading "
+                + "another's files, private stops one part of the code "
+                + "rewriting another's state. Lockout counters, balances, "
+                + "permission flags and token expiry times are exactly the "
+                + "fields that must only change through code that checks "
+                + "the rules.")
+            .check(new Task(Task.CHOICE,
+                    "Which code can use a private field of Account?")
+                .choices("Any class in Main.java",
+                         "Only Account's own constructors and methods",
+                         "Only main",
+                         "No code at all")
+                .accept("2", "b")
+                .hints("private means 'this class only'.",
+                       "Its own methods still use it.")
+                .explain(
+                    "b. The class's own code uses its private fields freely; "
+                    + "everything else must go through its methods.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Account has private boolean locked and no method that "
+                    + "sets it to false. What can unlock an account?")
+                .choices("acct.locked = false; in Main",
+                         "Nothing outside the class",
+                         "Any method in Main",
+                         "Calling the constructor again on it")
+                .accept("2", "b")
+                .hints("How does outside code change a private field?",
+                       "Only through the class's methods.")
+                .explain(
+                    "b. With no unlock method, nothing outside Account can "
+                    + "unlock it - the class decides what is possible.")
+                .xp(10))
+            .recap(
+                "    private int failures;    only this class's code\n"
+                + "    acct.failures = 0;       refused outside it\n"
+                + "\n"
+                + "Fields are private by default from now on. Outside code "
+                + "goes through methods that enforce the rules.")
+            .next("Next: controlled doors - getters and setters."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(15), "Getters and Setters", 3)
+            .brief(
+                "With its fields private, a Host is safe - and useless: the "
+                + "report cannot even read its name. The class needs to "
+                + "open a few controlled doors. Read access for the name "
+                + "and the port; write access for the port only, because a "
+                + "host's name is fixed when it is registered.")
+            .willLearn("Getters and setters")
+            .whyUseful(
+                "Getters and setters are the standard, recognisable doors "
+                + "into private fields. Choosing which ones to write - and "
+                + "leaving the rest out - is how a class decides what "
+                + "others may see and change.")
+            .concept("Getters and setters",
+                "A GETTER returns a private field's value; a SETTER "
+                + "changes it. The names follow a convention every Java "
+                + "programmer knows:\n"
+                + "\n"
+                + "    String getName()          read name\n"
+                + "    int getPort()             read port\n"
+                + "    void setPort(int port)    change port\n"
+                + "    boolean isLocked()        read a boolean: is, not get\n"
+                + "\n"
+                + "    int getPort() {\n"
+                + "        return port;\n"
+                + "    }\n"
+                + "\n"
+                + "    void setPort(int port) {\n"
+                + "        this.port = port;\n"
+                + "    }\n"
+                + "\n"
+                + "The important part is which ones you do NOT write:\n"
+                + "\n"
+                + "    getter, no setter    READ-ONLY: set once in the\n"
+                + "                         constructor, never changed\n"
+                + "    neither              fully internal\n"
+                + "    both                 changeable - so mission 16\n"
+                + "                         makes the setter check values\n"
+                + "\n"
+                + "Writing a getter and setter for every field by reflex "
+                + "undoes private. Ask for each field: who needs to read "
+                + "it, and who should ever change it?")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host h = new Host(\"db1\", 5432);",
+                "        System.out.println(h.getName() + \":\" + h.getPort());",
+                "        h.setPort(6432);",
+                "        System.out.println(h.getName() + \":\" + h.getPort());",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "    private int port;",
+                "",
+                "    Host(String name, int port) {",
+                "        this.name = name;",
+                "        this.port = port;",
+                "    }",
+                "",
+                "    String getName() {",
+                "        return name;",
+                "    }",
+                "",
+                "    int getPort() {",
+                "        return port;",
+                "    }",
+                "",
+                "    void setPort(int port) {",
+                "        this.port = port;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "db1:5432",
+                "db1:6432")
+            .lineByLine(
+                new String[]{"getName() with no setName()",
+                    "The name is read-only: fixed by the constructor."},
+                new String[]{"setPort(6432)",
+                    "The one change the class allows."},
+                new String[]{"h.getPort()",
+                    "Outside code reads through the door, never the field."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Lock {",
+                    "    private boolean locked = true;",
+                    "",
+                    "    boolean isLocked() {",
+                    "        return locked;",
+                    "    }",
+                    "}",
+                    "",
+                    "Lock k = new Lock();",
+                    "System.out.println(k.isLocked());")
+                .accept("true")
+                .hints("A boolean getter starts with is.",
+                       "The field starts as true.")
+                .explain(
+                    "true. isLocked reads the private field; with no setter, "
+                    + "nothing outside can ever change it.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A User has private String passwordHash. Which set of "
+                    + "methods is the safest to offer?")
+                .choices("getPasswordHash() and setPasswordHash()",
+                         "getPasswordHash() only",
+                         "checkPassword(String attempt) and "
+                         + "changePassword(old, new)",
+                         "Make the field public instead")
+                .accept("3", "c")
+                .hints("Does anything outside need the hash itself?",
+                       "Offer the operation, not the data.")
+                .explain(
+                    "c. Callers need to CHECK a password and CHANGE one "
+                    + "with the old one - not to read or overwrite the hash. "
+                    + "Good doors are operations, not raw getters and "
+                    + "setters.")
+                .xp(20))
+            .objective(
+                "Give Host a getter for its name.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host h = new Host(\"fw1\");",
+                "        System.out.println(\"Host: \" + h.getName());",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "",
+                "    Host(String name) {",
+                "        this.name = name;",
+                "    }",
+                "",
+                "    // the header of the getter for name",
+                "        return name;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the header of the getter for the name field: it "
+                + "follows the naming convention and returns a String.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the getter's header.")
+                .accept("String getName() {",
+                        "String getName(){",
+                        "public String getName() {")
+                .hints(
+                    "get followed by the field's name, capitalised.",
+                    "It returns the field's type.",
+                    "String getName() {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Host h = new Host(\"fw1\");",
+                    "        System.out.println(\"Host: \" + h.getName());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Host {",
+                    "    private String name;",
+                    "",
+                    "    Host(String name) {",
+                    "        this.name = name;",
+                    "    }",
+                    "",
+                    "    String getName() {",
+                    "        return name;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "getName returns the private field's value, so main can "
+                    + "print Host: fw1 without being able to change the name. "
+                    + "With no setName, the name is fixed from the moment "
+                    + "the constructor runs.\n"
+                    + "\n"
+                    + "Following the convention - getName, getPort, "
+                    + "isLocked - means every Java programmer, and many "
+                    + "tools, understand the class at a glance.")
+                .explain(
+                    "String getName() { - read access, nothing more.")
+                .xp(15))
+            .mistakes(
+                new String[]{"A getter and setter for every field",
+                    "That is a public field with extra steps."},
+                new String[]{"getLocked() for a boolean",
+                    "The convention is isLocked()."},
+                new String[]{"A setter for something that should be fixed",
+                    "Leave it out; set it in the constructor."})
+            .cyber(
+                "Every setter is a way to change state, so every setter is "
+                + "part of the attack surface. A read-only name cannot be "
+                + "spoofed later; a password hash with no getter cannot be "
+                + "leaked by a careless log line. Design the doors from "
+                + "what callers truly need, and prefer operations "
+                + "(checkPassword) to raw access (getPasswordHash).")
+            .check(new Task(Task.CHOICE,
+                    "What is the conventional getter name for a private "
+                    + "boolean field called active?")
+                .choices("getActive()", "isActive()", "active()", "readActive()")
+                .accept("2", "b")
+                .hints("Booleans are different.",
+                       "It reads like a question.")
+                .explain(
+                    "b. isActive() - booleans use is instead of get.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "How do you make a private field read-only to the rest "
+                    + "of the program?")
+                .choices("Write a getter and no setter",
+                         "Write a setter and no getter",
+                         "Remove private",
+                         "Write both")
+                .accept("1", "a")
+                .hints("Others need to read it.",
+                       "Nobody outside should change it.")
+                .explain(
+                    "a. A getter allows reading; with no setter, only the "
+                    + "class itself - usually its constructor - ever sets "
+                    + "it.")
+                .xp(10))
+            .recap(
+                "    T getX()          read\n"
+                + "    boolean isX()     read a boolean\n"
+                + "    void setX(T x)    change\n"
+                + "\n"
+                + "Write only the doors callers need. Getter without setter "
+                + "= read-only.")
+            .next("Next: setters that refuse bad values."));
     }
 }
