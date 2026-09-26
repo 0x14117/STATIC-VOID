@@ -20,8 +20,9 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 100 missions and 106 labs are playable (Campaigns 00 to 03
-> complete, labs included; Campaign 04 is next) out of 510 missions planned.
+> **Status:** 130 missions and 106 labs are playable (Campaigns 00 to 03
+> complete with labs; Campaign 04's missions complete, its labs next) out of
+> 510 missions planned.
 > The order follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
 
@@ -504,7 +505,7 @@ CAMPAIGN 00 - INIT            language, IDE      10       10   BUILT
 CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT
 CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   BUILT
 CAMPAIGN 03 - METHODS         methods, stack     30       30   BUILT
-CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30
+CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30   MISSIONS BUILT
 CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30
 CAMPAIGN 06 - OBJECTS         classes            30       30
 CAMPAIGN 07 - EXCEPTIONS      errors, events     25       30
@@ -554,6 +555,15 @@ and static fields, decomposition, testing a method, Javadoc comments,
 refactoring, a validation library, failing fast and closed, sanitising
 log output, and a small security toolkit.
 
+**Campaign 04 - LOOP//CONTROL:** `while`, the loop update, counters,
+infinite loops, sentinel loops, off-by-one errors, `for`, looping over a
+String, accumulators, maximum and minimum, `do-while`, retry loops with a
+limit, `break`, `continue`, nested loops, choosing a loop, loops that call
+methods, counting character types, linear search, key space and why
+lockout works, a lockout simulator, rate limiting, menu loops, bounds
+guards, building output, tracing, the loop-bug checklist, a log-line
+scanner and a firewall rule checker.
+
 Each mission ends with a cybersecurity connection. Examples: the 2014
 "goto fail" certificate bug, log injection, integer overflow, failing open
 against failing closed, and password spraying.
@@ -579,6 +589,7 @@ src/Campaign00.java       CAMPAIGN 00 - INIT
 src/Campaign01.java       CAMPAIGN 01 - JAVA ZERO
 src/Campaign02.java       CAMPAIGN 02 - CONDITIONAL
 src/Campaign03.java       CAMPAIGN 03 - METHODS
+src/Campaign04.java       CAMPAIGN 04 - LOOP//CONTROL
 src/KnowledgeIndex.java   the Java topics, and which missions teach them
 src/World.java            NORTHSTAR SYSTEMS: hosts and accounts
 

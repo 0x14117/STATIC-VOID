@@ -17,7 +17,7 @@ each one. Built items are marked; everything else is the plan.
 | Selection: Boolean operators & expressions | 02 CONDITIONAL | built |
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
 | Methods, parameters and the stack | 03 METHODS | built |
-| Iteration: while, for, do-while, break | 04 LOOP//CONTROL | planned |
+| Iteration: while, for, do-while, break | 04 LOOP//CONTROL | missions built |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
 | Exceptions & event handling: try, catch, finally | 07 EXCEPTIONS | planned |
@@ -144,7 +144,7 @@ Each line is one mission, one idea.
 29. A small security toolkit of methods
 30. METHODS COMPLETE: checkpoint
 
-### 04 LOOP//CONTROL
+### 04 LOOP//CONTROL (built)
 
 1. `while`: repeat while true
 2. The loop condition and the update

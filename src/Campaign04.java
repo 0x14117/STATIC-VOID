@@ -5258,5 +5258,1109 @@ public class Campaign04 {
                 + "item except the first. Put building loops in methods and "
                 + "print once.")
             .next("Next: tracing a loop on paper."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "Tracing a Loop", 5)
+            .brief(
+                "In the exam - and in every code review - there is no "
+                + "computer to run the loop for you. You have to work out "
+                + "what it does by hand. A TRACE TABLE makes that reliable "
+                + "instead of a guess.")
+            .willLearn("Tracing a loop")
+            .whyUseful(
+                "Tracing is how you find bugs before running code, answer "
+                + "'what does this print?' questions exactly, and read "
+                + "unfamiliar code - including code that nobody wants you to "
+                + "run, like malware.")
+            .concept("Tracing a loop",
+                "A TRACE TABLE has one column per variable, and one row per "
+                + "moment the condition is checked:\n"
+                + "\n"
+                + "    int total = 0;\n"
+                + "    for (int i = 1; i <= 4; i++) {\n"
+                + "        total += i * 2;\n"
+                + "    }\n"
+                + "\n"
+                + "    i   i <= 4?   total after the body\n"
+                + "    1   true      2\n"
+                + "    2   true      6\n"
+                + "    3   true      12\n"
+                + "    4   true      20\n"
+                + "    5   false     (loop ends)\n"
+                + "\n"
+                + "Rules that keep it accurate:\n"
+                + "\n"
+                + "    - one row per check of the condition\n"
+                + "    - include the final check that is FALSE\n"
+                + "    - update values in the order the code does\n"
+                + "    - never skip a row because 'it is obvious'\n"
+                + "\n"
+                + "The last row is where off-by-one errors show up. The value "
+                + "a variable has AFTER the loop - here i would be 5 - is "
+                + "often the question.\n"
+                + "\n"
+                + "A program can print its own trace: a println inside the "
+                + "loop showing every variable. That is the simplest "
+                + "debugging tool there is, and worth reaching for first.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 0;",
+                "        for (int i = 1; i <= 4; i++) {",
+                "            total += i * 2;",
+                "            System.out.println(\"i=\" + i + \" total=\" + total);",
+                "        }",
+                "        System.out.println(\"final total=\" + total);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "i=1 total=2",
+                "i=2 total=6",
+                "i=3 total=12",
+                "i=4 total=20",
+                "final total=20")
+            .lineByLine(
+                new String[]{"System.out.println(\"i=\" + i + ...)",
+                    "A trace line: the program shows its own table."},
+                new String[]{"i=4 total=20",
+                    "The last pass. Then i becomes 5 and the test fails."},
+                new String[]{"final total=20",
+                    "The value after the loop."})
+            .predict(new Task(Task.PREDICT,
+                    "Trace it. What does this print?")
+                .code(
+                    "int a = 1;",
+                    "int b = 1;",
+                    "for (int i = 0; i < 4; i++) {",
+                    "    int next = a + b;",
+                    "    a = b;",
+                    "    b = next;",
+                    "}",
+                    "System.out.println(b);")
+                .accept("8")
+                .hints("Make columns for i, a and b.",
+                       "b goes 2, 3, 5, then...")
+                .explain(
+                    "8. The pairs (a, b) go (1,2), (2,3), (3,5), (5,8). Each "
+                    + "pass adds the two previous values.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "Trace it. What does this print?")
+                .code(
+                    "int n = 13;",
+                    "int steps = 0;",
+                    "while (n != 1) {",
+                    "    if (n % 2 == 0) {",
+                    "        n = n / 2;",
+                    "    } else {",
+                    "        n = 3 * n + 1;",
+                    "    }",
+                    "    steps++;",
+                    "}",
+                    "System.out.println(steps);")
+                .accept("9")
+                .hints("13, 40, 20, 10, ...",
+                       "Count the steps until n is 1.")
+                .explain(
+                    "9. n goes 13, 40, 20, 10, 5, 16, 8, 4, 2, 1 - nine steps.")
+                .xp(20))
+            .objective(
+                "Add a trace line to a loop.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 0;",
+                "        for (int i = 1; i <= 3; i++) {",
+                "            total += i;",
+                "            // trace line: print i=<i> total=<total>",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the trace line so each pass prints, for example, "
+                + "i=2 total=3.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the trace line.")
+                .accept("System.out.println(\"i=\" + i + \" total=\" + total);")
+                .hints(
+                    "Join the labels and the variables with +.",
+                    "Note the space before total=.",
+                    "System.out.println(\"i=\" + i + \" total=\" + total);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int total = 0;",
+                    "        for (int i = 1; i <= 3; i++) {",
+                    "            total += i;",
+                    "            System.out.println(\"i=\" + i + \" total=\" + total);",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The trace line runs once per pass, after total is "
+                    + "updated, printing i=1 total=1, i=2 total=3 and i=3 "
+                    + "total=6. The program has printed its own trace table.\n"
+                    + "\n"
+                    + "Where the line goes matters: before the += it would "
+                    + "show each total one step behind. Trace lines are "
+                    + "removed once the bug is found - or kept behind a "
+                    + "debug switch.")
+                .explain(
+                    "One println per pass, showing every variable.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Skipping the final false check",
+                    "That row holds the value after the loop."},
+                new String[]{"Updating out of order",
+                    "Follow the code line by line, even when it seems slow."},
+                new String[]{"Guessing the middle",
+                    "Every row, every time - errors hide in the rows you "
+                    + "skip."})
+            .cyber(
+                "Malware analysts trace code they must never run. Obfuscated "
+                + "scripts often hide a URL or a command inside a loop that "
+                + "decodes it character by character; tracing the loop on "
+                + "paper - or in a safe, isolated environment - reveals what "
+                + "it builds without letting it do anything. The same skill "
+                + "lets a reviewer confirm a security loop really does stop "
+                + "where the policy says.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int x = 0;",
+                    "for (int i = 5; i > 0; i -= 2) {",
+                    "    x = x * 10 + i;",
+                    "}",
+                    "System.out.println(x);")
+                .accept("531")
+                .hints("i takes 5, 3, 1.",
+                       "Each pass puts i on the end of x.")
+                .explain(
+                    "531. x goes 5, 53, 531 as i goes 5, 3, 1.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "A trace table has one row for each:")
+                .choices("Line of code", "Check of the loop condition",
+                         "Variable", "println")
+                .accept("2", "b")
+                .hints("Including the final false one.",
+                       "Columns are the variables.")
+                .explain(
+                    "Each check of the condition - including the last, false "
+                    + "one.")
+                .xp(10))
+            .recap(
+                "Trace table: a column per variable, a row per condition "
+                + "check, including the final false one. Follow the code in "
+                + "order, never skip rows. A println per pass is a trace the "
+                + "program writes itself.")
+            .next("Next: the loop bugs everyone writes."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "Loop Bugs Everyone Writes", 5)
+            .brief(
+                "The code review board has seen the same half-dozen loop bugs "
+                + "a hundred times. None of them are clever. All of them "
+                + "compile. This mission is the checklist - so you can spot "
+                + "them in other people's code and never ship them in "
+                + "yours.")
+            .willLearn("Loop bugs")
+            .whyUseful(
+                "Most loop bugs compile and run, so the compiler cannot help. "
+                + "A short checklist, run over every loop, catches nearly all "
+                + "of them before a test does.")
+            .concept("Loop bugs",
+                "The loop-bug checklist:\n"
+                + "\n"
+                + "    1. OFF BY ONE\n"
+                + "       start and < / <= must agree (mission 6)\n"
+                + "\n"
+                + "    2. NO WAY OUT\n"
+                + "       no update, wrong direction, != with a big\n"
+                + "       step, while (true) with no break (mission 4)\n"
+                + "\n"
+                + "    3. STRAY SEMICOLON\n"
+                + "       for (...); { ... } runs an empty loop, then\n"
+                + "       the block ONCE\n"
+                + "\n"
+                + "    4. STATE IN THE WRONG PLACE\n"
+                + "       a counter declared inside the loop resets\n"
+                + "       every pass (mission 3)\n"
+                + "\n"
+                + "    5. SKIPPED UPDATE\n"
+                + "       continue before a while loop's update\n"
+                + "       (mission 14)\n"
+                + "\n"
+                + "    6. GUARD IN THE WRONG ORDER\n"
+                + "       charAt before the bounds check (mission 24)\n"
+                + "\n"
+                + "    7. CHANGING THE LOOP VARIABLE IN THE BODY\n"
+                + "       i++ in a for header AND in the body skips\n"
+                + "       every other value\n"
+                + "\n"
+                + "The stray semicolon is the nastiest: the code is indented "
+                + "as if the block were the loop, and it compiles without a "
+                + "warning.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int count = 0;",
+                "        for (int i = 0; i < 5; i++) {",
+                "            if (i % 2 == 0) {",
+                "                count++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Even values: \" + count);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Even values: 3")
+            .lineByLine(
+                new String[]{"int count = 0;",
+                    "Bug 4 avoided: state before the loop."},
+                new String[]{"for (int i = 0; i < 5; i++) {",
+                    "Bugs 1, 2 and 3 avoided: start 0 with <, an update, no "
+                    + "semicolon."},
+                new String[]{"Even values: 3",
+                    "0, 2 and 4."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int i = 0; i < 3; i++); {",
+                    "    System.out.println(\"scan\");",
+                    "}")
+                .accept("scan")
+                .hints("Look closely at the end of the first line.",
+                       "The loop's body is the empty statement ;")
+                .explain(
+                    "scan - once. The semicolon IS the loop body, so the "
+                    + "loop does nothing three times, and the block after it "
+                    + "runs once.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "for (int i = 0; i < 3; i++) {",
+                    "    int hits = 0;",
+                    "    hits++;",
+                    "    System.out.println(hits);",
+                    "}")
+                .accept("1 1 1")
+                .hints("Where is hits declared?",
+                       "It is created again every pass.")
+                .explain(
+                    "1 1 1 (one per line). hits is reset to 0 at the start "
+                    + "of every pass - bug 4.")
+                .xp(15))
+            .objective(
+                "Fix the loop that scans only once.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int i = 1; i <= 3; i++); {    // fix this line",
+                "            System.out.println(\"Scanning host \" + 1);",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "The for line has a stray semicolon. Rewrite it so the block "
+                + "below is the loop's body.")
+            .mainTask(new Task(Task.WRITE,
+                    "Rewrite the for line.")
+                .accept("for (int i = 1; i <= 3; i++) {",
+                        "for(int i = 1; i <= 3; i++) {",
+                        "for (int i = 1; i <= 3; i++){")
+                .hints(
+                    "Remove the semicolon before the brace.",
+                    "The header ends with ) and then {.",
+                    "for (int i = 1; i <= 3; i++) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        for (int i = 1; i <= 3; i++) {",
+                    "            System.out.println(\"Scanning host \" + 1);",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Without the semicolon, the block is the body and runs "
+                    + "three times. With it, the body was the empty statement "
+                    + "and the block ran once after the loop.\n"
+                    + "\n"
+                    + "Look again at the println: it prints the digit 1, not "
+                    + "i. The starter has a SECOND bug - every line says host "
+                    + "1. Fixing one bug and missing the next is how "
+                    + "checklists earn their keep.")
+                .explain(
+                    "No semicolon between ) and { - then the block is the "
+                    + "body.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Trusting indentation",
+                    "Java ignores it. Braces and semicolons decide."},
+                new String[]{"Stopping at the first bug",
+                    "Run the whole checklist - bugs travel in groups."},
+                new String[]{"Testing only one pass",
+                    "Many loop bugs only show on the second pass or the "
+                    + "last."})
+            .cyber(
+                "Some of the most famous security bugs are this simple. "
+                + "Apple's 2014 'goto fail' was a duplicated line that made "
+                + "certificate checks skip their final step; indentation made "
+                + "it look correct. The lesson is the same as the stray "
+                + "semicolon: code that LOOKS right to a skimming reviewer is "
+                + "not necessarily right, which is why security reviews read "
+                + "the braces, not the indentation.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int count = 0;",
+                    "for (int i = 0; i < 10; i++) {",
+                    "    count++;",
+                    "    i++;",
+                    "}",
+                    "System.out.println(count);")
+                .accept("5")
+                .hints("i goes up twice per pass.",
+                       "0, 2, 4, 6, 8.")
+                .explain(
+                    "5 - the extra i++ in the body skips every other value "
+                    + "(bug 7).")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Why can't the compiler catch most loop bugs?")
+                .choices("Loops are not checked by javac",
+                         "They are valid Java - they just do the wrong thing",
+                         "They only happen in while loops",
+                         "They are caught - as warnings")
+                .accept("2", "b")
+                .hints("Do they compile?",
+                       "Wrong is not the same as illegal.")
+                .explain(
+                    "They are perfectly legal Java that means something "
+                    + "different from what was intended.")
+                .xp(10))
+            .recap(
+                "The checklist: off by one, no way out, stray semicolon, "
+                + "state in the wrong place, skipped update, guard order, "
+                + "loop variable changed in the body. They all compile - read "
+                + "the braces, not the indentation.")
+            .next("Next: a scanner for log lines."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "A Log-Line Scanner", 6)
+            .brief(
+                "Time to put it together: read authentication log lines "
+                + "until END, skip blanks and comments, count the failures, "
+                + "and flag every failure that came from outside the network. "
+                + "One loop, three helpers, a summary at the end.")
+            .willLearn("Scanning input")
+            .whyUseful(
+                "Nearly every monitoring tool is this loop: read an event, "
+                + "skip the noise, classify it, count it, flag the bad ones, "
+                + "report. Once you can write it, you can write the core of "
+                + "a log analyser.")
+            .concept("Scanning input",
+                "A SCANNER loop reads a stream of records and processes each "
+                + "one:\n"
+                + "\n"
+                + "    while (true) {\n"
+                + "        String line = input.nextLine().trim();\n"
+                + "        if (line.equals(\"END\"))  break;      stop\n"
+                + "        if (isNoise(line))       continue;   skip\n"
+                + "        total++;                             count\n"
+                + "        if (isFailure(line)) {               classify\n"
+                + "            failures++;\n"
+                + "            if (isExternal(line))            flag\n"
+                + "                System.out.println(...);\n"
+                + "        }\n"
+                + "    }\n"
+                + "    summary                                  report\n"
+                + "\n"
+                + "(The braces are left off above to fit; the example has "
+                + "them.)\n"
+                + "\n"
+                + "Everything from this campaign is here: while (true) with a "
+                + "break, continue for noise, counters, and methods holding "
+                + "each rule so the loop reads like the job description.\n"
+                + "\n"
+                + "The rules live in helpers. When the log format changes, "
+                + "or 'external' gets a new definition, one small method "
+                + "changes - the loop does not.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int total = 0;",
+                "        int failures = 0;",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            if (isNoise(line)) {",
+                "                continue;",
+                "            }",
+                "            total++;",
+                "            if (line.startsWith(\"FAIL \")) {",
+                "                failures++;",
+                "                if (isExternal(line)) {",
+                "                    System.out.println(\"FLAG: \" + line);",
+                "                }",
+                "            }",
+                "        }",
+                "        String summary = total + \" events, \" + failures + \" failures\";",
+                "        System.out.println(summary);",
+                "    }",
+                "",
+                "    static boolean isNoise(String line) {",
+                "        return line.isEmpty() || line.startsWith(\"#\");",
+                "    }",
+                "",
+                "    static boolean isExternal(String line) {",
+                "        String ip = line.substring(line.lastIndexOf(\" \") + 1);",
+                "        return !ip.startsWith(\"10.\");",
+                "    }",
+                "}")
+            .exampleInput("# night shift", "OK jsmith 10.0.0.7",
+                          "FAIL jsmith 10.0.0.7",
+                          "FAIL admin 203.0.113.9", "END")
+            .exampleOutput(
+                "> # night shift",
+                "> OK jsmith 10.0.0.7",
+                "> FAIL jsmith 10.0.0.7",
+                "> FAIL admin 203.0.113.9",
+                "FLAG: FAIL admin 203.0.113.9",
+                "> END",
+                "3 events, 2 failures")
+            .lineByLine(
+                new String[]{"if (isNoise(line)) { continue; }",
+                    "Blank lines and # comments are skipped, not counted."},
+                new String[]{"failures++;",
+                    "Every failure counts..."},
+                new String[]{"if (isExternal(line))",
+                    "...but only external ones are flagged."},
+                new String[]{"line.lastIndexOf(\" \") + 1",
+                    "The address is the last word on the line."})
+            .predict(new Task(Task.PREDICT,
+                    "The person types a, # b, c, END. What does this print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "int total = 0;",
+                    "while (true) {",
+                    "    String line = input.nextLine().trim();",
+                    "    if (line.equals(\"END\")) {",
+                    "        break;",
+                    "    }",
+                    "    if (line.startsWith(\"#\")) {",
+                    "        continue;",
+                    "    }",
+                    "    total++;",
+                    "}",
+                    "System.out.println(total);")
+                .input("a", "# b", "c", "END")
+                .accept("2")
+                .hints("The # line is skipped.",
+                       "END stops the loop without being counted.")
+                .explain(
+                    "2 - a and c. The comment is skipped by continue, and END "
+                    + "breaks out before it can be counted.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why put isNoise and isExternal in methods instead of "
+                    + "writing the conditions in the loop?")
+                .choices("Loops cannot contain conditions",
+                         "Each rule can change and be tested without touching "
+                         + "the loop",
+                         "Methods run faster",
+                         "continue only works with methods")
+                .accept("2", "b")
+                .hints("What changes when the network gets a new range?",
+                       "Mission 17.")
+                .explain(
+                    "The loop stays the same; each rule is changed and "
+                    + "tested in one small place.")
+                .xp(10))
+            .objective(
+                "Skip the noise in the log scanner.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int total = 0;",
+                "        while (true) {",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            // the if line: skip the line when isNoise says so",
+                "                continue;",
+                "            }",
+                "            total++;",
+                "        }",
+                "        System.out.println(total + \" events\");",
+                "    }",
+                "",
+                "    static boolean isNoise(String line) {",
+                "        return line.isEmpty() || line.startsWith(\"#\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line that leads to continue: true when isNoise "
+                + "says the line is noise.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (isNoise(line)) {", "if(isNoise(line)) {",
+                        "if (isNoise(line)){")
+                .hints(
+                    "Ask the helper.",
+                    "It returns a boolean.",
+                    "if (isNoise(line)) {")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        int total = 0;",
+                    "        while (true) {",
+                    "            String line = input.nextLine().trim();",
+                    "            if (line.equals(\"END\")) {",
+                    "                break;",
+                    "            }",
+                    "            if (isNoise(line)) {",
+                    "                continue;",
+                    "            }",
+                    "            total++;",
+                    "        }",
+                    "        System.out.println(total + \" events\");",
+                    "    }",
+                    "",
+                    "    static boolean isNoise(String line) {",
+                    "        return line.isEmpty() || line.startsWith(\"#\");",
+                    "    }",
+                    "}")
+                .input("# start", "OK a", "", "FAIL b", "END")
+                .whyItWorks(
+                    "Comments and blank lines hit continue and are never "
+                    + "counted; real events reach total++. For the four lines "
+                    + "before END, two are noise and two are events, so the "
+                    + "program prints 2 events.\n"
+                    + "\n"
+                    + "The read sits at the top of the body, so continue "
+                    + "cannot skip it - this while (true) is safe with "
+                    + "continue.")
+                .explain(
+                    "if (isNoise(line)) { - then continue.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Counting the END line",
+                    "Break before counting anything."},
+                new String[]{"Rules written inline",
+                    "Put each rule in a named method."},
+                new String[]{"Skipping too much",
+                    "A skip rule that is too broad hides real events."})
+            .cyber(
+                "This is a miniature SIEM rule - the kind of logic security "
+                + "monitoring platforms run over millions of events. The "
+                + "design questions are the same at any size: what counts as "
+                + "noise, what counts as a failure, what makes one worth an "
+                + "alert. Get the skip rule wrong and attacks are filtered "
+                + "out; get the alert rule too broad and analysts drown in "
+                + "false positives.")
+            .check(new Task(Task.CHOICE,
+                    "In the scanner, what does END do?")
+                .choices("It is counted as an event, then stops the loop",
+                         "It stops the loop and is never counted",
+                         "It is skipped like a comment",
+                         "It restarts the loop")
+                .accept("2", "b")
+                .hints("The END check comes first.",
+                       "break leaves at once.")
+                .explain(
+                    "It stops the loop before any counting happens.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String line = \"FAIL admin 203.0.113.9\";",
+                    "String ip = line.substring(line.lastIndexOf(\" \") + 1);",
+                    "System.out.println(ip);")
+                .accept("203.0.113.9")
+                .hints("lastIndexOf finds the last space.",
+                       "+ 1 starts just after it.")
+                .explain(
+                    "203.0.113.9 - everything after the last space.")
+                .xp(10))
+            .recap(
+                "A scanner loop: read; END? break; noise? continue; count; "
+                + "classify; flag; then summarise after the loop. Keep each "
+                + "rule in a helper method so the loop reads like the job.")
+            .next("Next: checking what a firewall allows across a range."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "A Firewall Rule Checker", 6)
+            .brief(
+                "The firewall config says a lot of things in a lot of lines. "
+                + "The auditor wants one simple answer: of ports 20 to 30, "
+                + "which ones does it actually ALLOW? Loop over the range, "
+                + "ask the rules about each port, and report.")
+            .willLearn("Range checks")
+            .whyUseful(
+                "Checking a rule against every value in a range is how "
+                + "configurations are audited: which ports are open, which "
+                + "hours allow access, which accounts a policy covers. The "
+                + "loop turns a pile of rules into a clear list.")
+            .concept("Range checks",
+                "To audit rules, ask them about every value in a range and "
+                + "collect the answers:\n"
+                + "\n"
+                + "    for (int port = FIRST; port <= LAST; port++) {\n"
+                + "        if (isAllowed(port)) {\n"
+                + "            ... add port to the list, count it\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "isAllowed holds the rules, in order, first match wins - "
+                + "Campaign 02's firewall capstone, as a method:\n"
+                + "\n"
+                + "    static boolean isAllowed(int port) {\n"
+                + "        if (port == 23) return false;   deny telnet\n"
+                + "        if (port == 22) return true;    allow SSH\n"
+                + "        if (port >= 25 && port <= 27)\n"
+                + "            return true;                allow mail\n"
+                + "        return false;                   default deny\n"
+                + "    }\n"
+                + "\n"
+                + "(Shown without braces to fit; always use them in code.)\n"
+                + "\n"
+                + "The report uses mission 25's separator pattern, and a "
+                + "counter. The same loop with the rules swapped out would "
+                + "audit a different config - the loop does not care what "
+                + "the rules are.")
+            .example(
+                "public class Main {",
+                "    static final int FIRST = 20;",
+                "    static final int LAST = 30;",
+                "",
+                "    public static void main(String[] args) {",
+                "        String allowed = \"\";",
+                "        int count = 0;",
+                "        for (int port = FIRST; port <= LAST; port++) {",
+                "            if (isAllowed(port)) {",
+                "                if (count > 0) {",
+                "                    allowed += \", \";",
+                "                }",
+                "                allowed += port;",
+                "                count++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Allowed: \" + allowed);",
+                "        int size = LAST - FIRST + 1;",
+                "        System.out.println(count + \" of \" + size + \" ports open\");",
+                "    }",
+                "",
+                "    static boolean isAllowed(int port) {",
+                "        if (port == 23) {",
+                "            return false;",
+                "        }",
+                "        if (port == 22) {",
+                "            return true;",
+                "        }",
+                "        return port >= 25 && port <= 27;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Allowed: 22, 25, 26, 27",
+                "4 of 11 ports open")
+            .lineByLine(
+                new String[]{"for (int port = FIRST; port <= LAST; port++)",
+                    "Every port in the range, one pass each."},
+                new String[]{"if (count > 0) { allowed += \", \"; }",
+                    "Separators only between items."},
+                new String[]{"int size = LAST - FIRST + 1;",
+                    "The fencepost count: 11 ports from 20 to 30."},
+                new String[]{"return port >= 25 && port <= 27;",
+                    "The last rule, and default deny for everything else."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int open = 0;",
+                    "for (int p = 1; p <= 10; p++) {",
+                    "    if (p % 3 == 0) {",
+                    "        open++;",
+                    "    }",
+                    "}",
+                    "System.out.println(open);")
+                .accept("3")
+                .hints("Which of 1 to 10 are multiples of 3?",
+                       "3, 6, 9.")
+                .explain(
+                    "3 - the rule is true for 3, 6 and 9.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "In isAllowed, why is the deny rule for port 23 checked "
+                    + "first?")
+                .choices("It is the smallest number",
+                         "First match wins - an explicit deny must come "
+                         + "before any rule that could allow it",
+                         "Java checks ifs from the bottom",
+                         "It makes no difference")
+                .accept("2", "b")
+                .hints("Rules are checked top to bottom.",
+                       "Campaign 02's firewall capstone.")
+                .explain(
+                    "The first matching rule decides. A later, broader allow "
+                    + "rule must not be able to open a port that is meant to "
+                    + "be denied.")
+                .xp(15))
+            .objective(
+                "Audit which ports in the range are allowed.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int count = 0;",
+                "        for (int port = 20; port <= 30; port++) {",
+                "            // the if line: ask isAllowed about this port",
+                "                System.out.println(\"OPEN \" + port);",
+                "                count++;",
+                "            }",
+                "        }",
+                "        System.out.println(count + \" open\");",
+                "    }",
+                "",
+                "    static boolean isAllowed(int port) {",
+                "        return port == 22 || (port >= 25 && port <= 27);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line: true when isAllowed says yes for port.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (isAllowed(port)) {", "if(isAllowed(port)) {",
+                        "if (isAllowed(port)){")
+                .hints(
+                    "Ask the rule method.",
+                    "It returns a boolean.",
+                    "if (isAllowed(port)) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int count = 0;",
+                    "        for (int port = 20; port <= 30; port++) {",
+                    "            if (isAllowed(port)) {",
+                    "                System.out.println(\"OPEN \" + port);",
+                    "                count++;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(count + \" open\");",
+                    "    }",
+                    "",
+                    "    static boolean isAllowed(int port) {",
+                    "        return port == 22 || (port >= 25 && port <= 27);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The loop asks the rule about every port from 20 to 30. "
+                    + "Ports 22, 25, 26 and 27 are allowed, so four OPEN "
+                    + "lines print, then 4 open.\n"
+                    + "\n"
+                    + "An auditor reading this output sees exactly what the "
+                    + "rules permit - no need to reason through the config "
+                    + "line by line. That is the value of turning rules into "
+                    + "an answer for every value.")
+                .explain(
+                    "if (isAllowed(port)) { - ask the rules about each port.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Rule order that lets an allow win",
+                    "Explicit denies go first."},
+                new String[]{"No default deny",
+                    "Anything the rules do not mention must be refused."},
+                new String[]{"Forgetting the fencepost",
+                    "20 to 30 is 11 ports, not 10."})
+            .cyber(
+                "Firewall audits are a routine part of security work, and "
+                + "configs drift: a temporary rule becomes permanent, two "
+                + "rules overlap, an allow is placed above a deny. Asking the "
+                + "rules about every port and listing what is actually open "
+                + "turns a hundred lines of config into a short list an "
+                + "auditor can check against the policy - and any port on "
+                + "that list that nobody can explain is a finding.")
+            .check(new Task(Task.CHOICE,
+                    "How many ports are in the range 1024 to 1030 inclusive?")
+                .choices("6", "7", "8", "1030")
+                .accept("2", "b")
+                .hints("b - a + 1.",
+                       "Mission 6.")
+                .explain(
+                    "7 - 1030 minus 1024 plus 1, counting both ends.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String list = \"\";",
+                    "for (int p = 20; p <= 24; p += 2) {",
+                    "    if (!list.isEmpty()) {",
+                    "        list += \",\";",
+                    "    }",
+                    "    list += p;",
+                    "}",
+                    "System.out.println(list);")
+                .accept("20,22,24")
+                .hints("p goes 20, 22, 24.",
+                       "A comma before every item but the first.")
+                .explain(
+                    "20,22,24 - checking whether the list is still empty is "
+                    + "another way to skip the first separator.")
+                .xp(10))
+            .recap(
+                "Audit a range: loop over every value, ask a rule method, "
+                + "collect and count the matches, report. Rules inside the "
+                + "method go in order - explicit denies first, default deny "
+                + "last.")
+            .next("Next: the campaign checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "LOOP//CONTROL COMPLETE", 6)
+            .brief(
+                "Thirty missions ago, every program did its work once. Now "
+                + "they read streams of input, sweep ranges, count, search, "
+                + "limit and lock - and you know the handful of ways every "
+                + "loop goes wrong.\n\n"
+                + "This checkpoint mixes the whole campaign. No new Java.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Loop bugs come from ideas meeting: a sentinel with a "
+                + "continue, a counter inside a nested loop, a guard in a "
+                + "retry condition. This is the practice for exactly those.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "THE LOOPS\n"
+                + "    while         test first; 0 or more passes\n"
+                + "    for           start; test; update - known range\n"
+                + "    do-while      body first; 1 or more; ends in ;\n"
+                + "    while (true)  test in the middle, with break\n"
+                + "\n"
+                + "LEAVING AND SKIPPING\n"
+                + "    break      leave the innermost loop\n"
+                + "    continue   skip to the next pass - beware a\n"
+                + "               while loop's update\n"
+                + "\n"
+                + "PATTERNS\n"
+                + "    counter, accumulator, max/min, linear search,\n"
+                + "    sentinel read, retry with a limit, menu,\n"
+                + "    building output with separators\n"
+                + "\n"
+                + "CORRECTNESS\n"
+                + "    start and < / <= must agree\n"
+                + "    every loop needs a way out\n"
+                + "    state lives BEFORE the loop\n"
+                + "    guard on the left of &&\n"
+                + "    trace: a row per check, including the last\n"
+                + "\n"
+                + "SECURITY\n"
+                + "    loops driven by outside data need limits\n"
+                + "    lockouts and rate limits slow guessing\n"
+                + "    check the lock first; deny by default")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String code = \"48a516\";",
+                "        int digits = 0;",
+                "        for (int i = 0; i < code.length(); i++) {",
+                "            if (!Character.isDigit(code.charAt(i))) {",
+                "                continue;",
+                "            }",
+                "            digits++;",
+                "        }",
+                "        System.out.println(digits + \" of \" + code.length()",
+                "                + \" are digits\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "5 of 6 are digits")
+            .lineByLine(
+                new String[]{"for (int i = 0; i < code.length(); i++)",
+                    "Missions 7 and 8: every position, 0 to length - 1."},
+                new String[]{"continue;",
+                    "Mission 14: safe here, because the update is in the "
+                    + "for header."},
+                new String[]{"digits++;",
+                    "Mission 3: a counter declared before the loop."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int total = 0;",
+                    "for (int i = 1; i <= 3; i++) {",
+                    "    for (int j = 1; j <= i; j++) {",
+                    "        total++;",
+                    "    }",
+                    "}",
+                    "System.out.println(total);")
+                .accept("6")
+                .hints("The inner loop runs i times.",
+                       "1 + 2 + 3.")
+                .explain(
+                    "6. The inner loop runs once, then twice, then three "
+                    + "times (mission 15).")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "The person types 5, 9, 2, -1. What does this print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "int max = Integer.MIN_VALUE;",
+                    "int n = Integer.parseInt(input.nextLine());",
+                    "while (n != -1) {",
+                    "    max = Math.max(max, n);",
+                    "    n = Integer.parseInt(input.nextLine());",
+                    "}",
+                    "System.out.println(max);")
+                .input("5", "9", "2", "-1")
+                .accept("9")
+                .hints("A sentinel loop tracking the maximum.",
+                       "-1 is never compared.")
+                .explain(
+                    "9. Missions 5 and 10 together: read until -1, keep the "
+                    + "largest.")
+                .xp(20))
+            .objective(
+                "Finish a retry loop with a limit.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String code;",
+                "        int tries = 0;",
+                "        do {",
+                "            System.out.print(\"MFA code: \");",
+                "            code = input.nextLine().trim();",
+                "            tries++;",
+                "        // closing line: again while wrong AND tries < 3",
+                "        boolean ok = code.equals(\"481516\");",
+                "        System.out.println(ok ? \"Verified\" : \"Locked out\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the closing line: repeat while code is not 481516 AND "
+                + "fewer than 3 tries have been used.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the closing line.")
+                .accept("} while (!code.equals(\"481516\") && tries < 3);",
+                        "} while(!code.equals(\"481516\") && tries < 3);",
+                        "}while (!code.equals(\"481516\") && tries < 3);",
+                        "} while (tries < 3 && !code.equals(\"481516\"));")
+                .hints(
+                    "Two conditions, both needed to go round again: &&.",
+                    "Text compared with equals; the do-while ends with ;.",
+                    "} while (!code.equals(\"481516\") && tries < 3);")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        String code;",
+                    "        int tries = 0;",
+                    "        do {",
+                    "            System.out.print(\"MFA code: \");",
+                    "            code = input.nextLine().trim();",
+                    "            tries++;",
+                    "        } while (!code.equals(\"481516\") && tries < 3);",
+                    "        boolean ok = code.equals(\"481516\");",
+                    "        System.out.println(ok ? \"Verified\" : \"Locked out\");",
+                    "    }",
+                    "}")
+                .input("111111", "481516")
+                .whyItWorks(
+                    "The code is asked for at least once (do-while), and the "
+                    + "loop goes round again only while the code is wrong AND "
+                    + "tries remain. 111111 then 481516 prints Verified after "
+                    + "two tries; three wrong codes print Locked out.\n"
+                    + "\n"
+                    + "Five missions in one line: do-while (11), a retry "
+                    + "limit (12), equals on text, && so either reason stops "
+                    + "it, and a limit on a loop driven by outside input (4).")
+                .explain(
+                    "Either a right code or the third try ends the loop.")
+                .xp(40))
+            .mistakes(
+                new String[]{"No way out",
+                    "Every loop needs an update, a break, or a limit."},
+                new String[]{"State in the wrong place",
+                    "Counters and flags live before the loop."},
+                new String[]{"Guards in the wrong order",
+                    "Bounds first, then the use; lock first, then the "
+                    + "password."})
+            .cyber(
+                "Loops are where automation lives, on both sides. Attackers' "
+                + "tools are loops that never tire; defences - lockouts, rate "
+                + "limits, log scanners, audits - are loops too, written to "
+                + "notice, slow and stop them. Everything in this campaign is "
+                + "about writing loops that end when they should, handle the "
+                + "input they did not expect, and keep count of what "
+                + "matters.\n"
+                + "\n"
+                + "What these programs still cannot do is REMEMBER many "
+                + "things at once: every failed login per user, every port "
+                + "result, every log line. Campaign 05 adds arrays and lists.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int i = 0;",
+                    "int passes = 0;",
+                    "while (i < 10) {",
+                    "    i += 3;",
+                    "    passes++;",
+                    "}",
+                    "System.out.println(passes + \" \" + i);")
+                .accept("4 12")
+                .hints("i goes 3, 6, 9, 12.",
+                       "Trace until the test fails.")
+                .explain(
+                    "4 12. Four passes; after the last, i is 12 and 12 < 10 "
+                    + "is false (missions 4 and 26).")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which loop condition is safe for text with no space?")
+                .choices("s.charAt(i) != ' ' && i < s.length()",
+                         "i < s.length() && s.charAt(i) != ' '",
+                         "i <= s.length() && s.charAt(i) != ' '",
+                         "s.charAt(i) != ' '")
+                .accept("2", "b")
+                .hints("Guard on the left.",
+                       "Stop before length.")
+                .explain(
+                    "The bounds guard first, with < (mission 24).")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which change slows down password guessing without "
+                    + "changing the password at all?")
+                .choices("A longer password", "A rate limit or lockout",
+                         "More symbols", "Nothing can")
+                .accept("2", "b")
+                .hints("Key space or rate?",
+                       "Missions 20 to 22.")
+                .explain(
+                    "A rate limit or lockout reduces how many guesses can be "
+                    + "tried - the rate side of strength.")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 04 - LOOP//CONTROL complete.\n"
+                + "\n"
+                + "Your programs repeat, read until done, search, count, "
+                + "limit and audit - and you can trace any loop by hand.\n"
+                + "\n"
+                + "Next they learn to hold many values at once: arrays and "
+                + "lists.")
+            .next("Next: CAMPAIGN 05 - COLLECTIONS."));
     }
 }
