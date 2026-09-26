@@ -2673,5 +2673,905 @@ public class Campaign05Labs {
                 "> new e",
                 "UNKNOWN COMMAND",
                 "> END"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(21), "Undo History", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M023")
+            .brief(
+                "A firewall rule editor must let an engineer undo mistakes - "
+                + "an added rule taken back out, a deleted rule put back "
+                + "exactly where it was. Keep the rules in one list and "
+                + "every change in an undo history, and undo the most "
+                + "recent change first.")
+            .practises("ArrayList", "Parallel arrays", "The remove(int) trap")
+            .spec(
+                "Keep static lists: rules (the current rules), and an undo history of three parallel lists: kinds (ADD or DEL), places (the rule's index) and texts (the rule).",
+                "Repeatedly prompt > and read a line (trim it) until END. The argument is everything after the first space, trimmed.",
+                "ADD <rule>: add at the end, record the change, reply Added <n> (its 1-based position).",
+                "DEL <n>: n must be 1 to the number of rules, else NO SUCH RULE. Remove it, record the change, reply Deleted <n>.",
+                "UNDO: undo() reverses the most recent change and forgets it. Reply Undone, or Nothing to undo.",
+                "SHOW: print each rule as <n>. <rule>, or (no rules). Anything else: UNKNOWN COMMAND.")
+            .needsMethod("static void undo()")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> rules = new ArrayList<>();",
+                "    static ArrayList<String> kinds = new ArrayList<>();",
+                "    static ArrayList<Integer> places = new ArrayList<>();",
+                "    static ArrayList<String> texts = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // the command loop",
+                "    }",
+                "",
+                "    // declare undo() here",
+                "}")
+            .hints(
+                "Every ADD and DEL appends one entry to all three history "
+                + "lists: what happened, where, and which rule.",
+                "undo reads the LAST entry (index size() - 1) of each "
+                + "history list, then removes it from all three.",
+                "Undoing an ADD removes the rule at its place; undoing a "
+                + "DEL puts the text back with rules.add(place, text).",
+                "places is a list of Integers - remove the last entry with "
+                + "places.remove(places.size() - 1), an index.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> rules = new ArrayList<>();",
+                "    static ArrayList<String> kinds = new ArrayList<>();",
+                "    static ArrayList<Integer> places = new ArrayList<>();",
+                "    static ArrayList<String> texts = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String cmd = line;",
+                "            String arg = \"\";",
+                "            int space = line.indexOf(' ');",
+                "            if (space != -1) {",
+                "                cmd = line.substring(0, space);",
+                "                arg = line.substring(space + 1).trim();",
+                "            }",
+                "            if (cmd.equals(\"ADD\") && !arg.isEmpty()) {",
+                "                rules.add(arg);",
+                "                remember(\"ADD\", rules.size() - 1, arg);",
+                "                System.out.println(\"Added \" + rules.size());",
+                "            } else if (cmd.equals(\"DEL\")) {",
+                "                int n = toNumber(arg);",
+                "                if (n < 1 || n > rules.size()) {",
+                "                    System.out.println(\"NO SUCH RULE\");",
+                "                } else {",
+                "                    String gone = rules.remove(n - 1);",
+                "                    remember(\"DEL\", n - 1, gone);",
+                "                    System.out.println(\"Deleted \" + n);",
+                "                }",
+                "            } else if (cmd.equals(\"UNDO\")) {",
+                "                if (kinds.isEmpty()) {",
+                "                    System.out.println(\"Nothing to undo\");",
+                "                } else {",
+                "                    undo();",
+                "                    System.out.println(\"Undone\");",
+                "                }",
+                "            } else if (cmd.equals(\"SHOW\")) {",
+                "                show();",
+                "            } else {",
+                "                System.out.println(\"UNKNOWN COMMAND\");",
+                "            }",
+                "        }",
+                "    }",
+                "",
+                "    static void remember(String kind, int place, String text) {",
+                "        kinds.add(kind);",
+                "        places.add(place);",
+                "        texts.add(text);",
+                "    }",
+                "",
+                "    static void undo() {",
+                "        int last = kinds.size() - 1;",
+                "        String kind = kinds.remove(last);",
+                "        int place = places.remove(last);",
+                "        String text = texts.remove(last);",
+                "        if (kind.equals(\"ADD\")) {",
+                "            rules.remove(place);",
+                "        } else {",
+                "            rules.add(place, text);",
+                "        }",
+                "    }",
+                "",
+                "    static int toNumber(String s) {",
+                "        if (s.isEmpty() || s.length() > 4) {",
+                "            return -1;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return -1;",
+                "            }",
+                "        }",
+                "        return Integer.parseInt(s);",
+                "    }",
+                "",
+                "    static void show() {",
+                "        if (rules.isEmpty()) {",
+                "            System.out.println(\"(no rules)\");",
+                "        }",
+                "        for (int i = 0; i < rules.size(); i++) {",
+                "            System.out.println((i + 1) + \". \" + rules.get(i));",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The undo history is three parallel lists that only ever "
+                + "change together - remember adds to all three, undo takes "
+                + "the last entry off all three. Taking from the END makes "
+                + "it a stack: the most recent change is always undone "
+                + "first, which is the only order that is always safe, "
+                + "because each change was made to the rules as they were "
+                + "after the previous one.\n"
+                + "\n"
+                + "Mission 23's trap is here twice, handled on purpose. "
+                + "places.remove(last) and rules.remove(place) pass ints, "
+                + "so they remove by INDEX - which is exactly what is "
+                + "wanted. A DEL remembers the removed text and its index, "
+                + "so undoing it with add(place, text) puts the rule back in "
+                + "its original position, not at the end.")
+            .sample(Lab.typing("ADD allow 443", "ADD allow 22", "ADD deny all", "DEL 2", "SHOW", "UNDO", "SHOW", "END"),
+                "> ADD allow 443",
+                "Added 1",
+                "> ADD allow 22",
+                "Added 2",
+                "> ADD deny all",
+                "Added 3",
+                "> DEL 2",
+                "Deleted 2",
+                "> SHOW",
+                "1. allow 443",
+                "2. deny all",
+                "> UNDO",
+                "Undone",
+                "> SHOW",
+                "1. allow 443",
+                "2. allow 22",
+                "3. deny all",
+                "> END")
+            .hidden(Lab.typing("UNDO", "SHOW", "DEL 1", "END"),
+                "> UNDO",
+                "Nothing to undo",
+                "> SHOW",
+                "(no rules)",
+                "> DEL 1",
+                "NO SUCH RULE",
+                "> END")
+            .hidden(Lab.typing("ADD a", "ADD b", "UNDO", "UNDO", "UNDO", "SHOW", "END"),
+                "> ADD a",
+                "Added 1",
+                "> ADD b",
+                "Added 2",
+                "> UNDO",
+                "Undone",
+                "> UNDO",
+                "Undone",
+                "> UNDO",
+                "Nothing to undo",
+                "> SHOW",
+                "(no rules)",
+                "> END")
+            .hidden(Lab.typing("ADD a", "ADD b", "ADD c", "DEL 1", "DEL 2", "UNDO", "UNDO", "SHOW", "END"),
+                "> ADD a",
+                "Added 1",
+                "> ADD b",
+                "Added 2",
+                "> ADD c",
+                "Added 3",
+                "> DEL 1",
+                "Deleted 1",
+                "> DEL 2",
+                "Deleted 2",
+                "> UNDO",
+                "Undone",
+                "> UNDO",
+                "Undone",
+                "> SHOW",
+                "1. a",
+                "2. b",
+                "3. c",
+                "> END")
+            .hidden(Lab.typing("ADD", "DEL x", "DEL 0", "DEL 99999", "PURGE", "ADD x", "DEL 1", "SHOW", "END"),
+                "> ADD",
+                "UNKNOWN COMMAND",
+                "> DEL x",
+                "NO SUCH RULE",
+                "> DEL 0",
+                "NO SUCH RULE",
+                "> DEL 99999",
+                "NO SUCH RULE",
+                "> PURGE",
+                "UNKNOWN COMMAND",
+                "> ADD x",
+                "Added 1",
+                "> DEL 1",
+                "Deleted 1",
+                "> SHOW",
+                "(no rules)",
+                "> END"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(22), "Matrix Totals", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M016")
+            .brief(
+                "The weekly patch report is a table: rows are teams, columns "
+                + "are severity levels, cells are unpatched systems. Read a "
+                + "table of any size up to 4 by 4 and print it with a total "
+                + "for every row, every column and the whole table, lined "
+                + "up in columns.")
+            .practises("Two-dimensional arrays", "Returning an array", "String.format")
+            .spec(
+                "Prompt Rows (1-4): and Columns (1-4): and read a whole number after each. Either outside 1 to 4: INVALID.",
+                "For each row r from 1, prompt Row <r>: and read exactly <columns> whole numbers separated by single spaces. The wrong count: INVALID, and stop.",
+                "rowTotals(grid) and colTotals(grid) return arrays of the totals.",
+                "Print each row as its numbers then its total, every value right-aligned in 5 characters (%5d).",
+                "Then print a line of the column totals and the grand total, in the same format.")
+            .needsMethod("static int[] rowTotals(int[][])")
+            .needsMethod("static int[] colTotals(int[][])")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read the size, then each row, then print the table",
+                "    }",
+                "",
+                "    // declare rowTotals(int[][] g) and colTotals(int[][] g)",
+                "}")
+            .hints(
+                "new int[rows][cols] once the size is known and checked.",
+                "rowTotals: an array of g.length totals; colTotals: an array "
+                + "of g[0].length totals.",
+                "Build each output line with String.format(\"%5d\", v) for "
+                + "every value, then println it.",
+                "The grand total is the sum of the row totals.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Rows (1-4): \");",
+                "        int rows = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Columns (1-4): \");",
+                "        int cols = Integer.parseInt(input.nextLine().trim());",
+                "        if (rows < 1 || rows > 4 || cols < 1 || cols > 4) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        int[][] g = new int[rows][cols];",
+                "        for (int r = 0; r < rows; r++) {",
+                "            System.out.print(\"Row \" + (r + 1) + \": \");",
+                "            String[] p = input.nextLine().trim().split(\" \");",
+                "            if (p.length != cols) {",
+                "                System.out.println(\"INVALID\");",
+                "                return;",
+                "            }",
+                "            for (int c = 0; c < cols; c++) {",
+                "                g[r][c] = Integer.parseInt(p[c]);",
+                "            }",
+                "        }",
+                "        int[] rt = rowTotals(g);",
+                "        int[] ct = colTotals(g);",
+                "        int grand = 0;",
+                "        for (int r = 0; r < rows; r++) {",
+                "            String line = \"\";",
+                "            for (int c = 0; c < cols; c++) {",
+                "                line += String.format(\"%5d\", g[r][c]);",
+                "            }",
+                "            System.out.println(line + String.format(\"%5d\", rt[r]));",
+                "            grand += rt[r];",
+                "        }",
+                "        String last = \"\";",
+                "        for (int c = 0; c < cols; c++) {",
+                "            last += String.format(\"%5d\", ct[c]);",
+                "        }",
+                "        System.out.println(last + String.format(\"%5d\", grand));",
+                "    }",
+                "",
+                "    static int[] rowTotals(int[][] g) {",
+                "        int[] t = new int[g.length];",
+                "        for (int r = 0; r < g.length; r++) {",
+                "            for (int c = 0; c < g[r].length; c++) {",
+                "                t[r] += g[r][c];",
+                "            }",
+                "        }",
+                "        return t;",
+                "    }",
+                "",
+                "    static int[] colTotals(int[][] g) {",
+                "        int[] t = new int[g[0].length];",
+                "        for (int r = 0; r < g.length; r++) {",
+                "            for (int c = 0; c < g[r].length; c++) {",
+                "                t[c] += g[r][c];",
+                "            }",
+                "        }",
+                "        return t;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The size is read and checked before the array is made, so "
+                + "new int[rows][cols] is always a sensible size and every "
+                + "row line can be checked against cols before parsing.\n"
+                + "\n"
+                + "rowTotals and colTotals walk the same cells in the same "
+                + "order; the only difference is which total each cell is "
+                + "added to - t[r] or t[c]. Each method returns a fresh "
+                + "array that starts at zeros, which is exactly what a set "
+                + "of accumulators needs. colTotals sizes its result from "
+                + "g[0].length, safe because main guarantees at least one "
+                + "row. %5d right-aligns every number, so columns line up "
+                + "whatever the digits.")
+            .sample(Lab.typing("3", "3", "4 1 0", "12 3 1", "0 0 2"),
+                "Rows (1-4): 3",
+                "Columns (1-4): 3",
+                "Row 1: 4 1 0",
+                "Row 2: 12 3 1",
+                "Row 3: 0 0 2",
+                "    4    1    0    5",
+                "   12    3    1   16",
+                "    0    0    2    2",
+                "   16    4    3   23")
+            .hidden(Lab.typing("1", "1", "7"),
+                "Rows (1-4): 1",
+                "Columns (1-4): 1",
+                "Row 1: 7",
+                "    7    7",
+                "    7    7")
+            .hidden(Lab.typing("2", "4", "1 2 3 4", "100 200 300 400"),
+                "Rows (1-4): 2",
+                "Columns (1-4): 4",
+                "Row 1: 1 2 3 4",
+                "Row 2: 100 200 300 400",
+                "    1    2    3    4   10",
+                "  100  200  300  400 1000",
+                "  101  202  303  404 1010")
+            .hidden(Lab.typing("2", "2", "1 2", "3"),
+                "Rows (1-4): 2",
+                "Columns (1-4): 2",
+                "Row 1: 1 2",
+                "Row 2: 3",
+                "INVALID")
+            .hidden(Lab.typing("5", "2"),
+                "Rows (1-4): 5",
+                "Columns (1-4): 2",
+                "INVALID")
+            .hidden(Lab.typing("2", "0"),
+                "Rows (1-4): 2",
+                "Columns (1-4): 0",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(23), "Password History", Lab.BIG)
+            .stretch()
+            .after("C05-M021")
+            .brief(
+                "Policy: a new password must be at least 10 characters and "
+                + "must not repeat any of the account's last 3 passwords. "
+                + "Build the password-change check. The history is a list "
+                + "that keeps only the newest 3, dropping the oldest as a "
+                + "new one arrives - and the program never echoes a "
+                + "password back.")
+            .practises("ArrayList", "remove, contains and indexOf", "A capped list")
+            .spec(
+                "Repeatedly prompt New password: and read a line (not trimmed - spaces count) until the line is END.",
+                "verdict(history, pw) returns BLANK when pw is nothing but spaces, TOO SHORT when it is under 10 characters, REUSED when history contains pw exactly, otherwise ACCEPTED - checked in that order.",
+                "When ACCEPTED, remember(history, pw) adds pw to the end and, if the history then holds more than 3, removes the oldest.",
+                "Print the verdict for each attempt. Never print a password.",
+                "After END, print Changes accepted: <a>, rejected: <r>.")
+            .needsMethod("static String verdict(ArrayList<String>, String)")
+            .needsMethod("static void remember(ArrayList<String>, String)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MIN_LENGTH = 10;",
+                "    static final int KEEP = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> history = new ArrayList<>();",
+                "        // the change loop, then the totals",
+                "    }",
+                "",
+                "    // declare verdict(...) and remember(...) here",
+                "}")
+            .hints(
+                "Check the simple rules first: blank (pw.trim().isEmpty()), "
+                + "then length - both reject whatever the history says.",
+                "history.contains(pw) is an exact, case-sensitive "
+                + "comparison - which is what a password needs.",
+                "The oldest entry is at index 0: after adding, while "
+                + "history.size() > KEEP, remove(0).",
+                "Only ACCEPTED passwords go into the history.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MIN_LENGTH = 10;",
+                "    static final int KEEP = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> history = new ArrayList<>();",
+                "        int accepted = 0;",
+                "        int rejected = 0;",
+                "        while (true) {",
+                "            System.out.print(\"New password: \");",
+                "            String pw = input.nextLine();",
+                "            if (pw.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String v = verdict(history, pw);",
+                "            System.out.println(v);",
+                "            if (v.equals(\"ACCEPTED\")) {",
+                "                remember(history, pw);",
+                "                accepted++;",
+                "            } else {",
+                "                rejected++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Changes accepted: \" + accepted",
+                "                + \", rejected: \" + rejected);",
+                "    }",
+                "",
+                "    static String verdict(ArrayList<String> history, String pw) {",
+                "        if (pw.trim().isEmpty()) {",
+                "            return \"BLANK\";",
+                "        }",
+                "        if (pw.length() < MIN_LENGTH) {",
+                "            return \"TOO SHORT\";",
+                "        }",
+                "        if (history.contains(pw)) {",
+                "            return \"REUSED\";",
+                "        }",
+                "        return \"ACCEPTED\";",
+                "    }",
+                "",
+                "    static void remember(ArrayList<String> history, String pw) {",
+                "        history.add(pw);",
+                "        while (history.size() > KEEP) {",
+                "            history.remove(0);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "The history is a capped list: new passwords join at the "
+                + "end, and whenever it grows past KEEP the oldest - always "
+                + "at index 0 - is removed. So it holds exactly the last "
+                + "three accepted passwords, and a fourth-oldest becomes "
+                + "usable again, which the hidden tests check.\n"
+                + "\n"
+                + "verdict checks the simple rules first - ten spaces are ten "
+                + "characters, so length alone would let them through - and "
+                + "compares with the "
+                + "list's contains, an exact equals: Correct-Horse-1 and "
+                + "correct-horse-1 are different passwords. Rejected "
+                + "attempts are never remembered, and no password is ever "
+                + "printed - only the verdict. A real system would keep "
+                + "salted hashes rather than the passwords themselves "
+                + "(Campaign 17); the list logic is the same.")
+            .sample(Lab.typing("Blue-Kettle-Rain-42", "short1", "Blue-Kettle-Rain-42", "Quiet-Lantern-77", "END"),
+                "New password: Blue-Kettle-Rain-42",
+                "ACCEPTED",
+                "New password: short1",
+                "TOO SHORT",
+                "New password: Blue-Kettle-Rain-42",
+                "REUSED",
+                "New password: Quiet-Lantern-77",
+                "ACCEPTED",
+                "New password: END",
+                "Changes accepted: 2, rejected: 2")
+            .hidden(Lab.typing("aaaaaaaaaa1", "aaaaaaaaaa2", "aaaaaaaaaa3", "aaaaaaaaaa4", "aaaaaaaaaa1", "aaaaaaaaaa2", "END"),
+                "New password: aaaaaaaaaa1",
+                "ACCEPTED",
+                "New password: aaaaaaaaaa2",
+                "ACCEPTED",
+                "New password: aaaaaaaaaa3",
+                "ACCEPTED",
+                "New password: aaaaaaaaaa4",
+                "ACCEPTED",
+                "New password: aaaaaaaaaa1",
+                "ACCEPTED",
+                "New password: aaaaaaaaaa2",
+                "ACCEPTED",
+                "New password: END",
+                "Changes accepted: 6, rejected: 0")
+            .hidden(Lab.typing("Winter-Morning-9", "winter-morning-9", "Winter-Morning-9", "END"),
+                "New password: Winter-Morning-9",
+                "ACCEPTED",
+                "New password: winter-morning-9",
+                "ACCEPTED",
+                "New password: Winter-Morning-9",
+                "REUSED",
+                "New password: END",
+                "Changes accepted: 2, rejected: 1")
+            .hidden(Lab.typing("123456789", "          ", "END"),
+                "New password: 123456789",
+                "TOO SHORT",
+                "New password:",
+                "BLANK",
+                "New password: END",
+                "Changes accepted: 0, rejected: 2")
+            .hidden(Lab.typing("END"),
+                "New password: END",
+                "Changes accepted: 0, rejected: 0"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(24), "Failed Logins by User", Lab.BIG)
+            .stretch()
+            .after("C05-M028")
+            .brief(
+                "Detection needs two views of the same failures. Per user: "
+                + "how many failures, from how many places - an account "
+                + "failing from many sources is under attack. Per source: "
+                + "how many different accounts it failed against - one "
+                + "source trying many accounts is password spraying. Keep "
+                + "every failure as an event, and answer both questions.")
+            .practises("Counting per key", "Removing duplicates", "Sorting")
+            .spec(
+                "Keep two static parallel lists of failure events: users and sources.",
+                "Repeatedly prompt Event: and read a line (trim it) until END. It must be user,source,result - three pieces split at commas, each trimmed, result FAIL or OK. Anything else: count it as malformed.",
+                "For FAIL events store the user (lower-cased) and source. OK events are not stored.",
+                "sourcesFor(user) returns the distinct sources that user failed from; usersFrom(source) returns the distinct users that source failed against.",
+                "Print BY USER, then for each distinct failing user in alphabetical order: <user>: failures <f>, sources <n> - with  LOCK added when f is 3 or more. No failures at all: (none).",
+                "Print BY SOURCE, then for each distinct source in alphabetical order: <source>: users <n> - with  SPRAYING added when n is 3 or more. No failures at all: (none).",
+                "Print Malformed: <count>.")
+            .needsMethod("static ArrayList<String> sourcesFor(String)")
+            .needsMethod("static ArrayList<String> usersFrom(String)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> users = new ArrayList<>();",
+                "    static ArrayList<String> sources = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read the events, then the two reports",
+                "    }",
+                "",
+                "    // declare sourcesFor(String user) and usersFrom(String source)",
+                "}")
+            .hints(
+                "Store events, not totals: users.add(u); sources.add(s); "
+                + "for every FAIL. Both lists grow together.",
+                "sourcesFor: loop i over the events; where users.get(i) "
+                + "equals the user, add sources.get(i) if not already in "
+                + "the result.",
+                "The distinct users to report are a de-duplicated, sorted "
+                + "copy of users; the same for sources.",
+                "A user's failure count is how many events name them - a "
+                + "counting loop, or Collections.frequency if you have met "
+                + "it.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> users = new ArrayList<>();",
+                "    static ArrayList<String> sources = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int malformed = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Event: \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String[] p = line.split(\",\");",
+                "            if (p.length != 3) {",
+                "                malformed++;",
+                "                continue;",
+                "            }",
+                "            String u = p[0].trim().toLowerCase();",
+                "            String s = p[1].trim();",
+                "            String r = p[2].trim();",
+                "            boolean known = r.equals(\"FAIL\") || r.equals(\"OK\");",
+                "            if (u.isEmpty() || s.isEmpty() || !known) {",
+                "                malformed++;",
+                "            } else if (r.equals(\"FAIL\")) {",
+                "                users.add(u);",
+                "                sources.add(s);",
+                "            }",
+                "        }",
+                "        System.out.println(\"BY USER\");",
+                "        if (users.isEmpty()) {",
+                "            System.out.println(\"(none)\");",
+                "        }",
+                "        for (String u : sortedDistinct(users)) {",
+                "            int fails = count(users, u);",
+                "            String line = u + \": failures \" + fails",
+                "                    + \", sources \" + sourcesFor(u).size();",
+                "            System.out.println(fails >= 3 ? line + \"  LOCK\" : line);",
+                "        }",
+                "        System.out.println(\"BY SOURCE\");",
+                "        if (sources.isEmpty()) {",
+                "            System.out.println(\"(none)\");",
+                "        }",
+                "        for (String s : sortedDistinct(sources)) {",
+                "            int n = usersFrom(s).size();",
+                "            String line = s + \": users \" + n;",
+                "            System.out.println(n >= 3 ? line + \"  SPRAYING\" : line);",
+                "        }",
+                "        System.out.println(\"Malformed: \" + malformed);",
+                "    }",
+                "",
+                "    static ArrayList<String> sourcesFor(String user) {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (int i = 0; i < users.size(); i++) {",
+                "            String s = sources.get(i);",
+                "            if (users.get(i).equals(user) && !out.contains(s)) {",
+                "                out.add(s);",
+                "            }",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static ArrayList<String> usersFrom(String source) {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (int i = 0; i < sources.size(); i++) {",
+                "            String u = users.get(i);",
+                "            if (sources.get(i).equals(source) && !out.contains(u)) {",
+                "                out.add(u);",
+                "            }",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static ArrayList<String> sortedDistinct(ArrayList<String> list) {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (String x : list) {",
+                "            if (!out.contains(x)) {",
+                "                out.add(x);",
+                "            }",
+                "        }",
+                "        Collections.sort(out);",
+                "        return out;",
+                "    }",
+                "",
+                "    static int count(ArrayList<String> list, String x) {",
+                "        int n = 0;",
+                "        for (String item : list) {",
+                "            if (item.equals(x)) {",
+                "                n++;",
+                "            }",
+                "        }",
+                "        return n;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Keeping EVENTS rather than running totals is what makes "
+                + "both reports possible from one pass of input: the same "
+                + "two parallel lists answer 'which sources did this user "
+                + "fail from' and 'which users did this source fail "
+                + "against', simply by filtering on one list and collecting "
+                + "distinct values from the other.\n"
+                + "\n"
+                + "The two views catch different attacks. A user with many "
+                + "failures from many sources is being targeted; a source "
+                + "with failures against many users is spraying one common "
+                + "password across accounts - and each account may see "
+                + "only one failure, never enough to trip a per-account "
+                + "lockout. That is why the source view matters. Sorting "
+                + "the distinct keys makes the report stable and easy to "
+                + "scan.")
+            .sample(Lab.typing("admin,10.0.0.9,FAIL", "admin,10.0.0.9,FAIL", "Admin,172.16.0.4,FAIL", "jsmith,10.0.0.9,FAIL", "mpatel,10.0.0.9,FAIL", "mpatel,10.0.0.9,OK", "END"),
+                "Event: admin,10.0.0.9,FAIL",
+                "Event: admin,10.0.0.9,FAIL",
+                "Event: Admin,172.16.0.4,FAIL",
+                "Event: jsmith,10.0.0.9,FAIL",
+                "Event: mpatel,10.0.0.9,FAIL",
+                "Event: mpatel,10.0.0.9,OK",
+                "Event: END",
+                "BY USER",
+                "admin: failures 3, sources 2  LOCK",
+                "jsmith: failures 1, sources 1",
+                "mpatel: failures 1, sources 1",
+                "BY SOURCE",
+                "10.0.0.9: users 3  SPRAYING",
+                "172.16.0.4: users 1",
+                "Malformed: 0")
+            .hidden(Lab.typing("a,s1,OK", "END"),
+                "Event: a,s1,OK",
+                "Event: END",
+                "BY USER",
+                "(none)",
+                "BY SOURCE",
+                "(none)",
+                "Malformed: 0")
+            .hidden(Lab.typing("bob,x,FAIL", "garbage", "bob,,FAIL", ",x,FAIL", "bob,x,DENY", "bob,x", "END"),
+                "Event: bob,x,FAIL",
+                "Event: garbage",
+                "Event: bob,,FAIL",
+                "Event: ,x,FAIL",
+                "Event: bob,x,DENY",
+                "Event: bob,x",
+                "Event: END",
+                "BY USER",
+                "bob: failures 1, sources 1",
+                "BY SOURCE",
+                "x: users 1",
+                "Malformed: 5")
+            .hidden(Lab.typing("u1,203.0.113.5,FAIL", "u2,203.0.113.5,FAIL", "u3,203.0.113.5,FAIL", "u4,203.0.113.5,FAIL", "u1,198.51.100.2,FAIL", "END"),
+                "Event: u1,203.0.113.5,FAIL",
+                "Event: u2,203.0.113.5,FAIL",
+                "Event: u3,203.0.113.5,FAIL",
+                "Event: u4,203.0.113.5,FAIL",
+                "Event: u1,198.51.100.2,FAIL",
+                "Event: END",
+                "BY USER",
+                "u1: failures 2, sources 2",
+                "u2: failures 1, sources 1",
+                "u3: failures 1, sources 1",
+                "u4: failures 1, sources 1",
+                "BY SOURCE",
+                "198.51.100.2: users 1",
+                "203.0.113.5: users 4  SPRAYING",
+                "Malformed: 0"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(25), "Sliding Window Alerts", Lab.BIG)
+            .stretch()
+            .after("C05-M013")
+            .brief(
+                "Rate-based detection looks at windows: not 'how many "
+                + "requests today' but 'how many in any 3 consecutive "
+                + "seconds'. Given requests per second, slide a window "
+                + "along the array, alert on every window over the limit, "
+                + "and report the peak window.")
+            .practises("Looping over arrays", "Index ranges", "Max, min and average")
+            .spec(
+                "Prompt Counts: and read whole numbers separated by single spaces (requests in second 0, 1, 2, ...).",
+                "Prompt Window (seconds): and Limit: and read a whole number after each. A window below 1 or longer than the data: INVALID.",
+                "windowSum(counts, start, w) returns the total of the w counts starting at index start.",
+                "For every start from 0 to length - w, when the window's total is over the limit, print ALERT <start>-<end>: <total>, where end is start + w - 1.",
+                "Then print Alerts: <n> and Peak: <start>-<end> (<total>) - the earliest window with the highest total.")
+            .needsMethod("static int windowSum(int[], int, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Counts: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // parse, read window and limit, then slide the window",
+                "    }",
+                "",
+                "    // declare windowSum(int[] counts, int start, int w) here",
+                "}")
+            .hints(
+                "The last window starts at counts.length - w - so the loop "
+                + "test is start <= counts.length - w.",
+                "windowSum loops i from start to start + w - 1.",
+                "Track the peak's START index; its total can be recomputed "
+                + "with windowSum.",
+                "Strict > keeps the earliest window on a tie.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Counts: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] counts = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            counts[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        System.out.print(\"Window (seconds): \");",
+                "        int w = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Limit: \");",
+                "        int limit = Integer.parseInt(input.nextLine().trim());",
+                "        if (w < 1 || w > counts.length) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        int alerts = 0;",
+                "        int peak = 0;",
+                "        for (int start = 0; start <= counts.length - w; start++) {",
+                "            int total = windowSum(counts, start, w);",
+                "            if (total > limit) {",
+                "                System.out.println(\"ALERT \" + start + \"-\"",
+                "                        + (start + w - 1) + \": \" + total);",
+                "                alerts++;",
+                "            }",
+                "            if (total > windowSum(counts, peak, w)) {",
+                "                peak = start;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Alerts: \" + alerts);",
+                "        System.out.println(\"Peak: \" + peak + \"-\" + (peak + w - 1)",
+                "                + \" (\" + windowSum(counts, peak, w) + \")\");",
+                "    }",
+                "",
+                "    static int windowSum(int[] counts, int start, int w) {",
+                "        int sum = 0;",
+                "        for (int i = start; i < start + w; i++) {",
+                "            sum += counts[i];",
+                "        }",
+                "        return sum;",
+                "    }",
+                "}")
+            .walkthrough(
+                "A window of w seconds starting at start covers indexes "
+                + "start to start + w - 1. The last one that fits starts at "
+                + "counts.length - w, so the loop runs while start <= "
+                + "counts.length - w: one fewer and the final window is "
+                + "missed, one more and windowSum reads past the end. The "
+                + "INVALID check makes sure at least one window fits.\n"
+                + "\n"
+                + "Windows catch what totals hide. The sample's busiest "
+                + "single second is not alarming, but three busy seconds "
+                + "together are - a burst an attacker spreads out to stay "
+                + "under a per-second limit still shows up in the window "
+                + "sum. The peak is tracked as a start index, mission 15's "
+                + "idea, and strict > keeps the earliest on a tie.")
+            .sample(Lab.typing("4 6 5 20 18 25 3 2", "3", "40"),
+                "Counts: 4 6 5 20 18 25 3 2",
+                "Window (seconds): 3",
+                "Limit: 40",
+                "ALERT 2-4: 43",
+                "ALERT 3-5: 63",
+                "ALERT 4-6: 46",
+                "Alerts: 3",
+                "Peak: 3-5 (63)")
+            .hidden(Lab.typing("1 1 1 1", "2", "10"),
+                "Counts: 1 1 1 1",
+                "Window (seconds): 2",
+                "Limit: 10",
+                "Alerts: 0",
+                "Peak: 0-1 (2)")
+            .hidden(Lab.typing("9 9 9", "3", "20"),
+                "Counts: 9 9 9",
+                "Window (seconds): 3",
+                "Limit: 20",
+                "ALERT 0-2: 27",
+                "Alerts: 1",
+                "Peak: 0-2 (27)")
+            .hidden(Lab.typing("5 1 5 1", "1", "4"),
+                "Counts: 5 1 5 1",
+                "Window (seconds): 1",
+                "Limit: 4",
+                "ALERT 0-0: 5",
+                "ALERT 2-2: 5",
+                "Alerts: 2",
+                "Peak: 0-0 (5)")
+            .hidden(Lab.typing("1 2 3", "4", "1"),
+                "Counts: 1 2 3",
+                "Window (seconds): 4",
+                "Limit: 1",
+                "INVALID")
+            .hidden(Lab.typing("1 2 3", "0", "1"),
+                "Counts: 1 2 3",
+                "Window (seconds): 0",
+                "Limit: 1",
+                "INVALID"));
     }
 }
