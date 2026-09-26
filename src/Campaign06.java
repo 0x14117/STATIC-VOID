@@ -3542,5 +3542,1356 @@ public class Campaign06 {
                 + "Write only the doors callers need. Getter without setter "
                 + "= read-only.")
             .next("Next: setters that refuse bad values."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(16), "Setters That Say No", 4)
+            .brief(
+                "Rule.setPort happily accepted 0, -1 and 70000, and the "
+                + "firewall loaded rules that could never match anything - "
+                + "or, in one parser, matched everything. A setter is a "
+                + "door into an object. A good door checks what comes "
+                + "through it.")
+            .willLearn("Validating setters")
+            .whyUseful(
+                "If every change goes through a method, and every method "
+                + "checks its input, the object can never hold a bad value. "
+                + "That guarantee - an INVARIANT - is the real payoff of "
+                + "private fields.")
+            .concept("Validating setters",
+                "A setter should refuse values that make no sense, so the "
+                + "object is always valid:\n"
+                + "\n"
+                + "    boolean setPort(int port) {\n"
+                + "        if (port < 1 || port > 65535) {\n"
+                + "            return false;          refused, unchanged\n"
+                + "        }\n"
+                + "        this.port = port;\n"
+                + "        return true;               accepted\n"
+                + "    }\n"
+                + "\n"
+                + "Returning a boolean tells the caller whether it worked. "
+                + "(Campaign 07 shows the stronger way: throwing an "
+                + "exception, which a caller cannot ignore.)\n"
+                + "\n"
+                + "A rule every object of the class always obeys - 'port is "
+                + "from 1 to 65535' - is called an INVARIANT. To keep it:\n"
+                + "\n"
+                + "    - the field is private\n"
+                + "    - every setter checks\n"
+                + "    - the constructor checks too, or starts from a\n"
+                + "      safe value and uses the setter\n"
+                + "\n"
+                + "Refuse, do not repair: silently clamping 70000 to 65535 "
+                + "hides the caller's bug and produces a rule nobody asked "
+                + "for.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Rule r = new Rule();",
+                "        int[] tries = {443, 0, 70000, 8443};",
+                "        for (int p : tries) {",
+                "            boolean ok = r.setPort(p);",
+                "            String verdict = ok ? \"ok\" : \"REFUSED\";",
+                "            System.out.println(\"set \" + p + \": \" + verdict",
+                "                    + \", port is \" + r.getPort());",
+                "        }",
+                "    }",
+                "}",
+                "",
+                "class Rule {",
+                "    private int port = 443;",
+                "",
+                "    int getPort() {",
+                "        return port;",
+                "    }",
+                "",
+                "    boolean setPort(int port) {",
+                "        if (port < 1 || port > 65535) {",
+                "            return false;",
+                "        }",
+                "        this.port = port;",
+                "        return true;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "set 443: ok, port is 443",
+                "set 0: REFUSED, port is 443",
+                "set 70000: REFUSED, port is 443",
+                "set 8443: ok, port is 8443")
+            .lineByLine(
+                new String[]{"private int port = 443;",
+                    "Starts valid, so the invariant holds from the first "
+                    + "moment."},
+                new String[]{"return false;",
+                    "Refused values change nothing: the port stays valid."},
+                new String[]{"boolean ok = r.setPort(p);",
+                    "The caller learns whether the change happened."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Temp {",
+                    "    private int c = 20;",
+                    "",
+                    "    boolean set(int c) {",
+                    "        if (c < -50 || c > 60) {",
+                    "            return false;",
+                    "        }",
+                    "        this.c = c;",
+                    "        return true;",
+                    "    }",
+                    "",
+                    "    int get() {",
+                    "        return c;",
+                    "    }",
+                    "}",
+                    "",
+                    "Temp t = new Temp();",
+                    "t.set(35);",
+                    "t.set(900);",
+                    "System.out.println(t.get());")
+                .accept("35")
+                .hints("35 is accepted.",
+                       "900 is refused and changes nothing.")
+                .explain(
+                    "35. The second call is refused, so the last accepted "
+                    + "value stays.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "setSeverity(int s) must keep severity from 1 to 10. It "
+                    + "is called with 14. What is the best behaviour?")
+                .choices("Store 14 anyway",
+                         "Quietly store 10 instead",
+                         "Refuse, leave the old value, and report failure",
+                         "Set it to 0")
+                .accept("3", "c")
+                .hints("What does the caller learn?",
+                       "Refuse, do not repair.")
+                .explain(
+                    "c. Refusing keeps the invariant AND tells the caller "
+                    + "something is wrong. Clamping hides the bug; storing "
+                    + "14 or 0 breaks the rule.")
+                .xp(15))
+            .objective(
+                "Make the session length setter refuse bad values.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Session s = new Session();",
+                "        System.out.println(s.setMinutes(45) + \" \" + s.getMinutes());",
+                "        System.out.println(s.setMinutes(0) + \" \" + s.getMinutes());",
+                "        System.out.println(s.setMinutes(600) + \" \" + s.getMinutes());",
+                "    }",
+                "}",
+                "",
+                "class Session {",
+                "    private int minutes = 30;",
+                "",
+                "    int getMinutes() {",
+                "        return minutes;",
+                "    }",
+                "",
+                "    boolean setMinutes(int minutes) {",
+                "        // the if: minutes is below 1 or above 480",
+                "            return false;",
+                "        }",
+                "        this.minutes = minutes;",
+                "        return true;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that catches a session length below 1 minute "
+                + "or above 480 minutes (8 hours).")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (minutes < 1 || minutes > 480) {",
+                        "if(minutes < 1 || minutes > 480) {",
+                        "if (minutes < 1 || minutes > 480){",
+                        "if (minutes > 480 || minutes < 1) {",
+                        "if (minutes <= 0 || minutes > 480) {")
+                .hints(
+                    "Either problem alone is enough to refuse: ||.",
+                    "Below 1, or above 480.",
+                    "if (minutes < 1 || minutes > 480) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Session s = new Session();",
+                    "        System.out.println(s.setMinutes(45) + \" \" + s.getMinutes());",
+                    "        System.out.println(s.setMinutes(0) + \" \" + s.getMinutes());",
+                    "        System.out.println(s.setMinutes(600) + \" \" + s.getMinutes());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Session {",
+                    "    private int minutes = 30;",
+                    "",
+                    "    int getMinutes() {",
+                    "        return minutes;",
+                    "    }",
+                    "",
+                    "    boolean setMinutes(int minutes) {",
+                    "        if (minutes < 1 || minutes > 480) {",
+                    "            return false;",
+                    "        }",
+                    "        this.minutes = minutes;",
+                    "        return true;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "45 is accepted: true 45. 0 and 600 are refused, and the "
+                    + "session keeps 45: false 45, false 45.\n"
+                    + "\n"
+                    + "A zero-minute session would log users out at once; a "
+                    + "600-minute one would outlive a working day and keep a "
+                    + "forgotten session open overnight. The setter keeps "
+                    + "every Session inside policy.")
+                .explain(
+                    "if (minutes < 1 || minutes > 480) { - refuse either end.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Checking only one end",
+                    "Test the lower AND upper bound."},
+                new String[]{"Changing the field before checking",
+                    "Check first; change only when valid."},
+                new String[]{"A validating setter, an unchecked constructor",
+                    "Both doors need the check."})
+            .cyber(
+                "Input validation is most reliable at the object's own "
+                + "door. Validate in the UI and a script calls the API "
+                + "directly; validate in one caller and another forgets. "
+                + "Validate in the setter and the constructor, and no path "
+                + "can store a bad port, a negative amount or an endless "
+                + "session - whatever called it.")
+            .check(new Task(Task.CHOICE,
+                    "What is an invariant?")
+                .choices("A field that never changes",
+                         "A rule every object of the class always obeys",
+                         "A constructor with no parameters",
+                         "A static method")
+                .accept("2", "b")
+                .hints("'port is from 1 to 65535'.",
+                       "True of every object, all the time.")
+                .explain(
+                    "b. An invariant is a rule that always holds - kept true "
+                    + "by private fields and methods that check.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Pin {",
+                    "    private String code = \"0000\";",
+                    "",
+                    "    boolean set(String c) {",
+                    "        if (c.length() != 4) {",
+                    "            return false;",
+                    "        }",
+                    "        code = c;",
+                    "        return true;",
+                    "    }",
+                    "",
+                    "    String get() {",
+                    "        return code;",
+                    "    }",
+                    "}",
+                    "",
+                    "Pin p = new Pin();",
+                    "boolean a = p.set(\"12\");",
+                    "boolean b = p.set(\"4821\");",
+                    "System.out.println(a + \" \" + b + \" \" + p.get());")
+                .accept("false true 4821")
+                .hints("Two characters is refused.",
+                       "Four is accepted.")
+                .explain(
+                    "false true 4821. The refused value left 0000 in place; "
+                    + "the valid one replaced it.")
+                .xp(10))
+            .recap(
+                "    boolean setX(v) {\n"
+                + "        if (v is bad) return false;   unchanged\n"
+                + "        this.x = v;  return true;\n"
+                + "    }\n"
+                + "\n"
+                + "Private field + checking setters + checking constructor "
+                + "= an invariant that always holds.")
+            .next("Next: toString - how an object prints itself."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(17), "How an Object Prints Itself", 3)
+            .brief(
+                "The alert log printed lines like Alert@1b6d3586 - where "
+                + "each alert lived in memory, which is no use to anyone "
+                + "reading a log at 3 a.m. Every class can decide how its "
+                + "objects appear as text, by writing one method with a "
+                + "name Java already knows: toString.")
+            .willLearn("toString")
+            .whyUseful(
+                "println, + with a String, and every ArrayList print all "
+                + "call toString. Writing it once makes every object of the "
+                + "class readable in logs, reports and while debugging.")
+            .concept("toString",
+                "Every object already has a toString method - Java gives "
+                + "one to every class. The built-in version returns the "
+                + "class name, @, and a hex code: Alert@1b6d3586.\n"
+                + "\n"
+                + "Write your own, with exactly this header, and Java uses "
+                + "yours instead:\n"
+                + "\n"
+                + "    @Override\n"
+                + "    public String toString() {\n"
+                + "        return rule + \" (severity \" + severity + \")\";\n"
+                + "    }\n"
+                + "\n"
+                + "    public        required here (Campaign 10 says why)\n"
+                + "    @Override     asks the compiler to check that you\n"
+                + "                  really are replacing Java's version\n"
+                + "\n"
+                + "@Override is optional but catches typos: a method named "
+                + "tostring or ToString would silently be a NEW method, "
+                + "never called by println. With @Override, the typo is a "
+                + "compile error.\n"
+                + "\n"
+                + "Java calls toString for you whenever an object must "
+                + "become text:\n"
+                + "\n"
+                + "    System.out.println(a)       prints a.toString()\n"
+                + "    \"Alert: \" + a               joins a.toString()\n"
+                + "    System.out.println(list)    each item's toString\n"
+                + "\n"
+                + "Keep it short and readable - and never include secrets. "
+                + "Objects end up in logs.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert(\"Brute force\", 8);",
+                "        System.out.println(a);",
+                "        String line = \"New: \" + new Alert(\"Port scan\", 4);",
+                "        System.out.println(line);",
+                "        ArrayList<Alert> queue = new ArrayList<>();",
+                "        queue.add(a);",
+                "        queue.add(new Alert(\"Admin created\", 9));",
+                "        System.out.println(queue);",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    private String rule;",
+                "    private int severity;",
+                "",
+                "    Alert(String rule, int severity) {",
+                "        this.rule = rule;",
+                "        this.severity = severity;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return rule + \" (severity \" + severity + \")\";",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Brute force (severity 8)",
+                "New: Port scan (severity 4)",
+                "[Brute force (severity 8), Admin created (severity 9)]")
+            .lineByLine(
+                new String[]{"System.out.println(a);",
+                    "println calls a.toString() for you."},
+                new String[]{"\"New: \" + new Alert(...)",
+                    "Joining an object to a String calls toString too."},
+                new String[]{"System.out.println(queue);",
+                    "A list prints each item with the item's own toString."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Host {",
+                    "    String name = \"db1\";",
+                    "    int port = 5432;",
+                    "",
+                    "    @Override",
+                    "    public String toString() {",
+                    "        return name + \":\" + port;",
+                    "    }",
+                    "}",
+                    "",
+                    "Host h = new Host();",
+                    "System.out.println(\"Target \" + h);")
+                .accept("Target db1:5432")
+                .hints("+ with a String calls toString.",
+                       "toString returns name:port.")
+                .explain(
+                    "Target db1:5432. The object became text through its "
+                    + "own toString.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Ticket {",
+                    "    String title = \"Disk full\";",
+                    "",
+                    "    String toString() {",
+                    "        return \"Ticket: \" + title;",
+                    "    }",
+                    "}",
+                    "",
+                    "System.out.println(new Ticket());")
+                .accept("4", "line 4")
+                .hints("Compare the header with the one in the concept.",
+                       "One word is missing.")
+                .explain(
+                    "Line 4: 'attempting to assign weaker access "
+                    + "privileges'. Java's toString is public, and a "
+                    + "replacement must be public too.")
+                .xp(20))
+            .objective(
+                "Make Host objects print as name:port.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host h = new Host(\"web1\", 443);",
+                "        System.out.println(h);",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "    private int port;",
+                "",
+                "    Host(String name, int port) {",
+                "        this.name = name;",
+                "        this.port = port;",
+                "    }",
+                "",
+                "    @Override",
+                "    // the header of toString",
+                "        return name + \":\" + port;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the exact header that replaces Java's toString.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the toString header.")
+                .accept("public String toString() {",
+                        "public String toString(){")
+                .hints(
+                    "It must be public.",
+                    "It returns a String and takes nothing.",
+                    "public String toString() {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Host h = new Host(\"web1\", 443);",
+                    "        System.out.println(h);",
+                    "    }",
+                    "}",
+                    "",
+                    "class Host {",
+                    "    private String name;",
+                    "    private int port;",
+                    "",
+                    "    Host(String name, int port) {",
+                    "        this.name = name;",
+                    "        this.port = port;",
+                    "    }",
+                    "",
+                    "    @Override",
+                    "    public String toString() {",
+                    "        return name + \":\" + port;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "println(h) calls h.toString(), which now returns "
+                    + "web1:443 instead of Host@ and a code.\n"
+                    + "\n"
+                    + "@Override checked that the header really matches "
+                    + "Java's toString - spell it tostring and the compiler "
+                    + "says so, instead of println quietly using the old "
+                    + "version.")
+                .explain(
+                    "public String toString() { - replaces Java's version.")
+                .xp(15))
+            .mistakes(
+                new String[]{"Leaving out public",
+                    "'weaker access privileges'. It must be public."},
+                new String[]{"Printing inside toString",
+                    "Return the text; let the caller print it."},
+                new String[]{"Secrets in toString",
+                    "Objects get logged. Leave hashes and tokens out."})
+            .cyber(
+                "toString is called in places you did not plan: debug "
+                + "logs, error messages, list prints. A User whose toString "
+                + "includes the password hash, or a Session whose toString "
+                + "includes the token, will eventually write them to a log "
+                + "file that far more people can read. Decide what an "
+                + "object may say about itself.")
+            .check(new Task(Task.CHOICE,
+                    "A class has no toString of its own. What does "
+                    + "println(obj) show?")
+                .choices("Nothing",
+                         "Every field's value",
+                         "The class name, @ and a hex code",
+                         "A compile error")
+                .accept("3", "c")
+                .hints("Every class gets Java's version.",
+                       "Like arrays in Campaign 05.")
+                .explain(
+                    "c. Java's own toString: something like Alert@1b6d3586.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What does @Override do?")
+                .choices("Makes the method public",
+                         "Asks the compiler to check it replaces an "
+                         + "existing method",
+                         "Calls the old toString first",
+                         "Nothing at all")
+                .accept("2", "b")
+                .hints("It is a note to the compiler.",
+                       "It catches typos in the name.")
+                .explain(
+                    "b. If no existing method is being replaced - a typo in "
+                    + "the name, say - the compiler reports it.")
+                .xp(10))
+            .recap(
+                "    @Override\n"
+                + "    public String toString() {\n"
+                + "        return ...readable text...;\n"
+                + "    }\n"
+                + "\n"
+                + "Used by println, + with Strings, and list printing. "
+                + "Keep secrets out of it.")
+            .next("Next: when are two objects equal?"));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(18), "When Are Two Objects Equal?", 5)
+            .brief(
+                "The allowlist is an ArrayList of Host objects, and it "
+                + "never allowed anything. allow.contains(new Host(\"db1\", "
+                + "5432)) was false even though db1:5432 was in the list. "
+                + "contains uses equals, and Java's equals for objects asks "
+                + "only 'the same object?'. A class decides what 'equal' "
+                + "means for itself.")
+            .willLearn("equals for objects")
+            .whyUseful(
+                "Comparing records by their contents is everyday work - "
+                + "same host, same account, same rule. Writing equals makes "
+                + "==-style comparisons correct, and makes contains, "
+                + "indexOf and remove work on lists of your objects.")
+            .concept("equals for objects",
+                "Java's built-in equals behaves like ==: true only for the "
+                + "SAME object. To compare contents, replace it:\n"
+                + "\n"
+                + "    @Override\n"
+                + "    public boolean equals(Object other) {\n"
+                + "        if (!(other instanceof Host)) {\n"
+                + "            return false;\n"
+                + "        }\n"
+                + "        Host h = (Host) other;\n"
+                + "        return name.equals(h.name) && port == h.port;\n"
+                + "    }\n"
+                + "\n"
+                + "Line by line:\n"
+                + "\n"
+                + "    Object other   equals must accept ANY object -\n"
+                + "                   that is Java's rule for the header\n"
+                + "    instanceof     true when other really is a Host\n"
+                + "                   (and false for null)\n"
+                + "    (Host) other   a CAST, like (int) 3.9: treat it as\n"
+                + "                   a Host, now that we know it is one\n"
+                + "    the return     same contents: Strings with equals,\n"
+                + "                   numbers with ==\n"
+                + "\n"
+                + "Note that h.name works even though name is private: "
+                + "private means 'this CLASS only', and equals is inside "
+                + "Host.\n"
+                + "\n"
+                + "One more rule: a class that writes equals should also "
+                + "write hashCode, so the two agree. Nothing in this "
+                + "campaign needs it; Campaign 11's HashMap and HashSet do, "
+                + "and it is covered there.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host a = new Host(\"db1\", 5432);",
+                "        Host b = new Host(\"db1\", 5432);",
+                "        System.out.println(\"a == b: \" + (a == b));",
+                "        System.out.println(\"a.equals(b): \" + a.equals(b));",
+                "        ArrayList<Host> allow = new ArrayList<>();",
+                "        allow.add(a);",
+                "        System.out.println(allow.contains(new Host(\"db1\", 5432)));",
+                "        System.out.println(allow.contains(new Host(\"db1\", 22)));",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "    private int port;",
+                "",
+                "    Host(String name, int port) {",
+                "        this.name = name;",
+                "        this.port = port;",
+                "    }",
+                "",
+                "    @Override",
+                "    public boolean equals(Object other) {",
+                "        if (!(other instanceof Host)) {",
+                "            return false;",
+                "        }",
+                "        Host h = (Host) other;",
+                "        return name.equals(h.name) && port == h.port;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "a == b: false",
+                "a.equals(b): true",
+                "true",
+                "false")
+            .lineByLine(
+                new String[]{"a == b: false",
+                    "Two separate objects - == still asks 'same object?'."},
+                new String[]{"a.equals(b): true",
+                    "Our equals compares name and port instead."},
+                new String[]{"allow.contains(new Host(\"db1\", 5432))",
+                    "contains calls equals on each item, so it now finds a "
+                    + "matching host."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Tag {",
+                    "    String text;",
+                    "",
+                    "    Tag(String text) {",
+                    "        this.text = text;",
+                    "    }",
+                    "}",
+                    "",
+                    "Tag a = new Tag(\"prod\");",
+                    "Tag b = new Tag(\"prod\");",
+                    "System.out.println(a.equals(b));")
+                .accept("false")
+                .hints("Does Tag write its own equals?",
+                       "Java's own equals asks 'same object?'.")
+                .explain(
+                    "false. With no equals of its own, Tag uses Java's, "
+                    + "which is true only for the very same object.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why does equals take Object other, not Host other?")
+                .choices("Object is shorter",
+                         "Java's equals takes Object, and a replacement must "
+                         + "match it exactly",
+                         "Host cannot be a parameter type",
+                         "It makes the method faster")
+                .accept("2", "b")
+                .hints("It replaces an existing method.",
+                       "@Override would complain otherwise.")
+                .explain(
+                    "b. equals(Host other) would be a NEW method that "
+                    + "contains never calls. The header must match Java's: "
+                    + "equals(Object other).")
+                .xp(15))
+            .objective(
+                "Compare two accounts by username.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Account a = new Account(\"jsmith\");",
+                "        Account b = new Account(\"jsmith\");",
+                "        Account c = new Account(\"admin\");",
+                "        System.out.println(a.equals(b) + \" \" + a.equals(c));",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private String user;",
+                "",
+                "    Account(String user) {",
+                "        this.user = user;",
+                "    }",
+                "",
+                "    @Override",
+                "    public boolean equals(Object other) {",
+                "        if (!(other instanceof Account)) {",
+                "            return false;",
+                "        }",
+                "        Account a = (Account) other;",
+                "        // true when the two users are the same text",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the return line: two accounts are equal when their "
+                + "user fields hold the same text.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return user.equals(a.user);",
+                        "return this.user.equals(a.user);",
+                        "return a.user.equals(user);",
+                        "return a.user.equals(this.user);")
+                .hints(
+                    "Compare Strings with equals, never ==.",
+                    "This account's user against a's user.",
+                    "return user.equals(a.user);")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Account a = new Account(\"jsmith\");",
+                    "        Account b = new Account(\"jsmith\");",
+                    "        Account c = new Account(\"admin\");",
+                    "        System.out.println(a.equals(b) + \" \" + a.equals(c));",
+                    "    }",
+                    "}",
+                    "",
+                    "class Account {",
+                    "    private String user;",
+                    "",
+                    "    Account(String user) {",
+                    "        this.user = user;",
+                    "    }",
+                    "",
+                    "    @Override",
+                    "    public boolean equals(Object other) {",
+                    "        if (!(other instanceof Account)) {",
+                    "            return false;",
+                    "        }",
+                    "        Account a = (Account) other;",
+                    "        return user.equals(a.user);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "user.equals(a.user) compares the two usernames as text. "
+                    + "a and b both hold jsmith, so they are equal; c holds "
+                    + "admin, so it is not: true false.\n"
+                    + "\n"
+                    + "The instanceof check comes first, so comparing an "
+                    + "Account with null or with some other kind of object "
+                    + "returns false instead of crashing on the cast.")
+                .explain(
+                    "return user.equals(a.user); - same text, same account.")
+                .xp(25))
+            .mistakes(
+                new String[]{"equals(Host other)",
+                    "A new method, never used by contains. Take Object."},
+                new String[]{"Comparing String fields with ==",
+                    "Use equals inside equals too."},
+                new String[]{"Casting before instanceof",
+                    "A wrong type crashes. Check first."})
+            .cyber(
+                "Identity comparisons decide access: is this the same user, "
+                + "the same device, the same certificate? Compare the wrong "
+                + "way and a match is missed - an allowlist that allows "
+                + "nothing, or a blocklist that blocks nothing because the "
+                + "blocked entry is 'a different object'. Decide what "
+                + "equality means for the record, and write it once, in "
+                + "equals.")
+            .check(new Task(Task.CHOICE,
+                    "What does list.contains(x) use to compare x with each "
+                    + "item?")
+                .choices("==", "equals", "toString", "hashCode only")
+                .accept("2", "b")
+                .hints("Campaign 05 said list methods compare with ...",
+                       "So a class's own equals matters.")
+                .explain(
+                    "b. contains, indexOf and remove(Object) all call "
+                    + "equals - so they only find matching objects once the "
+                    + "class writes it.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What is other instanceof Host when other is null?")
+                .choices("true", "false", "It crashes", "It does not compile")
+                .accept("2", "b")
+                .hints("null is not a Host.",
+                       "instanceof never crashes.")
+                .explain(
+                    "b. false. That is why the instanceof check also "
+                    + "protects equals from null.")
+                .xp(10))
+            .recap(
+                "    @Override\n"
+                + "    public boolean equals(Object other) {\n"
+                + "        if (!(other instanceof Host)) return false;\n"
+                + "        Host h = (Host) other;\n"
+                + "        return ...compare the fields...;\n"
+                + "    }\n"
+                + "\n"
+                + "== asks 'same object?'; equals asks 'same contents?'.")
+            .next("Next: static - members that belong to the class."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(19), "Belonging to the Class", 4)
+            .brief(
+                "Every incident ticket needs a unique number: 1, 2, 3, in "
+                + "the order they were opened. An ordinary field cannot do "
+                + "it - each ticket has its own copy, and none of them "
+                + "knows how many others exist. The counter must belong to "
+                + "the Ticket CLASS, shared by all tickets. That is what "
+                + "static means.")
+            .willLearn("Static and instance members")
+            .whyUseful(
+                "static has been on every main since Campaign 00. Now it "
+                + "can be explained: static members belong to the class "
+                + "itself, one copy in total; instance members belong to "
+                + "each object.")
+            .concept("Static and instance members",
+                "An INSTANCE field has one copy per object. A STATIC field "
+                + "has ONE copy, shared by the class and all its objects:\n"
+                + "\n"
+                + "    class Ticket {\n"
+                + "        private static int nextId = 1;   one, shared\n"
+                + "        private int id;                  one per ticket\n"
+                + "        private String title;\n"
+                + "\n"
+                + "        Ticket(String title) {\n"
+                + "            this.title = title;\n"
+                + "            id = nextId;\n"
+                + "            nextId++;\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "Each constructor takes the shared counter's value as its "
+                + "own id, then moves the counter on - so tickets get 1, 2, "
+                + "3.\n"
+                + "\n"
+                + "Methods follow the same split:\n"
+                + "\n"
+                + "    instance method   runs on an object; has this;\n"
+                + "                      uses instance AND static fields\n"
+                + "    static method     belongs to the class; no this,\n"
+                + "                      so NO instance fields\n"
+                + "\n"
+                + "    Ticket.opened()   a static method, called on the\n"
+                + "                      class name\n"
+                + "\n"
+                + "That explains a Campaign 03 error: main is static, so "
+                + "inside main there is no object - which is why Main's "
+                + "helpers had to be static too. Math.max and "
+                + "Integer.parseInt are static for the same reason: they "
+                + "need no object.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Ticket a = new Ticket(\"Phishing report\");",
+                "        Ticket b = new Ticket(\"Disk full\");",
+                "        Ticket c = new Ticket(\"VPN down\");",
+                "        System.out.println(a);",
+                "        System.out.println(c);",
+                "        System.out.println(\"Opened so far: \" + Ticket.opened());",
+                "    }",
+                "}",
+                "",
+                "class Ticket {",
+                "    private static int nextId = 1;",
+                "    private int id;",
+                "    private String title;",
+                "",
+                "    Ticket(String title) {",
+                "        this.title = title;",
+                "        id = nextId;",
+                "        nextId++;",
+                "    }",
+                "",
+                "    static int opened() {",
+                "        return nextId - 1;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return \"#\" + id + \" \" + title;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "#1 Phishing report",
+                "#3 VPN down",
+                "Opened so far: 3")
+            .lineByLine(
+                new String[]{"private static int nextId = 1;",
+                    "One counter for the whole class, not one per ticket."},
+                new String[]{"id = nextId; nextId++;",
+                    "Each ticket copies the counter into its own id, then "
+                    + "moves the shared counter on."},
+                new String[]{"Ticket.opened()",
+                    "A static method, called on the class - no ticket "
+                    + "needed."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Probe {",
+                    "    static int total = 0;",
+                    "    int mine = 0;",
+                    "",
+                    "    void hit() {",
+                    "        total++;",
+                    "        mine++;",
+                    "    }",
+                    "}",
+                    "",
+                    "Probe p = new Probe();",
+                    "Probe q = new Probe();",
+                    "p.hit();",
+                    "p.hit();",
+                    "q.hit();",
+                    "System.out.println(p.mine + \" \" + q.mine + \" \" + Probe.total);")
+                .accept("2 1 3")
+                .hints("mine is per object; total is shared.",
+                       "Three hits in all.")
+                .explain(
+                    "2 1 3. Each object counts its own hits in mine; the "
+                    + "one static total counts every hit.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Sensor {",
+                    "    int reading;",
+                    "",
+                    "    static boolean isHot() {",
+                    "        return reading > 30;",
+                    "    }",
+                    "}",
+                    "",
+                    "Sensor s = new Sensor();",
+                    "System.out.println(Sensor.isHot());")
+                .accept("5", "line 5")
+                .hints("Which object's reading would a static method use?",
+                       "There is none.")
+                .explain(
+                    "Line 5: 'non-static variable reading cannot be "
+                    + "referenced from a static context'. A static method "
+                    + "has no object, so it has no reading. isHot should "
+                    + "not be static.")
+                .xp(20))
+            .objective(
+                "Number every asset tag automatically.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Asset a = new Asset(\"laptop\");",
+                "        Asset b = new Asset(\"yubikey\");",
+                "        System.out.println(a.label() + \" \" + b.label());",
+                "    }",
+                "}",
+                "",
+                "class Asset {",
+                "    // nextTag: one shared int for the whole class, starting at 100",
+                "    private int tag;",
+                "    private String kind;",
+                "",
+                "    Asset(String kind) {",
+                "        this.kind = kind;",
+                "        tag = nextTag;",
+                "        nextTag++;",
+                "    }",
+                "",
+                "    String label() {",
+                "        return kind + \"-\" + tag;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare nextTag: a private static int, shared by every "
+                + "Asset, starting at 100.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the field line.")
+                .accept("private static int nextTag = 100;",
+                        "static int nextTag = 100;",
+                        "private static int nextTag=100;")
+                .hints(
+                    "static makes it one copy for the class.",
+                    "Give it its starting value with =.",
+                    "private static int nextTag = 100;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Asset a = new Asset(\"laptop\");",
+                    "        Asset b = new Asset(\"yubikey\");",
+                    "        System.out.println(a.label() + \" \" + b.label());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Asset {",
+                    "    private static int nextTag = 100;",
+                    "    private int tag;",
+                    "    private String kind;",
+                    "",
+                    "    Asset(String kind) {",
+                    "        this.kind = kind;",
+                    "        tag = nextTag;",
+                    "        nextTag++;",
+                    "    }",
+                    "",
+                    "    String label() {",
+                    "        return kind + \"-\" + tag;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "There is one nextTag for the class. The laptop takes "
+                    + "100 and moves it to 101; the yubikey takes 101: "
+                    + "laptop-100 yubikey-101.\n"
+                    + "\n"
+                    + "Without static, each Asset would have its own nextTag "
+                    + "starting at 100, and every asset would be tagged 100 "
+                    + "- two laptops with the same tag, and an inventory "
+                    + "that cannot tell them apart.")
+                .explain(
+                    "private static int nextTag = 100; - one, shared.")
+                .xp(20))
+            .mistakes(
+                new String[]{"A per-object counter for IDs",
+                    "Every object starts at the same number. Use static."},
+                new String[]{"Instance fields in a static method",
+                    "No object, no fields. Remove static from the method."},
+                new String[]{"static for ordinary data",
+                    "Then all objects share one value - rarely wanted."})
+            .cyber(
+                "Static state is shared by everything that uses the class, "
+                + "which makes it powerful and risky. A static counter for "
+                + "IDs is fine. A static 'current user' field in a server "
+                + "that handles many users at once is a classic, serious "
+                + "bug: one user's request sees another user's identity. "
+                + "Keep per-user and per-request data in instance fields.")
+            .check(new Task(Task.CHOICE,
+                    "Which field should be static?")
+                .choices("Each account's username",
+                         "The number of accounts created so far",
+                         "Each account's failure count",
+                         "Each account's lock flag")
+                .accept("2", "b")
+                .hints("Which one belongs to no single account?",
+                       "It describes the whole class.")
+                .explain(
+                    "b. The count of accounts is one value for the class. "
+                    + "The others differ per account, so they are instance "
+                    + "fields.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why must helper methods called from main be static?")
+                .choices("static methods are faster",
+                         "main is static, so there is no object to call "
+                         + "instance methods on",
+                         "Java forbids instance methods in Main",
+                         "They must not use parameters")
+                .accept("2", "b")
+                .hints("What is this inside main?",
+                       "There is no this.")
+                .explain(
+                    "b. main runs without any Main object, so it can only "
+                    + "call methods that need none - static ones - unless it "
+                    + "makes an object first.")
+                .xp(10))
+            .recap(
+                "    static int nextId;   one copy, for the class\n"
+                + "    int id;              one copy per object\n"
+                + "    static method        no this, no instance fields\n"
+                + "    ClassName.method()   how static methods are called\n"
+                + "\n"
+                + "Shared counters: static. Per-object data: instance.")
+            .next("Next: a list of objects."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(20), "A List of Objects", 4)
+            .brief(
+                "Campaign 05's parallel lists - names in one, counts in "
+                + "another - can finally retire. An ArrayList<Account> "
+                + "holds whole accounts, each carrying its own user, count "
+                + "and lock. Sorting, removing or adding can never pair a "
+                + "count with the wrong user again.")
+            .willLearn("Lists of objects")
+            .whyUseful(
+                "A list of objects is how most programs hold their data: "
+                + "every open alert, every registered host, every active "
+                + "session. Everything Campaign 05 taught about lists works "
+                + "unchanged - with far richer items.")
+            .concept("Lists of objects",
+                "A list's type in the angle brackets can be your own class:\n"
+                + "\n"
+                + "    ArrayList<Account> accounts = new ArrayList<>();\n"
+                + "    accounts.add(new Account(\"admin\"));\n"
+                + "\n"
+                + "Each item is an Account, so the enhanced for hands you "
+                + "whole objects, and you call their methods:\n"
+                + "\n"
+                + "    for (Account a : accounts) {\n"
+                + "        if (a.isLocked()) {\n"
+                + "            System.out.println(a);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "The list holds REFERENCES. accounts.get(0) gives the very "
+                + "object in the list, not a copy - calling "
+                + "get(0).recordFailure() changes the account stored there.\n"
+                + "\n"
+                + "Searching by a field is Campaign 05's linear search, "
+                + "returning the object - or null:\n"
+                + "\n"
+                + "    static Account find(ArrayList<Account> list,\n"
+                + "                        String user) { ... }\n"
+                + "\n"
+                + "contains, indexOf and remove(Object) need equals "
+                + "(mission 18). The index loop and removing backwards "
+                + "work exactly as before.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Account> accounts = new ArrayList<>();",
+                "        accounts.add(new Account(\"admin\"));",
+                "        accounts.add(new Account(\"jsmith\"));",
+                "        accounts.add(new Account(\"mpatel\"));",
+                "        String[] log = {\"admin\", \"admin\", \"jsmith\", \"admin\"};",
+                "        for (String user : log) {",
+                "            Account a = find(accounts, user);",
+                "            if (a != null) {",
+                "                a.recordFailure();",
+                "            }",
+                "        }",
+                "        for (Account a : accounts) {",
+                "            System.out.println(a);",
+                "        }",
+                "    }",
+                "",
+                "    static Account find(ArrayList<Account> list, String user) {",
+                "        for (Account a : list) {",
+                "            if (a.getUser().equals(user)) {",
+                "                return a;",
+                "            }",
+                "        }",
+                "        return null;",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private String user;",
+                "    private int fails;",
+                "",
+                "    Account(String user) {",
+                "        this.user = user;",
+                "    }",
+                "",
+                "    String getUser() {",
+                "        return user;",
+                "    }",
+                "",
+                "    void recordFailure() {",
+                "        fails++;",
+                "    }",
+                "",
+                "    boolean isLocked() {",
+                "        return fails >= 3;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return user + \": \" + fails + (isLocked() ? \" LOCKED\" : \"\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "admin: 3 LOCKED",
+                "jsmith: 1",
+                "mpatel: 0")
+            .lineByLine(
+                new String[]{"ArrayList<Account>",
+                    "A list whose items are whole accounts."},
+                new String[]{"find(accounts, user)",
+                    "Returns the Account object in the list - or null."},
+                new String[]{"a.recordFailure();",
+                    "Changes the account stored in the list, because a IS "
+                    + "that object."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Box {",
+                    "    int n;",
+                    "}",
+                    "",
+                    "java.util.ArrayList<Box> list = new java.util.ArrayList<>();",
+                    "list.add(new Box());",
+                    "list.add(new Box());",
+                    "list.get(0).n = 5;",
+                    "Box b = list.get(0);",
+                    "b.n++;",
+                    "System.out.println(list.get(0).n + \" \" + list.get(1).n);")
+                .accept("6 0")
+                .hints("get returns the object itself, not a copy.",
+                       "b and list.get(0) are the same Box.")
+                .explain(
+                    "6 0. b refers to the Box in slot 0, so b.n++ changes "
+                    + "it. The Box in slot 1 was never touched.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why is ArrayList<Account> safer than a list of names "
+                    + "plus a list of counts?")
+                .choices("It uses less memory",
+                         "Each count travels inside its own account, so "
+                         + "nothing can pair it with the wrong name",
+                         "It sorts itself",
+                         "Lists of objects cannot be changed")
+                .accept("2", "b")
+                .hints("Remember Campaign 05's warning about parallel lists.",
+                       "What happens when one list is reordered?")
+                .explain(
+                    "b. Add, remove or reorder the list and each account "
+                    + "keeps its own count - there is no second list to fall "
+                    + "out of step.")
+                .xp(15))
+            .objective(
+                "Report every locked account.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<Account> accounts = new ArrayList<>();",
+                "        accounts.add(new Account(\"admin\", 4));",
+                "        accounts.add(new Account(\"jsmith\", 1));",
+                "        accounts.add(new Account(\"temp01\", 3));",
+                "        // the loop header: each Account a in accounts",
+                "            if (a.isLocked()) {",
+                "                System.out.println(\"LOCKED: \" + a.getUser());",
+                "            }",
+                "        }",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private String user;",
+                "    private int fails;",
+                "",
+                "    Account(String user, int fails) {",
+                "        this.user = user;",
+                "        this.fails = fails;",
+                "    }",
+                "",
+                "    String getUser() {",
+                "        return user;",
+                "    }",
+                "",
+                "    boolean isLocked() {",
+                "        return fails >= 3;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the enhanced for header that gives each Account in "
+                + "the list, in turn, as a.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the loop header.")
+                .accept("for (Account a : accounts) {",
+                        "for(Account a : accounts) {",
+                        "for (Account a: accounts) {",
+                        "for (Account a : accounts){")
+                .hints(
+                    "for (type name : list) {",
+                    "The type of each item is Account.",
+                    "for (Account a : accounts) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<Account> accounts = new ArrayList<>();",
+                    "        accounts.add(new Account(\"admin\", 4));",
+                    "        accounts.add(new Account(\"jsmith\", 1));",
+                    "        accounts.add(new Account(\"temp01\", 3));",
+                    "        for (Account a : accounts) {",
+                    "            if (a.isLocked()) {",
+                    "                System.out.println(\"LOCKED: \" + a.getUser());",
+                    "            }",
+                    "        }",
+                    "    }",
+                    "}",
+                    "",
+                    "class Account {",
+                    "    private String user;",
+                    "    private int fails;",
+                    "",
+                    "    Account(String user, int fails) {",
+                    "        this.user = user;",
+                    "        this.fails = fails;",
+                    "    }",
+                    "",
+                    "    String getUser() {",
+                    "        return user;",
+                    "    }",
+                    "",
+                    "    boolean isLocked() {",
+                    "        return fails >= 3;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "a is each Account in turn - a whole object - so the "
+                    + "loop can ask it isLocked() and getUser(). admin (4) "
+                    + "and temp01 (3) are locked; jsmith is not.\n"
+                    + "\n"
+                    + "The lockout rule is the account's own method, so this "
+                    + "report and every other part of the program agree on "
+                    + "what 'locked' means.")
+                .explain(
+                    "for (Account a : accounts) { - whole objects, in turn.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Expecting get(i) to return a copy",
+                    "It returns the object in the list."},
+                new String[]{"contains without equals",
+                    "Only finds the very same object. Write equals."},
+                new String[]{"Parallel lists out of habit",
+                    "One list of objects instead."})
+            .cyber(
+                "Collections of objects are the working memory of every "
+                + "security tool: the sessions a server trusts, the alerts "
+                + "waiting for triage, the hosts under watch. Getting the "
+                + "reference behaviour right matters - code that 'reads' "
+                + "an object from the list and changes it has changed the "
+                + "real, stored record.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Host {",
+                    "    String name;",
+                    "    boolean up;",
+                    "",
+                    "    Host(String name, boolean up) {",
+                    "        this.name = name;",
+                    "        this.up = up;",
+                    "    }",
+                    "}",
+                    "",
+                    "java.util.ArrayList<Host> hs = new java.util.ArrayList<>();",
+                    "hs.add(new Host(\"a\", true));",
+                    "hs.add(new Host(\"b\", false));",
+                    "hs.add(new Host(\"c\", false));",
+                    "int down = 0;",
+                    "for (Host h : hs) {",
+                    "    if (!h.up) {",
+                    "        down++;",
+                    "    }",
+                    "}",
+                    "System.out.println(down + \" of \" + hs.size());")
+                .accept("2 of 3")
+                .hints("Count the hosts that are not up.",
+                       "b and c.")
+                .explain(
+                    "2 of 3. The loop reads each Host's up field directly "
+                    + "from the objects in the list.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What must a class have for list.remove(someObject) to "
+                    + "remove an EQUAL object, not just the same one?")
+                .choices("A toString method",
+                         "An equals method",
+                         "A static counter",
+                         "A no-argument constructor")
+                .accept("2", "b")
+                .hints("How do list methods compare items?",
+                       "Mission 18.")
+                .explain(
+                    "b. remove(Object), contains and indexOf all compare "
+                    + "with equals.")
+                .xp(10))
+            .recap(
+                "    ArrayList<Account> list = new ArrayList<>();\n"
+                + "    list.add(new Account(\"admin\"));\n"
+                + "    for (Account a : list) { ... a.method() ... }\n"
+                + "\n"
+                + "Items are references: changing list.get(i) changes the "
+                + "stored object. Searching needs equals or a find method.")
+            .next("Next: passing objects to methods."));
     }
 }
