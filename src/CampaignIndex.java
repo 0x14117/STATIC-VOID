@@ -50,6 +50,7 @@ public class CampaignIndex {
         Campaign02.build(byNumber(2));
         Campaign03.build(byNumber(3));
         Campaign04.build(byNumber(4));
+        Campaign05.build(byNumber(5));
 
         // Labs: whole programs, written by the learner, tested by the game.
         Campaign00Labs.build(byNumber(0));
