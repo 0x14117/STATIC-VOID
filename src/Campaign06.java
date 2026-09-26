@@ -6227,5 +6227,1474 @@ public class Campaign06 {
                 + "The game keeps extra classes non-public inside "
                 + "Main.java; real projects give each its own file.")
             .next("Next: encapsulation as a security control."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "Encapsulation as a Security Control", 5)
+            .brief(
+                "User had private fields, a careful grantRole method that "
+                + "logged every change, and a getRoles() getter for the "
+                + "admin screen. A code review found a two-line exploit: "
+                + "user.getRoles().add(\"admin\"). The getter handed out "
+                + "the real list, and anyone holding it could promote "
+                + "themselves - no check, no log. private is only the "
+                + "start.")
+            .willLearn("Encapsulation")
+            .whyUseful(
+                "Encapsulation is the difference between rules that exist "
+                + "and rules that hold. Knowing where references leak - "
+                + "getters, constructors, lists - is what makes private "
+                + "fields actually private.")
+            .concept("Encapsulation",
+                "ENCAPSULATION means an object's data can only change "
+                + "through its own methods. private fields are the first "
+                + "step. Two leaks can still undo it, both caused by "
+                + "references (mission 6):\n"
+                + "\n"
+                + "LEAK 1 - a getter returns a mutable field itself:\n"
+                + "\n"
+                + "    ArrayList<String> getRoles() { return roles; }\n"
+                + "    user.getRoles().add(\"admin\");    changes User!\n"
+                + "\n"
+                + "LEAK 2 - a constructor keeps the caller's object:\n"
+                + "\n"
+                + "    User(ArrayList<String> roles) {\n"
+                + "        this.roles = roles;     caller still holds it\n"
+                + "    }\n"
+                + "\n"
+                + "The fixes:\n"
+                + "\n"
+                + "    - return a COPY: new ArrayList<>(roles)\n"
+                + "    - store a copy in the constructor too\n"
+                + "    - better still, offer a question instead of the\n"
+                + "      data: hasRole(\"admin\")\n"
+                + "\n"
+                + "new ArrayList<>(other) makes a new list holding the same "
+                + "items - changes to the copy do not reach the original.\n"
+                + "\n"
+                + "Strings, Integers and immutable objects need no copying: "
+                + "nobody can change them anyway. Lists, arrays and mutable "
+                + "objects do.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        User u = new User(\"jsmith\");",
+                "        u.grantRole(\"analyst\");",
+                "        ArrayList<String> view = u.getRoles();",
+                "        view.add(\"admin\");",
+                "        System.out.println(\"Caller's copy: \" + view);",
+                "        System.out.println(\"Is admin: \" + u.hasRole(\"admin\"));",
+                "        System.out.println(u.audit());",
+                "    }",
+                "}",
+                "",
+                "class User {",
+                "    private String name;",
+                "    private ArrayList<String> roles = new ArrayList<>();",
+                "    private int changes = 0;",
+                "",
+                "    User(String name) {",
+                "        this.name = name;",
+                "    }",
+                "",
+                "    void grantRole(String role) {",
+                "        roles.add(role);",
+                "        changes++;",
+                "    }",
+                "",
+                "    boolean hasRole(String role) {",
+                "        return roles.contains(role);",
+                "    }",
+                "",
+                "    ArrayList<String> getRoles() {",
+                "        return new ArrayList<>(roles);",
+                "    }",
+                "",
+                "    String audit() {",
+                "        return name + \" \" + roles + \", changes: \" + changes;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Caller's copy: [analyst, admin]",
+                "Is admin: false",
+                "jsmith [analyst], changes: 1")
+            .lineByLine(
+                new String[]{"return new ArrayList<>(roles);",
+                    "The caller gets a copy; the real list never leaves."},
+                new String[]{"view.add(\"admin\");",
+                    "Only changes the copy - the attempted promotion goes "
+                    + "nowhere."},
+                new String[]{"changes: 1",
+                    "Every real change went through grantRole, so the "
+                    + "audit count is honest."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Box {",
+                    "    private java.util.ArrayList<String> items =",
+                    "            new java.util.ArrayList<>();",
+                    "",
+                    "    java.util.ArrayList<String> getItems() {",
+                    "        return items;",
+                    "    }",
+                    "}",
+                    "",
+                    "Box b = new Box();",
+                    "b.getItems().add(\"x\");",
+                    "System.out.println(b.getItems().size());")
+                .accept("1")
+                .hints("What does getItems return - a copy?",
+                       "It returns the field itself.")
+                .explain(
+                    "1. The getter handed out the real list, so outside "
+                    + "code added to it despite private. Returning new "
+                    + "ArrayList<>(items) would print 0.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A User stores a private String name. Does its getter "
+                    + "need to return a copy?")
+                .choices("Yes, always copy",
+                         "No - Strings are immutable, so nobody can change "
+                         + "it",
+                         "Yes, or the name can be changed through it",
+                         "Only if the name is long")
+                .accept("2", "b")
+                .hints("Can a String ever be changed?",
+                       "Mission 23.")
+                .explain(
+                    "b. An immutable object can be shared freely. Only "
+                    + "mutable things - lists, arrays, most objects - need "
+                    + "copying.")
+                .xp(15))
+            .objective(
+                "Close the leak in getRoles.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        User u = new User();",
+                "        u.getRoles().add(\"admin\");",
+                "        System.out.println(\"Roles: \" + u.getRoles());",
+                "    }",
+                "}",
+                "",
+                "class User {",
+                "    private ArrayList<String> roles = new ArrayList<>();",
+                "",
+                "    ArrayList<String> getRoles() {",
+                "        // return a copy of roles, not roles itself",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the return line of getRoles so that it hands out a "
+                + "new list holding the same items.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return new ArrayList<>(roles);",
+                        "return new ArrayList<String>(roles);")
+                .hints(
+                    "new ArrayList<>(...) can start from another list.",
+                    "Pass roles to it.",
+                    "return new ArrayList<>(roles);")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        User u = new User();",
+                    "        u.getRoles().add(\"admin\");",
+                    "        System.out.println(\"Roles: \" + u.getRoles());",
+                    "    }",
+                    "}",
+                    "",
+                    "class User {",
+                    "    private ArrayList<String> roles = new ArrayList<>();",
+                    "",
+                    "    ArrayList<String> getRoles() {",
+                    "        return new ArrayList<>(roles);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Each call hands out a fresh copy. main adds admin to "
+                    + "that copy, which is then thrown away; the second "
+                    + "getRoles() copies the untouched real list: Roles: "
+                    + "[].\n"
+                    + "\n"
+                    + "With return roles; the output would be Roles: [admin] "
+                    + "- privilege escalation in one line, past every check "
+                    + "the class had.")
+                .explain(
+                    "return new ArrayList<>(roles); - a copy leaves, not roles.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Returning a mutable field",
+                    "Callers can change it. Return a copy."},
+                new String[]{"Storing the caller's list in the constructor",
+                    "They still hold it. Store a copy."},
+                new String[]{"Copying immutable values",
+                    "Not needed: Strings and Integers cannot change."})
+            .cyber(
+                "Leaked references are a real vulnerability class - "
+                + "'exposing internal representation', flagged by static "
+                + "analysis tools such as SpotBugs. The fix is cheap: copy "
+                + "on the way in, copy on the way out, and prefer methods "
+                + "that answer questions (hasRole) to methods that hand "
+                + "over data (getRoles). Every rule the class enforces "
+                + "depends on nobody else holding its internals.")
+            .check(new Task(Task.CHOICE,
+                    "Which getter is safe for private ArrayList<String> "
+                    + "tokens?")
+                .choices("return tokens;",
+                         "return new ArrayList<>(tokens);",
+                         "tokens.clear(); return tokens;",
+                         "return null;")
+                .accept("2", "b")
+                .hints("The caller must not reach the real list.",
+                       "Hand out a copy.")
+                .explain(
+                    "b. A copy lets the caller read the tokens without being "
+                    + "able to add, remove or clear the real ones.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "User(ArrayList<String> roles) { this.roles = roles; } - "
+                    + "what is the risk?")
+                .choices("None",
+                         "The caller keeps a reference and can change the "
+                         + "User's roles later",
+                         "It does not compile",
+                         "The roles are copied twice")
+                .accept("2", "b")
+                .hints("Who else refers to that list?",
+                       "The caller made it and still holds it.")
+                .explain(
+                    "b. The caller's variable and the field are the same "
+                    + "list. Store new ArrayList<>(roles) instead.")
+                .xp(10))
+            .recap(
+                "    private fields               step one\n"
+                + "    copy in: this.x = new ArrayList<>(x)\n"
+                + "    copy out: return new ArrayList<>(x)\n"
+                + "    better: answer questions - hasRole(r)\n"
+                + "\n"
+                + "Immutable values need no copies.")
+            .next("Next: an Alert with a lifecycle."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "An Alert with a Lifecycle", 5)
+            .brief(
+                "SOC alerts move through a lifecycle: NEW, then "
+                + "ACKNOWLEDGED by an analyst, then CLOSED with a reason. "
+                + "Metrics broke when some alerts were closed without "
+                + "anyone acknowledging them, and one closed alert was "
+                + "quietly reopened. The lifecycle should be enforced by "
+                + "the Alert itself.")
+            .willLearn("State in an object")
+            .whyUseful(
+                "Many objects move through states: tickets, sessions, "
+                + "deployments, incidents. Keeping the state private and "
+                + "allowing only the legal moves makes illegal histories "
+                + "impossible.")
+            .concept("State in an object",
+                "An object's STATE is the current values of its fields. "
+                + "When a field describes a stage - NEW, ACKNOWLEDGED, "
+                + "CLOSED - the class should allow only the legal moves:\n"
+                + "\n"
+                + "    NEW  --acknowledge-->  ACKNOWLEDGED  --close-->  CLOSED\n"
+                + "\n"
+                + "Each move is a method that checks the current state "
+                + "first, and refuses with false if the move is not "
+                + "allowed from there:\n"
+                + "\n"
+                + "    boolean close(String reason) {\n"
+                + "        if (!status.equals(\"ACKNOWLEDGED\")) {\n"
+                + "            return false;\n"
+                + "        }\n"
+                + "        status = \"CLOSED\";\n"
+                + "        this.reason = reason;\n"
+                + "        return true;\n"
+                + "    }\n"
+                + "\n"
+                + "There is no setStatus: callers cannot jump to any state "
+                + "they like. And there is no reopen method, so CLOSED is "
+                + "final.\n"
+                + "\n"
+                + "Each move also records WHO and WHY - owner, reason - so "
+                + "the alert's history explains itself. (Campaign 10's enum "
+                + "type is a tidier way to name states than Strings.)")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert(\"Brute force on vpn1\", 8);",
+                "        System.out.println(a.close(\"false positive\") + \" \" + a);",
+                "        System.out.println(a.acknowledge(\"ana\") + \" \" + a);",
+                "        System.out.println(a.acknowledge(\"ben\") + \" \" + a);",
+                "        System.out.println(a.close(\"blocked source\") + \" \" + a);",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    private static int nextId = 1;",
+                "    private final int id;",
+                "    private final String rule;",
+                "    private final int severity;",
+                "    private String status = \"NEW\";",
+                "    private String owner = \"-\";",
+                "",
+                "    Alert(String rule, int severity) {",
+                "        this.id = nextId++;",
+                "        this.rule = rule;",
+                "        this.severity = severity;",
+                "    }",
+                "",
+                "    boolean acknowledge(String analyst) {",
+                "        if (!status.equals(\"NEW\")) {",
+                "            return false;",
+                "        }",
+                "        status = \"ACKNOWLEDGED\";",
+                "        owner = analyst;",
+                "        return true;",
+                "    }",
+                "",
+                "    boolean close(String reason) {",
+                "        if (!status.equals(\"ACKNOWLEDGED\")) {",
+                "            return false;",
+                "        }",
+                "        status = \"CLOSED: \" + reason;",
+                "        return true;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return \"#\" + id + \" \" + status + \" (\" + owner + \")\";",
+                "    }",
+                "}")
+            .exampleOutput(
+                "false #1 NEW (-)",
+                "true #1 ACKNOWLEDGED (ana)",
+                "false #1 ACKNOWLEDGED (ana)",
+                "true #1 CLOSED: blocked source (ana)")
+            .lineByLine(
+                new String[]{"close before acknowledge",
+                    "Refused: an alert cannot skip a stage."},
+                new String[]{"acknowledge(\"ben\")",
+                    "Refused: already owned. Ana's ownership cannot be "
+                    + "silently taken over."},
+                new String[]{"this.id = nextId++;",
+                    "nextId++ hands over the current value, THEN adds one - "
+                    + "the id and the counter move in one step."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Door {",
+                    "    private String state = \"CLOSED\";",
+                    "",
+                    "    boolean open() {",
+                    "        if (state.equals(\"LOCKED\")) {",
+                    "            return false;",
+                    "        }",
+                    "        state = \"OPEN\";",
+                    "        return true;",
+                    "    }",
+                    "",
+                    "    void lock() {",
+                    "        state = \"LOCKED\";",
+                    "    }",
+                    "}",
+                    "",
+                    "Door d = new Door();",
+                    "boolean a = d.open();",
+                    "d.lock();",
+                    "boolean b = d.open();",
+                    "System.out.println(a + \" \" + b);")
+                .accept("true false")
+                .hints("The first open happens before the lock.",
+                       "A locked door refuses.")
+                .explain(
+                    "true false. open checks the state first; once locked, "
+                    + "the move is refused.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why does Alert have no setStatus(String) method?")
+                .choices("Setters are not allowed with private fields",
+                         "So callers cannot jump to any state, skipping the "
+                         + "checks",
+                         "Strings cannot be set",
+                         "It would be slower")
+                .accept("2", "b")
+                .hints("What would setStatus(\"NEW\") on a closed alert do?",
+                       "Only the legal moves should exist.")
+                .explain(
+                    "b. A general setter would let anyone reopen, skip or "
+                    + "invent states. Specific moves - acknowledge, close - "
+                    + "each check that they are allowed.")
+                .xp(15))
+            .objective(
+                "Stop alerts being closed before they are acknowledged.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert();",
+                "        System.out.println(a.close() + \" \" + a.getStatus());",
+                "        a.acknowledge();",
+                "        System.out.println(a.close() + \" \" + a.getStatus());",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    private String status = \"NEW\";",
+                "",
+                "    String getStatus() {",
+                "        return status;",
+                "    }",
+                "",
+                "    void acknowledge() {",
+                "        if (status.equals(\"NEW\")) {",
+                "            status = \"ACKNOWLEDGED\";",
+                "        }",
+                "    }",
+                "",
+                "    boolean close() {",
+                "        // the if: status is not ACKNOWLEDGED",
+                "            return false;",
+                "        }",
+                "        status = \"CLOSED\";",
+                "        return true;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that refuses to close unless the status is "
+                + "exactly ACKNOWLEDGED.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (!status.equals(\"ACKNOWLEDGED\")) {",
+                        "if(!status.equals(\"ACKNOWLEDGED\")) {",
+                        "if (!status.equals(\"ACKNOWLEDGED\")){",
+                        "if (!\"ACKNOWLEDGED\".equals(status)) {")
+                .hints(
+                    "Compare Strings with equals.",
+                    "Refuse when it is NOT acknowledged: !",
+                    "if (!status.equals(\"ACKNOWLEDGED\")) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Alert a = new Alert();",
+                    "        System.out.println(a.close() + \" \" + a.getStatus());",
+                    "        a.acknowledge();",
+                    "        System.out.println(a.close() + \" \" + a.getStatus());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Alert {",
+                    "    private String status = \"NEW\";",
+                    "",
+                    "    String getStatus() {",
+                    "        return status;",
+                    "    }",
+                    "",
+                    "    void acknowledge() {",
+                    "        if (status.equals(\"NEW\")) {",
+                    "            status = \"ACKNOWLEDGED\";",
+                    "        }",
+                    "    }",
+                    "",
+                    "    boolean close() {",
+                    "        if (!status.equals(\"ACKNOWLEDGED\")) {",
+                    "            return false;",
+                    "        }",
+                    "        status = \"CLOSED\";",
+                    "        return true;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The first close finds NEW and refuses: false NEW. "
+                    + "After acknowledge, the same call is allowed: true "
+                    + "CLOSED.\n"
+                    + "\n"
+                    + "Checking for the one state that IS allowed, rather "
+                    + "than listing the ones that are not, is deny by "
+                    + "default again: a state added later is refused until "
+                    + "someone decides otherwise.")
+                .explain(
+                    "if (!status.equals(\"ACKNOWLEDGED\")) { - allow one state.")
+                .xp(25))
+            .mistakes(
+                new String[]{"A general setStatus",
+                    "Anyone can jump anywhere. Offer the legal moves only."},
+                new String[]{"Listing forbidden states",
+                    "Allow the one right state; refuse all others."},
+                new String[]{"Changing state without recording who",
+                    "Keep the owner and reason with the move."})
+            .cyber(
+                "Workflow bypasses are a classic logic flaw: an order "
+                + "shipped before payment, a change deployed before "
+                + "approval, an incident closed without investigation. "
+                + "When the object refuses illegal transitions itself, no "
+                + "screen, script or API call can skip a step - and the "
+                + "audit trail shows who made each legal one.")
+            .check(new Task(Task.CHOICE,
+                    "A CLOSED alert should never reopen. How does the class "
+                    + "make sure?")
+                .choices("A comment saying so",
+                         "It has no method that moves out of CLOSED",
+                         "It checks the time",
+                         "It makes status public")
+                .accept("2", "b")
+                .hints("Enforce by omission (mission 24).",
+                       "No path out.")
+                .explain(
+                    "b. With no method that leaves CLOSED, and a private "
+                    + "status, nothing can reopen it.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int next = 5;",
+                    "int a = next++;",
+                    "int b = next++;",
+                    "System.out.println(a + \" \" + b + \" \" + next);")
+                .accept("5 6 7")
+                .hints("next++ gives the old value, then adds one.",
+                       "Twice.")
+                .explain(
+                    "5 6 7. Each next++ hands out the current number and "
+                    + "moves on - how the Alert hands out IDs in one step.")
+                .xp(10))
+            .recap(
+                "    private String status = \"NEW\";\n"
+                + "    boolean move() {\n"
+                + "        if (!status.equals(\"ALLOWED FROM\")) return false;\n"
+                + "        status = \"NEXT\"; record who; return true;\n"
+                + "    }\n"
+                + "\n"
+                + "No general setter; no way back from a final state.")
+            .next("Next: turning a log line into an object."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "From Log Line to Object", 6)
+            .brief(
+                "Campaign 05 split log lines into String arrays and checked "
+                + "them in every program that read them. With a class, the "
+                + "checking can live in ONE place: a LogEvent that can only "
+                + "be created from a line that passed validation. Every "
+                + "LogEvent anywhere in the program is then known to be "
+                + "well-formed.")
+            .willLearn("Parsing into objects")
+            .whyUseful(
+                "Turning raw text into validated objects at the edge of a "
+                + "program is how real tools are built. Everything after "
+                + "the edge works with clean, typed data and never repeats "
+                + "the checks.")
+            .concept("Parsing into objects",
+                "Make the constructor PRIVATE, and give the class a static "
+                + "method that parses and validates - a STATIC FACTORY:\n"
+                + "\n"
+                + "    class LogEvent {\n"
+                + "        private final int hour;\n"
+                + "        private final String user;\n"
+                + "        private final boolean failed;\n"
+                + "\n"
+                + "        private LogEvent(int hour, String user,\n"
+                + "                         boolean failed) { ... }\n"
+                + "\n"
+                + "        static LogEvent parse(String line) {\n"
+                + "            ...split and check...\n"
+                + "            if (anything is wrong) {\n"
+                + "                return null;\n"
+                + "            }\n"
+                + "            return new LogEvent(hour, user, failed);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "Outside code cannot call new LogEvent(...) - the "
+                + "constructor is private - so the ONLY way to get one is "
+                + "parse, which checks first. A LogEvent that exists is a "
+                + "valid LogEvent.\n"
+                + "\n"
+                + "parse returns null for a bad line, so callers check "
+                + "(mission 7) and count the rejects. The fields are final: "
+                + "an event, once parsed, is a fact that never changes.\n"
+                + "\n"
+                + "The fields are typed, too - hour is an int, failed a "
+                + "boolean - so later code does arithmetic and logic, not "
+                + "string comparisons.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] lines = {\"09 jsmith FAIL\", \"garbage\",",
+                "                \"03 admin FAIL\", \"25 root OK\", \"14 mpatel OK\"};",
+                "        int night = 0;",
+                "        int bad = 0;",
+                "        for (String line : lines) {",
+                "            LogEvent e = LogEvent.parse(line);",
+                "            if (e == null) {",
+                "                bad++;",
+                "            } else if (e.isFailure() && e.getHour() < 6) {",
+                "                night++;",
+                "                System.out.println(\"Night failure: \" + e);",
+                "            }",
+                "        }",
+                "        System.out.println(\"Night failures: \" + night",
+                "                + \", rejected: \" + bad);",
+                "    }",
+                "}",
+                "",
+                "class LogEvent {",
+                "    private final int hour;",
+                "    private final String user;",
+                "    private final boolean failed;",
+                "",
+                "    private LogEvent(int hour, String user, boolean failed) {",
+                "        this.hour = hour;",
+                "        this.user = user;",
+                "        this.failed = failed;",
+                "    }",
+                "",
+                "    static LogEvent parse(String line) {",
+                "        String[] p = line.trim().split(\" \");",
+                "        if (p.length != 3 || p[0].length() != 2",
+                "                || !Character.isDigit(p[0].charAt(0))",
+                "                || !Character.isDigit(p[0].charAt(1))) {",
+                "            return null;",
+                "        }",
+                "        int hour = Integer.parseInt(p[0]);",
+                "        boolean ok = p[2].equals(\"OK\");",
+                "        if (hour > 23 || !(ok || p[2].equals(\"FAIL\"))) {",
+                "            return null;",
+                "        }",
+                "        return new LogEvent(hour, p[1].toLowerCase(), !ok);",
+                "    }",
+                "",
+                "    int getHour() {",
+                "        return hour;",
+                "    }",
+                "",
+                "    boolean isFailure() {",
+                "        return failed;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return String.format(\"%02d\", hour) + \" \" + user;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Night failure: 03 admin",
+                "Night failures: 1, rejected: 2")
+            .lineByLine(
+                new String[]{"private LogEvent(...)",
+                    "Nobody outside can make one directly."},
+                new String[]{"LogEvent.parse(line)",
+                    "The only way in: checks, then builds - or returns null."},
+                new String[]{"e.isFailure() && e.getHour() < 6",
+                    "Typed fields: a boolean and an int, not Strings to "
+                    + "compare."},
+                new String[]{"rejected: 2",
+                    "garbage (wrong shape) and 25 root OK (no hour 25)."})
+            .predict(new Task(Task.CHOICE,
+                    "LogEvent's constructor is private. Which line compiles "
+                    + "in Main?")
+                .code(
+                    "LogEvent a = new LogEvent(9, \"ana\", true);",
+                    "LogEvent b = LogEvent.parse(\"09 ana FAIL\");",
+                    "LogEvent c = LogEvent();",
+                    "LogEvent d = new LogEvent();")
+                .choices("Line 1", "Line 2", "Line 3", "Line 4")
+                .accept("2", "b")
+                .hints("Which one does not call the constructor directly?",
+                       "The static factory is the way in.")
+                .explain(
+                    "b. parse is a static method of LogEvent, available to "
+                    + "anyone, and it calls the private constructor from "
+                    + "inside the class. The others cannot reach it.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "What is the main benefit of making parse the only way "
+                    + "to create a LogEvent?")
+                .choices("It is faster than new",
+                         "Every LogEvent that exists has passed validation",
+                         "It saves memory",
+                         "It removes the need for fields")
+                .accept("2", "b")
+                .hints("What can outside code never make?",
+                       "An unchecked event.")
+                .explain(
+                    "b. With the constructor private, no invalid LogEvent "
+                    + "can exist, so no later code needs to re-check one.")
+                .xp(15))
+            .objective(
+                "Write the header of the parsing factory.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Reading r = Reading.parse(\"temp=31\");",
+                "        Reading bad = Reading.parse(\"temp:31\");",
+                "        System.out.println(r.getValue() + \" \" + (bad == null));",
+                "    }",
+                "}",
+                "",
+                "class Reading {",
+                "    private final int value;",
+                "",
+                "    private Reading(int value) {",
+                "        this.value = value;",
+                "    }",
+                "",
+                "    // the header: a static method parse, taking a String line,",
+                "    // returning a Reading",
+                "        String[] p = line.split(\"=\");",
+                "        if (p.length != 2 || !p[0].equals(\"temp\")) {",
+                "            return null;",
+                "        }",
+                "        return new Reading(Integer.parseInt(p[1]));",
+                "    }",
+                "",
+                "    int getValue() {",
+                "        return value;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the header of parse: a static method that takes a "
+                + "String called line and returns a Reading.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the method header.")
+                .accept("static Reading parse(String line) {",
+                        "static Reading parse(String line){",
+                        "public static Reading parse(String line) {")
+                .hints(
+                    "static: it is called on the class, before any "
+                    + "Reading exists.",
+                    "The return type is the class itself.",
+                    "static Reading parse(String line) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Reading r = Reading.parse(\"temp=31\");",
+                    "        Reading bad = Reading.parse(\"temp:31\");",
+                    "        System.out.println(r.getValue() + \" \" + (bad == null));",
+                    "    }",
+                    "}",
+                    "",
+                    "class Reading {",
+                    "    private final int value;",
+                    "",
+                    "    private Reading(int value) {",
+                    "        this.value = value;",
+                    "    }",
+                    "",
+                    "    static Reading parse(String line) {",
+                    "        String[] p = line.split(\"=\");",
+                    "        if (p.length != 2 || !p[0].equals(\"temp\")) {",
+                    "            return null;",
+                    "        }",
+                    "        return new Reading(Integer.parseInt(p[1]));",
+                    "    }",
+                    "",
+                    "    int getValue() {",
+                    "        return value;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "parse must be static: there is no Reading yet to call "
+                    + "it on - making one is its job. temp=31 passes and "
+                    + "becomes a Reading of 31; temp:31 has no = and is "
+                    + "refused with null: 31 true.\n"
+                    + "\n"
+                    + "Because the constructor is private, main could not "
+                    + "have skipped the check with new Reading(31) even if "
+                    + "it wanted to.")
+                .explain(
+                    "static Reading parse(String line) { - the only way in.")
+                .xp(25))
+            .mistakes(
+                new String[]{"A public constructor beside parse",
+                    "Callers can skip the checks. Make it private."},
+                new String[]{"Using parse's result unchecked",
+                    "It returns null for bad lines."},
+                new String[]{"Keeping fields as Strings",
+                    "Parse once into int, boolean - then use them."})
+            .cyber(
+                "'Parse, don't validate' is a well-known secure-design "
+                + "principle: turn untrusted input into a trusted type at "
+                + "the boundary, once, and let the type prove it was "
+                + "checked. Code deep inside the program that receives a "
+                + "LogEvent never has to wonder whether the hour is 99 or "
+                + "the user is empty - such a LogEvent cannot exist.")
+            .check(new Task(Task.CHOICE,
+                    "Why must parse be static?")
+                .choices("Static methods are faster",
+                         "It is called before any object exists - making "
+                         + "one is its job",
+                         "Private constructors require it",
+                         "It returns null")
+                .accept("2", "b")
+                .hints("What would you call an instance method on?",
+                       "There is no LogEvent yet.")
+                .explain(
+                    "b. An instance method needs an object. parse CREATES "
+                    + "the object, so it belongs to the class.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Port {",
+                    "    private final int n;",
+                    "",
+                    "    private Port(int n) {",
+                    "        this.n = n;",
+                    "    }",
+                    "",
+                    "    static Port of(int n) {",
+                    "        return (n >= 1 && n <= 65535) ? new Port(n) : null;",
+                    "    }",
+                    "}",
+                    "",
+                    "boolean a = Port.of(443) != null;",
+                    "boolean b = Port.of(0) != null;",
+                    "System.out.println(a + \" \" + b);")
+                .accept("true false")
+                .hints("443 is in range.",
+                       "0 is not.")
+                .explain(
+                    "true false. The factory refuses 0 by returning null, so "
+                    + "no Port object for 0 can ever exist.")
+                .xp(10))
+            .recap(
+                "    private X(...) { ... }          no direct new\n"
+                + "    static X parse(String s) {      check, then build\n"
+                + "        if (bad) return null;\n"
+                + "        return new X(...);\n"
+                + "    }\n"
+                + "\n"
+                + "Every X that exists has been checked.")
+            .next("Next: a class that manages a set of accounts."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "An Account Store", 6)
+            .brief(
+                "The login service needs one place that knows every "
+                + "account: register new ones (no duplicates), record "
+                + "failures by username, answer 'is this user locked?', "
+                + "and list the locked ones for the morning report. Main "
+                + "should not juggle lists and loops for any of that. An "
+                + "AccountStore class owns the accounts and the rules.")
+            .willLearn("A class that manages objects")
+            .whyUseful(
+                "Programs are built from layers: objects (Account), a class "
+                + "that manages many of them (AccountStore), and code that "
+                + "uses the manager (main). Each layer is simple, and the "
+                + "rules live exactly once.")
+            .concept("A class that manages objects",
+                "A MANAGER class keeps a private collection of objects and "
+                + "offers operations on it - never the collection itself:\n"
+                + "\n"
+                + "    class AccountStore {\n"
+                + "        private ArrayList<Account> accounts =\n"
+                + "                new ArrayList<>();\n"
+                + "\n"
+                + "        boolean register(String user)\n"
+                + "        void recordFailure(String user)\n"
+                + "        boolean canLogIn(String user)\n"
+                + "        ArrayList<String> lockedUsers()\n"
+                + "\n"
+                + "        private Account find(String user)\n"
+                + "    }\n"
+                + "\n"
+                + "Three ideas meet here:\n"
+                + "\n"
+                + "    a PRIVATE HELPER   find is used by the other\n"
+                + "                       methods, and nobody else\n"
+                + "    DELEGATION         the store finds the account and\n"
+                + "                       calls ITS method; Account still\n"
+                + "                       owns the lockout rule\n"
+                + "    SAFE ANSWERS       unknown users are 'not locked'\n"
+                + "                       only if that is safe - here an\n"
+                + "                       unknown user cannot log in at\n"
+                + "                       all, so the store says so\n"
+                + "\n"
+                + "Usernames are normalised ONCE, inside the store, so "
+                + "every caller gets the same answer for JSmith and jsmith.\n"
+                + "\n"
+                + "lockedUsers returns a NEW list of names (mission 26): "
+                + "the caller can read it, but not reach the accounts.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        AccountStore store = new AccountStore();",
+                "        System.out.println(store.register(\"admin\"));",
+                "        System.out.println(store.register(\"ADMIN\"));",
+                "        store.register(\"jsmith\");",
+                "        String[] fails = {\"admin\", \"Admin\", \"jsmith\",",
+                "                \"admin\", \"ghost\"};",
+                "        for (String u : fails) {",
+                "            store.recordFailure(u);",
+                "        }",
+                "        System.out.println(\"Locked: \" + store.lockedUsers());",
+                "        boolean ghost = store.canLogIn(\"ghost\");",
+                "        System.out.println(\"ghost can log in: \" + ghost);",
+                "    }",
+                "}",
+                "",
+                "class AccountStore {",
+                "    private ArrayList<Account> accounts = new ArrayList<>();",
+                "",
+                "    boolean register(String user) {",
+                "        String u = user.trim().toLowerCase();",
+                "        if (find(u) != null) {",
+                "            return false;",
+                "        }",
+                "        accounts.add(new Account(u));",
+                "        return true;",
+                "    }",
+                "",
+                "    void recordFailure(String user) {",
+                "        Account a = find(user.trim().toLowerCase());",
+                "        if (a != null) {",
+                "            a.recordFailure();",
+                "        }",
+                "    }",
+                "",
+                "    boolean canLogIn(String user) {",
+                "        Account a = find(user.trim().toLowerCase());",
+                "        return a != null && !a.isLocked();",
+                "    }",
+                "",
+                "    ArrayList<String> lockedUsers() {",
+                "        ArrayList<String> out = new ArrayList<>();",
+                "        for (Account a : accounts) {",
+                "            if (a.isLocked()) {",
+                "                out.add(a.getUser());",
+                "            }",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    private Account find(String user) {",
+                "        for (Account a : accounts) {",
+                "            if (a.getUser().equals(user)) {",
+                "                return a;",
+                "            }",
+                "        }",
+                "        return null;",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private final String user;",
+                "    private int fails;",
+                "",
+                "    Account(String user) {",
+                "        this.user = user;",
+                "    }",
+                "",
+                "    String getUser() {",
+                "        return user;",
+                "    }",
+                "",
+                "    void recordFailure() {",
+                "        fails++;",
+                "    }",
+                "",
+                "    boolean isLocked() {",
+                "        return fails >= 3;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "true",
+                "false",
+                "Locked: [admin]",
+                "ghost can log in: false")
+            .lineByLine(
+                new String[]{"register(\"ADMIN\") -> false",
+                    "Normalised first, so it is a duplicate of admin."},
+                new String[]{"a.recordFailure();",
+                    "Delegation: the store finds the account; the account "
+                    + "applies its own rule."},
+                new String[]{"private Account find(...)",
+                    "A helper for the store's own methods - not part of its "
+                    + "public face."},
+                new String[]{"a != null && !a.isLocked()",
+                    "An unknown user cannot log in: deny by default."})
+            .predict(new Task(Task.CHOICE,
+                    "Why is find private in AccountStore?")
+                .choices("Private methods run faster",
+                         "It would hand out real Account objects, letting "
+                         + "callers bypass the store's rules",
+                         "Java requires helpers to be private",
+                         "It returns null")
+                .accept("2", "b")
+                .hints("What could a caller do with the Account itself?",
+                       "Mission 26.")
+                .explain(
+                    "b. A public find would give callers the live Account, "
+                    + "so they could work on it directly. The store offers "
+                    + "operations instead.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "canLogIn(\"ghost\") is called for a user that was never "
+                    + "registered. What is the safe answer?")
+                .choices("true - they are not locked",
+                         "false - an unknown user cannot log in",
+                         "Crash with NullPointerException",
+                         "Register them automatically")
+                .accept("2", "b")
+                .hints("Deny by default.",
+                       "Unknown is not the same as allowed.")
+                .explain(
+                    "b. 'Not locked' is not 'allowed'. An account that does "
+                    + "not exist has no right to log in.")
+                .xp(20))
+            .objective(
+                "Write the store's registration check.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        UserStore s = new UserStore();",
+                "        boolean first = s.register(\"ana\");",
+                "        boolean again = s.register(\" ANA \");",
+                "        System.out.println(first + \" \" + again);",
+                "        System.out.println(s.count());",
+                "    }",
+                "}",
+                "",
+                "class UserStore {",
+                "    private ArrayList<String> users = new ArrayList<>();",
+                "",
+                "    boolean register(String user) {",
+                "        String u = user.trim().toLowerCase();",
+                "        // the if: u is already in users",
+                "            return false;",
+                "        }",
+                "        users.add(u);",
+                "        return true;",
+                "    }",
+                "",
+                "    int count() {",
+                "        return users.size();",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that refuses a username the store already "
+                + "holds.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (users.contains(u)) {",
+                        "if(users.contains(u)) {",
+                        "if (users.contains(u)){",
+                        "if (users.indexOf(u) != -1) {")
+                .hints(
+                    "Search the list for the normalised name.",
+                    "contains answers exactly that.",
+                    "if (users.contains(u)) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        UserStore s = new UserStore();",
+                    "        boolean first = s.register(\"ana\");",
+                "        boolean again = s.register(\" ANA \");",
+                "        System.out.println(first + \" \" + again);",
+                    "        System.out.println(s.count());",
+                    "    }",
+                    "}",
+                    "",
+                    "class UserStore {",
+                    "    private ArrayList<String> users = new ArrayList<>();",
+                    "",
+                    "    boolean register(String user) {",
+                    "        String u = user.trim().toLowerCase();",
+                    "        if (users.contains(u)) {",
+                    "            return false;",
+                    "        }",
+                    "        users.add(u);",
+                    "        return true;",
+                    "    }",
+                    "",
+                    "    int count() {",
+                    "        return users.size();",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "\" ANA \" is normalised to ana, found in the list, and "
+                    + "refused: true false, then a count of 1.\n"
+                    + "\n"
+                    + "Because normalising and the duplicate check live "
+                    + "inside register, no caller can create a second "
+                    + "account for the same person by changing the case or "
+                    + "adding spaces - a classic way to confuse audits.")
+                .explain(
+                    "if (users.contains(u)) { - normalised, then checked.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Handing out the managed objects",
+                    "Offer operations; keep find private."},
+                new String[]{"Normalising in callers",
+                    "Do it once, inside the store."},
+                new String[]{"'Unknown' treated as 'fine'",
+                    "An unknown user has no rights. Deny."})
+            .cyber(
+                "Identity stores are among the most attacked parts of any "
+                + "system: duplicate accounts by case tricks, lockouts "
+                + "bypassed through a side door, unknown users treated as "
+                + "allowed. A store class that normalises once, refuses "
+                + "duplicates, delegates the lockout rule to Account and "
+                + "denies unknown users closes each of those in one place.")
+            .check(new Task(Task.CHOICE,
+                    "In the example, which class decides when an account is "
+                    + "locked?")
+                .choices("Main", "AccountStore", "Account", "ArrayList")
+                .accept("3", "c")
+                .hints("Where is isLocked written?",
+                       "The store only asks.")
+                .explain(
+                    "c. Account owns the rule; the store finds accounts and "
+                    + "asks them. Each rule lives in exactly one class.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Store {",
+                    "    private java.util.ArrayList<String> names =",
+                    "            new java.util.ArrayList<>();",
+                    "",
+                    "    java.util.ArrayList<String> snapshot() {",
+                    "        return new java.util.ArrayList<>(names);",
+                    "    }",
+                    "",
+                    "    void add(String n) {",
+                    "        names.add(n);",
+                    "    }",
+                    "}",
+                    "",
+                    "Store s = new Store();",
+                    "s.add(\"a\");",
+                    "s.snapshot().clear();",
+                    "System.out.println(s.snapshot().size());")
+                .accept("1")
+                .hints("snapshot returns a copy.",
+                       "Clearing the copy leaves the store alone.")
+                .explain(
+                    "1. The caller cleared a copy. The store's own list "
+                    + "still holds a.")
+                .xp(15))
+            .recap(
+                "    manager class: private collection + operations\n"
+                + "    private helpers (find)\n"
+                + "    delegation: the object applies its own rule\n"
+                + "    normalise once; deny unknowns; hand out copies\n"
+                + "\n"
+                + "main uses the store; the store uses the accounts.")
+            .next("Next: the campaign checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "OBJECTS COMPLETE", 6)
+            .brief(
+                "Thirty missions ago, a record was a handful of parallel "
+                + "arrays held together by an index. Now it is a type of "
+                + "your own: private fields, a constructor that demands "
+                + "what it needs, methods that enforce the rules, and a "
+                + "manager class that keeps many of them safe.\n\n"
+                + "This checkpoint mixes the whole campaign. No new Java.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Object bugs come from ideas meeting: a shared reference "
+                + "where a copy was meant, a setter that shadows its field, "
+                + "a getter that leaks a list. This is the practice for "
+                + "exactly those.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "CLASSES AND OBJECTS\n"
+                + "    class = blueprint; new = one object (an instance)\n"
+                + "    fields: one copy per object; defaults 0/false/null\n"
+                + "    variables hold REFERENCES; b = a shares one object\n"
+                + "    null: no object - check before the dot\n"
+                + "\n"
+                + "BEHAVIOUR\n"
+                + "    instance methods run on an object; this = it\n"
+                + "    this.x = x  when a parameter shadows the field\n"
+                + "    static: one per class; no this inside\n"
+                + "\n"
+                + "CONSTRUCTORS\n"
+                + "    class's name, no return type; run by new\n"
+                + "    writing one removes the free no-arg constructor\n"
+                + "    overloads; this(...) first, to chain\n"
+                + "\n"
+                + "ENCAPSULATION\n"
+                + "    private fields; getters/setters only as needed\n"
+                + "    setters validate; invariants always hold\n"
+                + "    copy mutable things in and out\n"
+                + "    final fields + no setters = immutable\n"
+                + "\n"
+                + "OBJECT METHODS\n"
+                + "    public String toString()  - no secrets\n"
+                + "    public boolean equals(Object o) - instanceof, cast\n"
+                + "\n"
+                + "DESIGN\n"
+                + "    has-a composition; manager classes; delegation\n"
+                + "    private constructor + static parse = checked input\n"
+                + "    no method for what must never happen")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Watchlist w = new Watchlist(2);",
+                "        System.out.println(w.add(\"JSmith\") + \" \" + w.add(\"jsmith\"));",
+                "        System.out.println(w.add(\"temp01\") + \" \" + w.add(\"guest\"));",
+                "        w.names().clear();",
+                "        System.out.println(w);",
+                "    }",
+                "}",
+                "",
+                "class Watchlist {",
+                "    private final int max;",
+                "    private ArrayList<String> names = new ArrayList<>();",
+                "",
+                "    Watchlist(int max) {",
+                "        this.max = max;",
+                "    }",
+                "",
+                "    boolean add(String name) {",
+                "        String n = name.trim().toLowerCase();",
+                "        if (names.contains(n) || names.size() >= max) {",
+                "            return false;",
+                "        }",
+                "        names.add(n);",
+                "        return true;",
+                "    }",
+                "",
+                "    ArrayList<String> names() {",
+                "        return new ArrayList<>(names);",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return \"Watching \" + names;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "true false",
+                "true false",
+                "Watching [jsmith, temp01]")
+            .lineByLine(
+                new String[]{"private final int max;",
+                    "Missions 14 and 23: private, and fixed at creation."},
+                new String[]{"name.trim().toLowerCase()",
+                    "Normalised once, inside the class (mission 29)."},
+                new String[]{"w.names().clear();",
+                    "Clears a copy - mission 26 - so the watchlist is "
+                    + "untouched."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Acct {",
+                    "    int fails;",
+                    "}",
+                    "",
+                    "Acct a = new Acct();",
+                    "Acct b = a;",
+                    "Acct c = new Acct();",
+                    "b.fails = 2;",
+                    "c.fails = b.fails + 1;",
+                    "System.out.println(a.fails + \" \" + c.fails + \" \" + (a == b));")
+                .accept("2 3 true")
+                .hints("a and b are one object.",
+                       "c is separate.")
+                .explain(
+                    "2 3 true. Missions 2 and 6: b = a shares one object; c "
+                    + "is its own.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Rule {",
+                    "    private int port = 22;",
+                    "",
+                    "    void setPort(int port) {",
+                    "        port = port;",
+                    "    }",
+                    "",
+                    "    int getPort() {",
+                    "        return port;",
+                    "    }",
+                    "}",
+                    "",
+                    "Rule r = new Rule();",
+                    "r.setPort(443);",
+                    "System.out.println(r.getPort());")
+                .accept("22")
+                .hints("Look closely at the setter.",
+                       "Mission 9.")
+                .explain(
+                    "22. port = port assigns the parameter to itself; the "
+                    + "field never changes. It needed this.port = port.")
+                .xp(20))
+            .objective(
+                "Finish a validated, encapsulated Host.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host h = new Host(\"db1\", 5432);",
+                "        System.out.println(h.setPort(70000) + \" \" + h);",
+                "        System.out.println(h.setPort(6432) + \" \" + h);",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private final String name;",
+                "    private int port;",
+                "",
+                "    Host(String name, int port) {",
+                "        this.name = name;",
+                "        this.port = port;",
+                "    }",
+                "",
+                "    boolean setPort(int port) {",
+                "        if (port < 1 || port > 65535) {",
+                "            return false;",
+                "        }",
+                "        // store the parameter in the field",
+                "        return true;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return name + \":\" + port;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that stores the validated parameter in the "
+                + "port field.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line.")
+                .accept("this.port = port;")
+                .hints(
+                    "The parameter shadows the field.",
+                    "this.port is the field.",
+                    "this.port = port;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Host h = new Host(\"db1\", 5432);",
+                    "        System.out.println(h.setPort(70000) + \" \" + h);",
+                    "        System.out.println(h.setPort(6432) + \" \" + h);",
+                    "    }",
+                    "}",
+                    "",
+                    "class Host {",
+                    "    private final String name;",
+                    "    private int port;",
+                    "",
+                    "    Host(String name, int port) {",
+                    "        this.name = name;",
+                    "        this.port = port;",
+                    "    }",
+                    "",
+                    "    boolean setPort(int port) {",
+                    "        if (port < 1 || port > 65535) {",
+                    "            return false;",
+                    "        }",
+                    "        this.port = port;",
+                    "        return true;",
+                    "    }",
+                    "",
+                    "    @Override",
+                    "    public String toString() {",
+                    "        return name + \":\" + port;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "70000 is refused before the field is touched: false "
+                    + "db1:5432. 6432 passes and this.port = port stores it: "
+                    + "true db1:6432.\n"
+                    + "\n"
+                    + "Five missions in one class: private and final fields "
+                    + "(14, 23), a constructor (10), a validating setter "
+                    + "(16), this against shadowing (9), and toString (17). "
+                    + "The one line that remains is the one that has to be "
+                    + "exactly right.")
+                .explain(
+                    "this.port = port; - after the check, into the field.")
+                .xp(40))
+            .mistakes(
+                new String[]{"Sharing when you meant to copy",
+                    "b = a is one object. Copy with new."},
+                new String[]{"Doors left open",
+                    "Public fields, raw getters of lists, setters for all."},
+                new String[]{"Rules outside the class",
+                    "They drift. Put them in the class's methods."})
+            .cyber(
+                "Classes are where security policy becomes code. An Account "
+                + "that locks itself, a Badge that cannot be reactivated, "
+                + "an Evidence record that cannot change, a LogEvent that "
+                + "cannot exist unchecked, a store that denies unknown "
+                + "users: each is a control that holds whatever the rest of "
+                + "the program does.\n"
+                + "\n"
+                + "What these programs still do badly is FAIL. A bad value "
+                + "returns false or null, and the caller must remember to "
+                + "check. Campaign 07 introduces exceptions: failures that "
+                + "cannot be ignored.")
+            .check(new Task(Task.CHOICE,
+                    "Which getter keeps private ArrayList<String> roles "
+                    + "safe?")
+                .choices("return roles;",
+                         "return new ArrayList<>(roles);",
+                         "public ArrayList<String> roles;",
+                         "return null;")
+                .accept("2", "b")
+                .hints("Mission 26.",
+                       "Hand out a copy.")
+                .explain(
+                    "b. A copy lets callers read without being able to "
+                    + "change the real list.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Why does list.contains(new Host(\"db1\", 22)) find an "
+                    + "equal Host only after Host writes equals?")
+                .choices("contains uses toString",
+                         "contains uses equals, and Java's own equals means "
+                         + "'same object'",
+                         "contains only works on Strings",
+                         "It never finds it")
+                .accept("2", "b")
+                .hints("Mission 18.",
+                       "Java's equals behaves like ==.")
+                .explain(
+                    "b. contains calls equals; until the class defines "
+                    + "equality by contents, only the very same object "
+                    + "matches.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "A LogEvent has a private constructor and a static "
+                    + "parse method. What does that guarantee?")
+                .choices("Parsing is fast",
+                         "Every LogEvent that exists passed parse's checks",
+                         "LogEvents can be changed later",
+                         "Nothing")
+                .accept("2", "b")
+                .hints("Mission 28.",
+                       "There is no other way in.")
+                .explain(
+                    "b. With no public constructor, parse is the only way "
+                    + "to make one - so every LogEvent was validated.")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 06 - OBJECTS complete.\n"
+                + "\n"
+                + "You can design a class from a spec, protect its data, "
+                + "enforce its rules, and build larger systems from "
+                + "objects that hold and manage other objects.\n"
+                + "\n"
+                + "Next: making failures impossible to ignore - "
+                + "exceptions.")
+            .next("Next: CAMPAIGN 07 - EXCEPTIONS."));
     }
 }

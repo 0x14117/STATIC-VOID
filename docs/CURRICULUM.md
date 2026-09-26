@@ -19,7 +19,7 @@ each one. Built items are marked; everything else is the plan.
 | Methods, parameters and the stack | 03 METHODS | built |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | built |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | built |
-| Classes: composite types, members, constructors | 06 OBJECTS | planned |
+| Classes: composite types, members, constructors | 06 OBJECTS | missions built |
 | Exceptions & event handling: try, catch, finally | 07 EXCEPTIONS | planned |
 | File I/O | 08 FILES | planned |
 
@@ -210,7 +210,7 @@ Each line is one mission, one idea.
 29. An allowlist check
 30. COLLECTIONS COMPLETE: checkpoint
 
-### 06 OBJECTS
+### 06 OBJECTS (built)
 
 1. Why classes: a type of your own
 2. A class is a blueprint
