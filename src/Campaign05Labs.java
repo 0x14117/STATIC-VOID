@@ -3573,5 +3573,1007 @@ public class Campaign05Labs {
                 "Window (seconds): 0",
                 "Limit: 1",
                 "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(26), "Seat Map", Lab.BIG)
+            .stretch()
+            .after("C05-M016")
+            .brief(
+                "During a major incident, responders gather in the bridge "
+                + "room: three rows of four seats, A1 to C4. The incident "
+                + "lead books seats as people arrive so everyone can be "
+                + "found fast. Keep the room as a 2D array of names, and "
+                + "refuse anything that would put two people in one seat "
+                + "or one person in two.")
+            .practises("Two-dimensional arrays", "Parsing a code into indexes", "Searching a grid")
+            .spec(
+                "The room is a String[3][4]; null means free. Row letters A to C are rows 0 to 2; seats 1 to 4 are columns 0 to 3.",
+                "Repeatedly prompt > and read a line (trim it), split at single spaces, until END.",
+                "parseSeat(code) returns {row, column} for a valid code (letter any case), or {-1, -1}.",
+                "BOOK <seat> <name>: BAD SEAT, TAKEN, ALREADY SEATED (the name, lower-cased, is in another seat) - or book it and reply Booked <SEAT> for <name>.",
+                "FREE <seat>: BAD SEAT, ALREADY FREE, or Freed <SEAT>. WHO <seat>: <SEAT>: <name> or <SEAT>: free.",
+                "MAP: printMap(room) prints each row as its letter, a colon, then for each seat a space and X or a dot.",
+                "Seat codes in replies are upper case. Wrong number of pieces: MALFORMED. Any other command: UNKNOWN COMMAND.")
+            .needsMethod("static int[] parseSeat(String)")
+            .needsMethod("static void printMap(String[][])")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String[][] room = new String[3][4];",
+                "        // the command loop",
+                "    }",
+                "",
+                "    // declare parseSeat(String code) and printMap(String[][] room)",
+                "}")
+            .hints(
+                "parseSeat: the code must be 2 characters; the row is "
+                + "Character.toUpperCase(code.charAt(0)) - 'A', the column is "
+                + "code.charAt(1) - '1'. Then range-check both.",
+                "char arithmetic gives ints: 'C' - 'A' is 2, '4' - '1' is 3.",
+                "ALREADY SEATED needs a search of the whole grid: a nested "
+                + "loop comparing each non-null seat with the name.",
+                "Check the piece count for each command before reading its "
+                + "pieces: BOOK needs 3, FREE and WHO need 2, MAP needs 1.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String[][] room = new String[3][4];",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String reply = handle(room, line.split(\" \"));",
+                "            if (!reply.isEmpty()) {",
+                "                System.out.println(reply);",
+                "            }",
+                "        }",
+                "    }",
+                "",
+                "    static String handle(String[][] room, String[] p) {",
+                "        String cmd = p[0];",
+                "        if (cmd.equals(\"MAP\")) {",
+                "            if (p.length != 1) {",
+                "                return \"MALFORMED\";",
+                "            }",
+                "            printMap(room);",
+                "            return \"\";",
+                "        }",
+                "        int need = cmd.equals(\"BOOK\") ? 3 : 2;",
+                "        boolean known = cmd.equals(\"BOOK\") || cmd.equals(\"FREE\")",
+                "                || cmd.equals(\"WHO\");",
+                "        if (!known) {",
+                "            return \"UNKNOWN COMMAND\";",
+                "        }",
+                "        if (p.length != need) {",
+                "            return \"MALFORMED\";",
+                "        }",
+                "        int[] at = parseSeat(p[1]);",
+                "        if (at[0] == -1) {",
+                "            return \"BAD SEAT\";",
+                "        }",
+                "        String seat = p[1].toUpperCase();",
+                "        String who = room[at[0]][at[1]];",
+                "        if (cmd.equals(\"WHO\")) {",
+                "            return seat + \": \" + (who == null ? \"free\" : who);",
+                "        }",
+                "        if (cmd.equals(\"FREE\")) {",
+                "            if (who == null) {",
+                "                return \"ALREADY FREE\";",
+                "            }",
+                "            room[at[0]][at[1]] = null;",
+                "            return \"Freed \" + seat;",
+                "        }",
+                "        String name = p[2].toLowerCase();",
+                "        if (who != null) {",
+                "            return \"TAKEN\";",
+                "        }",
+                "        if (isSeated(room, name)) {",
+                "            return \"ALREADY SEATED\";",
+                "        }",
+                "        room[at[0]][at[1]] = name;",
+                "        return \"Booked \" + seat + \" for \" + name;",
+                "    }",
+                "",
+                "    static int[] parseSeat(String code) {",
+                "        if (code.length() != 2) {",
+                "            return new int[]{-1, -1};",
+                "        }",
+                "        int r = Character.toUpperCase(code.charAt(0)) - 'A';",
+                "        int c = code.charAt(1) - '1';",
+                "        if (r < 0 || r > 2 || c < 0 || c > 3) {",
+                "            return new int[]{-1, -1};",
+                "        }",
+                "        return new int[]{r, c};",
+                "    }",
+                "",
+                "    static boolean isSeated(String[][] room, String name) {",
+                "        for (String[] row : room) {",
+                "            for (String s : row) {",
+                "                if (s != null && s.equals(name)) {",
+                "                    return true;",
+                "                }",
+                "            }",
+                "        }",
+                "        return false;",
+                "    }",
+                "",
+                "    static void printMap(String[][] room) {",
+                "        for (int r = 0; r < room.length; r++) {",
+                "            String line = (char) ('A' + r) + \":\";",
+                "            for (String s : room[r]) {",
+                "                line += s == null ? \" .\" : \" X\";",
+                "            }",
+                "            System.out.println(line);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "parseSeat turns a code like b3 into grid indexes with char "
+                + "arithmetic - 'B' - 'A' is 1, '3' - '1' is 2 - and "
+                + "range-checks the result, so a code like D1 or A9 can "
+                + "never become an out-of-bounds index. {-1, -1} is its "
+                + "'not a seat' answer, the array version of indexOf's -1.\n"
+                + "\n"
+                + "handle checks in a fixed order - known command, piece "
+                + "count, valid seat - so every array read is safe by the "
+                + "time it happens. null marks a free seat, which is why "
+                + "every comparison checks s != null first (mission 8). "
+                + "ALREADY SEATED needs the whole grid searched, a nested "
+                + "loop that returns as soon as the name is found. MAP "
+                + "prints its own lines and returns an empty reply, which "
+                + "main knows not to print.")
+            .sample(Lab.typing("BOOK B2 jsmith", "BOOK b2 mpatel", "BOOK A1 JSmith", "BOOK A1 mpatel", "MAP", "END"),
+                "> BOOK B2 jsmith",
+                "Booked B2 for jsmith",
+                "> BOOK b2 mpatel",
+                "TAKEN",
+                "> BOOK A1 JSmith",
+                "ALREADY SEATED",
+                "> BOOK A1 mpatel",
+                "Booked A1 for mpatel",
+                "> MAP",
+                "A: X . . .",
+                "B: . X . .",
+                "C: . . . .",
+                "> END")
+            .hidden(Lab.typing("WHO C4", "FREE C4", "BOOK C4 ana", "WHO c4", "FREE c4", "WHO C4", "END"),
+                "> WHO C4",
+                "C4: free",
+                "> FREE C4",
+                "ALREADY FREE",
+                "> BOOK C4 ana",
+                "Booked C4 for ana",
+                "> WHO c4",
+                "C4: ana",
+                "> FREE c4",
+                "Freed C4",
+                "> WHO C4",
+                "C4: free",
+                "> END")
+            .hidden(Lab.typing("BOOK D1 x", "BOOK A5 x", "BOOK A x", "BOOK A10 x", "FREE Z9", "END"),
+                "> BOOK D1 x",
+                "BAD SEAT",
+                "> BOOK A5 x",
+                "BAD SEAT",
+                "> BOOK A x",
+                "BAD SEAT",
+                "> BOOK A10 x",
+                "BAD SEAT",
+                "> FREE Z9",
+                "BAD SEAT",
+                "> END")
+            .hidden(Lab.typing("BOOK A1", "WHO", "MAP now", "SIT A1 x", "MAP", "END"),
+                "> BOOK A1",
+                "MALFORMED",
+                "> WHO",
+                "MALFORMED",
+                "> MAP now",
+                "MALFORMED",
+                "> SIT A1 x",
+                "UNKNOWN COMMAND",
+                "> MAP",
+                "A: . . . .",
+                "B: . . . .",
+                "C: . . . .",
+                "> END"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(27), "Inventory Manager", Lab.BIG)
+            .stretch()
+            .after("C05-M025")
+            .brief(
+                "The security team's equipment cupboard: hardware keys, "
+                + "spare laptops, forensic drives. Track what is in it with "
+                + "two lists that grow together - item names and "
+                + "quantities - never letting stock go below zero, and "
+                + "print a sorted report that flags anything running low.")
+            .practises("Parallel arrays", "Sorting", "Validating a quantity")
+            .spec(
+                "Keep two static lists: items (names, lower case) and stock (quantities).",
+                "Repeatedly prompt > and read a line (trim it), split at single spaces, until END.",
+                "ADD <item> <n>: add n to the item, adding it with n if new. Reply Stock of <item>: <new total>.",
+                "TAKE <item> <n>: UNKNOWN ITEM, or INSUFFICIENT (have <k>) when n is more than the stock, otherwise take it and reply Stock of <item>: <left>.",
+                "COUNT <item>: <item>: <k>, or UNKNOWN ITEM. REPORT: report() prints every item, sorted by name, as <item>: <k> - with  LOW when k is under 3 - or (empty).",
+                "n must be a whole number from 1 to 1000, digits only; anything else, or the wrong number of pieces: MALFORMED. Other commands: UNKNOWN COMMAND.",
+                "find(item) returns the item's index in items, or -1.")
+            .needsMethod("static int find(String)")
+            .needsMethod("static void report()")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> items = new ArrayList<>();",
+                "    static ArrayList<Integer> stock = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // the command loop",
+                "    }",
+                "",
+                "    // declare find(String item) and report() here",
+                "}")
+            .hints(
+                "find is items.indexOf(item) - a one-line method with a "
+                + "clear name.",
+                "Update a quantity with stock.set(at, stock.get(at) + n).",
+                "A small toQuantity(String) that returns -1 for anything "
+                + "invalid keeps the command code short.",
+                "report: sort a COPY of items, then for each name find its "
+                + "index and read stock at that index. Sorting items itself "
+                + "would break the pairing with stock.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static ArrayList<String> items = new ArrayList<>();",
+                "    static ArrayList<Integer> stock = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            String[] p = line.split(\" \");",
+                "            String cmd = p[0];",
+                "            if (cmd.equals(\"REPORT\")) {",
+                "                if (p.length == 1) {",
+                "                    report();",
+                "                } else {",
+                "                    System.out.println(\"MALFORMED\");",
+                "                }",
+                "            } else if (cmd.equals(\"COUNT\")) {",
+                "                System.out.println(p.length == 2 ? count(p[1])",
+                "                        : \"MALFORMED\");",
+                "            } else if (cmd.equals(\"ADD\") || cmd.equals(\"TAKE\")) {",
+                "                System.out.println(change(p));",
+                "            } else {",
+                "                System.out.println(\"UNKNOWN COMMAND\");",
+                "            }",
+                "        }",
+                "    }",
+                "",
+                "    static String change(String[] p) {",
+                "        int n = p.length == 3 ? toQuantity(p[2]) : -1;",
+                "        if (n == -1) {",
+                "            return \"MALFORMED\";",
+                "        }",
+                "        String item = p[1].toLowerCase();",
+                "        int at = find(item);",
+                "        if (p[0].equals(\"ADD\")) {",
+                "            if (at == -1) {",
+                "                items.add(item);",
+                "                stock.add(0);",
+                "                at = items.size() - 1;",
+                "            }",
+                "            stock.set(at, stock.get(at) + n);",
+                "        } else {",
+                "            if (at == -1) {",
+                "                return \"UNKNOWN ITEM\";",
+                "            }",
+                "            if (n > stock.get(at)) {",
+                "                return \"INSUFFICIENT (have \" + stock.get(at) + \")\";",
+                "            }",
+                "            stock.set(at, stock.get(at) - n);",
+                "        }",
+                "        return \"Stock of \" + item + \": \" + stock.get(at);",
+                "    }",
+                "",
+                "    static String count(String item) {",
+                "        int at = find(item.toLowerCase());",
+                "        if (at == -1) {",
+                "            return \"UNKNOWN ITEM\";",
+                "        }",
+                "        return items.get(at) + \": \" + stock.get(at);",
+                "    }",
+                "",
+                "    static int find(String item) {",
+                "        return items.indexOf(item);",
+                "    }",
+                "",
+                "    static int toQuantity(String s) {",
+                "        if (s.isEmpty() || s.length() > 4) {",
+                "            return -1;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return -1;",
+                "            }",
+                "        }",
+                "        int n = Integer.parseInt(s);",
+                "        return n >= 1 && n <= 1000 ? n : -1;",
+                "    }",
+                "",
+                "    static void report() {",
+                "        if (items.isEmpty()) {",
+                "            System.out.println(\"(empty)\");",
+                "            return;",
+                "        }",
+                "        ArrayList<String> names = new ArrayList<>();",
+                "        for (String item : items) {",
+                "            names.add(item);",
+                "        }",
+                "        Collections.sort(names);",
+                "        for (String name : names) {",
+                "            int k = stock.get(find(name));",
+                "            String low = k < 3 ? \"  LOW\" : \"\";",
+                "            System.out.println(name + \": \" + k + low);",
+                "        }",
+                "    }",
+                "}")
+            .walkthrough(
+                "items and stock are parallel lists, and every change keeps "
+                + "them aligned: a new item is added to both at once (with "
+                + "0, then topped up by the same code as an existing item). "
+                + "The one place they could fall apart is sorting - so "
+                + "report sorts a COPY of the names and finds each one's "
+                + "stock by index, leaving the pairing untouched. That is "
+                + "mission 15's warning, handled.\n"
+                + "\n"
+                + "TAKE refuses to go below zero and says what IS there. "
+                + "The quantity is validated as text before parseInt, so "
+                + "\"-5\", \"two\" and \"99999999999\" are MALFORMED rather "
+                + "than crashes or negative stock. Items are lower-cased "
+                + "on the way in, so YubiKey and yubikey are one line of "
+                + "stock.")
+            .sample(Lab.typing("ADD yubikey 5", "ADD laptop 2", "TAKE YubiKey 3", "TAKE laptop 4", "REPORT", "END"),
+                "> ADD yubikey 5",
+                "Stock of yubikey: 5",
+                "> ADD laptop 2",
+                "Stock of laptop: 2",
+                "> TAKE YubiKey 3",
+                "Stock of yubikey: 2",
+                "> TAKE laptop 4",
+                "INSUFFICIENT (have 2)",
+                "> REPORT",
+                "laptop: 2  LOW",
+                "yubikey: 2  LOW",
+                "> END")
+            .hidden(Lab.typing("REPORT", "COUNT drive", "TAKE drive 1", "END"),
+                "> REPORT",
+                "(empty)",
+                "> COUNT drive",
+                "UNKNOWN ITEM",
+                "> TAKE drive 1",
+                "UNKNOWN ITEM",
+                "> END")
+            .hidden(Lab.typing("ADD drive 0", "ADD drive -5", "ADD drive two", "ADD drive 1001", "ADD drive", "COUNT", "REPORT now", "SELL x 1", "END"),
+                "> ADD drive 0",
+                "MALFORMED",
+                "> ADD drive -5",
+                "MALFORMED",
+                "> ADD drive two",
+                "MALFORMED",
+                "> ADD drive 1001",
+                "MALFORMED",
+                "> ADD drive",
+                "MALFORMED",
+                "> COUNT",
+                "MALFORMED",
+                "> REPORT now",
+                "MALFORMED",
+                "> SELL x 1",
+                "UNKNOWN COMMAND",
+                "> END")
+            .hidden(Lab.typing("ADD zip 1", "ADD cable 10", "ADD badge 3", "TAKE cable 10", "ADD zip 1000", "COUNT ZIP", "REPORT", "END"),
+                "> ADD zip 1",
+                "Stock of zip: 1",
+                "> ADD cable 10",
+                "Stock of cable: 10",
+                "> ADD badge 3",
+                "Stock of badge: 3",
+                "> TAKE cable 10",
+                "Stock of cable: 0",
+                "> ADD zip 1000",
+                "Stock of zip: 1001",
+                "> COUNT ZIP",
+                "zip: 1001",
+                "> REPORT",
+                "badge: 3",
+                "cable: 0  LOW",
+                "zip: 1001",
+                "> END"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(28), "Binary Search", Lab.BIG)
+            .stretch()
+            .after("C05-M025")
+            .brief(
+                "A banned-ID list with a million entries cannot be searched "
+                + "one slot at a time on every login. Sorted, it can be "
+                + "halved at each step: look in the middle, throw away the "
+                + "half that cannot hold the ID, repeat. Implement binary "
+                + "search and count its steps to see the difference.")
+            .practises("Linear search", "Sorting", "Halving a range")
+            .spec(
+                "Prompt Banned IDs: and Check: and read a line of whole numbers separated by single spaces after each.",
+                "Sort a copy of the banned IDs and print Sorted: and the copy as Arrays.toString shows it.",
+                "find(sorted, id): lo = 0, hi = length - 1; while lo <= hi: mid = (lo + hi) / 2, count one step, return mid if it holds id, else move lo to mid + 1 or hi to mid - 1. Return -1 when lo passes hi.",
+                "The step count is kept in a static int steps, reset to 0 at the start of each find.",
+                "For each ID to check, print <id>: BANNED (steps: <s>) or <id>: ok (steps: <s>).",
+                "Finally print Total steps: <all steps>; linear worst case: <banned count x checks>.")
+            .needsMethod("static int find(int[], int)")
+            .starter(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static int steps = 0;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read both lines, sort a copy, check each ID",
+                "    }",
+                "",
+                "    // declare find(int[] sorted, int id) here",
+                "}")
+            .hints(
+                "A parse helper that turns a line of numbers into an int[] "
+                + "is used twice.",
+                "mid = (lo + hi) / 2 uses int division, so it is always a "
+                + "valid index between lo and hi.",
+                "If sorted[mid] < id, the ID can only be to the right: "
+                + "lo = mid + 1. Otherwise it can only be to the left: "
+                + "hi = mid - 1.",
+                "The +1 and -1 matter: without them the range can stop "
+                + "shrinking and the loop never ends.")
+            .solution(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static int steps = 0;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Banned IDs: \");",
+                "        int[] banned = parse(input.nextLine());",
+                "        System.out.print(\"Check: \");",
+                "        int[] checks = parse(input.nextLine());",
+                "        int[] sorted = Arrays.copyOf(banned, banned.length);",
+                "        Arrays.sort(sorted);",
+                "        System.out.println(\"Sorted: \" + Arrays.toString(sorted));",
+                "        int total = 0;",
+                "        for (int id : checks) {",
+                "            boolean hit = find(sorted, id) != -1;",
+                "            total += steps;",
+                "            System.out.println(id + \": \" + (hit ? \"BANNED\" : \"ok\")",
+                "                    + \" (steps: \" + steps + \")\");",
+                "        }",
+                "        int linear = banned.length * checks.length;",
+                "        System.out.println(\"Total steps: \" + total",
+                "                + \"; linear worst case: \" + linear);",
+                "    }",
+                "",
+                "    static int[] parse(String line) {",
+                "        String[] p = line.trim().split(\" \");",
+                "        int[] out = new int[p.length];",
+                "        for (int i = 0; i < p.length; i++) {",
+                "            out[i] = Integer.parseInt(p[i]);",
+                "        }",
+                "        return out;",
+                "    }",
+                "",
+                "    static int find(int[] sorted, int id) {",
+                "        steps = 0;",
+                "        int lo = 0;",
+                "        int hi = sorted.length - 1;",
+                "        while (lo <= hi) {",
+                "            int mid = (lo + hi) / 2;",
+                "            steps++;",
+                "            if (sorted[mid] == id) {",
+                "                return mid;",
+                "            }",
+                "            if (sorted[mid] < id) {",
+                "                lo = mid + 1;",
+                "            } else {",
+                "                hi = mid - 1;",
+                "            }",
+                "        }",
+                "        return -1;",
+                "    }",
+                "}")
+            .walkthrough(
+                "lo and hi mark the part of the sorted array where the ID "
+                + "could still be. Each step looks at the middle and throws "
+                + "away the half that cannot contain it, so the range "
+                + "halves every time: 8 IDs need at most 4 steps, a "
+                + "million need about 20. A linear search could need a "
+                + "million.\n"
+                + "\n"
+                + "It only works because the array is SORTED - the search "
+                + "runs on a sorted copy, keeping the original list as it "
+                + "was. The loop ends in one of two ways: a match, or lo "
+                + "passing hi, which means the range is empty and the ID "
+                + "is not there. mid + 1 and mid - 1 guarantee the range "
+                + "shrinks on every step, so the loop always ends.")
+            .sample(Lab.typing("905 112 407 330 781 256 649 518", "407 500 905"),
+                "Banned IDs: 905 112 407 330 781 256 649 518",
+                "Check: 407 500 905",
+                "Sorted: [112, 256, 330, 407, 518, 649, 781, 905]",
+                "407: BANNED (steps: 1)",
+                "500: ok (steps: 3)",
+                "905: BANNED (steps: 4)",
+                "Total steps: 8; linear worst case: 24")
+            .hidden(Lab.typing("42", "42 41 43"),
+                "Banned IDs: 42",
+                "Check: 42 41 43",
+                "Sorted: [42]",
+                "42: BANNED (steps: 1)",
+                "41: ok (steps: 1)",
+                "43: ok (steps: 1)",
+                "Total steps: 3; linear worst case: 3")
+            .hidden(Lab.typing("1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16", "1 16 8 17"),
+                "Banned IDs: 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16",
+                "Check: 1 16 8 17",
+                "Sorted: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]",
+                "1: BANNED (steps: 4)",
+                "16: BANNED (steps: 5)",
+                "8: BANNED (steps: 1)",
+                "17: ok (steps: 5)",
+                "Total steps: 15; linear worst case: 64")
+            .hidden(Lab.typing("30 10 20", "5 15 25 35"),
+                "Banned IDs: 30 10 20",
+                "Check: 5 15 25 35",
+                "Sorted: [10, 20, 30]",
+                "5: ok (steps: 2)",
+                "15: ok (steps: 2)",
+                "25: ok (steps: 2)",
+                "35: ok (steps: 2)",
+                "Total steps: 8; linear worst case: 12"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(29), "Bubble Sort, Traced", Lab.BIG)
+            .stretch()
+            .after("C05-M025")
+            .brief(
+                "Arrays.sort is a black box. Open one up: bubble sort "
+                + "compares neighbours and swaps them when they are out of "
+                + "order, so after each pass the largest remaining value "
+                + "has bubbled to the end. Sort a set of alert severities "
+                + "and print the array after every pass.")
+            .practises("Looping over arrays", "Swapping two slots", "Stopping early")
+            .spec(
+                "Prompt Severities: and read a line of whole numbers separated by single spaces.",
+                "swap(a, i, j) exchanges a[i] and a[j].",
+                "pass(a, end) compares every neighbour pair a[i], a[i + 1] for i from 0 to end - 1, swaps each pair that is out of order, and returns the number of swaps.",
+                "Pass p uses end = length - p. After each pass print Pass <p>: <array> (swaps: <n>), the array as Arrays.toString shows it.",
+                "Stop after a pass with no swaps, or when end reaches 0. Then print Passes: <p>, swaps: <total>.")
+            .needsMethod("static void swap(int[], int, int)")
+            .needsMethod("static int pass(int[], int)")
+            .starter(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Severities: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        // parse, then run passes until one makes no swaps",
+                "    }",
+                "",
+                "    // declare swap(int[] a, int i, int j) and pass(int[] a, int end)",
+                "}")
+            .hints(
+                "swap needs a temporary variable: int t = a[i]; a[i] = a[j]; "
+                + "a[j] = t;",
+                "In pass, i stops at end - 1 so a[i + 1] never goes past "
+                + "a[end].",
+                "The outer loop: p starts at 1; end = a.length - p; keep "
+                + "going while end >= 1.",
+                "A one-value array needs no pass at all: Passes: 0.")
+            .solution(
+                "import java.util.Arrays;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Severities: \");",
+                "        String[] parts = input.nextLine().trim().split(\" \");",
+                "        int[] a = new int[parts.length];",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            a[i] = Integer.parseInt(parts[i]);",
+                "        }",
+                "        int passes = 0;",
+                "        int total = 0;",
+                "        for (int p = 1; a.length - p >= 1; p++) {",
+                "            int swaps = pass(a, a.length - p);",
+                "            passes++;",
+                "            total += swaps;",
+                "            System.out.println(\"Pass \" + p + \": \" + Arrays.toString(a)",
+                "                    + \" (swaps: \" + swaps + \")\");",
+                "            if (swaps == 0) {",
+                "                break;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Passes: \" + passes",
+                "                + \", swaps: \" + total);",
+                "    }",
+                "",
+                "    static int pass(int[] a, int end) {",
+                "        int swaps = 0;",
+                "        for (int i = 0; i < end; i++) {",
+                "            if (a[i] > a[i + 1]) {",
+                "                swap(a, i, i + 1);",
+                "                swaps++;",
+                "            }",
+                "        }",
+                "        return swaps;",
+                "    }",
+                "",
+                "    static void swap(int[] a, int i, int j) {",
+                "        int t = a[i];",
+                "        a[i] = a[j];",
+                "        a[j] = t;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each pass walks the unsorted part comparing neighbours, and "
+                + "every swap carries the larger value one place right - so "
+                + "by the end of pass p, the p largest values are in their "
+                + "final places. That is why the next pass can stop one slot "
+                + "earlier: end = length - p.\n"
+                + "\n"
+                + "A pass with no swaps proves every neighbour pair is in "
+                + "order, so the array is sorted and the loop stops early - "
+                + "an already-sorted array takes just one pass. swap and "
+                + "pass change the caller's array directly, because an "
+                + "array parameter is a reference (mission 10). Bubble sort "
+                + "is slow on big data - Arrays.sort is far faster - but "
+                + "seeing each pass shows exactly what 'sorting' does.")
+            .sample(Lab.typing("3 1 4 1 5 2"),
+                "Severities: 3 1 4 1 5 2",
+                "Pass 1: [1, 3, 1, 4, 2, 5] (swaps: 3)",
+                "Pass 2: [1, 1, 3, 2, 4, 5] (swaps: 2)",
+                "Pass 3: [1, 1, 2, 3, 4, 5] (swaps: 1)",
+                "Pass 4: [1, 1, 2, 3, 4, 5] (swaps: 0)",
+                "Passes: 4, swaps: 6")
+            .hidden(Lab.typing("1 2 3 4"),
+                "Severities: 1 2 3 4",
+                "Pass 1: [1, 2, 3, 4] (swaps: 0)",
+                "Passes: 1, swaps: 0")
+            .hidden(Lab.typing("4 3 2 1"),
+                "Severities: 4 3 2 1",
+                "Pass 1: [3, 2, 1, 4] (swaps: 3)",
+                "Pass 2: [2, 1, 3, 4] (swaps: 2)",
+                "Pass 3: [1, 2, 3, 4] (swaps: 1)",
+                "Passes: 3, swaps: 6")
+            .hidden(Lab.typing("9"),
+                "Severities: 9",
+                "Passes: 0, swaps: 0")
+            .hidden(Lab.typing("2 2 1"),
+                "Severities: 2 2 1",
+                "Pass 1: [2, 1, 2] (swaps: 1)",
+                "Pass 2: [1, 2, 2] (swaps: 1)",
+                "Passes: 2, swaps: 2"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(30), "Log Summary Report", Lab.CAPSTONE)
+            .after("C05-M030")
+            .brief(
+                "The capstone: the morning summary of the night's "
+                + "authentication log, the report a SOC analyst reads "
+                + "first. Validate every line, then answer six questions "
+                + "at once - how much, when, how many failed at night, from "
+                + "how many places, who failed most, and whether anyone on "
+                + "the watchlist appeared. Every pattern in the campaign "
+                + "has a part to play.")
+            .practises("Tally arrays", "Counting per key", "Watchlists")
+            .spec(
+                "Repeatedly prompt Log: and read a line (trim it) until END. Each line should be: HH:MM user source result, split at single spaces.",
+                "Valid only with exactly 4 pieces, a valid time (isValidTime: 5 characters, digits around a colon, hour 00-23, minute 00-59) and a result of FAIL or OK. Otherwise count it as malformed and skip it.",
+                "For a valid line: lower-case the user; hourOf(time) gives the hour to tally in an int[24]; note the source if new; if onWatchlist(user) - the watchlist is temp01, svc_old, guest - note the user if new.",
+                "For a FAIL: count it, and recordFailure(user) counts it per user in two parallel lists. A FAIL in hours 00 to 05 is a night failure.",
+                "After END print LOG SUMMARY, then these lines in order:",
+                "Lines: <all lines read>, malformed: <m>",
+                "Logins: <valid lines>, failed: <FAIL lines>",
+                "Busiest hour: HH (<count>) - the earliest hour on a tie - or Busiest hour: none",
+                "Night failures (00-05): <k>",
+                "Distinct sources: <s>",
+                "Top failing user: <user> (<count>) - the first to fail on a tie - or none",
+                "Watchlist seen: <names in the order first seen, separated by \", \"> or none")
+            .needsMethod("static boolean isValidTime(String)")
+            .needsMethod("static int hourOf(String)")
+            .needsMethod("static void recordFailure(String)")
+            .needsMethod("static boolean onWatchlist(String)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String[] WATCHLIST = {\"temp01\", \"svc_old\", \"guest\"};",
+                "    static int[] perHour = new int[24];",
+                "    static ArrayList<String> failUsers = new ArrayList<>();",
+                "    static ArrayList<Integer> failCounts = new ArrayList<>();",
+                "    static ArrayList<String> sources = new ArrayList<>();",
+                "    static ArrayList<String> watchSeen = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read and validate every line, then print the summary",
+                "    }",
+                "",
+                "    // declare isValidTime, hourOf, recordFailure, onWatchlist",
+                "}")
+            .hints(
+                "Validate before using anything: pieces, then the time, "
+                + "then the result. Only a fully valid line changes any "
+                + "totals.",
+                "isValidTime: length 5, charAt(2) == ':', Character.isDigit "
+                + "for indexes 0, 1, 3 and 4 - then parse the hour and "
+                + "minute and range-check them.",
+                "recordFailure is mission 28's indexOf pattern: -1 means "
+                + "add to both lists, otherwise set the count one higher.",
+                "Busiest hour: scan perHour for the largest count with "
+                + "strict >; if that count is 0, there were no valid lines.",
+                "Keep main readable: a report() method that prints the "
+                + "seven lines, and one helper for 'list or none'.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String[] WATCHLIST = {\"temp01\", \"svc_old\", \"guest\"};",
+                "    static int[] perHour = new int[24];",
+                "    static ArrayList<String> failUsers = new ArrayList<>();",
+                "    static ArrayList<Integer> failCounts = new ArrayList<>();",
+                "    static ArrayList<String> sources = new ArrayList<>();",
+                "    static ArrayList<String> watchSeen = new ArrayList<>();",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int lines = 0;",
+                "        int malformed = 0;",
+                "        int valid = 0;",
+                "        int failed = 0;",
+                "        int night = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Log: \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            lines++;",
+                "            String[] p = line.split(\" \");",
+                "            if (p.length != 4 || !isValidTime(p[0])",
+                "                    || !(p[3].equals(\"FAIL\") || p[3].equals(\"OK\"))) {",
+                "                malformed++;",
+                "                continue;",
+                "            }",
+                "            valid++;",
+                "            String user = p[1].toLowerCase();",
+                "            int hour = hourOf(p[0]);",
+                "            perHour[hour]++;",
+                "            if (!sources.contains(p[2])) {",
+                "                sources.add(p[2]);",
+                "            }",
+                "            if (onWatchlist(user) && !watchSeen.contains(user)) {",
+                "                watchSeen.add(user);",
+                "            }",
+                "            if (p[3].equals(\"FAIL\")) {",
+                "                failed++;",
+                "                recordFailure(user);",
+                "                if (hour <= 5) {",
+                "                    night++;",
+                "                }",
+                "            }",
+                "        }",
+                "        System.out.println(\"LOG SUMMARY\");",
+                "        System.out.println(\"Lines: \" + lines",
+                "                + \", malformed: \" + malformed);",
+                "        System.out.println(\"Logins: \" + valid",
+                "                + \", failed: \" + failed);",
+                "        System.out.println(\"Busiest hour: \" + busiestHour());",
+                "        System.out.println(\"Night failures (00-05): \" + night);",
+                "        System.out.println(\"Distinct sources: \" + sources.size());",
+                "        System.out.println(\"Top failing user: \" + topUser());",
+                "        String seen = listOrNone(watchSeen);",
+                "        System.out.println(\"Watchlist seen: \" + seen);",
+                "    }",
+                "",
+                "    static boolean isValidTime(String t) {",
+                "        if (t.length() != 5 || t.charAt(2) != ':') {",
+                "            return false;",
+                "        }",
+                "        int[] digits = {0, 1, 3, 4};",
+                "        for (int i : digits) {",
+                "            if (!Character.isDigit(t.charAt(i))) {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        int minute = Integer.parseInt(t.substring(3));",
+                "        return hourOf(t) <= 23 && minute <= 59;",
+                "    }",
+                "",
+                "    static int hourOf(String t) {",
+                "        return Integer.parseInt(t.substring(0, 2));",
+                "    }",
+                "",
+                "    static void recordFailure(String user) {",
+                "        int at = failUsers.indexOf(user);",
+                "        if (at == -1) {",
+                "            failUsers.add(user);",
+                "            failCounts.add(1);",
+                "        } else {",
+                "            failCounts.set(at, failCounts.get(at) + 1);",
+                "        }",
+                "    }",
+                "",
+                "    static boolean onWatchlist(String user) {",
+                "        for (String w : WATCHLIST) {",
+                "            if (w.equals(user)) {",
+                "                return true;",
+                "            }",
+                "        }",
+                "        return false;",
+                "    }",
+                "",
+                "    static String busiestHour() {",
+                "        int best = 0;",
+                "        for (int h = 1; h < perHour.length; h++) {",
+                "            if (perHour[h] > perHour[best]) {",
+                "                best = h;",
+                "            }",
+                "        }",
+                "        if (perHour[best] == 0) {",
+                "            return \"none\";",
+                "        }",
+                "        return String.format(\"%02d\", best) + \" (\"",
+                "                + perHour[best] + \")\";",
+                "    }",
+                "",
+                "    static String topUser() {",
+                "        if (failUsers.isEmpty()) {",
+                "            return \"none\";",
+                "        }",
+                "        int best = 0;",
+                "        for (int i = 1; i < failCounts.size(); i++) {",
+                "            if (failCounts.get(i) > failCounts.get(best)) {",
+                "                best = i;",
+                "            }",
+                "        }",
+                "        return failUsers.get(best) + \" (\"",
+                "                + failCounts.get(best) + \")\";",
+                "    }",
+                "",
+                "    static String listOrNone(ArrayList<String> list) {",
+                "        if (list.isEmpty()) {",
+                "            return \"none\";",
+                "        }",
+                "        String text = \"\";",
+                "        for (int i = 0; i < list.size(); i++) {",
+                "            text += (i > 0 ? \", \" : \"\") + list.get(i);",
+                "        }",
+                "        return text;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The program has one gate and many counters. The gate - "
+                + "four pieces, isValidTime, a known result - runs before a "
+                + "single counter moves, so a malformed line can never "
+                + "corrupt the totals, crash hourOf, or push an hour of 99 "
+                + "into perHour. isValidTime checks the shape as text first "
+                + "and only then parses, which is why \"9:30\" and \"ab:cd\" "
+                + "are refused rather than thrown.\n"
+                + "\n"
+                + "Behind the gate, each question uses the campaign pattern "
+                + "that fits it: a tally array for hours (the hour IS the "
+                + "index), parallel lists for failures per user, a distinct "
+                + "list for sources, a membership check plus a distinct "
+                + "list for the watchlist, and best-index scans with strict "
+                + "> for the busiest hour and top user, so ties go to the "
+                + "earliest. Empty cases - no valid lines, no failures, no "
+                + "watchlist hits - each say none rather than inventing a "
+                + "00 or reading get(0) from an empty list.")
+            .sample(Lab.typing("09:02 jsmith 10.0.0.5 OK", "09:15 admin 203.0.113.9 FAIL", "09:16 Admin 203.0.113.9 FAIL", "03:40 temp01 198.51.100.7 FAIL", "9:30 bob 10.0.0.8 OK", "14:05 mpatel 10.0.0.6 OK", "14:07 admin 203.0.113.9 FAIL", "23:59 guest 10.0.0.9 DENY", "END"),
+                "Log: 09:02 jsmith 10.0.0.5 OK",
+                "Log: 09:15 admin 203.0.113.9 FAIL",
+                "Log: 09:16 Admin 203.0.113.9 FAIL",
+                "Log: 03:40 temp01 198.51.100.7 FAIL",
+                "Log: 9:30 bob 10.0.0.8 OK",
+                "Log: 14:05 mpatel 10.0.0.6 OK",
+                "Log: 14:07 admin 203.0.113.9 FAIL",
+                "Log: 23:59 guest 10.0.0.9 DENY",
+                "Log: END",
+                "LOG SUMMARY",
+                "Lines: 8, malformed: 2",
+                "Logins: 6, failed: 4",
+                "Busiest hour: 09 (3)",
+                "Night failures (00-05): 1",
+                "Distinct sources: 4",
+                "Top failing user: admin (3)",
+                "Watchlist seen: temp01")
+            .hidden(Lab.typing("END"),
+                "Log: END",
+                "LOG SUMMARY",
+                "Lines: 0, malformed: 0",
+                "Logins: 0, failed: 0",
+                "Busiest hour: none",
+                "Night failures (00-05): 0",
+                "Distinct sources: 0",
+                "Top failing user: none",
+                "Watchlist seen: none")
+            .hidden(Lab.typing("24:00 a s OK", "23:60 a s OK", "ab:cd a s OK", "12:3O a s OK", "12:30 a s", "12:30 a s OK extra", "", "END"),
+                "Log: 24:00 a s OK",
+                "Log: 23:60 a s OK",
+                "Log: ab:cd a s OK",
+                "Log: 12:3O a s OK",
+                "Log: 12:30 a s",
+                "Log: 12:30 a s OK extra",
+                "Log:",
+                "Log: END",
+                "LOG SUMMARY",
+                "Lines: 7, malformed: 7",
+                "Logins: 0, failed: 0",
+                "Busiest hour: none",
+                "Night failures (00-05): 0",
+                "Distinct sources: 0",
+                "Top failing user: none",
+                "Watchlist seen: none")
+            .hidden(Lab.typing("00:00 GUEST x FAIL", "05:59 svc_old y FAIL", "06:00 guest x FAIL", "23:10 bob z OK", "23:20 bob z OK", "END"),
+                "Log: 00:00 GUEST x FAIL",
+                "Log: 05:59 svc_old y FAIL",
+                "Log: 06:00 guest x FAIL",
+                "Log: 23:10 bob z OK",
+                "Log: 23:20 bob z OK",
+                "Log: END",
+                "LOG SUMMARY",
+                "Lines: 5, malformed: 0",
+                "Logins: 5, failed: 3",
+                "Busiest hour: 23 (2)",
+                "Night failures (00-05): 2",
+                "Distinct sources: 3",
+                "Top failing user: guest (2)",
+                "Watchlist seen: guest, svc_old")
+            .hidden(Lab.typing("10:00 ann a FAIL", "11:00 bob b FAIL", "11:01 bob b FAIL", "10:30 ann a FAIL", "END"),
+                "Log: 10:00 ann a FAIL",
+                "Log: 11:00 bob b FAIL",
+                "Log: 11:01 bob b FAIL",
+                "Log: 10:30 ann a FAIL",
+                "Log: END",
+                "LOG SUMMARY",
+                "Lines: 4, malformed: 0",
+                "Logins: 4, failed: 4",
+                "Busiest hour: 10 (2)",
+                "Night failures (00-05): 0",
+                "Distinct sources: 2",
+                "Top failing user: ann (2)",
+                "Watchlist seen: none"));
     }
 }

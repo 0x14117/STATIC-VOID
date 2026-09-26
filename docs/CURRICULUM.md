@@ -18,7 +18,7 @@ each one. Built items are marked; everything else is the plan.
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
 | Methods, parameters and the stack | 03 METHODS | built |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | built |
-| Collections: raw arrays and ArrayList | 05 COLLECTIONS | missions built |
+| Collections: raw arrays and ArrayList | 05 COLLECTIONS | built |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
 | Exceptions & event handling: try, catch, finally | 07 EXCEPTIONS | planned |
 | File I/O | 08 FILES | planned |
@@ -360,6 +360,10 @@ assumes that mission has been completed.
   (return type, name and parameter types). The game reads them from the
   compiled class before running any test, so a methods lab cannot be passed
   with everything in `main`.
+- A required method may name a generic type such as `ArrayList<String>`.
+  Java erases the part in angle brackets when it compiles, so the check
+  compares `ArrayList` - the brief still shows the full type, since that is
+  what the learner should write.
 
 ---
 
@@ -536,7 +540,7 @@ source contains the answers as typed text.
 | L29 | Binary Converter | MEDIUM | S |
 | L30 | Lockout Simulator | CAPSTONE | C |
 
-### 05 COLLECTIONS: 30 labs
+### 05 COLLECTIONS: 30 labs (built)
 
 | Lab | Title | Size | Tier |
 |---|---|---|---|
