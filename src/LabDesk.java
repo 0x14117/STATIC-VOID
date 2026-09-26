@@ -267,7 +267,8 @@ public class LabDesk {
 
         if (!lab.getNeededMethods().isEmpty()) {
             Terminal.blank();
-            Terminal.heading("METHODS YOUR PROGRAM MUST DECLARE");
+            Terminal.heading(declaresClasses(lab) ? "WHAT YOUR PROGRAM MUST DECLARE"
+                    : "METHODS YOUR PROGRAM MUST DECLARE");
             Terminal.blank();
             for (String method : lab.getNeededMethods()) {
                 Terminal.lineAs(Theme.CODE, "    " + method);
@@ -276,6 +277,12 @@ public class LabDesk {
             Terminal.wrapped("The tests check these exist, with exactly these "
                     + "return and parameter types. Parameter names are yours "
                     + "to choose.", "  ");
+            if (declaresClasses(lab)) {
+                Terminal.wrapped("\"in Account:\" means a member of your own "
+                        + "class Account, written in Main.java below Main. A "
+                        + "field must be declared with the words shown, such as "
+                        + "private.", "  ");
+            }
         }
 
         List<LabTest> tests = lab.getTests();
@@ -374,6 +381,16 @@ public class LabDesk {
         return false;
     }
 
+    /** True when the lab asks for members of the learner's own classes. */
+    private static boolean declaresClasses(Lab lab) {
+        for (String needed : lab.getNeededMethods()) {
+            if (!LabBench.ownerOf(needed).equals("Main")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void test(Lab lab, Player player) {
         if (!compileOrExplain(lab)) {
             return;
@@ -382,7 +399,7 @@ public class LabDesk {
         if (!missing.isEmpty()) {
             Terminal.lineAs(Theme.GOOD, "  Compiled.");
             Terminal.blank();
-            Terminal.lineAs(Theme.BAD, "  This lab needs methods your program does "
+            Terminal.lineAs(Theme.BAD, "  This lab needs members your program does "
                     + "not declare:");
             Terminal.blank();
             for (String method : missing) {
@@ -390,8 +407,9 @@ public class LabDesk {
             }
             Terminal.blank();
             Terminal.wrapped("Check each one's name, its return type, its parameter "
-                    + "types and their order, and that it is static. Then test "
-                    + "again.", "  ");
+                    + "types and their order, and that a method of Main is "
+                    + "static. For \"in\" lines, check the class name too. Then "
+                    + "test again.", "  ");
             Terminal.pause();
             return;
         }

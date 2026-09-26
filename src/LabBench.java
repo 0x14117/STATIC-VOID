@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -161,32 +163,120 @@ public class LabBench {
     }
 
     /**
-     * The lab's needed methods that the compiled program does not declare,
-     * each as the lab wrote it. They are read from the class file; nothing
+     * The lab's needed members that the compiled program does not declare,
+     * each as the lab wrote it. They are read from the class files; nothing
      * in the learner's program runs.
+     *
+     * A need is a method of Main, "static boolean isValidPort(String)", or
+     * - from Campaign 06, when learners write classes of their own - a
+     * member of another class, prefixed with that class's name:
+     *
+     *     in Account: Account(String, int)       a constructor
+     *     in Account: void deposit(int)          a method
+     *     in Account: private int balance        a field
      */
     public static List<String> missingMethods(Lab lab, File folder) {
         List<String> missing = new ArrayList<>();
         if (lab.getNeededMethods().isEmpty()) {
             return missing;
         }
-        List<String> declared = new ArrayList<>();
         File build = new File(folder, "build");
         try (URLClassLoader loader = new URLClassLoader(
                 new URL[]{build.toURI().toURL()}, null)) {
-            Class<?> main = Class.forName("Main", false, loader);
-            for (Method method : main.getDeclaredMethods()) {
-                declared.add(signatureOf(method));
+            for (String needed : lab.getNeededMethods()) {
+                Class<?> owner = findClass(loader, ownerOf(needed));
+                if (owner == null || !declares(owner, memberOf(needed))) {
+                    missing.add(needed);
+                }
             }
         } catch (Exception | LinkageError e) {
-            // Unreadable: every needed method counts as missing.
-        }
-        for (String needed : lab.getNeededMethods()) {
-            if (!declared.contains(withoutTypeArguments(tidySignature(needed)))) {
-                missing.add(needed);
-            }
+            // Unreadable: every needed member counts as missing.
+            missing.clear();
+            missing.addAll(lab.getNeededMethods());
         }
         return missing;
+    }
+
+    /** "in Account: void deposit(int)" belongs to Account; the rest to Main. */
+    public static String ownerOf(String needed) {
+        if (needed.startsWith("in ") && needed.contains(":")) {
+            return needed.substring(3, needed.indexOf(':')).trim();
+        }
+        return "Main";
+    }
+
+    /** The member itself, without any "in Class:" prefix. */
+    public static String memberOf(String needed) {
+        if (needed.startsWith("in ") && needed.contains(":")) {
+            return needed.substring(needed.indexOf(':') + 1).trim();
+        }
+        return needed.trim();
+    }
+
+    /** A class in Main.java: top level, or nested inside Main. */
+    static Class<?> findClass(ClassLoader loader, String name) {
+        for (String binary : new String[]{name, "Main$" + name}) {
+            try {
+                return Class.forName(binary, false, loader);
+            } catch (Exception | LinkageError e) {
+                // try the next spelling
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Methods and constructors must match exactly - return type, name and
+     * parameter types. A field matches by type and name, and must carry
+     * every modifier the lab names (private, static, final); modifiers the
+     * lab does not name are the learner's choice.
+     */
+    static boolean declares(Class<?> owner, String member) {
+        String wanted = withoutTypeArguments(tidySignature(member));
+        if (wanted.contains("(")) {
+            for (Method method : owner.getDeclaredMethods()) {
+                if (signatureOf(method).equals(wanted)) {
+                    return true;
+                }
+            }
+            for (Constructor<?> maker : owner.getDeclaredConstructors()) {
+                if (signatureOf(maker).equals(wanted)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        String[] words = wanted.split(" ");
+        if (words.length < 2) {
+            return false;
+        }
+        String name = words[words.length - 1];
+        String type = words[words.length - 2];
+        for (Field field : owner.getDeclaredFields()) {
+            if (!field.getName().equals(name)
+                    || !field.getType().getSimpleName().equals(type)) {
+                continue;
+            }
+            int mods = field.getModifiers();
+            boolean ok = true;
+            for (int i = 0; i < words.length - 2; i++) {
+                ok &= (words[i].equals("private") && Modifier.isPrivate(mods))
+                        || (words[i].equals("static") && Modifier.isStatic(mods))
+                        || (words[i].equals("final") && Modifier.isFinal(mods));
+            }
+            return ok;
+        }
+        return false;
+    }
+
+    static String signatureOf(Constructor<?> maker) {
+        StringBuilder text = new StringBuilder(maker.getDeclaringClass().getSimpleName());
+        text.append('(');
+        Class<?>[] types = maker.getParameterTypes();
+        for (int i = 0; i < types.length; i++) {
+            text.append(i == 0 ? "" : ", ").append(types[i].getSimpleName());
+        }
+        return text.append(')').toString();
     }
 
     /**

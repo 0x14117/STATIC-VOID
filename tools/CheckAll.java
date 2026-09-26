@@ -268,9 +268,15 @@ public class CheckAll {
                 for (String method : lab.getNeededMethods()) {
                     check(id + " needed method fits the screen",
                           4 + method.length() <= Terminal.WIDTH, method);
-                    check(id + " needed method is written as a static header",
-                          method.startsWith("static ") && method.endsWith(")")
-                              && method.contains("("), method);
+                    String member = LabBench.memberOf(method);
+                    boolean ofMain = LabBench.ownerOf(method).equals("Main");
+                    boolean header = member.endsWith(")") && member.contains("(");
+                    boolean field = !member.contains("(")
+                              && member.split(" ").length >= 2;
+                    check(id + " needed member is a static header of Main, or "
+                              + "\"in Class:\" with a header or a field",
+                          ofMain ? member.startsWith("static ") && header
+                                 : header || field, method);
                 }
                 check(id + " explains its solution", lab.getWalkthrough().length() > 150,
                       "a solution without reasoning teaches copying");

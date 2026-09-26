@@ -67,14 +67,18 @@ public class CheckJava {
 
                 if (t.getType().equals(Task.DEBUG) && t.getCode().length > 0) {
                     boolean whole = isProgram(t.getCode());
-                    Result d = run(whole ? t.getCode() : wrap(t.getCode()),
-                                   t.getInput());
+                    boolean mixed = !whole && isMixed(t.getCode());
+                    Result d = run(asProgram(t.getCode()), t.getInput());
                     if (d.compiled) {
                         check(tag + " snippet really fails to compile", false,
                               "it compiled");
                         continue;
                     }
                     int line = d.firstErrorLine - (whole ? 0 : WRAP_OFFSET);
+                    if (mixed) {
+                        int at = d.firstErrorLine - 1;
+                        line = at >= 0 && at < origin.length ? origin[at] : -1;
+                    }
                     check(tag + " error is on the stated line",
                           t.matches(String.valueOf(line)),
                           "javac reports line " + line + ", task expects "
@@ -109,7 +113,7 @@ public class CheckJava {
         }
 
         String[] typed = m.getExampleInput();
-        Result ex = run(isProgram(code) ? code : wrap(code), typed);
+        Result ex = run(asProgram(code), typed);
 
         if (first.startsWith("(") && first.contains("does not compile")) {
             check(id + " example really does not compile", !ex.compiled,
@@ -130,7 +134,7 @@ public class CheckJava {
     static void checkPredict(String tag, Task t) throws Exception {
         String[] code = t.getCode();
         String prompt = t.getPrompt().toLowerCase();
-        Result p = run(isProgram(code) ? code : wrap(code), t.getInput());
+        Result p = run(asProgram(code), t.getInput());
         if (!p.compiled) {
             check(tag + " snippet compiles", false, p.errors);
             return;
@@ -223,11 +227,93 @@ public class CheckJava {
 
     static boolean isProgram(String[] lines) {
         for (String line : lines) {
-            if (line.contains("class ")) {
+            if (line.contains("public class ") || line.startsWith("import ")) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * From Campaign 06 on, a snippet can declare a small class of its own at
+     * the left margin - "class Host { ... }" - beside the statements that use
+     * it. The class goes into the file after Main, the statements into main.
+     */
+    static boolean isMixed(String[] snippet) {
+        for (String line : snippet) {
+            if (line.startsWith("class ")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** For a mixed snippet: file line (index) to snippet line (1-based). */
+    static int[] origin = new int[0];
+
+    static String[] wrapMixed(String[] snippet) {
+        List<String> file = new ArrayList<>();
+        List<Integer> from = new ArrayList<>();
+        List<Integer> statements = new ArrayList<>();
+        List<Integer> classes = new ArrayList<>();
+        int depth = 0;
+        for (int i = 0; i < snippet.length; i++) {
+            String line = snippet[i];
+            if (depth == 0 && !line.startsWith("class ")) {
+                statements.add(i);
+                continue;
+            }
+            classes.add(i);
+            depth += count(line, '{') - count(line, '}');
+        }
+        String[] body = new String[statements.size()];
+        for (int k = 0; k < body.length; k++) {
+            body[k] = snippet[statements.get(k)];
+        }
+        boolean classBody = isClassBody(body);
+        file.add("import java.util.*;");
+        from.add(0);
+        file.add("public class Main {");
+        from.add(0);
+        if (!classBody) {
+            file.add("    public static void main(String[] args) {");
+            from.add(0);
+        }
+        for (int k : statements) {
+            file.add((classBody ? "    " : "        ") + snippet[k]);
+            from.add(k + 1);
+        }
+        if (!classBody) {
+            file.add("    }");
+            from.add(0);
+        }
+        file.add("}");
+        from.add(0);
+        for (int k : classes) {
+            file.add(snippet[k]);
+            from.add(k + 1);
+        }
+        origin = new int[from.size()];
+        for (int k = 0; k < origin.length; k++) {
+            origin[k] = from.get(k);
+        }
+        return file.toArray(new String[0]);
+    }
+
+    static int count(String text, char c) {
+        int n = 0;
+        for (char x : text.toCharArray()) {
+            n += x == c ? 1 : 0;
+        }
+        return n;
+    }
+
+    /** Whole program, mixed snippet, or statements - whichever it is. */
+    static String[] asProgram(String[] code) {
+        if (isProgram(code)) {
+            return code;
+        }
+        return isMixed(code) ? wrapMixed(code) : wrap(code);
     }
 
     /**
