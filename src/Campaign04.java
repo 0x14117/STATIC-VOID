@@ -3110,5 +3110,1036 @@ public class Campaign04 {
                 + "one, so passes multiply. Give each loop its own variable. "
                 + "break and continue affect only the innermost loop.")
             .next("Next: choosing the right loop for the job."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(16), "The Right Loop for the Job", 4)
+            .brief(
+                "Three new tools arrive on the same day: one checks ports 1 "
+                + "to 1024, one reads commands until quit, one asks for a PIN "
+                + "and must ask at least once. Any loop CAN do all three. "
+                + "Choosing the one that fits makes each tool obviously "
+                + "right.")
+            .willLearn("Choosing a loop")
+            .whyUseful(
+                "The right loop says what the code means before anyone reads "
+                + "the body. The wrong one works - with extra flags, "
+                + "duplicated reads, or off-by-one risks that did not need to "
+                + "exist.")
+            .concept("Choosing a loop",
+                "All of Java's loops can do each other's jobs, but each fits "
+                + "one situation best:\n"
+                + "\n"
+                + "    for             the range or count is known\n"
+                + "                    ports 1 to 1024, every character\n"
+                + "\n"
+                + "    while           repeat until something happens,\n"
+                + "                    and zero passes is fine\n"
+                + "                    read until done\n"
+                + "\n"
+                + "    do-while        at least one pass is required\n"
+                + "                    ask, then decide whether to ask again\n"
+                + "\n"
+                + "    while (true)    the natural test is in the middle\n"
+                + "     + break        read, check for END, then use\n"
+                + "\n"
+                + "A quick test: can you say, before the loop starts, how many "
+                + "passes there will be? Then use for. If not, a while "
+                + "family loop.\n"
+                + "\n"
+                + "Rewriting one loop as another is a good way to understand "
+                + "both. A for loop is a while loop with its start, test and "
+                + "update gathered into the header.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int total = 0;",
+                "        for (int i = 1; i <= 5; i++) {",
+                "            total += i;",
+                "        }",
+                "        System.out.println(\"for:   \" + total);",
+                "",
+                "        total = 0;",
+                "        int j = 1;",
+                "        while (j <= 5) {",
+                "            total += j;",
+                "            j++;",
+                "        }",
+                "        System.out.println(\"while: \" + total);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "for:   15",
+                "while: 15")
+            .lineByLine(
+                new String[]{"for (int i = 1; i <= 5; i++)",
+                    "A known range: for says so in one line."},
+                new String[]{"int j = 1; ... j++;",
+                    "The same loop as a while: three pieces in three "
+                    + "places."},
+                new String[]{"15 and 15",
+                    "Same result - but the for version is easier to check."})
+            .predict(new Task(Task.CHOICE,
+                    "A program reads log lines until it meets the line END, "
+                    + "and a log might be empty. Which loop fits best?")
+                .choices("for", "while (or while (true) with break)",
+                         "do-while", "Nested for loops")
+                .accept("2", "b")
+                .hints("Is the number of lines known in advance?",
+                       "Could there be zero lines?")
+                .explain(
+                    "while - the count is unknown and zero passes is fine. "
+                    + "while (true) with a break on END is just as good.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "A tool must show a menu, read a choice, and show the menu "
+                    + "again unless the choice was 9. Which loop fits best?")
+                .choices("for", "while with a priming read", "do-while",
+                         "No loop is needed")
+                .accept("3", "c")
+                .hints("Must the menu appear at least once?",
+                       "The decision comes after the first pass.")
+                .explain(
+                    "do-while: the menu is always shown once, and the test "
+                    + "comes after the choice is read.")
+                .xp(10))
+            .objective(
+                "Rewrite a counting while as a for.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        // rewrite as one for header:",
+                "        //   int k = 0;  while (k < 4) { ...  k++; }",
+                "            System.out.println(\"Shard \" + k + \" checked\");",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "The comment shows a while loop's start, test and update. "
+                + "Write the for header that does the same.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the for header.")
+                .accept("for (int k = 0; k < 4; k++) {",
+                        "for(int k = 0; k < 4; k++) {",
+                        "for (int k = 0; k < 4; k++){",
+                        "for (int k = 0; k <= 3; k++) {")
+                .hints(
+                    "Start, test and update, in that order.",
+                    "Separated by semicolons.",
+                    "for (int k = 0; k < 4; k++) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        for (int k = 0; k < 4; k++) {",
+                    "            System.out.println(\"Shard \" + k + \" checked\");",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "int k = 0 is the start, k < 4 the test and k++ the "
+                    + "update - the same three pieces the while loop had, now "
+                    + "in one place. It prints Shard 0 to Shard 3.\n"
+                    + "\n"
+                    + "k now exists only inside the loop, which the while "
+                    + "version could not promise.")
+                .explain(
+                    "for (int k = 0; k < 4; k++) { - start, test, update.")
+                .xp(15))
+            .mistakes(
+                new String[]{"for with an unknown end",
+                    "Forcing a sentinel loop into a for hides the real test."},
+                new String[]{"while where do-while fits",
+                    "Leads to a duplicated read before the loop."},
+                new String[]{"while (true) without a clear break",
+                    "Keep the exit obvious, near the top."})
+            .cyber(
+                "Code reviews in security teams look for loops that could run "
+                + "longer than intended. A for loop over a fixed range is easy "
+                + "to reason about: it WILL end, and you can see when. A "
+                + "while loop driven by outside data needs a second look - "
+                + "who controls the condition, and is there a limit? Choosing "
+                + "the loop that matches the job makes that review quicker "
+                + "and more reliable.")
+            .check(new Task(Task.CHOICE,
+                    "Checking every port from 1 to 1024. Which loop?")
+                .choices("for", "while (true)", "do-while",
+                         "A recursive method")
+                .accept("1", "a")
+                .hints("Is the range known?",
+                       "Start, test and update fit in one line.")
+                .explain(
+                    "for - the range is known before the loop starts.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int n = 0;",
+                    "for (int i = 3; i < 12; i += 3) {",
+                    "    n++;",
+                    "}",
+                    "System.out.println(n);")
+                .accept("3")
+                .hints("i takes 3, 6, 9.",
+                       "12 is not less than 12.")
+                .explain(
+                    "3. The passes are for i = 3, 6 and 9.")
+                .xp(10))
+            .recap(
+                "for: the range is known. while: repeat until something "
+                + "happens, zero passes allowed. do-while: at least once. "
+                + "while (true) + break: the test belongs in the middle. "
+                + "Pick the one that says what you mean.")
+            .next("Next: loops that call methods."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(17), "Loops That Call Methods", 5)
+            .brief(
+                "The port audit loop has grown an if with four conditions in "
+                + "it, and nobody can tell which ports it flags or why. "
+                + "Campaign 03's methods fix that: the loop handles the "
+                + "repeating, and a method with an honest name handles the "
+                + "rule.")
+            .willLearn("Loops and methods")
+            .whyUseful(
+                "Loops and methods together are how real programs are "
+                + "shaped. The loop says 'for every item'; the method says "
+                + "'what to do with one'. Each can be read and tested on its "
+                + "own.")
+            .concept("Loops and methods",
+                "A loop body can call a method on every pass:\n"
+                + "\n"
+                + "    for (int port = 20; port <= 25; port++) {\n"
+                + "        if (isRisky(port)) {\n"
+                + "            System.out.println(\"Flag \" + port);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "The split of jobs is clean:\n"
+                + "\n"
+                + "    the loop      WHICH items, and in what order\n"
+                + "    the method    WHAT to decide about one item\n"
+                + "\n"
+                + "isRisky can be tested with single values (Campaign 03, "
+                + "mission 23) without running the loop at all, and the loop "
+                + "can be read without knowing the rule.\n"
+                + "\n"
+                + "It works the other way round too: a method can CONTAIN a "
+                + "loop. countDigits(text) loops over the characters and "
+                + "returns a number, and its caller just sees one call:\n"
+                + "\n"
+                + "    int d = countDigits(password);\n"
+                + "\n"
+                + "A loop inside a method is invisible to the caller - which "
+                + "is exactly what a good method should be.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int port = 20; port <= 25; port++) {",
+                "            if (isRisky(port)) {",
+                "                System.out.println(\"Flag \" + port);",
+                "            }",
+                "        }",
+                "        int d = countDigits(\"pa55w0rd\");",
+                "        System.out.println(\"Digits in pa55w0rd: \" + d);",
+                "    }",
+                "",
+                "    static boolean isRisky(int port) {",
+                "        return port == 21 || port == 23;",
+                "    }",
+                "",
+                "    static int countDigits(String text) {",
+                "        int count = 0;",
+                "        for (int i = 0; i < text.length(); i++) {",
+                "            if (Character.isDigit(text.charAt(i))) {",
+                "                count++;",
+                "            }",
+                "        }",
+                "        return count;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Flag 21",
+                "Flag 23",
+                "Digits in pa55w0rd: 3")
+            .lineByLine(
+                new String[]{"if (isRisky(port))",
+                    "The loop asks; the method decides."},
+                new String[]{"return port == 21 || port == 23;",
+                    "FTP and telnet: the rule in one place."},
+                new String[]{"int d = countDigits(\"pa55w0rd\");",
+                    "A method with a loop inside - the caller sees one "
+                    + "call."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int twice(int n) {",
+                    "    return n * 2;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    int total = 0;",
+                    "    for (int i = 1; i <= 3; i++) {",
+                    "        total += twice(i);",
+                    "    }",
+                    "    System.out.println(total);",
+                    "}")
+                .accept("12")
+                .hints("twice gives 2, 4, 6.",
+                       "They are added up.")
+                .explain(
+                    "12. Each pass calls twice and adds the result: 2 + 4 + "
+                    + "6.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "static int countA(String s) {",
+                    "    int n = 0;",
+                    "    for (int i = 0; i < s.length(); i++) {",
+                    "        if (s.charAt(i) == 'a') {",
+                    "            n++;",
+                    "        }",
+                    "    }",
+                    "    return n;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    System.out.println(countA(\"admin\") + countA(\"banana\"));",
+                    "}")
+                .accept("4")
+                .hints("admin has one a.",
+                       "banana has three.")
+                .explain(
+                    "4. Each call runs its own loop and returns its count: 1 "
+                    + "+ 3.")
+                .xp(15))
+            .objective(
+                "Flag risky ports using the rule method.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        for (int port = 20; port <= 25; port++) {",
+                "            // the if line: ask isRisky about this port",
+                "                System.out.println(\"Flag \" + port);",
+                "            }",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isRisky(int port) {",
+                "        return port == 21 || port == 23;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line inside the loop: true when isRisky says "
+                + "yes for port.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (isRisky(port)) {", "if(isRisky(port)) {",
+                        "if (isRisky(port)){")
+                .hints(
+                    "The method already returns a boolean.",
+                    "Call it inside the if's brackets.",
+                    "if (isRisky(port)) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        for (int port = 20; port <= 25; port++) {",
+                    "            if (isRisky(port)) {",
+                    "                System.out.println(\"Flag \" + port);",
+                    "            }",
+                    "        }",
+                    "    }",
+                    "",
+                    "    static boolean isRisky(int port) {",
+                    "        return port == 21 || port == 23;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The loop visits 20 to 25 and asks isRisky about each. "
+                    + "Only 21 and 23 get a yes, so two lines are printed.\n"
+                    + "\n"
+                    + "When the list of risky ports changes, only isRisky "
+                    + "changes. The loop - which ports are checked - and the "
+                    + "rule - which ones are flagged - are separate "
+                    + "decisions, in separate places.")
+                .explain(
+                    "if (isRisky(port)) { - the loop asks, the method "
+                    + "decides.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Rules buried in the loop body",
+                    "Move them into a named method."},
+                new String[]{"Printing inside the helper",
+                    "Return the answer; let the loop decide what to show."},
+                new String[]{"Calling the same method twice per pass",
+                    "Store the result if you need it twice."})
+            .cyber(
+                "Separating 'which items' from 'what rule' is how detection "
+                + "engines are built: the engine loops over events, and each "
+                + "rule is a small, testable function. Security teams can "
+                + "then add, fix and review rules without touching the loop "
+                + "that reads millions of events - and a mistake in one rule "
+                + "cannot break the others.")
+            .check(new Task(Task.CHOICE,
+                    "In a loop that calls isRisky(port), which part decides "
+                    + "WHICH ports are checked?")
+                .choices("isRisky", "The loop", "main's return type",
+                         "The println")
+                .accept("2", "b")
+                .hints("The method decides about one port.",
+                       "Who chooses the range?")
+                .explain(
+                    "The loop chooses which ports; isRisky decides about each "
+                    + "one.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why put the character loop inside countDigits instead of "
+                    + "in main?")
+                .choices("Loops cannot go in main",
+                         "Callers get a simple answer and the loop can be "
+                         + "reused and tested",
+                         "It runs faster",
+                         "Methods must contain a loop")
+                .accept("2", "b")
+                .hints("What does the caller see?",
+                       "One call, one number.")
+                .explain(
+                    "Callers see one call returning a number; the loop is "
+                    + "written, tested and fixed in one place.")
+                .xp(10))
+            .recap(
+                "The loop says which items; a method says what to do with "
+                + "one. Methods can contain loops too, hidden behind a clear "
+                + "name. Both halves stay small and testable.")
+            .next("Next: counting kinds of characters."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(18), "What Is This Password Made Of?", 5)
+            .brief(
+                "The new-account form needs a password meter: how many "
+                + "upper-case letters, lower-case letters, digits and symbols "
+                + "does the password contain? One loop over the characters, "
+                + "four counters, and the Character methods from Campaign "
+                + "02.")
+            .willLearn("Character counting")
+            .whyUseful(
+                "Classifying every character is the core of password "
+                + "meters, input validators and log cleaners. Once you can "
+                + "count each kind, any rule about text becomes a comparison "
+                + "of counts.")
+            .concept("Character counting",
+                "Loop over the characters, and for each one decide which kind "
+                + "it is:\n"
+                + "\n"
+                + "    for (int i = 0; i < pw.length(); i++) {\n"
+                + "        char c = pw.charAt(i);\n"
+                + "        if (Character.isUpperCase(c)) {\n"
+                + "            upper++;\n"
+                + "        } else if (Character.isLowerCase(c)) {\n"
+                + "            lower++;\n"
+                + "        } else if (Character.isDigit(c)) {\n"
+                + "            digits++;\n"
+                + "        } else {\n"
+                + "            symbols++;\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "An else-if chain means each character lands in EXACTLY one "
+                + "counter - so the four counts always add up to the length. "
+                + "That is a useful check when testing.\n"
+                + "\n"
+                + "The final else catches everything else: punctuation, "
+                + "spaces, and characters from other alphabets. Because it "
+                + "is the default, nothing can slip through uncounted.\n"
+                + "\n"
+                + "Rules then become comparisons: 'at least one digit' is "
+                + "digits >= 1; 'at least 12 characters' is length() >= 12. "
+                + "Current guidance values length far above mixing symbols - "
+                + "a long passphrase beats a short jumble - so a good meter "
+                + "weighs length most.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String pw = \"Tr0ub4dor&3\";",
+                "        int upper = 0;",
+                "        int lower = 0;",
+                "        int digits = 0;",
+                "        int symbols = 0;",
+                "        for (int i = 0; i < pw.length(); i++) {",
+                "            char c = pw.charAt(i);",
+                "            if (Character.isUpperCase(c)) {",
+                "                upper++;",
+                "            } else if (Character.isLowerCase(c)) {",
+                "                lower++;",
+                "            } else if (Character.isDigit(c)) {",
+                "                digits++;",
+                "            } else {",
+                "                symbols++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Upper: \" + upper + \"  Lower: \" + lower);",
+                "        System.out.println(\"Digits: \" + digits",
+                "                + \"  Symbols: \" + symbols);",
+                "        System.out.println(\"Length: \" + pw.length());",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Upper: 1  Lower: 6",
+                "Digits: 3  Symbols: 1",
+                "Length: 11")
+            .lineByLine(
+                new String[]{"char c = pw.charAt(i);",
+                    "Look at one character per pass."},
+                new String[]{"else if ... else",
+                    "Each character lands in exactly one counter."},
+                new String[]{"1 + 6 + 3 + 1",
+                    "The counts add up to the length, 11."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"ab12!\";",
+                    "int digits = 0;",
+                    "for (int i = 0; i < s.length(); i++) {",
+                    "    if (Character.isDigit(s.charAt(i))) {",
+                    "        digits++;",
+                    "    }",
+                    "}",
+                    "System.out.println(digits);")
+                .accept("2")
+                .hints("Which characters are digits?",
+                       "1 and 2.")
+                .explain(
+                    "2. Only '1' and '2' pass isDigit; letters and ! do "
+                    + "not.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"Hi 5!\";",
+                    "int other = 0;",
+                    "for (int i = 0; i < s.length(); i++) {",
+                    "    char c = s.charAt(i);",
+                    "    if (!Character.isLetterOrDigit(c)) {",
+                    "        other++;",
+                    "    }",
+                    "}",
+                    "System.out.println(other);")
+                .accept("2")
+                .hints("The space counts.",
+                       "So does the !.")
+                .explain(
+                    "2: the space and the !. Letters and the digit 5 are not "
+                    + "counted.")
+                .xp(15))
+            .objective(
+                "Count the digits in a password.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String pw = \"n0rth5tar\";",
+                "        int digits = 0;",
+                "        for (int i = 0; i < pw.length(); i++) {",
+                "            // the if line: is this character a digit?",
+                "                digits++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Digits: \" + digits);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if line: true when the character at position i is "
+                + "a digit.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (Character.isDigit(pw.charAt(i))) {",
+                        "if(Character.isDigit(pw.charAt(i))) {",
+                        "if (Character.isDigit(pw.charAt(i))){")
+                .hints(
+                    "Character.isDigit takes a char.",
+                    "The char is pw.charAt(i).",
+                    "if (Character.isDigit(pw.charAt(i))) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String pw = \"n0rth5tar\";",
+                    "        int digits = 0;",
+                    "        for (int i = 0; i < pw.length(); i++) {",
+                    "            if (Character.isDigit(pw.charAt(i))) {",
+                    "                digits++;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(\"Digits: \" + digits);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Every character is looked at once; isDigit says yes for "
+                    + "'0' and '5', so the program prints Digits: 2.\n"
+                    + "\n"
+                    + "Swapping o for 0 and s for 5 adds digits to the count, "
+                    + "but attackers' wordlists include those swaps - which "
+                    + "is why a meter should never treat 'has a digit' as "
+                    + "strong on its own.")
+                .explain(
+                    "if (Character.isDigit(pw.charAt(i))) {")
+                .xp(20))
+            .mistakes(
+                new String[]{"Separate ifs instead of else if",
+                    "A character could be counted twice - or, with gaps, not "
+                    + "at all."},
+                new String[]{"No final else",
+                    "Symbols and spaces go uncounted."},
+                new String[]{"Scoring symbols above length",
+                    "Length matters most."})
+            .cyber(
+                "Password rules built on counts were the standard for years: "
+                + "one upper case, one digit, one symbol. The result was "
+                + "Password1! - technically compliant and near the top of "
+                + "every leaked-password list. Current guidance (NIST's, for "
+                + "example) favours length and checking against known "
+                + "breached passwords over composition rules.\n"
+                + "\n"
+                + "Counting characters is still valuable: it powers meters, "
+                + "flags suspicious input, and spots control characters that "
+                + "should never appear in a user name.")
+            .check(new Task(Task.CHOICE,
+                    "Why use else if between the four character kinds?")
+                .choices("It is faster to type",
+                         "So each character is counted exactly once",
+                         "Character methods need it",
+                         "Loops cannot contain separate ifs")
+                .accept("2", "b")
+                .hints("Could a character match twice with separate ifs?",
+                       "The counts should add up to the length.")
+                .explain(
+                    "Each character lands in exactly one counter, so the "
+                    + "totals add up to the length.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"AbC\";",
+                    "int upper = 0;",
+                    "for (int i = 0; i < s.length(); i++) {",
+                    "    if (Character.isUpperCase(s.charAt(i))) {",
+                    "        upper++;",
+                    "    }",
+                    "}",
+                    "System.out.println(upper + \" of \" + s.length());")
+                .accept("2 of 3")
+                .hints("A and C are upper case.",
+                       "The length is 3.")
+                .explain(
+                    "2 of 3 - A and C are upper case; b is not.")
+                .xp(10))
+            .recap(
+                "One loop, one character per pass, an else-if chain with a "
+                + "final else: every character counted exactly once. Rules "
+                + "become comparisons of counts - and length should carry the "
+                + "most weight.")
+            .next("Next: searching text for something."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(19), "Searching Text", 5)
+            .brief(
+                "indexOf finds things - but only exact text. The log filter "
+                + "needs to find the first character that should NEVER be in "
+                + "a user name: a control character, a quote, a semicolon. "
+                + "That means searching yourself, one character at a time.")
+            .willLearn("Linear search")
+            .whyUseful(
+                "Searching item by item until a match is found is one of "
+                + "the most common loops in all of programming. Writing it "
+                + "yourself lets you search for anything a method can "
+                + "describe, not just fixed text.")
+            .concept("Linear search",
+                "A LINEAR SEARCH checks each item in order until it finds a "
+                + "match - or runs out:\n"
+                + "\n"
+                + "    int found = -1;\n"
+                + "    for (int i = 0; i < text.length(); i++) {\n"
+                + "        if (isForbidden(text.charAt(i))) {\n"
+                + "            found = i;\n"
+                + "            break;\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "Three parts worth copying:\n"
+                + "\n"
+                + "    found = -1     'not found yet', the same signal\n"
+                + "                   indexOf uses\n"
+                + "    break          stop at the FIRST match\n"
+                + "    after          -1 means no match anywhere\n"
+                + "\n"
+                + "Without the break, the loop keeps going and found ends up "
+                + "holding the LAST match instead of the first.\n"
+                + "\n"
+                + "A search for 'is there ANY?' can use a boolean instead: "
+                + "start false, set true on a match. A search for 'are they "
+                + "ALL?' flips it: start true, set false on the first "
+                + "failure - one bad character is enough to reject.\n"
+                + "\n"
+                + "The worst case checks every item. For text that is fine; "
+                + "Campaign 05 and beyond meet cases where it is not.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String user = \"bob';--\";",
+                "        int found = -1;",
+                "        for (int i = 0; i < user.length(); i++) {",
+                "            if (isForbidden(user.charAt(i))) {",
+                "                found = i;",
+                "                break;",
+                "            }",
+                "        }",
+                "        if (found == -1) {",
+                "            System.out.println(\"Clean user name\");",
+                "        } else {",
+                "            System.out.println(\"Forbidden character at \" + found);",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isForbidden(char c) {",
+                "        return c == '\\'' || c == ';' || c == '\"' || c < ' ';",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Forbidden character at 3")
+            .lineByLine(
+                new String[]{"int found = -1;",
+                    "Nothing found yet."},
+                new String[]{"break;",
+                    "Stop at the first forbidden character - the quote at "
+                    + "position 3."},
+                new String[]{"c < ' '",
+                    "Characters before the space are invisible control "
+                    + "characters, like line breaks."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"web-01.local\";",
+                    "int at = -1;",
+                    "for (int i = 0; i < s.length(); i++) {",
+                    "    if (s.charAt(i) == '.') {",
+                    "        at = i;",
+                    "        break;",
+                    "    }",
+                    "}",
+                    "System.out.println(at);")
+                .accept("6")
+                .hints("Count from 0: w e b - 0 1 .",
+                       "The first dot stops the loop.")
+                .explain(
+                    "6. The dot is the seventh character, at position 6.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "No break this time. What does this print?")
+                .code(
+                    "String s = \"a.b.c\";",
+                    "int at = -1;",
+                    "for (int i = 0; i < s.length(); i++) {",
+                    "    if (s.charAt(i) == '.') {",
+                    "        at = i;",
+                    "    }",
+                    "}",
+                    "System.out.println(at);")
+                .accept("3")
+                .hints("The loop keeps going after the first dot.",
+                       "at is overwritten by the last match.")
+                .explain(
+                    "3 - the LAST dot, because nothing stopped the loop at "
+                    + "the first one (position 1).")
+                .xp(15))
+            .objective(
+                "Check whether every character of a code is a digit.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String code = \"48a516\";",
+                "        boolean allDigits = true;",
+                "        for (int i = 0; i < code.length(); i++) {",
+                "            if (!Character.isDigit(code.charAt(i))) {",
+                "                // one bad character is enough: record it",
+                "                break;",
+                "            }",
+                "        }",
+                "        System.out.println(allDigits ? \"VALID\" : \"INVALID\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that records the failure: set allDigits to "
+                + "false.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line.")
+                .accept("allDigits = false;")
+                .hints(
+                    "allDigits started as true.",
+                    "One non-digit makes it false.",
+                    "allDigits = false;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String code = \"48a516\";",
+                    "        boolean allDigits = true;",
+                    "        for (int i = 0; i < code.length(); i++) {",
+                    "            if (!Character.isDigit(code.charAt(i))) {",
+                    "                allDigits = false;",
+                    "                break;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(allDigits ? \"VALID\" : \"INVALID\");",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "An 'are they ALL?' search starts true and flips to false "
+                    + "on the first failure. The a at position 2 does it, the "
+                    + "break stops there, and the program prints INVALID.\n"
+                    + "\n"
+                    + "This is what text.matches(\"[0-9]+\") does for you - "
+                    + "except that the loop can test any rule you can write, "
+                    + "and an empty code would count as VALID here, which a "
+                    + "real check must refuse separately.")
+                .explain(
+                    "allDigits = false; then break - one failure decides.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Forgetting break",
+                    "You get the last match, not the first."},
+                new String[]{"Starting found at 0",
+                    "0 is a real position. -1 means not found."},
+                new String[]{"'All' searches starting false",
+                    "Start true; one failure flips it."})
+            .cyber(
+                "Scanning input for forbidden characters is an old defence, "
+                + "and a weak one on its own: a block-list misses characters "
+                + "nobody thought of. The example's rule catches quotes, "
+                + "semicolons and control characters, which covers many "
+                + "injection tricks - but an allow-list (letters, digits, dot "
+                + "and hyphen only) is stronger. Searches like this are still "
+                + "useful for DETECTING suspicious input and logging it for "
+                + "an analyst.")
+            .check(new Task(Task.CHOICE,
+                    "A linear search finishes with found still -1. What does "
+                    + "that mean?")
+                .choices("The match was at position -1",
+                         "No match anywhere",
+                         "The first character matched",
+                         "The loop crashed")
+                .accept("2", "b")
+                .hints("It started as -1.",
+                       "It only changes on a match.")
+                .explain(
+                    "No match anywhere - it was never replaced.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "To check that EVERY character is a letter, the flag "
+                    + "should start as:")
+                .choices("false, set true on each letter",
+                         "true, set false on the first non-letter",
+                         "-1",
+                         "The text's length")
+                .accept("2", "b")
+                .hints("One failure is enough to reject.",
+                       "Innocent until proven otherwise.")
+                .explain(
+                    "true, flipped to false by the first non-letter - and "
+                    + "then break.")
+                .xp(10))
+            .recap(
+                "Linear search: start at 'not found' (-1 or a flag), check "
+                + "each item, break on the first match. 'Any?' starts false; "
+                + "'all?' starts true and flips on the first failure.")
+            .next("Next: counting the odds - and why lockout works."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(20), "Counting the Odds", 5)
+            .brief(
+                "Management asks: is a 4-digit PIN safe enough for the badge "
+                + "system? The honest answer is a number: how many PINs there "
+                + "are, and how long it would take to get through them with "
+                + "and without a lockout. A loop can build that number up.")
+            .willLearn("Key space")
+            .whyUseful(
+                "Key space - how many possible secrets there are - is the "
+                + "arithmetic behind every password policy, PIN length and "
+                + "lockout setting. Being able to calculate it turns 'is it "
+                + "secure?' into a question with an answer.")
+            .concept("Key space",
+                "The KEY SPACE is the number of possible secrets. Each extra "
+                + "character multiplies it by the number of choices for that "
+                + "character:\n"
+                + "\n"
+                + "    digits only (10 choices)\n"
+                + "        1 digit     10\n"
+                + "        4 digits    10 x 10 x 10 x 10 = 10,000\n"
+                + "        6 digits    1,000,000\n"
+                + "\n"
+                + "That is a product accumulator (mission 9): start at 1 and "
+                + "multiply once per character:\n"
+                + "\n"
+                + "    long combos = 1;\n"
+                + "    for (int i = 1; i <= length; i++) {\n"
+                + "        combos *= choices;\n"
+                + "    }\n"
+                + "\n"
+                + "long, not int: key spaces outgrow an int very quickly - 26 "
+                + "letters to the power 7 is already over 8 billion.\n"
+                + "\n"
+                + "WHY LOCKOUT WORKS. Without limits, software can test "
+                + "thousands of guesses a second, and 10,000 PINs fall in "
+                + "seconds. With a lockout of 5 attempts per 15 minutes, the "
+                + "same 10,000 need 2,000 lockout periods - about three "
+                + "weeks. The key space did not change; the RATE did. That is "
+                + "why defenders limit attempts, and why the next two "
+                + "missions build a lockout and a rate limiter.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        long combos = 1;",
+                "        for (int digits = 1; digits <= 6; digits++) {",
+                "            combos *= 10;",
+                "            System.out.println(digits + \"-digit PINs: \" + combos);",
+                "        }",
+                "        long periods = 10000 / 5;",
+                "        long minutes = periods * 15;",
+                "        System.out.println(\"4 digits, 5 tries per 15 min: \"",
+                "                + minutes / (60 * 24) + \" days\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "1-digit PINs: 10",
+                "2-digit PINs: 100",
+                "3-digit PINs: 1000",
+                "4-digit PINs: 10000",
+                "5-digit PINs: 100000",
+                "6-digit PINs: 1000000",
+                "4 digits, 5 tries per 15 min: 20 days")
+            .lineByLine(
+                new String[]{"long combos = 1;",
+                    "A product starts at 1. long, because it grows fast."},
+                new String[]{"combos *= 10;",
+                    "Each extra digit multiplies the choices by 10."},
+                new String[]{"10000 / 5 * 15 minutes",
+                    "Lockout turns seconds into weeks."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "long combos = 1;",
+                    "for (int i = 1; i <= 3; i++) {",
+                    "    combos *= 26;",
+                    "}",
+                    "System.out.println(combos);")
+                .accept("17576")
+                .hints("26 x 26 x 26.",
+                       "676 x 26.")
+                .explain(
+                    "17576 - every three-letter lower-case combination.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A PIN gains one more digit. What happens to the key "
+                    + "space?")
+                .choices("It goes up by 1", "It goes up by 10",
+                         "It is multiplied by 10", "It doubles")
+                .accept("3", "c")
+                .hints("Each position has 10 choices.",
+                       "Every old PIN now has 10 versions.")
+                .explain(
+                    "Multiplied by 10 - which is why length matters so much "
+                    + "more than anything else.")
+                .xp(10))
+            .objective(
+                "Work out the key space for 8 lower-case letters.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        long combos = 1;",
+                "        for (int i = 1; i <= 8; i++) {",
+                "            // multiply by the 26 choices for this letter",
+                "        }",
+                "        System.out.println(\"8 letters: \" + combos);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line inside the loop that multiplies combos by 26.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the multiplying line.")
+                .accept("combos *= 26;", "combos = combos * 26;",
+                        "combos = 26 * combos;")
+                .hints(
+                    "A product accumulator.",
+                    "*= multiplies a variable.",
+                    "combos *= 26;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        long combos = 1;",
+                    "        for (int i = 1; i <= 8; i++) {",
+                    "            combos *= 26;",
+                    "        }",
+                    "        System.out.println(\"8 letters: \" + combos);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Eight passes multiply 1 by 26 eight times, giving "
+                    + "208827064576 - about 209 billion. That fits in a long "
+                    + "but would have overflowed an int, which is why combos "
+                    + "is a long.\n"
+                    + "\n"
+                    + "Even 209 billion is small for a computer with no "
+                    + "limits on guessing. The defence is the combination: a "
+                    + "large key space AND a limit on attempts.")
+                .explain(
+                    "combos *= 26; - once per letter.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Starting a product at 0",
+                    "It stays 0 for ever."},
+                new String[]{"Using int",
+                    "Key spaces overflow an int fast. Use long."},
+                new String[]{"Adding instead of multiplying",
+                    "Each character MULTIPLIES the possibilities."})
+            .cyber(
+                "This arithmetic is how security teams set policy. A 4-digit "
+                + "PIN is acceptable on a bank card only because the card "
+                + "locks after three wrong tries: 10,000 possibilities, "
+                + "three guesses, odds of 3 in 10,000. The same 4 digits as "
+                + "an online password with no limit would be found almost "
+                + "instantly.\n"
+                + "\n"
+                + "So strength comes from two places: key space (length, "
+                + "variety) and rate (lockouts, delays, rate limits). "
+                + "Missions 21 and 22 build the rate side.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "long combos = 1;",
+                    "for (int i = 1; i <= 4; i++) {",
+                    "    combos *= 10;",
+                    "}",
+                    "System.out.println(combos / 3);")
+                .accept("3333")
+                .hints("combos is 10000.",
+                       "Integer division by 3.")
+                .explain(
+                    "3333 - 10,000 PINs split into groups of three tries: the "
+                    + "number of lockouts needed with a 3-try card.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "A lockout does not change the key space. What does it "
+                    + "change?")
+                .choices("The number of possible PINs",
+                         "How fast guesses can be tried",
+                         "The PIN's length",
+                         "Nothing")
+                .accept("2", "b")
+                .hints("Same PINs, fewer guesses per hour.",
+                       "Rate.")
+                .explain(
+                    "The rate of guessing - which turns seconds into weeks.")
+                .xp(10))
+            .recap(
+                "Key space = choices per character, multiplied once per "
+                + "character: a product accumulator starting at 1, in a long. "
+                + "Strength is key space AND rate - lockouts and limits make "
+                + "even small key spaces slow to exhaust.")
+            .next("Next: building a lockout."));
     }
 }

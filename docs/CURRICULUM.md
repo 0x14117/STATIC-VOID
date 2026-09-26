@@ -165,7 +165,7 @@ Each line is one mission, one idea.
 17. Loops that call methods
 18. Counting digits, letters and symbols: password strength
 19. Searching text character by character
-20. Brute force, and why lockout works
+20. Counting the odds: key space, and why lockout works
 21. A lockout simulator
 22. Rate limiting over time
 23. A menu loop
@@ -174,7 +174,7 @@ Each line is one mission, one idea.
 26. Loop tracing on paper
 27. Common loop bugs
 28. A log-line scanner
-29. A port-range sweeper, simulated
+29. A firewall rule checker over a port range
 30. LOOP//CONTROL COMPLETE: checkpoint
 
 ### 05 COLLECTIONS
@@ -517,7 +517,7 @@ source contains the answers as typed text.
 | L10 | Password Strength | MEDIUM | C |
 | L11 | Three Strikes Login | MEDIUM | C |
 | L12 | Menu Loop | MEDIUM | C |
-| L13 | Guess the PIN | MEDIUM | S |
+| L13 | Higher or Lower | MEDIUM | S |
 | L14 | Character Frequency | MEDIUM | S |
 | L15 | Box Drawer | MEDIUM | S |
 | L16 | Prime Checker | MEDIUM | S |
@@ -526,9 +526,9 @@ source contains the answers as typed text.
 | L19 | Caesar Cipher | MEDIUM | C |
 | L20 | Vowel Stripper | SMALL | S |
 | L21 | Rate Limiter | BIG | S |
-| L22 | Brute-Force Estimator | BIG | S |
+| L22 | Lockout Time Calculator | BIG | S |
 | L23 | Log Scanner | BIG | C |
-| L24 | Port Range Report | BIG | S |
+| L24 | Firewall Range Report | BIG | S |
 | L25 | Run-Length Encoder | BIG | S |
 | L26 | Hex Dump | BIG | S |
 | L27 | Pattern Printer | MEDIUM | S |
