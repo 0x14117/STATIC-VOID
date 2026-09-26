@@ -5228,5 +5228,1259 @@ public class Campaign05 {
                 + "first, digits as characters. Sort a copy to keep the "
                 + "original order.")
             .next("Next: putting it together - a live watchlist."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(26), "A Live Watchlist", 5)
+            .brief(
+                "The SOC keeps a watchlist of accounts under observation. "
+                + "Analysts send it short commands through the shift: ADD "
+                + "an account, DEL one, CHECK whether one is watched. Each "
+                + "command is one line of text. Build the watchlist that "
+                + "reads them - split, ArrayList and methods, together.")
+            .willLearn("Watchlists")
+            .whyUseful(
+                "Most small security tools are this shape: a list kept in "
+                + "memory, changed by commands, asked questions. Writing one "
+                + "brings the campaign's list methods together with split "
+                + "and the careful checks that make it safe to feed.")
+            .concept("Watchlists",
+                "A watchlist is a list with RULES about what may go in:\n"
+                + "\n"
+                + "    no duplicates   ADD checks contains first\n"
+                + "    one spelling    names are lower-cased on the way in\n"
+                + "    a size cap      a list fed from outside needs one\n"
+                + "    full removal    DEL removes every copy\n"
+                + "\n"
+                + "Each command line is split into a command and a name:\n"
+                + "\n"
+                + "    String[] parts = line.split(\" \");\n"
+                + "    if (parts.length != 2)   reject it - malformed\n"
+                + "\n"
+                + "Then one method per command keeps main short. Putting the "
+                + "rules INSIDE the methods means no caller can forget "
+                + "them:\n"
+                + "\n"
+                + "    static String add(ArrayList<String> w, String n)\n"
+                + "        lower-case n; refuse if full or present;\n"
+                + "        otherwise add, and report what happened\n"
+                + "\n"
+                + "The list is passed to each method - and because a list "
+                + "variable is a reference (mission 10), the methods change "
+                + "the caller's list.\n"
+                + "\n"
+                + "Every command gets a reply, including the refusals. A "
+                + "tool that silently ignores a bad command leaves the "
+                + "analyst believing it worked.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    static final int MAX = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> watch = new ArrayList<>();",
+                "        String[] commands = {\"ADD jsmith\", \"ADD JSmith\",",
+                "                \"CHECK jsmith\", \"ADD temp01\", \"DEL jsmith\",",
+                "                \"CHECK jsmith\", \"PURGE\"};",
+                "        for (String line : commands) {",
+                "            System.out.println(line + \" -> \" + run(watch, line));",
+                "        }",
+                "        System.out.println(\"Watching: \" + watch);",
+                "    }",
+                "",
+                "    static String run(ArrayList<String> w, String line) {",
+                "        String[] parts = line.split(\" \");",
+                "        if (parts.length != 2) {",
+                "            return \"MALFORMED\";",
+                "        }",
+                "        String name = parts[1].toLowerCase();",
+                "        if (parts[0].equals(\"ADD\")) {",
+                "            if (w.contains(name)) {",
+                "                return \"ALREADY WATCHED\";",
+                "            }",
+                "            if (w.size() >= MAX) {",
+                "                return \"FULL\";",
+                "            }",
+                "            w.add(name);",
+                "            return \"ADDED\";",
+                "        }",
+                "        if (parts[0].equals(\"DEL\")) {",
+                "            boolean found = false;",
+                "            while (w.remove(name)) {",
+                "                found = true;",
+                "            }",
+                "            return found ? \"REMOVED\" : \"NOT WATCHED\";",
+                "        }",
+                "        if (parts[0].equals(\"CHECK\")) {",
+                "            return w.contains(name) ? \"WATCHED\" : \"CLEAR\";",
+                "        }",
+                "        return \"UNKNOWN COMMAND\";",
+                "    }",
+                "}")
+            .exampleOutput(
+                "ADD jsmith -> ADDED",
+                "ADD JSmith -> ALREADY WATCHED",
+                "CHECK jsmith -> WATCHED",
+                "ADD temp01 -> ADDED",
+                "DEL jsmith -> REMOVED",
+                "CHECK jsmith -> CLEAR",
+                "PURGE -> MALFORMED",
+                "Watching: [temp01]")
+            .lineByLine(
+                new String[]{"parts.length != 2",
+                    "PURGE has one piece: refused before parts[1] is read."},
+                new String[]{"parts[1].toLowerCase()",
+                    "JSmith and jsmith become one spelling, so the "
+                    + "duplicate is caught."},
+                new String[]{"while (w.remove(name))",
+                    "remove returns true while it finds a copy - so this "
+                    + "removes them all."},
+                new String[]{"return \"UNKNOWN COMMAND\";",
+                    "Anything not recognised is refused out loud."})
+            .predict(new Task(Task.PREDICT,
+                    "Using the example's run method with an empty list, "
+                    + "what does run(watch, \"CHECK a b\") return?")
+                .accept("MALFORMED")
+                .hints("How many pieces does split give?",
+                       "Three pieces is not two.")
+                .explain(
+                    "MALFORMED. \"CHECK a b\" splits into three pieces, and "
+                    + "the length check refuses anything but two.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why does ADD lower-case the name before checking "
+                    + "contains?")
+                .choices("Lists cannot hold capitals",
+                         "So JSmith and jsmith count as the same account",
+                         "It makes the list sort faster",
+                         "contains ignores case anyway")
+                .accept("2", "b")
+                .hints("contains uses equals - which cares about case.",
+                       "Two spellings, one person.")
+                .explain(
+                    "b. contains compares with equals, which is case "
+                    + "sensitive. Normalising first stops one account being "
+                    + "listed twice under two spellings.")
+                .xp(15))
+            .objective(
+                "Write the watchlist's CHECK method.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> watch = new ArrayList<>();",
+                "        watch.add(\"temp01\");",
+                "        watch.add(\"svc_old\");",
+                "        System.out.println(check(watch, \"TEMP01\"));",
+                "        System.out.println(check(watch, \"jsmith\"));",
+                "    }",
+                "",
+                "    static String check(ArrayList<String> w, String n) {",
+                "        // return WATCHED if w contains n in lower case,",
+                "        // otherwise CLEAR",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the single line that returns \"WATCHED\" when w "
+                + "contains n.toLowerCase(), and \"CLEAR\" otherwise. The "
+                + "ternary operator from Campaign 02 fits it on one line.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return w.contains(n.toLowerCase()) ? \"WATCHED\" "
+                        + ": \"CLEAR\";",
+                        "return w.contains(n.toLowerCase())?\"WATCHED\""
+                        + ":\"CLEAR\";",
+                        "return !w.contains(n.toLowerCase()) ? \"CLEAR\" "
+                        + ": \"WATCHED\";")
+                .hints(
+                    "condition ? valueIfTrue : valueIfFalse",
+                    "The condition is w.contains(n.toLowerCase()).",
+                    "return w.contains(n.toLowerCase()) ? \"WATCHED\" "
+                    + ": \"CLEAR\";")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> watch = new ArrayList<>();",
+                    "        watch.add(\"temp01\");",
+                    "        watch.add(\"svc_old\");",
+                    "        System.out.println(check(watch, \"TEMP01\"));",
+                    "        System.out.println(check(watch, \"jsmith\"));",
+                    "    }",
+                    "",
+                    "    static String check(ArrayList<String> w, String n) {",
+                    "        return w.contains(n.toLowerCase()) ? \"WATCHED\" : \"CLEAR\";",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "TEMP01 is lower-cased to temp01 before the search, so "
+                    + "it is found: WATCHED. jsmith is not on the list: "
+                    + "CLEAR.\n"
+                    + "\n"
+                    + "Without toLowerCase, an analyst typing TEMP01 would be "
+                    + "told the account is clear - the most dangerous wrong "
+                    + "answer a watchlist can give.")
+                .explain(
+                    "Normalise first, then search: TEMP01 is found as temp01.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Normalising on ADD but not on CHECK",
+                    "Stored and searched spellings must match."},
+                new String[]{"No length check on the command",
+                    "A one-word line crashes on parts[1]."},
+                new String[]{"Silently ignoring bad commands",
+                    "Always reply - refusals included."})
+            .cyber(
+                "Watchlists, blocklists and deny lists fail in the same few "
+                + "ways: an entry stored under one spelling and searched "
+                + "under another, a removal that leaves a copy behind, a "
+                + "list that grows without limit, and a malformed command "
+                + "that crashes the tool. Each rule here closes one of "
+                + "those. Keeping the rules inside the methods means they "
+                + "hold for every caller, not just the careful ones.")
+            .check(new Task(Task.CHOICE,
+                    "The list is full (MAX entries). What should ADD for a "
+                    + "new name do?")
+                .choices("Add it anyway",
+                         "Remove the oldest entry silently",
+                         "Refuse, and say FULL",
+                         "Crash")
+                .accept("3", "c")
+                .hints("The analyst must know it was not added.",
+                       "Refuse out loud.")
+                .explain(
+                    "c. Refusing with a clear reply keeps the cap and tells "
+                    + "the analyst to act. Silently dropping an old entry "
+                    + "would stop watching someone without anyone knowing.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> w = new java.util.ArrayList<>();",
+                    "w.add(\"x\");",
+                    "w.add(\"x\");",
+                    "int n = 0;",
+                    "while (w.remove(\"x\")) {",
+                    "    n++;",
+                    "}",
+                    "System.out.println(n + \" \" + w.size());")
+                .accept("2 0")
+                .hints("remove returns true each time it finds one.",
+                       "The third call finds none.")
+                .explain(
+                    "2 0. Two successful removals, then remove returns false "
+                    + "and the loop ends with the list empty.")
+                .xp(15))
+            .recap(
+                "    split the command; check parts.length\n"
+                + "    normalise names on the way in AND when searching\n"
+                + "    ADD: refuse duplicates and a full list\n"
+                + "    DEL: while (list.remove(x)) - every copy\n"
+                + "    reply to every command")
+            .next("Next: keeping one of each."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(27), "One of Each", 5)
+            .brief(
+                "Overnight, 9 failed logins came from the internet. Were "
+                + "they 9 different attackers, or one address trying 9 "
+                + "times? Those are very different incidents. The answer is "
+                + "the list of DISTINCT addresses - every one, once.")
+            .willLearn("Removing duplicates")
+            .whyUseful(
+                "'How many different...' is one of the most common "
+                + "questions in log analysis: distinct users, sources, "
+                + "hosts. Building a list of unique values is the answer, "
+                + "and doing it without destroying the original keeps the "
+                + "full count too.")
+            .concept("Removing duplicates",
+                "To keep one of each, build a NEW list and add each value "
+                + "only if it is not there yet:\n"
+                + "\n"
+                + "    ArrayList<String> unique = new ArrayList<>();\n"
+                + "    for (String ip : sources) {\n"
+                + "        if (!unique.contains(ip)) {\n"
+                + "            unique.add(ip);\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "The first time an address appears it goes in; every later "
+                + "copy is skipped. The unique list keeps the order of FIRST "
+                + "appearance - useful: the first source seen is listed "
+                + "first.\n"
+                + "\n"
+                + "The original is untouched, so both answers are available: "
+                + "sources.size() events, from unique.size() sources.\n"
+                + "\n"
+                + "'Same' needs deciding first. \"Admin\" and \"admin\" are "
+                + "different Strings but, for accounts, the same user - "
+                + "normalise (toLowerCase, trim) BEFORE the contains check.\n"
+                + "\n"
+                + "contains checks the whole list each time, so this gets "
+                + "slow for very large lists. Campaign 11's HashSet does the "
+                + "same job fast; for a night's log, this is fine.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] sources = {\"203.0.113.9\", \"198.51.100.4\",",
+                "                \"203.0.113.9\", \"203.0.113.9\", \"192.0.2.77\",",
+                "                \"203.0.113.9\", \"198.51.100.4\", \"203.0.113.9\",",
+                "                \"203.0.113.9\"};",
+                "        ArrayList<String> unique = new ArrayList<>();",
+                "        for (String ip : sources) {",
+                "            if (!unique.contains(ip)) {",
+                "                unique.add(ip);",
+                "            }",
+                "        }",
+                "        System.out.println(sources.length + \" events from \"",
+                "                + unique.size() + \" sources\");",
+                "        for (String ip : unique) {",
+                "            int n = 0;",
+                "            for (String s : sources) {",
+                "                if (s.equals(ip)) {",
+                "                    n++;",
+                "                }",
+                "            }",
+                "            System.out.println(\"  \" + ip + \"  x\" + n);",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "9 events from 3 sources",
+                "  203.0.113.9  x6",
+                "  198.51.100.4  x2",
+                "  192.0.2.77  x1")
+            .lineByLine(
+                new String[]{"if (!unique.contains(ip))",
+                    "Only the first copy of each address gets past this."},
+                new String[]{"sources.length and unique.size()",
+                    "The original keeps every event; the new list has one "
+                    + "of each."},
+                new String[]{"the inner loop",
+                    "For each distinct address, count its copies in the "
+                    + "original. One source made two-thirds of the noise."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] u = {\"b\", \"a\", \"b\", \"c\", \"a\"};",
+                    "java.util.ArrayList<String> one = new java.util.ArrayList<>();",
+                    "for (String s : u) {",
+                    "    if (!one.contains(s)) {",
+                    "        one.add(s);",
+                    "    }",
+                    "}",
+                    "System.out.println(one);")
+                .accept("[b, a, c]")
+                .hints("Each value goes in the first time it is seen.",
+                       "The order is the order of first appearance.")
+                .explain(
+                    "[b, a, c]. b first, then a, then c; the later b and a "
+                    + "are skipped.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] u = {\"Admin\", \"admin\", \"ADMIN\"};",
+                    "java.util.ArrayList<String> one = new java.util.ArrayList<>();",
+                    "for (String s : u) {",
+                    "    if (!one.contains(s)) {",
+                    "        one.add(s);",
+                    "    }",
+                    "}",
+                    "System.out.println(one.size());")
+                .accept("3")
+                .hints("contains uses equals.",
+                       "Is \"Admin\" equal to \"admin\"?")
+                .explain(
+                    "3 - one account counted three times. Adding "
+                    + "s.toLowerCase() and checking that would give 1.")
+                .xp(20))
+            .objective(
+                "Count the distinct users behind a burst of alerts.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] users = {\"jsmith\", \"JSmith\", \"mpatel\",",
+                "                \" jsmith\", \"mpatel\"};",
+                "        ArrayList<String> distinct = new ArrayList<>();",
+                "        for (String u : users) {",
+                "            String name = u.trim().toLowerCase();",
+                "            // the if: distinct does not contain name yet",
+                "                distinct.add(name);",
+                "            }",
+                "        }",
+                "        System.out.println(users.length + \" alerts, \"",
+                "                + distinct.size() + \" users: \" + distinct);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that lets name through only when distinct "
+                + "does not already contain it.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (!distinct.contains(name)) {",
+                        "if(!distinct.contains(name)) {",
+                        "if (!distinct.contains(name)){",
+                        "if (distinct.contains(name) == false) {",
+                        "if (distinct.indexOf(name) == -1) {")
+                .hints(
+                    "contains answers 'already there?'.",
+                    "You want the opposite: !",
+                    "if (!distinct.contains(name)) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] users = {\"jsmith\", \"JSmith\", \"mpatel\",",
+                    "                \" jsmith\", \"mpatel\"};",
+                    "        ArrayList<String> distinct = new ArrayList<>();",
+                    "        for (String u : users) {",
+                    "            String name = u.trim().toLowerCase();",
+                    "            if (!distinct.contains(name)) {",
+                    "                distinct.add(name);",
+                    "            }",
+                    "        }",
+                    "        System.out.println(users.length + \" alerts, \"",
+                    "                + distinct.size() + \" users: \" + distinct);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Each name is trimmed and lower-cased first, so \"JSmith\" "
+                    + "and \" jsmith\" both become \"jsmith\" - already in the "
+                    + "list, so skipped. Output: 5 alerts, 2 users: [jsmith, "
+                    + "mpatel].\n"
+                    + "\n"
+                    + "Without the normalising line, the same person would "
+                    + "count as three users, and the report would overstate "
+                    + "the incident.")
+                .explain(
+                    "if (!distinct.contains(name)) { - only if not seen yet.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Removing from the original",
+                    "You lose the event count. Build a new list."},
+                new String[]{"Not normalising first",
+                    "Admin, admin and \" admin\" count as three."},
+                new String[]{"contains without the !",
+                    "Adds only the copies - the opposite result."})
+            .cyber(
+                "'Nine failures' means little until you know how many "
+                + "sources and how many targets. One source against many "
+                + "accounts is password spraying; many sources against one "
+                + "account is a distributed attack on it; one against one "
+                + "is often a user with a stale saved password. Distinct "
+                + "counts separate them - but only if 'same' was decided "
+                + "properly first.")
+            .check(new Task(Task.CHOICE,
+                    "Failed logins: 40 events, 1 distinct source address, "
+                    + "40 distinct usernames. What does that pattern "
+                    + "suggest?")
+                .choices("One user who forgot a password",
+                         "Password spraying: one source trying many accounts",
+                         "Forty separate attackers",
+                         "Nothing unusual")
+                .accept("2", "b")
+                .hints("One source, many targets.",
+                       "Each account tried a small number of times.")
+                .explain(
+                    "b. A single source working through many accounts is "
+                    + "the spraying pattern - which per-account lockouts "
+                    + "alone may never notice.")
+                .xp(15))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] s = {\"x\", \"y\", \"x\", \"x\"};",
+                    "java.util.ArrayList<String> u = new java.util.ArrayList<>();",
+                    "for (String v : s) {",
+                    "    if (!u.contains(v)) {",
+                    "        u.add(v);",
+                    "    }",
+                    "}",
+                    "System.out.println(s.length + \" \" + u.size());")
+                .accept("4 2")
+                .hints("The array keeps all four.",
+                       "The list keeps x and y once each.")
+                .explain(
+                    "4 2. The original still has every event; the new list "
+                    + "has one of each value.")
+                .xp(15))
+            .recap(
+                "    new list; for each value:\n"
+                + "        normalise it\n"
+                + "        if (!unique.contains(v)) unique.add(v)\n"
+                + "\n"
+                + "Keep the original for the total. Order of first "
+                + "appearance is kept.")
+            .next("Next: counting per user, and finding the worst."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(28), "Top Offenders", 6)
+            .brief(
+                "The morning report's headline is the account with the most "
+                + "failed logins overnight. The log is a list of lines like "
+                + "'FAIL jsmith'. Nobody knows in advance which users will "
+                + "appear, so a fixed tally array cannot be used. Two lists "
+                + "that grow together can: names, and a count for each.")
+            .willLearn("Counting per key")
+            .whyUseful(
+                "'How many per user / per address / per host' is the core "
+                + "of log analysis. This mission builds it from the "
+                + "campaign's pieces: split, indexOf, parallel lists and "
+                + "tracking the best index.")
+            .concept("Counting per key",
+                "A tally array (mission 14) needs the values to be small "
+                + "numbers. For text keys like usernames, keep two lists in "
+                + "step - parallel lists (mission 15), but growable:\n"
+                + "\n"
+                + "    ArrayList<String> names    who\n"
+                + "    ArrayList<Integer> counts  how many, same index\n"
+                + "\n"
+                + "For each event:\n"
+                + "\n"
+                + "    int at = names.indexOf(user);\n"
+                + "    if (at == -1) {             new user\n"
+                + "        names.add(user);\n"
+                + "        counts.add(1);\n"
+                + "    } else {                    seen before\n"
+                + "        counts.set(at, counts.get(at) + 1);\n"
+                + "    }\n"
+                + "\n"
+                + "A new user is added to BOTH lists at once, so they stay "
+                + "the same length; a known user's count is replaced with "
+                + "one more. Nothing else ever changes either list, which "
+                + "keeps them in step.\n"
+                + "\n"
+                + "Then find the top offender by INDEX, as in mission 15, "
+                + "and read both lists with it.\n"
+                + "\n"
+                + "(Campaign 11's HashMap stores key-count pairs directly. "
+                + "The idea is exactly this.)")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] log = {\"FAIL jsmith\", \"OK mpatel\",",
+                "                \"FAIL admin\", \"FAIL admin\", \"FAIL jsmith\",",
+                "                \"FAIL admin\", \"OK jsmith\"};",
+                "        ArrayList<String> names = new ArrayList<>();",
+                "        ArrayList<Integer> counts = new ArrayList<>();",
+                "        for (String line : log) {",
+                "            String[] p = line.split(\" \");",
+                "            if (p.length != 2 || !p[0].equals(\"FAIL\")) {",
+                "                continue;",
+                "            }",
+                "            int at = names.indexOf(p[1]);",
+                "            if (at == -1) {",
+                "                names.add(p[1]);",
+                "                counts.add(1);",
+                "            } else {",
+                "                counts.set(at, counts.get(at) + 1);",
+                "            }",
+                "        }",
+                "        int top = 0;",
+                "        for (int i = 1; i < counts.size(); i++) {",
+                "            if (counts.get(i) > counts.get(top)) {",
+                "                top = i;",
+                "            }",
+                "        }",
+                "        System.out.println(names + \" \" + counts);",
+                "        System.out.println(\"Top: \" + names.get(top)",
+                "                + \" (\" + counts.get(top) + \")\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "[jsmith, admin] [2, 3]",
+                "Top: admin (3)")
+            .lineByLine(
+                new String[]{"p.length != 2 || !p[0].equals(\"FAIL\")",
+                    "Malformed lines and successes are skipped. The length "
+                    + "check comes first, so p[0] is safe."},
+                new String[]{"names.indexOf(p[1])",
+                    "Where this user sits in names - or -1 if new."},
+                new String[]{"names.add(...); counts.add(1);",
+                    "A new user joins both lists together: same length, "
+                    + "same index."},
+                new String[]{"counts.set(at, counts.get(at) + 1)",
+                    "Read the count, add one, put it back."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<String> k = new java.util.ArrayList<>();",
+                    "java.util.ArrayList<Integer> n = new java.util.ArrayList<>();",
+                    "String[] ev = {\"a\", \"b\", \"a\"};",
+                    "for (String e : ev) {",
+                    "    int at = k.indexOf(e);",
+                    "    if (at == -1) {",
+                    "        k.add(e);",
+                    "        n.add(1);",
+                    "    } else {",
+                    "        n.set(at, n.get(at) + 1);",
+                    "    }",
+                    "}",
+                    "System.out.println(k + \" \" + n);")
+                .accept("[a, b] [2, 1]")
+                .hints("a is new, b is new, then a is seen again.",
+                       "a's count goes to 2.")
+                .explain(
+                    "[a, b] [2, 1]. The second a finds index 0 and raises "
+                    + "that count; the lists stay the same length.")
+                .xp(20))
+            .practice(new Task(Task.CHOICE,
+                    "A new user is added to names, but the programmer "
+                    + "forgets counts.add(1). What happens next time a count "
+                    + "is read?")
+                .choices("Nothing - Java adds the count",
+                         "Counts belong to the wrong users, or a crash",
+                         "A compile error",
+                         "The user is ignored")
+                .accept("2", "b")
+                .hints("The lists are now different lengths.",
+                       "The same index no longer means the same user.")
+                .explain(
+                    "b. names is now one longer. Every later new user's "
+                    + "count lands at the wrong index, and reading the last "
+                    + "name's count runs off the end of counts.")
+                .xp(20))
+            .objective(
+                "Complete the count update for a user already seen.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] blocked = {\"10.0.0.9\", \"10.0.0.4\", \"10.0.0.9\"};",
+                "        ArrayList<String> ips = new ArrayList<>();",
+                "        ArrayList<Integer> hits = new ArrayList<>();",
+                "        for (String ip : blocked) {",
+                "            int at = ips.indexOf(ip);",
+                "            if (at == -1) {",
+                "                ips.add(ip);",
+                "                hits.add(1);",
+                "            } else {",
+                "                // add 1 to the count at index at",
+                "            }",
+                "        }",
+                "        System.out.println(ips + \" \" + hits);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that replaces the count at index at with "
+                + "one more than it was.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line in the else.")
+                .accept("hits.set(at, hits.get(at) + 1);",
+                        "hits.set(at,hits.get(at)+1);",
+                        "hits.set(at, hits.get(at)+1);",
+                        "hits.set(at, 1 + hits.get(at));")
+                .hints(
+                    "set(index, newValue).",
+                    "The new value is the old count, hits.get(at), plus 1.",
+                    "hits.set(at, hits.get(at) + 1);")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] blocked = {\"10.0.0.9\", \"10.0.0.4\", \"10.0.0.9\"};",
+                    "        ArrayList<String> ips = new ArrayList<>();",
+                    "        ArrayList<Integer> hits = new ArrayList<>();",
+                    "        for (String ip : blocked) {",
+                    "            int at = ips.indexOf(ip);",
+                    "            if (at == -1) {",
+                    "                ips.add(ip);",
+                    "                hits.add(1);",
+                    "            } else {",
+                    "                hits.set(at, hits.get(at) + 1);",
+                    "            }",
+                    "        }",
+                    "        System.out.println(ips + \" \" + hits);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The third address, 10.0.0.9, is found at index 0, so "
+                    + "its count is read (1), increased and put back (2): "
+                    + "[10.0.0.9, 10.0.0.4] [2, 1].\n"
+                    + "\n"
+                    + "hits.get(at)++ would not compile - get gives back a "
+                    + "value, not a slot to change. A list's item is changed "
+                    + "only with set.")
+                .explain(
+                    "hits.set(at, hits.get(at) + 1); - read, add one, store.")
+                .xp(30))
+            .mistakes(
+                new String[]{"Adding to only one list",
+                    "The lists fall out of step."},
+                new String[]{"hits.get(at)++",
+                    "Does not compile. Use set with the new value."},
+                new String[]{"Reading p[1] before checking p.length",
+                    "A malformed line crashes the whole report."})
+            .cyber(
+                "Top offender lists drive the first hour of most "
+                + "investigations: the most-attacked accounts, the noisiest "
+                + "sources, the hosts with the most alerts. Two things make "
+                + "one trustworthy: every line is counted under the right "
+                + "key (normalised, with malformed lines skipped and "
+                + "counted separately), and the counts can never drift away "
+                + "from their names.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<Integer> c = new java.util.ArrayList<>();",
+                    "c.add(4);",
+                    "c.add(9);",
+                    "c.add(9);",
+                    "int top = 0;",
+                    "for (int i = 1; i < c.size(); i++) {",
+                    "    if (c.get(i) > c.get(top)) {",
+                    "        top = i;",
+                    "    }",
+                    "}",
+                    "System.out.println(top);")
+                .accept("1")
+                .hints("> is strict.",
+                       "The second 9 does not beat the first.")
+                .explain(
+                    "1. The first 9 takes the lead at index 1; the second 9 "
+                    + "only ties, and a tie does not replace it. (Here > "
+                    + "on two Integers unboxes them, so it is safe.)")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Why can a tally array (mission 14) not count per "
+                    + "username?")
+                .choices("Arrays cannot hold ints",
+                         "A username cannot be used as an index",
+                         "Tally arrays are too slow",
+                         "It can")
+                .accept("2", "b")
+                .hints("What picks the slot in a tally array?",
+                       "Indexes are ints.")
+                .explain(
+                    "b. A tally array uses the value itself as the index, "
+                    + "which only works for small whole numbers. Text keys "
+                    + "need indexOf on a list of names.")
+                .xp(15))
+            .recap(
+                "    at = names.indexOf(key)\n"
+                + "    -1:   names.add(key); counts.add(1);\n"
+                + "    else: counts.set(at, counts.get(at) + 1);\n"
+                + "    top:  track the best index, read both lists\n"
+                + "\n"
+                + "Change both lists together, or not at all.")
+            .next("Next: the allowlist - deny unless listed."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(29), "An Allowlist Check", 6)
+            .brief(
+                "Outbound web traffic from the payment servers may only go "
+                + "to a short list of approved domains. Everything else is "
+                + "refused. The first draft used contains on the domain "
+                + "text, and a tester got through with "
+                + "pay.example.com.attacker.net. The rule is right; the "
+                + "matching was wrong.")
+            .willLearn("Allowlists")
+            .whyUseful(
+                "An allowlist - deny everything except what is listed - is "
+                + "one of the strongest controls there is, and one of the "
+                + "easiest to weaken by matching loosely. Writing one "
+                + "correctly uses almost every idea in this campaign.")
+            .concept("Allowlists",
+                "An ALLOWLIST says what is permitted; everything else is "
+                + "denied. (A blocklist is the opposite, and always "
+                + "incomplete - new bad things appear every day.)\n"
+                + "\n"
+                + "Four rules make an allowlist check sound:\n"
+                + "\n"
+                + "    deny by default   return false unless a match\n"
+                + "                      was found\n"
+                + "    exact matching    equals, never String contains,\n"
+                + "                      startsWith or endsWith\n"
+                + "    normalise first   trim and lower-case the input,\n"
+                + "                      the way the list was stored\n"
+                + "    empty means none  an empty list allows NOTHING\n"
+                + "\n"
+                + "Why exact? Loose matches accept look-alikes:\n"
+                + "\n"
+                + "    text.contains(\"pay.example.com\")\n"
+                + "        accepts pay.example.com.attacker.net\n"
+                + "    text.endsWith(\"example.com\")\n"
+                + "        accepts badexample.com\n"
+                + "\n"
+                + "With a list, the exact check is one call - the list's own "
+                + "contains, which compares each entry with equals:\n"
+                + "\n"
+                + "    return allow.contains(host.trim().toLowerCase());\n"
+                + "\n"
+                + "That single line meets all four rules: false unless an "
+                + "entry is EQUAL, after normalising, and false for an "
+                + "empty list.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> allow = new ArrayList<>();",
+                "        allow.add(\"pay.example.com\");",
+                "        allow.add(\"api.example.com\");",
+                "        String[] tries = {\"pay.example.com\", \" API.Example.com \",",
+                "                \"pay.example.com.attacker.net\", \"example.com\"};",
+                "        for (String t : tries) {",
+                "            String verdict = isAllowed(allow, t) ? \"ALLOW\" : \"DENY\";",
+                "            System.out.println(verdict + \"  [\" + t + \"]\");",
+                "        }",
+                "    }",
+                "",
+                "    static boolean isAllowed(ArrayList<String> allow, String host) {",
+                "        String h = host.trim().toLowerCase();",
+                "        return allow.contains(h);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "ALLOW  [pay.example.com]",
+                "ALLOW  [ API.Example.com ]",
+                "DENY  [pay.example.com.attacker.net]",
+                "DENY  [example.com]")
+            .lineByLine(
+                new String[]{"host.trim().toLowerCase()",
+                    "Spaces and capitals cannot sneak a listed host past, "
+                    + "or keep a real one out."},
+                new String[]{"allow.contains(h)",
+                    "The LIST's contains: each entry compared with equals. "
+                    + "Exact match or nothing."},
+                new String[]{"DENY  [pay.example.com.attacker.net]",
+                    "It starts with a listed name, but is not equal to one: "
+                    + "denied."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String host = \"pay.example.com.attacker.net\";",
+                    "System.out.println(host.contains(\"pay.example.com\"));")
+                .accept("true")
+                .hints("Does the text appear inside host?",
+                       "At the very start.")
+                .explain(
+                    "true - which is why String contains is the wrong test. "
+                    + "The attacker controls the text after the approved "
+                    + "name.")
+                .xp(20))
+            .practice(new Task(Task.CHOICE,
+                    "The allowlist is empty because a config file failed to "
+                    + "load. What should isAllowed return for every host?")
+                .choices("true - nothing is blocked",
+                         "false - nothing is allowed",
+                         "It should crash",
+                         "true for known hosts only")
+                .accept("2", "b")
+                .hints("Deny by default.",
+                       "Fail closed (Campaign 03).")
+                .explain(
+                    "b. An empty allowlist allows nothing. Failing open "
+                    + "here would switch the control off exactly when "
+                    + "something has already gone wrong.")
+                .xp(20))
+            .objective(
+                "Write the allowlist check with a loop, deny by default.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        ArrayList<String> allow = new ArrayList<>();",
+                "        allow.add(\"updates.example.com\");",
+                "        System.out.println(ok(allow, \"Updates.Example.com\"));",
+                "        System.out.println(ok(allow, \"updates.example.com.evil.io\"));",
+                "        System.out.println(ok(new ArrayList<>(), \"x.com\"));",
+                "    }",
+                "",
+                "    static boolean ok(ArrayList<String> allow, String host) {",
+                "        String h = host.trim().toLowerCase();",
+                "        for (String entry : allow) {",
+                "            if (entry.equals(h)) {",
+                "                return true;",
+                "            }",
+                "        }",
+                "        // deny by default",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the last line of ok: the answer when no entry "
+                + "matched - including when the list is empty.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the last line.")
+                .accept("return false;")
+                .hints(
+                    "Nothing matched.",
+                    "Deny by default.",
+                    "return false;")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        ArrayList<String> allow = new ArrayList<>();",
+                    "        allow.add(\"updates.example.com\");",
+                    "        System.out.println(ok(allow, \"Updates.Example.com\"));",
+                    "        System.out.println(ok(allow, \"updates.example.com.evil.io\"));",
+                    "        System.out.println(ok(new ArrayList<>(), \"x.com\"));",
+                    "    }",
+                    "",
+                    "    static boolean ok(ArrayList<String> allow, String host) {",
+                    "        String h = host.trim().toLowerCase();",
+                    "        for (String entry : allow) {",
+                    "            if (entry.equals(h)) {",
+                    "                return true;",
+                    "            }",
+                    "        }",
+                    "        return false;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The normalised host is compared with each entry using "
+                    + "equals. Only an exact match returns true; reaching the "
+                    + "end of the loop means none matched, so the answer is "
+                    + "false. Output: true, false, false.\n"
+                    + "\n"
+                    + "The empty list never enters the loop at all, and goes "
+                    + "straight to return false: deny. The loop is the same "
+                    + "check allow.contains(h) makes - mission 12's search, "
+                    + "with this mission's rules.")
+                .explain(
+                    "return false; - no match, or no list, means deny.")
+                .xp(30))
+            .mistakes(
+                new String[]{"host.contains(entry)",
+                    "Look-alike hosts get through."},
+                new String[]{"Returning true after the loop",
+                    "Fails open: everything is allowed."},
+                new String[]{"Normalising the list but not the input",
+                    "Real hosts are refused, or tricks slip past."})
+            .cyber(
+                "Loose matching has undone countless allowlists: redirect "
+                + "checks that trusted any URL containing the company's "
+                + "name, email filters that trusted any sender ending in "
+                + "the right word, CORS rules that trusted any origin "
+                + "starting with the right text. Each let attackers "
+                + "register a look-alike and walk in. Deny by default, "
+                + "match exactly, normalise both sides - and test with the "
+                + "look-alikes yourself.")
+            .check(new Task(Task.CHOICE,
+                    "The list holds example.com. Which test accepts "
+                    + "badexample.com?")
+                .choices("allow.contains(h)",
+                         "h.endsWith(\"example.com\")",
+                         "h.equals(\"example.com\")",
+                         "None of them")
+                .accept("2", "b")
+                .hints("Does badexample.com END with example.com?",
+                       "Yes.")
+                .explain(
+                    "b. endsWith accepts any host whose text finishes the "
+                    + "same way - anyone can register badexample.com. The "
+                    + "exact tests refuse it.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Why is an allowlist usually stronger than a blocklist?")
+                .choices("It is shorter",
+                         "Anything not yet known is denied by default",
+                         "It runs faster",
+                         "It needs no normalising")
+                .accept("2", "b")
+                .hints("What happens to a brand-new bad domain?",
+                       "A blocklist has never heard of it.")
+                .explain(
+                    "b. A blocklist must know every bad thing in advance. "
+                    + "An allowlist only needs to know the good ones; "
+                    + "everything new is refused.")
+                .xp(15))
+            .recap(
+                "    normalise: h = host.trim().toLowerCase()\n"
+                + "    match exactly: list.contains(h) or equals\n"
+                + "    deny by default: false unless a match\n"
+                + "    empty list: allows nothing\n"
+                + "\n"
+                + "Never String contains, startsWith or endsWith for trust.")
+            .next("Next: the campaign checkpoint."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(30), "COLLECTIONS COMPLETE", 6)
+            .brief(
+                "Thirty missions ago, a program could hold a handful of "
+                + "values in a handful of variables. Now it keeps whole "
+                + "batches - every reading, every user, every field of a "
+                + "line - searches them, counts them, cleans them and "
+                + "reports on them.\n\n"
+                + "This checkpoint mixes the whole campaign. No new Java.")
+            .willLearn("Recall of the whole campaign")
+            .whyUseful(
+                "Collection bugs come from ideas meeting: a reference where "
+                + "a copy was meant, a removal inside a loop, an index read "
+                + "before a length check. This is the practice for exactly "
+                + "those.")
+            .concept("Everything, together",
+                "The campaign in one page.\n"
+                + "\n"
+                + "ARRAYS\n"
+                + "    int[] a = new int[n];   or   {1, 2, 3}\n"
+                + "    a[i], a.length, indexes 0 to length - 1\n"
+                + "    defaults: 0, 0.0, false, null\n"
+                + "    int[][] g: g[r][c], g.length, g[r].length\n"
+                + "\n"
+                + "LOOPS\n"
+                + "    for (int i = 0; i < a.length; i++)  position + value\n"
+                + "    for (int v : a)                     values only\n"
+                + "    remove from a list: loop backwards\n"
+                + "\n"
+                + "REFERENCES\n"
+                + "    b = a shares one array; methods can change it\n"
+                + "    Arrays.copyOf for a real copy; == asks 'same one?'\n"
+                + "\n"
+                + "ARRAYLIST\n"
+                + "    add, add(i, x), get, set, size, isEmpty\n"
+                + "    remove, contains, indexOf - all use equals\n"
+                + "    ArrayList<Integer>; remove(Integer.valueOf(v))\n"
+                + "\n"
+                + "PATTERNS\n"
+                + "    search, max/min/average, tally, parallel arrays,\n"
+                + "    split, distinct values, count per key, sort\n"
+                + "\n"
+                + "SECURITY\n"
+                + "    check lengths and indexes from outside\n"
+                + "    work on copies; keep the original as evidence\n"
+                + "    normalise, match exactly, deny by default\n"
+                + "    cap anything that grows with outside input")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"22,80,x,443,80,99999\";",
+                "        String[] parts = line.split(\",\");",
+                "        ArrayList<Integer> ports = new ArrayList<>();",
+                "        int bad = 0;",
+                "        for (String p : parts) {",
+                "            if (!isPort(p)) {",
+                "                bad++;",
+                "            } else if (!ports.contains(Integer.parseInt(p))) {",
+                "                ports.add(Integer.parseInt(p));",
+                "            }",
+                "        }",
+                "        System.out.println(\"Ports: \" + ports + \", rejected: \" + bad);",
+                "    }",
+                "",
+                "    static boolean isPort(String s) {",
+                "        if (s.isEmpty() || s.length() > 5) {",
+                "            return false;",
+                "        }",
+                "        for (int i = 0; i < s.length(); i++) {",
+                "            if (!Character.isDigit(s.charAt(i))) {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        int n = Integer.parseInt(s);",
+                "        return n >= 1 && n <= 65535;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Ports: [22, 80, 443], rejected: 2")
+            .lineByLine(
+                new String[]{"line.split(\",\")",
+                    "Mission 17: six pieces, not all of them trustworthy."},
+                new String[]{"isPort(p)",
+                    "Campaigns 03 and 04: a validator that checks every "
+                    + "character before parseInt, and the range after."},
+                new String[]{"!ports.contains(Integer.parseInt(p))",
+                    "Missions 22 and 27: one of each, compared as values."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {3, 1, 2};",
+                    "int[] b = a;",
+                    "int[] c = java.util.Arrays.copyOf(a, a.length);",
+                    "b[0] = 9;",
+                    "c[1] = 8;",
+                    "System.out.println(a[0] + \" \" + a[1]);")
+                .accept("9 1")
+                .hints("b shares a's array; c is a real copy.",
+                       "Only the change through b reaches a.")
+                .explain(
+                    "9 1. Missions 10 and 11: b = a is one array with two "
+                    + "names, while copyOf made a separate one.")
+                .xp(20))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "java.util.ArrayList<Integer> v = new java.util.ArrayList<>();",
+                    "v.add(3);",
+                    "v.add(0);",
+                    "v.add(3);",
+                    "v.remove(0);",
+                    "v.remove(Integer.valueOf(3));",
+                    "System.out.println(v);")
+                .accept("[0]")
+                .hints("remove(0) removes INDEX 0, not the value 0.",
+                       "Then valueOf(3) removes the value 3.")
+                .explain(
+                    "[0]. remove(0) took index 0 - the first 3 - leaving "
+                    + "[0, 3]; removing the VALUE 3 then left [0]. Mission "
+                    + "23's trap, both ways round.")
+                .xp(20))
+            .objective(
+                "Report each failing user once, in order.")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Collections;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] log = {\"FAIL Zed\", \"OK ann\", \"FAIL bob\",",
+                "                \"FAIL zed\", \"broken\", \"FAIL bob\"};",
+                "        ArrayList<String> users = new ArrayList<>();",
+                "        for (String line : log) {",
+                "            String[] p = line.split(\" \");",
+                "            // the if: exactly 2 parts, and the first is FAIL",
+                "                String u = p[1].toLowerCase();",
+                "                if (!users.contains(u)) {",
+                "                    users.add(u);",
+                "                }",
+                "            }",
+                "        }",
+                "        Collections.sort(users);",
+                "        System.out.println(users);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that lets a line through only when it split "
+                + "into exactly 2 parts AND its first part is FAIL. The "
+                + "length check must come first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (p.length == 2 && p[0].equals(\"FAIL\")) {",
+                        "if(p.length == 2 && p[0].equals(\"FAIL\")) {",
+                        "if (p.length == 2 && p[0].equals(\"FAIL\")){",
+                        "if (p.length == 2 && \"FAIL\".equals(p[0])) {")
+                .hints(
+                    "Two conditions joined by &&, the guard on the left.",
+                    "Compare text with equals.",
+                    "if (p.length == 2 && p[0].equals(\"FAIL\")) {")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "import java.util.Collections;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] log = {\"FAIL Zed\", \"OK ann\", \"FAIL bob\",",
+                    "                \"FAIL zed\", \"broken\", \"FAIL bob\"};",
+                    "        ArrayList<String> users = new ArrayList<>();",
+                    "        for (String line : log) {",
+                    "            String[] p = line.split(\" \");",
+                    "            if (p.length == 2 && p[0].equals(\"FAIL\")) {",
+                    "                String u = p[1].toLowerCase();",
+                    "                if (!users.contains(u)) {",
+                    "                    users.add(u);",
+                    "                }",
+                    "            }",
+                    "        }",
+                    "        Collections.sort(users);",
+                    "        System.out.println(users);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "\"broken\" has one part, so the length check stops it "
+                    + "before p[0] matters - and && never looks at the "
+                    + "right side. OK ann is not a failure. Zed and zed are "
+                    + "normalised to one user, bob is kept once, and the "
+                    + "sort gives [bob, zed].\n"
+                    + "\n"
+                    + "Six missions in one line and the lines around it: "
+                    + "split (17), a length guard (7), equals on text (8), "
+                    + "normalising and distinct values (27), and sorting "
+                    + "(25).")
+                .explain(
+                    "The length guard first, then the text compared with equals.")
+                .xp(40))
+            .mistakes(
+                new String[]{"Reading fields before the length check",
+                    "One broken line crashes the whole report."},
+                new String[]{"b = a as a backup",
+                    "Two names, one array. Use Arrays.copyOf."},
+                new String[]{"Removing inside a forward loop",
+                    "Items are skipped. Loop backwards."})
+            .cyber(
+                "Almost every security tool is a collections program: it "
+                + "reads a batch of events, splits them into fields, keeps "
+                + "lists of what it has seen, counts per user and per "
+                + "source, and checks each against allowlists and "
+                + "watchlists. Everything in this campaign is about doing "
+                + "that without crashing on bad input, losing the original "
+                + "evidence, or matching loosely.\n"
+                + "\n"
+                + "What these programs still juggle clumsily is RECORDS - a "
+                + "user AND their count AND their last address, kept in "
+                + "parallel lists that can drift apart. Campaign 06 gives "
+                + "each record a type of its own: classes and objects.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[][] g = {{1, 2}, {3, 4}};",
+                    "int t = 0;",
+                    "for (int[] row : g) {",
+                    "    for (int v : row) {",
+                    "        t += v;",
+                    "    }",
+                    "}",
+                    "System.out.println(t + \" \" + g[1][0]);")
+                .accept("10 3")
+                .hints("Each row of an int[][] is an int[].",
+                       "1 + 2 + 3 + 4, then row 1, column 0.")
+                .explain(
+                    "10 3. The enhanced for works on 2D arrays too: each "
+                    + "row is an int[], and each v an int (missions 6 "
+                    + "and 16).")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "Which loop removes every \"EXP\" from a list safely?")
+                .choices("for (String s : list) { if (...) list.remove(s); }",
+                         "for (int i = 0; i < list.size(); i++) ...",
+                         "for (int i = list.size() - 1; i >= 0; i--) ...",
+                         "Any of them")
+                .accept("3", "c")
+                .hints("Mission 21.",
+                       "Which one only moves items already checked?")
+                .explain(
+                    "c. Backwards. a crashes with a "
+                    + "ConcurrentModificationException, and b skips the item "
+                    + "after each removal.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "An allowlist holds pay.example.com. Which check is "
+                    + "correct?")
+                .choices("host.contains(\"pay.example.com\")",
+                         "host.startsWith(\"pay.example.com\")",
+                         "allow.contains(host.trim().toLowerCase())",
+                         "host.endsWith(\"example.com\")")
+                .accept("3", "c")
+                .hints("Exact matching, after normalising.",
+                       "Mission 29.")
+                .explain(
+                    "c. The list's contains compares each entry with equals: "
+                    + "exact matches only, and false when nothing matches.")
+                .xp(15))
+            .recap(
+                "CAMPAIGN 05 - COLLECTIONS complete.\n"
+                + "\n"
+                + "Your programs hold batches of data in arrays and lists, "
+                + "search and count them, copy and sort them safely, and "
+                + "parse lines into fields without trusting them.\n"
+                + "\n"
+                + "Next they get types of their own: classes and objects.")
+            .next("Next: CAMPAIGN 06 - OBJECTS."));
     }
 }

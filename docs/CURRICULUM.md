@@ -18,7 +18,7 @@ each one. Built items are marked; everything else is the plan.
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
 | Methods, parameters and the stack | 03 METHODS | built |
 | Iteration: while, for, do-while, break | 04 LOOP//CONTROL | built |
-| Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
+| Collections: raw arrays and ArrayList | 05 COLLECTIONS | missions built |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
 | Exceptions & event handling: try, catch, finally | 07 EXCEPTIONS | planned |
 | File I/O | 08 FILES | planned |
@@ -177,7 +177,7 @@ Each line is one mission, one idea.
 29. A firewall rule checker over a port range
 30. LOOP//CONTROL COMPLETE: checkpoint
 
-### 05 COLLECTIONS
+### 05 COLLECTIONS (built)
 
 1. Why arrays: one name, many values
 2. Declaring and creating an array
@@ -192,12 +192,12 @@ Each line is one mission, one idea.
 11. Copying an array properly
 12. Linear search
 13. Maximum, minimum, average
-14. Counting matches
+14. Tally arrays: a counter for every value
 15. Parallel arrays
 16. Two-dimensional arrays
 17. `split`: from a line to an array
 18. `ArrayList`: a list that grows
-19. `add`, `get`, `size`
+19. `get`, `set`, and inserting with `add(i, x)`
 20. `remove`, `contains`, `indexOf`
 21. Looping over an `ArrayList`
 22. Wrapper classes and autoboxing

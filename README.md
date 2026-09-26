@@ -20,8 +20,9 @@ stopping forged log entries, checking access.
 
 ![CYBER//OPS starting up: the logo, a boot sequence and the analyst sign-in](docs/screenshot-start.png)
 
-> **Status:** 130 missions and 136 labs are playable (Campaigns 00 to 04
-> complete, labs included; Campaign 05 is next) out of 510 missions planned.
+> **Status:** 160 missions and 136 labs are playable (Campaigns 00 to 04
+> complete, labs included; Campaign 05's missions are built and its labs are
+> next) out of 510 missions planned.
 > The order follows a first-year Java programming module; see
 > [the curriculum plan](docs/CURRICULUM.md).
 
@@ -505,7 +506,7 @@ CAMPAIGN 01 - JAVA ZERO       variables, I/O     30       30   BUILT
 CAMPAIGN 02 - CONDITIONAL     selection, switch  30       30   BUILT
 CAMPAIGN 03 - METHODS         methods, stack     30       30   BUILT
 CAMPAIGN 04 - LOOP//CONTROL   iteration          30       30   BUILT
-CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30
+CAMPAIGN 05 - COLLECTIONS     arrays, ArrayList  30       30   MISSIONS
 CAMPAIGN 06 - OBJECTS         classes            30       30
 CAMPAIGN 07 - EXCEPTIONS      errors, events     25       30
 CAMPAIGN 08 - FILES           file I/O           25       30
@@ -563,6 +564,16 @@ lockout works, a lockout simulator, rate limiting, menu loops, bounds
 guards, building output, tracing, the loop-bug checklist, a log-line
 scanner and a firewall rule checker.
 
+**Campaign 05 - COLLECTIONS:** arrays, creating them, default values,
+`length`, looping over an array, the enhanced `for`,
+`ArrayIndexOutOfBoundsException`, arrays of Strings, arrays in and out of
+methods, references, copying and `Arrays.toString`, linear search,
+maximum, minimum and average, tally arrays, parallel arrays,
+two-dimensional arrays, `split`, `ArrayList`, `get` and `set`, `remove`,
+`contains` and `indexOf`, removing while looping, wrapper classes, the
+`remove(int)` trap, choosing an array or a list, sorting, a watchlist,
+distinct values, top offenders and an allowlist check.
+
 Each mission ends with a cybersecurity connection. Examples: the 2014
 "goto fail" certificate bug, log injection, integer overflow, failing open
 against failing closed, and password spraying.
@@ -589,6 +600,7 @@ src/Campaign01.java       CAMPAIGN 01 - JAVA ZERO
 src/Campaign02.java       CAMPAIGN 02 - CONDITIONAL
 src/Campaign03.java       CAMPAIGN 03 - METHODS
 src/Campaign04.java       CAMPAIGN 04 - LOOP//CONTROL
+src/Campaign05.java       CAMPAIGN 05 - COLLECTIONS
 src/KnowledgeIndex.java   the Java topics, and which missions teach them
 src/World.java            NORTHSTAR SYSTEMS: hosts and accounts
 
