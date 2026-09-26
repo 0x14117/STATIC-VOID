@@ -182,7 +182,7 @@ public class LabBench {
             // Unreadable: every needed method counts as missing.
         }
         for (String needed : lab.getNeededMethods()) {
-            if (!declared.contains(tidySignature(needed))) {
+            if (!declared.contains(withoutTypeArguments(tidySignature(needed)))) {
                 missing.add(needed);
             }
         }
@@ -264,6 +264,20 @@ public class LabBench {
             text.append(i == 0 ? "" : ", ").append(types[i].getSimpleName());
         }
         return text.append(')').toString();
+    }
+
+    /**
+     * Reflection sees ArrayList, never ArrayList<String>: Java erases type
+     * arguments when it compiles. The brief shows them, because they tell
+     * the learner what to write; the check compares without them.
+     */
+    static String withoutTypeArguments(String signature) {
+        String before;
+        do {
+            before = signature;
+            signature = signature.replaceAll("<[^<>]*>", "");
+        } while (!signature.equals(before));
+        return signature;
     }
 
     /** One space between words, ", " between parameters, none inside (). */
