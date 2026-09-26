@@ -4893,5 +4893,1339 @@ public class Campaign06 {
                 + "Items are references: changing list.get(i) changes the "
                 + "stored object. Searching needs equals or a find method.")
             .next("Next: passing objects to methods."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "Handing Objects to Methods", 4)
+            .brief(
+                "A helper called quarantine(host) was meant to mark a host "
+                + "as isolated. A second helper, reset(host), was meant to "
+                + "give the caller a clean host - and did nothing at all. "
+                + "Both received an object. Only one of them understood "
+                + "what receiving an object means.")
+            .willLearn("Objects as parameters")
+            .whyUseful(
+                "Most real methods take objects: check this account, "
+                + "report on that host, compare two rules. Knowing what a "
+                + "method can and cannot do to an object it is given "
+                + "prevents both kinds of surprise.")
+            .concept("Objects as parameters",
+                "Passing an object passes a copy of its REFERENCE. The "
+                + "parameter and the caller's variable then refer to the "
+                + "same object:\n"
+                + "\n"
+                + "    static void quarantine(Host h) {\n"
+                + "        h.setIsolated(true);     changes THE host\n"
+                + "    }\n"
+                + "\n"
+                + "After quarantine(web1), web1 is isolated - the method "
+                + "worked on the caller's own object, through the "
+                + "reference.\n"
+                + "\n"
+                + "But assigning a NEW object to the parameter only moves "
+                + "the parameter:\n"
+                + "\n"
+                + "    static void reset(Host h) {\n"
+                + "        h = new Host(\"clean\");  h now points elsewhere\n"
+                + "    }\n"
+                + "\n"
+                + "The caller's variable still refers to the old host. To "
+                + "hand back a new object, RETURN it:\n"
+                + "\n"
+                + "    static Host freshCopy(Host h) {\n"
+                + "        return new Host(h.getName());\n"
+                + "    }\n"
+                + "\n"
+                + "So: through the reference, a method can CHANGE the "
+                + "object; it can never REPLACE the caller's object. It is "
+                + "Campaign 05's array rule, exactly.\n"
+                + "\n"
+                + "Methods can also take two objects and compare or combine "
+                + "them - riskier(a, b), a.sameOwner(b).")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host web1 = new Host(\"web1\");",
+                "        quarantine(web1);",
+                "        System.out.println(web1);",
+                "        reset(web1);",
+                "        System.out.println(web1);",
+                "        Host copy = freshCopy(web1);",
+                "        System.out.println(copy);",
+                "    }",
+                "",
+                "    static void quarantine(Host h) {",
+                "        h.setIsolated(true);",
+                "    }",
+                "",
+                "    static void reset(Host h) {",
+                "        h = new Host(\"clean\");",
+                "    }",
+                "",
+                "    static Host freshCopy(Host h) {",
+                "        return new Host(h.getName());",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "    private boolean isolated;",
+                "",
+                "    Host(String name) {",
+                "        this.name = name;",
+                "    }",
+                "",
+                "    String getName() {",
+                "        return name;",
+                "    }",
+                "",
+                "    void setIsolated(boolean isolated) {",
+                "        this.isolated = isolated;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return name + (isolated ? \" [ISOLATED]\" : \"\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "web1 [ISOLATED]",
+                "web1 [ISOLATED]",
+                "web1")
+            .lineByLine(
+                new String[]{"quarantine(web1);",
+                    "The method changed the caller's own host."},
+                new String[]{"reset(web1);",
+                    "The new Host went into the parameter only - web1 is "
+                    + "unchanged."},
+                new String[]{"freshCopy(web1)",
+                    "Returning an object is how a method hands back a new "
+                    + "one."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Acct {",
+                    "    int fails;",
+                    "}",
+                    "",
+                    "static void punish(Acct a) {",
+                    "    a.fails += 3;",
+                    "    a = new Acct();",
+                    "    a.fails = 100;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    Acct x = new Acct();",
+                    "    punish(x);",
+                    "    System.out.println(x.fails);",
+                    "}")
+                .accept("3")
+                .hints("The first line changes x's object.",
+                       "After a = new Acct(), a no longer refers to it.")
+                .explain(
+                    "3. a.fails += 3 changed the caller's object; then a was "
+                    + "pointed at a new Acct, and the 100 went there.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A method must give the caller a brand-new Session. "
+                    + "Which design works?")
+                .choices("static void make(Session s) { s = new Session(); }",
+                         "static Session make() { return new Session(); }",
+                         "static void make() { new Session(); }",
+                         "static Session make(Session s) { s = null; "
+                         + "return s; }")
+                .accept("2", "b")
+                .hints("Assigning to a parameter does not reach the caller.",
+                       "Return it.")
+                .explain(
+                    "b. The caller receives the new object as the return "
+                    + "value. a changes only its own parameter; c throws the "
+                    + "object away; d returns null.")
+                .xp(15))
+            .objective(
+                "Write a helper that raises an alert's severity.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Alert a = new Alert(\"Port scan\", 4);",
+                "        escalate(a);",
+                "        System.out.println(a);",
+                "    }",
+                "",
+                "    // the header: escalate takes an Alert and returns nothing",
+                "        alert.setSeverity(alert.getSeverity() + 3);",
+                "    }",
+                "}",
+                "",
+                "class Alert {",
+                "    private String rule;",
+                "    private int severity;",
+                "",
+                "    Alert(String rule, int severity) {",
+                "        this.rule = rule;",
+                "        this.severity = severity;",
+                "    }",
+                "",
+                "    int getSeverity() {",
+                "        return severity;",
+                "    }",
+                "",
+                "    void setSeverity(int severity) {",
+                "        this.severity = Math.min(severity, 10);",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return rule + \" (\" + severity + \")\";",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the header of a static method escalate that takes "
+                + "an Alert called alert and returns nothing.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the method header.")
+                .accept("static void escalate(Alert alert) {",
+                        "static void escalate(Alert alert){",
+                        "public static void escalate(Alert alert) {",
+                        "private static void escalate(Alert alert) {")
+                .hints(
+                    "static, because main calls it without an object.",
+                    "The parameter's type is Alert.",
+                    "static void escalate(Alert alert) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Alert a = new Alert(\"Port scan\", 4);",
+                    "        escalate(a);",
+                    "        System.out.println(a);",
+                    "    }",
+                    "",
+                    "    static void escalate(Alert alert) {",
+                    "        alert.setSeverity(alert.getSeverity() + 3);",
+                    "    }",
+                    "}",
+                    "",
+                    "class Alert {",
+                    "    private String rule;",
+                    "    private int severity;",
+                    "",
+                    "    Alert(String rule, int severity) {",
+                    "        this.rule = rule;",
+                    "        this.severity = severity;",
+                    "    }",
+                    "",
+                    "    int getSeverity() {",
+                    "        return severity;",
+                    "    }",
+                    "",
+                    "    void setSeverity(int severity) {",
+                    "        this.severity = Math.min(severity, 10);",
+                    "    }",
+                    "",
+                    "    @Override",
+                    "    public String toString() {",
+                    "        return rule + \" (\" + severity + \")\";",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "escalate receives a reference to main's Alert and "
+                    + "changes it through its setter, so main's a now reads "
+                    + "Port scan (7). No return value is needed.\n"
+                    + "\n"
+                    + "The change still goes through setSeverity, so the "
+                    + "class's own rule - never above 10 - applies even to "
+                    + "helpers outside it.")
+                .explain(
+                    "static void escalate(Alert alert) { - an object in.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Replacing the parameter to 'return' an object",
+                    "The caller never sees it. Return the new object."},
+                new String[]{"Surprise changes to an object passed in",
+                    "Say so in the method's name and comment."},
+                new String[]{"Reaching into fields from the helper",
+                    "Use the object's methods, so its rules apply."})
+            .cyber(
+                "A method handed an object can change it - so any method "
+                + "you pass a security-relevant object to is trusted with "
+                + "it. Passing a live Session into a logging helper that "
+                + "'tidies' it, or a permissions object into a display "
+                + "method, gives those methods power over it. Pass objects "
+                + "whose methods only allow safe changes, and name methods "
+                + "that change their arguments clearly.")
+            .check(new Task(Task.CHOICE,
+                    "What does a method receive when an object is passed "
+                    + "to it?")
+                .choices("A full copy of the object",
+                         "A copy of the reference to the same object",
+                         "Only the object's toString",
+                         "Nothing until it calls new")
+                .accept("2", "b")
+                .hints("Mission 6: object variables hold references.",
+                       "The reference is copied, not the object.")
+                .explain(
+                    "b. The parameter refers to the caller's object, so "
+                    + "changes through it are seen by the caller.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Pair {",
+                    "    int a;",
+                    "    int b;",
+                    "}",
+                    "",
+                    "static void swap(Pair p) {",
+                    "    int t = p.a;",
+                    "    p.a = p.b;",
+                    "    p.b = t;",
+                    "}",
+                    "",
+                    "public static void main(String[] args) {",
+                    "    Pair p = new Pair();",
+                    "    p.a = 1;",
+                    "    p.b = 2;",
+                    "    swap(p);",
+                    "    System.out.println(p.a + \" \" + p.b);",
+                    "}")
+                .accept("2 1")
+                .hints("swap changes the fields of the caller's Pair.",
+                       "Through the reference.")
+                .explain(
+                    "2 1. Unlike swapping two int parameters (which cannot "
+                    + "reach the caller), swapping fields of a passed object "
+                    + "works.")
+                .xp(10))
+            .recap(
+                "    method(obj)            the method can CHANGE obj\n"
+                + "    param = new X();       only moves the parameter\n"
+                + "    return new X();        how to hand back a new one\n"
+                + "\n"
+                + "Passing an object trusts the method with it.")
+            .next("Next: objects that hold other objects."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Objects Inside Objects", 5)
+            .brief(
+                "An audit needs, for every server, the local accounts on it "
+                + "and which of them are locked. A Host and an Account "
+                + "class already exist. The missing piece is the "
+                + "relationship: a Host HAS accounts. Give Host a field "
+                + "that holds them, and methods that answer questions "
+                + "about them.")
+            .willLearn("Composition")
+            .whyUseful(
+                "Real things are built from other things: a host has "
+                + "accounts, an incident has alerts, a firewall has rules. "
+                + "Building classes out of other classes - composition - is "
+                + "how programs model that.")
+            .concept("Composition",
+                "A field can hold any type - including your own classes, "
+                + "and lists of them. That is COMPOSITION, the 'has-a' "
+                + "relationship:\n"
+                + "\n"
+                + "    class Host {\n"
+                + "        private String name;\n"
+                + "        private ArrayList<Account> accounts =\n"
+                + "                new ArrayList<>();\n"
+                + "\n"
+                + "        void addAccount(Account a) {\n"
+                + "            accounts.add(a);\n"
+                + "        }\n"
+                + "\n"
+                + "        int lockedCount() {\n"
+                + "            int n = 0;\n"
+                + "            for (Account a : accounts) {\n"
+                + "                if (a.isLocked()) { n++; }\n"
+                + "            }\n"
+                + "            return n;\n"
+                + "        }\n"
+                + "    }\n"
+                + "\n"
+                + "The list is created where it is declared, with = new "
+                + "ArrayList<>(), so every Host starts with an empty list - "
+                + "never null.\n"
+                + "\n"
+                + "Each class answers questions about its own data: Host "
+                + "counts and loops, and asks each Account isLocked(); "
+                + "Account knows what locked means. Neither reaches into "
+                + "the other's private fields.\n"
+                + "\n"
+                + "Keep the list private and offer operations - "
+                + "addAccount, lockedCount - rather than a getter that "
+                + "hands out the list itself, which would let any caller "
+                + "add or remove accounts behind the Host's back.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Host db = new Host(\"db1\");",
+                "        db.addAccount(new Account(\"postgres\", 0));",
+                "        db.addAccount(new Account(\"backup\", 5));",
+                "        db.addAccount(new Account(\"temp01\", 3));",
+                "        System.out.println(db);",
+                "        System.out.println(\"Locked: \" + db.lockedCount());",
+                "    }",
+                "}",
+                "",
+                "class Host {",
+                "    private String name;",
+                "    private ArrayList<Account> accounts = new ArrayList<>();",
+                "",
+                "    Host(String name) {",
+                "        this.name = name;",
+                "    }",
+                "",
+                "    void addAccount(Account a) {",
+                "        accounts.add(a);",
+                "    }",
+                "",
+                "    int lockedCount() {",
+                "        int n = 0;",
+                "        for (Account a : accounts) {",
+                "            if (a.isLocked()) {",
+                "                n++;",
+                "            }",
+                "        }",
+                "        return n;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return name + \" \" + accounts;",
+                "    }",
+                "}",
+                "",
+                "class Account {",
+                "    private String user;",
+                "    private int fails;",
+                "",
+                "    Account(String user, int fails) {",
+                "        this.user = user;",
+                "        this.fails = fails;",
+                "    }",
+                "",
+                "    boolean isLocked() {",
+                "        return fails >= 3;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return user;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "db1 [postgres, backup, temp01]",
+                "Locked: 2")
+            .lineByLine(
+                new String[]{"private ArrayList<Account> accounts = ...",
+                    "A Host has accounts - and starts with an empty list, "
+                    + "not null."},
+                new String[]{"a.isLocked()",
+                    "Host asks each Account; Account decides."},
+                new String[]{"name + \" \" + accounts",
+                    "The list prints using each Account's toString."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Rule {",
+                    "    int port;",
+                    "",
+                    "    Rule(int port) {",
+                    "        this.port = port;",
+                    "    }",
+                    "}",
+                    "",
+                    "class Firewall {",
+                    "    java.util.ArrayList<Rule> rules = new java.util.ArrayList<>();",
+                    "",
+                    "    boolean allows(int port) {",
+                    "        for (Rule r : rules) {",
+                    "            if (r.port == port) {",
+                    "                return true;",
+                    "            }",
+                    "        }",
+                    "        return false;",
+                    "    }",
+                    "}",
+                    "",
+                    "Firewall fw = new Firewall();",
+                    "fw.rules.add(new Rule(443));",
+                    "System.out.println(fw.allows(443) + \" \" + fw.allows(22));")
+                .accept("true false")
+                .hints("The Firewall holds a list of Rules.",
+                       "Only 443 has a rule.")
+                .explain(
+                    "true false. allows searches the firewall's own rules; "
+                    + "no rule means no, which is deny by default.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Host has private ArrayList<Account> accounts. Which "
+                    + "method is the RISKIEST to add?")
+                .choices("int lockedCount()",
+                         "void addAccount(Account a)",
+                         "ArrayList<Account> getAccounts() returning the "
+                         + "field itself",
+                         "String toString()")
+                .accept("3", "c")
+                .hints("What could a caller do with the list itself?",
+                       "Mission 6: a reference is not a copy.")
+                .explain(
+                    "c. Handing out the real list lets any caller add, "
+                    + "remove or clear accounts without Host knowing. "
+                    + "Offer operations, or return a copy.")
+                .xp(20))
+            .objective(
+                "Give Incident a list of its alerts.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Incident inc = new Incident(\"INC-7\");",
+                "        inc.add(\"Brute force\");",
+                "        inc.add(\"New admin account\");",
+                "        System.out.println(inc.summary());",
+                "    }",
+                "}",
+                "",
+                "class Incident {",
+                "    private String id;",
+                "    // alerts: a private list of Strings, created empty here",
+                "",
+                "    Incident(String id) {",
+                "        this.id = id;",
+                "    }",
+                "",
+                "    void add(String alert) {",
+                "        alerts.add(alert);",
+                "    }",
+                "",
+                "    String summary() {",
+                "        return id + \": \" + alerts.size() + \" alerts \" + alerts;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare alerts: a private ArrayList of Strings, created "
+                + "empty right where it is declared.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the field line.")
+                .accept("private ArrayList<String> alerts = new ArrayList<>();",
+                        "private ArrayList<String> alerts = new ArrayList<String>();",
+                        "private ArrayList<String> alerts=new ArrayList<>();")
+                .hints(
+                    "A private field, whose type is a list.",
+                    "= new ArrayList<>() so it is never null.",
+                    "private ArrayList<String> alerts = new ArrayList<>();")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Incident inc = new Incident(\"INC-7\");",
+                    "        inc.add(\"Brute force\");",
+                    "        inc.add(\"New admin account\");",
+                    "        System.out.println(inc.summary());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Incident {",
+                    "    private String id;",
+                    "    private ArrayList<String> alerts = new ArrayList<>();",
+                    "",
+                    "    Incident(String id) {",
+                    "        this.id = id;",
+                    "    }",
+                    "",
+                    "    void add(String alert) {",
+                    "        alerts.add(alert);",
+                    "    }",
+                    "",
+                    "    String summary() {",
+                    "        return id + \": \" + alerts.size() + \" alerts \" + alerts;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Every Incident is made with its own empty list, so "
+                    + "add has somewhere to put alerts from the very first "
+                    + "call: INC-7: 2 alerts [Brute force, New admin "
+                    + "account].\n"
+                    + "\n"
+                    + "Without = new ArrayList<>(), the field would start as "
+                    + "null and the first add would throw "
+                    + "NullPointerException.")
+                .explain(
+                    "private ArrayList<String> alerts = new ArrayList<>();")
+                .xp(20))
+            .mistakes(
+                new String[]{"A list field left null",
+                    "Create it where it is declared, or in the constructor."},
+                new String[]{"Returning the private list from a getter",
+                    "Callers can change it. Offer operations."},
+                new String[]{"Reaching into the inner objects' fields",
+                    "Ask them through their methods."})
+            .cyber(
+                "Composition is how security models are built: a user HAS "
+                + "roles, a role HAS permissions, a host HAS open ports. The "
+                + "boundaries between the classes are control points. If "
+                + "Host hands out its account list, any code can add a "
+                + "backdoor account without going through the checks "
+                + "addAccount would make.")
+            .check(new Task(Task.CHOICE,
+                    "Which relationship is composition ('has-a')?")
+                .choices("A Host has a list of Accounts",
+                         "An int is a number",
+                         "main is static",
+                         "String is a class")
+                .accept("1", "a")
+                .hints("One object holding others.",
+                       "A field whose type is another class.")
+                .explain(
+                    "a. Host holds Accounts in a field - it is composed of "
+                    + "them.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "class Team {",
+                    "    java.util.ArrayList<String> members = new java.util.ArrayList<>();",
+                    "}",
+                    "",
+                    "Team a = new Team();",
+                    "Team b = new Team();",
+                    "a.members.add(\"ana\");",
+                    "System.out.println(a.members.size() + \" \" + b.members.size());")
+                .accept("1 0")
+                .hints("Each Team gets its own new list.",
+                       "Only a's list was added to.")
+                .explain(
+                    "1 0. The field's = new ArrayList<>() runs for every new "
+                    + "Team, so each has a separate list.")
+                .xp(10))
+            .recap(
+                "    class Host {\n"
+                + "        private ArrayList<Account> accounts =\n"
+                + "                new ArrayList<>();\n"
+                + "        void addAccount(Account a) { ... }\n"
+                + "    }\n"
+                + "\n"
+                + "Has-a. Create inner lists at once. Offer operations, not "
+                + "the list itself.")
+            .next("Next: objects that can never change."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "Objects That Never Change", 4)
+            .brief(
+                "Evidence records hold a file's name, its SHA-256 hash and "
+                + "when it was collected. Once recorded, none of that may "
+                + "change - not by a setter, not by a bug, not by anyone. "
+                + "Java can enforce that with one keyword on each field.")
+            .willLearn("Immutable objects")
+            .whyUseful(
+                "An object that cannot change after it is made is easy to "
+                + "trust, safe to share, and can never be tampered with "
+                + "through a stray method call. String has worked this way "
+                + "since Campaign 01.")
+            .concept("Immutable objects",
+                "A FINAL field must be set exactly once - in the "
+                + "constructor, or where it is declared - and can never be "
+                + "assigned again:\n"
+                + "\n"
+                + "    class Evidence {\n"
+                + "        private final String file;\n"
+                + "        private final String sha256;\n"
+                + "\n"
+                + "        Evidence(String file, String sha256) {\n"
+                + "            this.file = file;\n"
+                + "            this.sha256 = sha256;\n"
+                + "        }\n"
+                + "\n"
+                + "        String getSha256() { return sha256; }\n"
+                + "    }\n"
+                + "\n"
+                + "Any later sha256 = ... is a COMPILE error. An object "
+                + "whose fields are all private and final, with no method "
+                + "that changes them, is IMMUTABLE.\n"
+                + "\n"
+                + "To 'change' an immutable object, make a new one. That is "
+                + "exactly what String does: text.toUpperCase() never "
+                + "changes text; it returns a new String. Now you know "
+                + "why.\n"
+                + "\n"
+                + "One catch: final fixes the REFERENCE, not the object it "
+                + "points to. A private final ArrayList can still have "
+                + "items added. For a truly immutable object, its fields "
+                + "must be immutable too - or never handed out.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Evidence e = new Evidence(\"auth.log\",",
+                "                \"9f86d081884c7d659a2feaa0c55ad015\");",
+                "        System.out.println(e);",
+                "        Evidence renamed = e.withFile(\"auth.log.1\");",
+                "        System.out.println(renamed);",
+                "        System.out.println(e);",
+                "        String s = \"admin\";",
+                "        s.toUpperCase();",
+                "        System.out.println(s);",
+                "    }",
+                "}",
+                "",
+                "class Evidence {",
+                "    private final String file;",
+                "    private final String sha256;",
+                "",
+                "    Evidence(String file, String sha256) {",
+                "        this.file = file;",
+                "        this.sha256 = sha256;",
+                "    }",
+                "",
+                "    Evidence withFile(String newFile) {",
+                "        return new Evidence(newFile, sha256);",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        return file + \" \" + sha256.substring(0, 8);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "auth.log 9f86d081",
+                "auth.log.1 9f86d081",
+                "auth.log 9f86d081",
+                "admin")
+            .lineByLine(
+                new String[]{"private final String sha256;",
+                    "Set once in the constructor; never again."},
+                new String[]{"withFile(...)",
+                    "'Changing' an immutable object means making a new one; "
+                    + "e itself is untouched."},
+                new String[]{"s.toUpperCase(); then admin",
+                    "String is immutable too: the result was thrown away, "
+                    + "and s never changed."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String a = \"root\";",
+                    "String b = a.replace(\"o\", \"0\");",
+                    "System.out.println(a + \" \" + b);")
+                .accept("root r00t")
+                .hints("Strings are immutable.",
+                       "replace returns a new String.")
+                .explain(
+                    "root r00t. replace built a new String for b; a is "
+                    + "exactly as it was.")
+                .xp(15))
+            .practice(new Task(Task.DEBUG,
+                    "Which line does not compile?")
+                .code(
+                    "class Token {",
+                    "    private final String value;",
+                    "",
+                    "    Token(String value) {",
+                    "        this.value = value;",
+                    "    }",
+                    "",
+                    "    void rotate(String next) {",
+                    "        value = next;",
+                    "    }",
+                    "}",
+                    "",
+                    "Token t = new Token(\"abc\");")
+                .accept("9", "line 9")
+                .hints("Which field is final?",
+                       "Where is it assigned a second time?")
+                .explain(
+                    "Line 9: 'cannot assign a value to final variable "
+                    + "value'. A final field is set once, in the "
+                    + "constructor. To rotate a token, make a new Token.")
+                .xp(20))
+            .objective(
+                "Make the hash impossible to change.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Evidence e = new Evidence(\"disk.img\", \"a1b2c3d4\");",
+                "        System.out.println(e.getFile() + \" \" + e.getHash());",
+                "    }",
+                "}",
+                "",
+                "class Evidence {",
+                "    private final String file;",
+                "    // hash: a private String that can be set only once",
+                "",
+                "    Evidence(String file, String hash) {",
+                "        this.file = file;",
+                "        this.hash = hash;",
+                "    }",
+                "",
+                "    String getFile() {",
+                "        return file;",
+                "    }",
+                "",
+                "    String getHash() {",
+                "        return hash;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare hash as a private, final String field.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the field line.")
+                .accept("private final String hash;",
+                        "final private String hash;")
+                .hints(
+                    "Like the file field above it.",
+                    "private final, then the type and name.",
+                    "private final String hash;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Evidence e = new Evidence(\"disk.img\", \"a1b2c3d4\");",
+                    "        System.out.println(e.getFile() + \" \" + e.getHash());",
+                    "    }",
+                    "}",
+                    "",
+                    "class Evidence {",
+                    "    private final String file;",
+                    "    private final String hash;",
+                    "",
+                    "    Evidence(String file, String hash) {",
+                    "        this.file = file;",
+                    "        this.hash = hash;",
+                    "    }",
+                    "",
+                    "    String getFile() {",
+                    "        return file;",
+                    "    }",
+                    "",
+                    "    String getHash() {",
+                    "        return hash;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The constructor sets hash once, and from then on the "
+                    + "compiler rejects any assignment to it - even from "
+                    + "inside Evidence. With getters and no setters, the "
+                    + "object is immutable: disk.img a1b2c3d4, for good.\n"
+                    + "\n"
+                    + "final also catches a class of mistakes: forget to set "
+                    + "hash in the constructor, and the class does not "
+                    + "compile.")
+                .explain(
+                    "private final String hash; - set once, never again.")
+                .xp(20))
+            .mistakes(
+                new String[]{"A setter on a final field",
+                    "Does not compile. Return a new object instead."},
+                new String[]{"final list, items still changing",
+                    "final fixes the reference, not the list's contents."},
+                new String[]{"s.toUpperCase(); on its own",
+                    "Strings never change. Keep the result."})
+            .cyber(
+                "Chain of custody depends on evidence that cannot change "
+                + "after collection. Immutable objects give that guarantee "
+                + "inside the program: once an Evidence record exists, no "
+                + "code path can rewrite its hash. Immutable objects are "
+                + "also safe to share between parts of a program, since "
+                + "nobody can alter what another part is relying on.")
+            .check(new Task(Task.CHOICE,
+                    "When can a final field be assigned?")
+                .choices("Any time",
+                         "Once - where it is declared or in the constructor",
+                         "Only in a setter",
+                         "Never")
+                .accept("2", "b")
+                .hints("It must get a value exactly once.",
+                       "Before the object is handed out.")
+                .explain(
+                    "b. Exactly once, while the object is being built. "
+                    + "Every later assignment is a compile error.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "Why does name.trim() on its own leave name unchanged?")
+                .choices("trim is broken",
+                         "String is immutable: trim returns a new String",
+                         "name must be final",
+                         "trim only works on arrays")
+                .accept("2", "b")
+                .hints("Can a String ever change?",
+                       "Where does the result go?")
+                .explain(
+                    "b. Every String method that 'changes' text returns a "
+                    + "new String. name = name.trim(); keeps the result.")
+                .xp(10))
+            .recap(
+                "    private final T field;   set once, in the constructor\n"
+                + "    no setters               nothing can change it\n"
+                + "    withX(...)               'change' = a new object\n"
+                + "\n"
+                + "String is immutable. final fixes references, not the "
+                + "objects behind them.")
+            .next("Next: from a written spec to a class."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "From a Spec to a Class", 5)
+            .brief(
+                "Facilities send a one-paragraph spec for door badges: each "
+                + "badge has a fixed number and owner, lists the zones it "
+                + "opens, can be deactivated but never reactivated, and "
+                + "must refuse every door once deactivated. Turning a "
+                + "paragraph like that into a class is the skill every "
+                + "later campaign relies on.")
+            .willLearn("Designing a class")
+            .whyUseful(
+                "Most classes start as words: a ticket, a spec, a policy. A "
+                + "repeatable way to turn words into fields, constructors "
+                + "and methods - with the rules built in - makes the result "
+                + "correct and hard to misuse.")
+            .concept("Designing a class",
+                "Read the spec four times, looking for four things:\n"
+                + "\n"
+                + "    NOUNS it HAS        fields\n"
+                + "      number, owner, zones, active\n"
+                + "    FIXED at creation   final fields, constructor\n"
+                + "      number and owner never change\n"
+                + "    VERBS it DOES       methods\n"
+                + "      deactivate, canEnter(zone), addZone(zone)\n"
+                + "    RULES               checks and invariants\n"
+                + "      no reactivation; inactive = no door opens\n"
+                + "\n"
+                + "Then decide the doors:\n"
+                + "\n"
+                + "    - every field private\n"
+                + "    - a constructor that demands what is required\n"
+                + "    - getters only for what callers must read\n"
+                + "    - methods for what may happen - and nothing for\n"
+                + "      what may not (no reactivate method at all)\n"
+                + "\n"
+                + "The strongest rules are the ones you enforce by "
+                + "OMISSION: if the spec says a badge can never be "
+                + "reactivated, the class simply has no way to do it.\n"
+                + "\n"
+                + "Finally, check the defaults: a new badge should be "
+                + "active with NO zones - opening nothing until zones are "
+                + "granted.")
+            .example(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Badge b = new Badge(4021, \"Ana Silva\");",
+                "        b.addZone(\"LOBBY\");",
+                "        b.addZone(\"SOC\");",
+                "        boolean soc = b.canEnter(\"SOC\");",
+                "        boolean dc = b.canEnter(\"DATACENTRE\");",
+                "        System.out.println(soc + \" \" + dc);",
+                "        b.deactivate();",
+                "        System.out.println(b.canEnter(\"LOBBY\"));",
+                "        System.out.println(b);",
+                "    }",
+                "}",
+                "",
+                "class Badge {",
+                "    private final int number;",
+                "    private final String owner;",
+                "    private ArrayList<String> zones = new ArrayList<>();",
+                "    private boolean active = true;",
+                "",
+                "    Badge(int number, String owner) {",
+                "        this.number = number;",
+                "        this.owner = owner;",
+                "    }",
+                "",
+                "    void addZone(String zone) {",
+                "        if (active && !zones.contains(zone)) {",
+                "            zones.add(zone);",
+                "        }",
+                "    }",
+                "",
+                "    boolean canEnter(String zone) {",
+                "        return active && zones.contains(zone);",
+                "    }",
+                "",
+                "    void deactivate() {",
+                "        active = false;",
+                "    }",
+                "",
+                "    @Override",
+                "    public String toString() {",
+                "        String state = active ? \"\" : \" [INACTIVE]\";",
+                "        return \"#\" + number + \" \" + owner + state;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "true false",
+                "false",
+                "#4021 Ana Silva [INACTIVE]")
+            .lineByLine(
+                new String[]{"private final int number;",
+                    "Fixed at creation: final, set by the constructor."},
+                new String[]{"return active && zones.contains(zone);",
+                    "Two rules in one line: active, AND granted this zone."},
+                new String[]{"no reactivate()",
+                    "The spec forbids it, so the class has no way to do it."})
+            .predict(new Task(Task.CHOICE,
+                    "Spec: 'A ticket has an ID assigned when it is opened, a "
+                    + "title that can be edited, and a status that only "
+                    + "moves forward.' Which field should be final?")
+                .choices("title", "status", "id", "None of them")
+                .accept("3", "c")
+                .hints("Which one never changes after creation?",
+                       "Assigned when it is opened.")
+                .explain(
+                    "c. The ID is fixed at creation. The title may be "
+                    + "edited and the status moves - both change, so "
+                    + "neither can be final.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Spec: 'An API key can be revoked, and a revoked key can "
+                    + "never be used again.' How should the class enforce "
+                    + "the second half?")
+                .choices("A comment asking callers not to unrevoke",
+                         "A setRevoked(boolean) setter",
+                         "A revoke() method and no method that clears it",
+                         "A public revoked field")
+                .accept("3", "c")
+                .hints("Enforce by omission.",
+                       "What should be impossible?")
+                .explain(
+                    "c. revoke() only ever sets it; with no way to clear it, "
+                    + "the rule holds whatever callers try.")
+                .xp(20))
+            .objective(
+                "Write the badge's door check.")
+            .starter(
+                "import java.util.ArrayList;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Badge b = new Badge(77);",
+                "        b.addZone(\"LAB\");",
+                "        boolean lab = b.canEnter(\"LAB\");",
+                "        boolean vault = b.canEnter(\"VAULT\");",
+                "        System.out.println(lab + \" \" + vault);",
+                "        b.deactivate();",
+                "        System.out.println(b.canEnter(\"LAB\"));",
+                "    }",
+                "}",
+                "",
+                "class Badge {",
+                "    private final int number;",
+                "    private ArrayList<String> zones = new ArrayList<>();",
+                "    private boolean active = true;",
+                "",
+                "    Badge(int number) {",
+                "        this.number = number;",
+                "    }",
+                "",
+                "    void addZone(String zone) {",
+                "        zones.add(zone);",
+                "    }",
+                "",
+                "    void deactivate() {",
+                "        active = false;",
+                "    }",
+                "",
+                "    boolean canEnter(String zone) {",
+                "        // true only if active AND the zone was granted",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the return line of canEnter: true only when the badge "
+                + "is active AND its zones include the one asked for.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the return line.")
+                .accept("return active && zones.contains(zone);",
+                        "return zones.contains(zone) && active;")
+                .hints(
+                    "Both conditions must hold: &&.",
+                    "zones.contains(zone) checks the grant.",
+                    "return active && zones.contains(zone);")
+                .solution(
+                    "import java.util.ArrayList;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Badge b = new Badge(77);",
+                    "        b.addZone(\"LAB\");",
+                    "        boolean lab = b.canEnter(\"LAB\");",
+                "        boolean vault = b.canEnter(\"VAULT\");",
+                "        System.out.println(lab + \" \" + vault);",
+                    "        b.deactivate();",
+                    "        System.out.println(b.canEnter(\"LAB\"));",
+                    "    }",
+                    "}",
+                    "",
+                    "class Badge {",
+                    "    private final int number;",
+                    "    private ArrayList<String> zones = new ArrayList<>();",
+                    "    private boolean active = true;",
+                    "",
+                    "    Badge(int number) {",
+                    "        this.number = number;",
+                    "    }",
+                    "",
+                    "    void addZone(String zone) {",
+                    "        zones.add(zone);",
+                    "    }",
+                    "",
+                    "    void deactivate() {",
+                    "        active = false;",
+                    "    }",
+                    "",
+                    "    boolean canEnter(String zone) {",
+                    "        return active && zones.contains(zone);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "The LAB was granted and the badge is active: true. The "
+                    + "VAULT was never granted: false. After deactivation, "
+                    + "active is false, so even the LAB is refused.\n"
+                    + "\n"
+                    + "Deny by default is built in twice: a new badge has no "
+                    + "zones, and an inactive one opens nothing whatever its "
+                    + "zones say.")
+                .explain(
+                    "return active && zones.contains(zone); - both must hold.")
+                .xp(25))
+            .mistakes(
+                new String[]{"Setters for every field",
+                    "Only what the spec says may change."},
+                new String[]{"Rules left as comments",
+                    "Build them into methods - or leave the method out."},
+                new String[]{"Generous defaults",
+                    "New objects should grant nothing until told to."})
+            .cyber(
+                "Physical access control, API keys, user accounts: each is "
+                + "a class whose rules ARE the security policy. Designing "
+                + "from the spec - final for what never changes, no method "
+                + "for what must never happen, deny by default for what is "
+                + "not granted - turns the policy into code that cannot be "
+                + "argued with at runtime.")
+            .check(new Task(Task.CHOICE,
+                    "Which part of a spec usually becomes a METHOD?")
+                .choices("A noun the thing has, like 'owner'",
+                         "A verb the thing does, like 'deactivate'",
+                         "A value that never changes",
+                         "The name of the class")
+                .accept("2", "b")
+                .hints("Things it HAS are fields.",
+                       "Things it DOES are methods.")
+                .explain(
+                    "b. Verbs become methods; nouns become fields; fixed "
+                    + "values become final fields.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "A new Badge is made. What should canEnter(\"SOC\") "
+                    + "return before any zone is added?")
+                .choices("true, badges are trusted",
+                         "false, nothing is granted yet",
+                         "It should crash",
+                         "true for staff only")
+                .accept("2", "b")
+                .hints("Deny by default.",
+                       "The zones list starts empty.")
+                .explain(
+                    "b. A new badge opens nothing until zones are granted - "
+                    + "the safe default.")
+                .xp(10))
+            .recap(
+                "    nouns -> fields        fixed -> final\n"
+                + "    verbs -> methods       rules -> checks\n"
+                + "    forbidden -> no method at all\n"
+                + "    defaults -> grant nothing\n"
+                + "\n"
+                + "Private fields; only the doors the spec needs.")
+            .next("Next: how real projects split classes into files."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "One Class per File", 3)
+            .brief(
+                "Every program so far has lived in one file, Main.java, "
+                + "with extra classes after Main. Open a real Java project "
+                + "and you see Account.java, Host.java, Alert.java - one "
+                + "class per file. Here is how that works, and why Java "
+                + "insists on it for public classes.")
+            .willLearn("One class per file")
+            .whyUseful(
+                "Real code is organised as many files, one per class. "
+                + "Knowing the rule - and how to compile and run a "
+                + "multi-file program - lets you move from these exercises "
+                + "to any Java project, including your module "
+                + "assignments.")
+            .concept("One class per file",
+                "The rule: a PUBLIC class must be in a file with exactly "
+                + "its name. public class Account goes in Account.java, "
+                + "and nowhere else.\n"
+                + "\n"
+                + "That is why the game's extra classes have never said "
+                + "public: a file may hold only ONE public class, and in "
+                + "Main.java that is Main. Non-public classes may share a "
+                + "file, which is handy for small programs - and it is how "
+                + "every lab here works.\n"
+                + "\n"
+                + "A real project puts each class in its own file, in the "
+                + "same folder:\n"
+                + "\n"
+                + "    Account.java     public class Account { ... }\n"
+                + "    Host.java        public class Host { ... }\n"
+                + "    Main.java        public class Main { ... }\n"
+                + "\n"
+                + "Compile them together, then run the class with main:\n"
+                + "\n"
+                + "    javac *.java\n"
+                + "    java Main\n"
+                + "\n"
+                + "javac also compiles any class a file uses, so javac "
+                + "Main.java often works too - but *.java is the safe "
+                + "habit. Each class becomes its own .class file.\n"
+                + "\n"
+                + "Bigger projects group files into folders called "
+                + "PACKAGES, with a package line at the top of each file - "
+                + "Campaign 10. In an IDE such as IntelliJ, New > Java Class "
+                + "makes the file with the right name for you.")
+            .example(
+                "ls",
+                "Account.java  Host.java  Main.java",
+                "javac *.java",
+                "ls *.class",
+                "Account.class  Host.class  Main.class",
+                "java Main",
+                "db1 [postgres, backup, temp01]")
+            .exampleOutput(
+                "(the terminal session above: three files in, three "
+                + "classes out)")
+            .lineByLine(
+                new String[]{"Account.java  Host.java  Main.java",
+                    "One public class per file, each named after its class."},
+                new String[]{"javac *.java",
+                    "Compiles every file in the folder together."},
+                new String[]{"java Main",
+                    "Runs the class that has main - no .java, no .class."})
+            .predict(new Task(Task.CHOICE,
+                    "A file contains public class Alert. What must the file "
+                    + "be called?")
+                .choices("alert.java", "Alert.java", "Main.java",
+                         "Anything ending in .java")
+                .accept("2", "b")
+                .hints("Exactly the class name.",
+                       "Capital letter included.")
+                .explain(
+                    "b. Alert.java - the name must match exactly, including "
+                    + "case.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why do the extra classes in the game's Main.java NOT "
+                    + "say public?")
+                .choices("public is not allowed on classes",
+                         "A file may hold only one public class - Main",
+                         "They would run faster",
+                         "private classes are safer")
+                .accept("2", "b")
+                .hints("Main.java already has a public class.",
+                       "One per file.")
+                .explain(
+                    "b. Main is the public class of Main.java, so the "
+                    + "others must be non-public - or live in their own "
+                    + "files.")
+                .xp(15))
+            .objective(
+                "Start the file for the Account class.")
+            .starter(
+                "// Account.java",
+                "",
+                "// the class line for a public class Account",
+                "    private String user;",
+                "",
+                "    public Account(String user) {",
+                "        this.user = user;",
+                "    }",
+                "",
+                "    public String getUser() {",
+                "        return user;",
+                "    }",
+                "}")
+            .yourTask(
+                "This is the whole of Account.java. Write its first line: "
+                + "the declaration of a public class called Account.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the class line.")
+                .accept("public class Account {",
+                        "public class Account{")
+                .hints(
+                    "It is the only class in its own file.",
+                    "So it can - and should - be public.",
+                    "public class Account {")
+                .solution(
+                    "// Account.java",
+                    "",
+                    "public class Account {",
+                    "    private String user;",
+                    "",
+                    "    public Account(String user) {",
+                    "        this.user = user;",
+                    "    }",
+                    "",
+                    "    public String getUser() {",
+                    "        return user;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "In its own file, Account can be public, and the file's "
+                    + "name, Account.java, matches it exactly. Its "
+                    + "constructor and getter are marked public too, so "
+                    + "classes in other packages can use them later.\n"
+                    + "\n"
+                    + "Main.java then just uses new Account(\"admin\") as "
+                    + "before; javac *.java compiles both files together.")
+                .explain(
+                    "public class Account { - in Account.java, by itself.")
+                .xp(15))
+            .mistakes(
+                new String[]{"public class Account in Main.java",
+                    "'should be declared in a file named Account.java'."},
+                new String[]{"account.java for class Account",
+                    "The case must match exactly."},
+                new String[]{"java Main.class",
+                    "Run with the class name: java Main."})
+            .cyber(
+                "One class per file is also good security hygiene. Changes "
+                + "to Account.java are easy to find in version control and "
+                + "easy to review on their own; access rules live in a file "
+                + "that can be given extra scrutiny. A single giant file "
+                + "hides a one-line change to a permission check among "
+                + "thousands of unrelated lines.")
+            .check(new Task(Task.CHOICE,
+                    "A project has Main.java, Host.java and Rule.java. "
+                    + "Which commands compile and run it?")
+                .choices("java *.java",
+                         "javac *.java, then java Main",
+                         "javac Main, then java Main.java",
+                         "java Host")
+                .accept("2", "b")
+                .hints("Compile everything, then run the class with main.",
+                       "javac compiles; java runs.")
+                .explain(
+                    "b. javac *.java compiles all three; java Main runs the "
+                    + "program from Main's main method.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "How many public classes may one .java file hold?")
+                .choices("Any number", "One at most", "Exactly two", "None")
+                .accept("2", "b")
+                .hints("And its name decides the file's name.",
+                       "One.")
+                .explain(
+                    "b. At most one, named like the file. Non-public "
+                    + "classes may share the file.")
+                .xp(10))
+            .recap(
+                "    public class Account   ->   Account.java\n"
+                + "    one public class per file\n"
+                + "    javac *.java  then  java Main\n"
+                + "\n"
+                + "The game keeps extra classes non-public inside "
+                + "Main.java; real projects give each its own file.")
+            .next("Next: encapsulation as a security control."));
     }
 }

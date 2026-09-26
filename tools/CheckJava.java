@@ -368,23 +368,36 @@ public class CheckJava {
         Result r = new Result();
         Path dir = work.resolve("p" + (counter++));
         Files.createDirectories(dir);
-        Files.write(dir.resolve("Main.java"), List.of(program), StandardCharsets.UTF_8);
+        // A public class must live in a file of its own name (mission 25
+        // of Campaign 06 shows Account.java on its own).
+        String name = "Main";
+        java.util.regex.Matcher pub = java.util.regex.Pattern
+                .compile("public class (\\w+)").matcher(String.join("\n", program));
+        if (pub.find()) {
+            name = pub.group(1);
+        }
+        Files.write(dir.resolve(name + ".java"), List.of(program), StandardCharsets.UTF_8);
 
-        Process javac = new ProcessBuilder("javac", "-d", ".", "Main.java")
+        Process javac = new ProcessBuilder("javac", "-d", ".", name + ".java")
                 .directory(dir.toFile()).redirectErrorStream(true).start();
         String compileOut = read(javac);
         r.compiled = javac.waitFor() == 0;
         if (!r.compiled) {
             r.errors = firstLine(compileOut);
             java.util.regex.Matcher m = java.util.regex.Pattern
-                    .compile("Main\\.java:(\\d+):").matcher(compileOut);
+                    .compile("\\w+\\.java:(\\d+):").matcher(compileOut);
             if (m.find()) {
                 r.firstErrorLine = Integer.parseInt(m.group(1));
             }
             return r;
         }
 
-        Process java = new ProcessBuilder("java", "-cp", ".", "Main")
+        if (!String.join("\n", program).contains("static void main")) {
+            // A lone class with no main: compiling is all it can do.
+            r.ran = true;
+            return r;
+        }
+        Process java = new ProcessBuilder("java", "-cp", ".", name)
                 .directory(dir.toFile()).redirectErrorStream(true).start();
         for (String line : typed) {
             java.getOutputStream().write((line + "\n").getBytes(StandardCharsets.UTF_8));
