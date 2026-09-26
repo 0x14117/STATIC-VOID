@@ -548,5 +548,700 @@ public class Campaign05Labs {
             .hidden(Lab.typing("db9"),
                 "Host: db9",
                 "db9 not found"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(6), "Split the Line", Lab.SMALL)
+            .after("C05-M017")
+            .brief(
+                "The VPN gateway writes one line per connection: time, user, "
+                + "source address and result, separated by commas. Parse a "
+                + "line into its four fields - and refuse lines that do not "
+                + "have exactly four, or that leave a field empty, instead "
+                + "of crashing on them.")
+            .practises("split", "Checking parts.length", "Trimming each field")
+            .spec(
+                "Prompt Line: and read one line.",
+                "fields(line) splits it at every comma, trims each piece, and returns the pieces as an array.",
+                "Not exactly 4 fields: print MALFORMED: <count> fields.",
+                "4 fields but any of them empty after trimming: print MALFORMED: empty field.",
+                "Otherwise print Time: , User: , Source: and Result: lines, one field each.")
+            .needsMethod("static String[] fields(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Line: \");",
+                "        String line = input.nextLine();",
+                "        // split into fields, check them, then print them",
+                "    }",
+                "",
+                "    // declare fields(String line) here",
+                "}")
+            .hints(
+                "line.split(\",\") gives the pieces; commas need no "
+                + "backslashes.",
+                "Trim in place: for each index i, parts[i] = parts[i].trim();",
+                "Check parts.length BEFORE reading parts[3].",
+                "A second loop, or four isEmpty() checks joined by ||, "
+                + "finds an empty field.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Line: \");",
+                "        String line = input.nextLine();",
+                "        String[] f = fields(line);",
+                "        if (f.length != 4) {",
+                "            System.out.println(\"MALFORMED: \" + f.length + \" fields\");",
+                "            return;",
+                "        }",
+                "        for (String part : f) {",
+                "            if (part.isEmpty()) {",
+                "                System.out.println(\"MALFORMED: empty field\");",
+                "                return;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Time: \" + f[0]);",
+                "        System.out.println(\"User: \" + f[1]);",
+                "        System.out.println(\"Source: \" + f[2]);",
+                "        System.out.println(\"Result: \" + f[3]);",
+                "    }",
+                "",
+                "    static String[] fields(String line) {",
+                "        String[] parts = line.split(\",\");",
+                "        for (int i = 0; i < parts.length; i++) {",
+                "            parts[i] = parts[i].trim();",
+                "        }",
+                "        return parts;",
+                "    }",
+                "}")
+            .walkthrough(
+                "fields does the mechanical work - split, then trim every "
+                + "piece in place with an index loop (an enhanced for could "
+                + "not store the trimmed text back). It returns the same "
+                + "array it trimmed.\n"
+                + "\n"
+                + "main then checks in order: the count first, because "
+                + "reading f[3] from a 3-piece line would crash; then "
+                + "emptiness, because two commas side by side produce a "
+                + "real but empty piece. Only a line that passes both is "
+                + "trusted. The malformed messages say what was wrong, which "
+                + "is what an analyst needs to find the bad line.")
+            .sample(Lab.typing("09:14,jsmith,10.0.0.5,FAIL"),
+                "Line: 09:14,jsmith,10.0.0.5,FAIL",
+                "Time: 09:14",
+                "User: jsmith",
+                "Source: 10.0.0.5",
+                "Result: FAIL")
+            .hidden(Lab.typing(" 22:03 , mpatel ,192.168.4.20, OK"),
+                "Line:  22:03 , mpatel ,192.168.4.20, OK",
+                "Time: 22:03",
+                "User: mpatel",
+                "Source: 192.168.4.20",
+                "Result: OK")
+            .hidden(Lab.typing("09:14,jsmith,FAIL"),
+                "Line: 09:14,jsmith,FAIL",
+                "MALFORMED: 3 fields")
+            .hidden(Lab.typing("09:14,jsmith,10.0.0.5,FAIL,extra"),
+                "Line: 09:14,jsmith,10.0.0.5,FAIL,extra",
+                "MALFORMED: 5 fields")
+            .hidden(Lab.typing("09:14,,10.0.0.5,FAIL"),
+                "Line: 09:14,,10.0.0.5,FAIL",
+                "MALFORMED: empty field")
+            .hidden(Lab.typing("09:14, ,10.0.0.5,FAIL"),
+                "Line: 09:14, ,10.0.0.5,FAIL",
+                "MALFORMED: empty field"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(7), "Parallel Arrays Report", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M015")
+            .brief(
+                "The identity team sends a list of accounts and each one's "
+                + "failed logins this week. Keep the names and the counts in "
+                + "two arrays that line up, flag every account at or over "
+                + "the review limit, and name the worst one.")
+            .practises("Parallel arrays", "Tracking the best index", "Formatted reports")
+            .spec(
+                "Prompt Accounts (1-8): and read a whole number. Outside 1 to 8: INVALID.",
+                "For each account i from 1, prompt Name i: then Failures i: and read a name (trim it) and a whole number.",
+                "Print one line per account: the name, a colon and a space, the count - and  REVIEW after it when the count is 5 or more.",
+                "worstIndex(counts) returns the index of the highest count (the first one, on a tie).",
+                "Print Worst: <name> (<count>).")
+            .needsMethod("static int worstIndex(int[])")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int REVIEW = 5;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Accounts (1-8): \");",
+                "        int n = Integer.parseInt(input.nextLine().trim());",
+                "        // validate; fill names and counts; report",
+                "    }",
+                "",
+                "    // declare worstIndex(int[] counts) here",
+                "}")
+            .hints(
+                "Two arrays of the same length n: String[] names and "
+                + "int[] counts. Fill slot i of both in the same pass.",
+                "The report needs the position, so use an index loop and "
+                + "read names[i] and counts[i] together.",
+                "worstIndex starts with best = 0 and moves it when "
+                + "counts[i] > counts[best]. Strict > keeps the first on a "
+                + "tie.",
+                "Then names[w] and counts[w] name the worst account.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int REVIEW = 5;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Accounts (1-8): \");",
+                "        int n = Integer.parseInt(input.nextLine().trim());",
+                "        if (n < 1 || n > 8) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        String[] names = new String[n];",
+                "        int[] counts = new int[n];",
+                "        for (int i = 0; i < n; i++) {",
+                "            System.out.print(\"Name \" + (i + 1) + \": \");",
+                "            names[i] = input.nextLine().trim();",
+                "            System.out.print(\"Failures \" + (i + 1) + \": \");",
+                "            counts[i] = Integer.parseInt(input.nextLine().trim());",
+                "        }",
+                "        for (int i = 0; i < n; i++) {",
+                "            String line = names[i] + \": \" + counts[i];",
+                "            if (counts[i] >= REVIEW) {",
+                "                line += \"  REVIEW\";",
+                "            }",
+                "            System.out.println(line);",
+                "        }",
+                "        int w = worstIndex(counts);",
+                "        System.out.println(\"Worst: \" + names[w] + \" (\"",
+                "                + counts[w] + \")\");",
+                "    }",
+                "",
+                "    static int worstIndex(int[] counts) {",
+                "        int best = 0;",
+                "        for (int i = 1; i < counts.length; i++) {",
+                "            if (counts[i] > counts[best]) {",
+                "                best = i;",
+                "            }",
+                "        }",
+                "        return best;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The two arrays are filled in the same pass, so slot i of "
+                + "each always describes the same account - the one rule "
+                + "parallel arrays depend on. The report loop uses the index "
+                + "for the same reason: an enhanced for over names would "
+                + "have no way to reach the matching count.\n"
+                + "\n"
+                + "worstIndex returns a POSITION, not a count. The position "
+                + "answers both questions - who and how many - by reading "
+                + "each array once. Strict > means a later account with an "
+                + "equal count does not replace the first; the hidden tie "
+                + "test checks that the rule in the spec is the one "
+                + "implemented.")
+            .sample(Lab.typing("3", "jsmith", "2", "admin", "14", "svc_web", "6"),
+                "Accounts (1-8): 3",
+                "Name 1: jsmith",
+                "Failures 1: 2",
+                "Name 2: admin",
+                "Failures 2: 14",
+                "Name 3: svc_web",
+                "Failures 3: 6",
+                "jsmith: 2",
+                "admin: 14  REVIEW",
+                "svc_web: 6  REVIEW",
+                "Worst: admin (14)")
+            .hidden(Lab.typing("1", "mpatel", "0"),
+                "Accounts (1-8): 1",
+                "Name 1: mpatel",
+                "Failures 1: 0",
+                "mpatel: 0",
+                "Worst: mpatel (0)")
+            .hidden(Lab.typing("3", "a", "7", "b", "9", "c", "9"),
+                "Accounts (1-8): 3",
+                "Name 1: a",
+                "Failures 1: 7",
+                "Name 2: b",
+                "Failures 2: 9",
+                "Name 3: c",
+                "Failures 3: 9",
+                "a: 7  REVIEW",
+                "b: 9  REVIEW",
+                "c: 9  REVIEW",
+                "Worst: b (9)")
+            .hidden(Lab.typing("2", " temp01 ", "5", "root", "4"),
+                "Accounts (1-8): 2",
+                "Name 1:  temp01",
+                "Failures 1: 5",
+                "Name 2: root",
+                "Failures 2: 4",
+                "temp01: 5  REVIEW",
+                "root: 4",
+                "Worst: temp01 (5)")
+            .hidden(Lab.typing("9"),
+                "Accounts (1-8): 9",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(8), "Grid of Alerts", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M016")
+            .brief(
+                "Three servers, four six-hour shifts: the alert counts form "
+                + "a grid. The duty manager wants each server's day total, "
+                + "each shift's total across servers, and the single worst "
+                + "server-and-shift. Read the grid a row at a time and let "
+                + "methods total it.")
+            .practises("Two-dimensional arrays", "split", "Row and column totals")
+            .spec(
+                "For each server r from 0 to 2, prompt Server <r>: and read a line of 4 whole numbers separated by single spaces.",
+                "A line that does not split into exactly 4 pieces: print INVALID and stop at once.",
+                "rowTotal(grid, r) and colTotal(grid, c) return the totals of row r and column c.",
+                "Print Server <r>: <total> for each row, then Shift <c>: <total> for each column.",
+                "Print Worst: server <r>, shift <c> (<count>) for the largest cell - the first one found, reading rows top to bottom and each row left to right, on a tie.")
+            .needsMethod("static int rowTotal(int[][], int)")
+            .needsMethod("static int colTotal(int[][], int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int SERVERS = 3;",
+                "    static final int SHIFTS = 4;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int[][] grid = new int[SERVERS][SHIFTS];",
+                "        // read each row, then print totals and the worst cell",
+                "    }",
+                "",
+                "    // declare rowTotal and colTotal here",
+                "}")
+            .hints(
+                "For each row: String[] p = input.nextLine().trim().split(\" \"); "
+                + "check p.length, then parse p[c] into grid[r][c].",
+                "rowTotal keeps r fixed and loops over the columns; colTotal "
+                + "keeps c fixed and loops over the rows.",
+                "For the worst cell, track TWO indexes, bestR and bestC, "
+                + "starting at 0 and 0.",
+                "Strict > while scanning row by row keeps the first "
+                + "largest cell.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int SERVERS = 3;",
+                "    static final int SHIFTS = 4;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int[][] grid = new int[SERVERS][SHIFTS];",
+                "        for (int r = 0; r < SERVERS; r++) {",
+                "            System.out.print(\"Server \" + r + \": \");",
+                "            String[] p = input.nextLine().trim().split(\" \");",
+                "            if (p.length != SHIFTS) {",
+                "                System.out.println(\"INVALID\");",
+                "                return;",
+                "            }",
+                "            for (int c = 0; c < SHIFTS; c++) {",
+                "                grid[r][c] = Integer.parseInt(p[c]);",
+                "            }",
+                "        }",
+                "        for (int r = 0; r < SERVERS; r++) {",
+                "            int total = rowTotal(grid, r);",
+                "            System.out.println(\"Server \" + r + \": \" + total);",
+                "        }",
+                "        for (int c = 0; c < SHIFTS; c++) {",
+                "            int total = colTotal(grid, c);",
+                "            System.out.println(\"Shift \" + c + \": \" + total);",
+                "        }",
+                "        int bestR = 0;",
+                "        int bestC = 0;",
+                "        for (int r = 0; r < SERVERS; r++) {",
+                "            for (int c = 0; c < SHIFTS; c++) {",
+                "                if (grid[r][c] > grid[bestR][bestC]) {",
+                "                    bestR = r;",
+                "                    bestC = c;",
+                "                }",
+                "            }",
+                "        }",
+                "        System.out.println(\"Worst: server \" + bestR + \", shift \"",
+                "                + bestC + \" (\" + grid[bestR][bestC] + \")\");",
+                "    }",
+                "",
+                "    static int rowTotal(int[][] g, int r) {",
+                "        int sum = 0;",
+                "        for (int c = 0; c < g[r].length; c++) {",
+                "            sum += g[r][c];",
+                "        }",
+                "        return sum;",
+                "    }",
+                "",
+                "    static int colTotal(int[][] g, int c) {",
+                "        int sum = 0;",
+                "        for (int r = 0; r < g.length; r++) {",
+                "            sum += g[r][c];",
+                "        }",
+                "        return sum;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each input line becomes one row: split, check there are "
+                + "exactly four pieces, then parse them into grid[r][0] to "
+                + "grid[r][3]. The length check comes before any parsing, so "
+                + "a short line is refused rather than crashing on p[3].\n"
+                + "\n"
+                + "The two total methods are mirror images: rowTotal holds "
+                + "the row and walks the columns, colTotal holds the column "
+                + "and walks the rows. Mixing up the indexes is the classic "
+                + "2D bug, and here it would print plausible wrong numbers. "
+                + "The worst cell needs two indexes, since one number no "
+                + "longer identifies a position.")
+            .sample(Lab.typing("4 30 12 2", "9 28 10 1", "41 25 11 3"),
+                "Server 0: 4 30 12 2",
+                "Server 1: 9 28 10 1",
+                "Server 2: 41 25 11 3",
+                "Server 0: 48",
+                "Server 1: 48",
+                "Server 2: 80",
+                "Shift 0: 54",
+                "Shift 1: 83",
+                "Shift 2: 33",
+                "Shift 3: 6",
+                "Worst: server 2, shift 0 (41)")
+            .hidden(Lab.typing("0 0 0 0", "0 0 0 0", "0 0 0 0"),
+                "Server 0: 0 0 0 0",
+                "Server 1: 0 0 0 0",
+                "Server 2: 0 0 0 0",
+                "Server 0: 0",
+                "Server 1: 0",
+                "Server 2: 0",
+                "Shift 0: 0",
+                "Shift 1: 0",
+                "Shift 2: 0",
+                "Shift 3: 0",
+                "Worst: server 0, shift 0 (0)")
+            .hidden(Lab.typing("1 2 3 9", "9 1 1 1", "0 0 9 0"),
+                "Server 0: 1 2 3 9",
+                "Server 1: 9 1 1 1",
+                "Server 2: 0 0 9 0",
+                "Server 0: 15",
+                "Server 1: 12",
+                "Server 2: 9",
+                "Shift 0: 10",
+                "Shift 1: 3",
+                "Shift 2: 13",
+                "Shift 3: 10",
+                "Worst: server 0, shift 3 (9)")
+            .hidden(Lab.typing("1 2 3", "4 5 6 7", "8 9 10 11"),
+                "Server 0: 1 2 3",
+                "INVALID")
+            .hidden(Lab.typing("1 2 3 4", "5 6 7 8 9"),
+                "Server 0: 1 2 3 4",
+                "Server 1: 5 6 7 8 9",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(9), "Watchlist", Lab.MEDIUM)
+            .after("C05-M026")
+            .brief(
+                "Build the SOC watchlist from mission 26 as a real tool. It "
+                + "reads commands until END, keeps accounts in an ArrayList "
+                + "under clear rules - one spelling, no duplicates, a size "
+                + "cap - and answers every command, including the ones it "
+                + "refuses.")
+            .practises("ArrayList", "Watchlists", "remove, contains and indexOf")
+            .spec(
+                "Repeatedly prompt > and read a command line (trim it), until the command is END.",
+                "Split the line at single spaces. The first piece is the command; for ADD, DEL and CHECK the second piece is a name, stored and searched in lower case.",
+                "ADD: ALREADY WATCHED if present, FULL if the list already holds 3, otherwise add it and reply ADDED.",
+                "DEL: remove every copy; reply REMOVED, or NOT WATCHED if there was none. CHECK: WATCHED or CLEAR.",
+                "LIST: reply Watching: followed by the list as println shows it, e.g. [a, b].",
+                "ADD, DEL or CHECK without exactly 2 pieces, or LIST with more than 1: MALFORMED. Any other command: UNKNOWN COMMAND.",
+                "END: print Watching: and the list, then stop.",
+                "run(watch, line) returns the reply for one command (not END); main prints it.")
+            .needsMethod("static String run(ArrayList<String>, String)")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> watch = new ArrayList<>();",
+                "        // loop: prompt, read, stop on END, otherwise print run(...)",
+                "    }",
+                "",
+                "    // declare run(ArrayList<String> w, String line) here",
+                "}")
+            .hints(
+                "A while (true) loop with break on END is the menu loop "
+                + "from Campaign 04.",
+                "In run: String[] p = line.split(\" \"); then decide by "
+                + "p[0], checking p.length before reading p[1].",
+                "Lower-case the name ONCE, right after the length check, and "
+                + "use that everywhere - ADD, DEL and CHECK must agree.",
+                "while (w.remove(name)) { found = true; } removes every "
+                + "copy and tells you whether there was one.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        ArrayList<String> watch = new ArrayList<>();",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                System.out.println(\"Watching: \" + watch);",
+                "                break;",
+                "            }",
+                "            System.out.println(run(watch, line));",
+                "        }",
+                "    }",
+                "",
+                "    static String run(ArrayList<String> w, String line) {",
+                "        String[] p = line.split(\" \");",
+                "        String cmd = p[0];",
+                "        if (cmd.equals(\"LIST\")) {",
+                "            return p.length == 1 ? \"Watching: \" + w : \"MALFORMED\";",
+                "        }",
+                "        boolean known = cmd.equals(\"ADD\") || cmd.equals(\"DEL\")",
+                "                || cmd.equals(\"CHECK\");",
+                "        if (!known) {",
+                "            return \"UNKNOWN COMMAND\";",
+                "        }",
+                "        if (p.length != 2) {",
+                "            return \"MALFORMED\";",
+                "        }",
+                "        String name = p[1].toLowerCase();",
+                "        if (cmd.equals(\"ADD\")) {",
+                "            if (w.contains(name)) {",
+                "                return \"ALREADY WATCHED\";",
+                "            }",
+                "            if (w.size() >= MAX) {",
+                "                return \"FULL\";",
+                "            }",
+                "            w.add(name);",
+                "            return \"ADDED\";",
+                "        }",
+                "        if (cmd.equals(\"DEL\")) {",
+                "            boolean found = false;",
+                "            while (w.remove(name)) {",
+                "                found = true;",
+                "            }",
+                "            return found ? \"REMOVED\" : \"NOT WATCHED\";",
+                "        }",
+                "        return w.contains(name) ? \"WATCHED\" : \"CLEAR\";",
+                "    }",
+                "}")
+            .walkthrough(
+                "main owns the loop and the END test; run owns the rules. "
+                + "Because the list variable is a reference, every add and "
+                + "remove inside run changes main's list - no return value "
+                + "is needed for that.\n"
+                + "\n"
+                + "run decides in a careful order: LIST first (it has no "
+                + "name), then unknown commands, then the length check - so "
+                + "p[1] is only ever read when it exists. The name is "
+                + "lower-cased once and the same spelling is used to add, "
+                + "remove and search, which is what makes JSmith and jsmith "
+                + "one account. FULL is checked after ALREADY WATCHED, so "
+                + "adding someone already on a full list gets the more "
+                + "useful answer.")
+            .sample(Lab.typing("ADD jsmith", "ADD JSmith", "CHECK jsmith", "LIST", "END"),
+                "> ADD jsmith",
+                "ADDED",
+                "> ADD JSmith",
+                "ALREADY WATCHED",
+                "> CHECK jsmith",
+                "WATCHED",
+                "> LIST",
+                "Watching: [jsmith]",
+                "> END",
+                "Watching: [jsmith]")
+            .hidden(Lab.typing("ADD a", "ADD b", "ADD c", "ADD d", "ADD a", "END"),
+                "> ADD a",
+                "ADDED",
+                "> ADD b",
+                "ADDED",
+                "> ADD c",
+                "ADDED",
+                "> ADD d",
+                "FULL",
+                "> ADD a",
+                "ALREADY WATCHED",
+                "> END",
+                "Watching: [a, b, c]")
+            .hidden(Lab.typing("DEL ghost", "ADD temp01", "DEL TEMP01", "CHECK temp01", "END"),
+                "> DEL ghost",
+                "NOT WATCHED",
+                "> ADD temp01",
+                "ADDED",
+                "> DEL TEMP01",
+                "REMOVED",
+                "> CHECK temp01",
+                "CLEAR",
+                "> END",
+                "Watching: []")
+            .hidden(Lab.typing("ADD", "ADD two names", "LIST all", "PURGE", "list", "END"),
+                "> ADD",
+                "MALFORMED",
+                "> ADD two names",
+                "MALFORMED",
+                "> LIST all",
+                "MALFORMED",
+                "> PURGE",
+                "UNKNOWN COMMAND",
+                "> list",
+                "UNKNOWN COMMAND",
+                "> END",
+                "Watching: []")
+            .hidden(Lab.typing("END"),
+                "> END",
+                "Watching: []"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(10), "Remove Duplicates", Lab.MEDIUM)
+            .stretch()
+            .after("C05-M027")
+            .brief(
+                "An alert burst lists the usernames involved, comma "
+                + "separated, straight from several tools - so the same "
+                + "person appears in different cases, with stray spaces, "
+                + "and more than once. Report how many names were seen, and "
+                + "the distinct users in the order they first appeared.")
+            .practises("Removing duplicates", "split", "Normalising text")
+            .spec(
+                "Prompt Users: and read one line. Split it at commas.",
+                "Each piece is trimmed and lower-cased. Pieces that are empty after trimming are ignored.",
+                "distinct(pieces) returns an ArrayList of the tidied, non-empty names, each once, in order of first appearance.",
+                "Print Names seen: <non-empty count>, then Distinct: <size>.",
+                "Print List: followed by the distinct names separated by \", \" - or List: (none) when there are none.")
+            .needsMethod("static ArrayList<String> distinct(String[])")
+            .starter(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Users: \");",
+                "        String[] pieces = input.nextLine().split(\",\");",
+                "        // count the non-empty names; build the distinct list",
+                "    }",
+                "",
+                "    // declare distinct(String[] pieces) here",
+                "}")
+            .hints(
+                "Tidy each piece first: String name = "
+                + "piece.trim().toLowerCase();",
+                "Skip it if name.isEmpty(); otherwise add it only if "
+                + "!unique.contains(name).",
+                "Names seen counts the non-empty pieces - a separate "
+                + "counter, or a small helper method.",
+                "The list prints as [a, b]; for \"a, b\" build the text with "
+                + "a separator loop instead.")
+            .solution(
+                "import java.util.ArrayList;",
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Users: \");",
+                "        String[] pieces = input.nextLine().split(\",\");",
+                "        int seen = 0;",
+                "        for (String piece : pieces) {",
+                "            if (!piece.trim().isEmpty()) {",
+                "                seen++;",
+                "            }",
+                "        }",
+                "        ArrayList<String> unique = distinct(pieces);",
+                "        System.out.println(\"Names seen: \" + seen);",
+                "        System.out.println(\"Distinct: \" + unique.size());",
+                "        if (unique.isEmpty()) {",
+                "            System.out.println(\"List: (none)\");",
+                "            return;",
+                "        }",
+                "        String text = \"\";",
+                "        for (int i = 0; i < unique.size(); i++) {",
+                "            if (i > 0) {",
+                "                text += \", \";",
+                "            }",
+                "            text += unique.get(i);",
+                "        }",
+                "        System.out.println(\"List: \" + text);",
+                "    }",
+                "",
+                "    static ArrayList<String> distinct(String[] pieces) {",
+                "        ArrayList<String> unique = new ArrayList<>();",
+                "        for (String piece : pieces) {",
+                "            String name = piece.trim().toLowerCase();",
+                "            if (!name.isEmpty() && !unique.contains(name)) {",
+                "                unique.add(name);",
+                "            }",
+                "        }",
+                "        return unique;",
+                "    }",
+                "}")
+            .walkthrough(
+                "distinct builds a new list and adds each tidied name only "
+                + "the first time it is seen, so the list keeps the order of "
+                + "first appearance. Tidying BEFORE the contains check is "
+                + "the whole trick: \"JSmith\", \" jsmith\" and \"jsmith\" all "
+                + "become one key.\n"
+                + "\n"
+                + "The original array is never changed, so the total can "
+                + "still be counted from it - two answers from one input, "
+                + "which is what an incident report needs: how noisy, and "
+                + "how many people. Empty pieces from doubled or trailing "
+                + "commas are ignored in both counts, since they are not "
+                + "names at all.")
+            .sample(Lab.typing("jsmith, JSmith,mpatel, jsmith ,admin,MPATEL"),
+                "Users: jsmith, JSmith,mpatel, jsmith ,admin,MPATEL",
+                "Names seen: 6",
+                "Distinct: 3",
+                "List: jsmith, mpatel, admin")
+            .hidden(Lab.typing("root"),
+                "Users: root",
+                "Names seen: 1",
+                "Distinct: 1",
+                "List: root")
+            .hidden(Lab.typing("a,,b, ,a,"),
+                "Users: a,,b, ,a,",
+                "Names seen: 3",
+                "Distinct: 2",
+                "List: a, b")
+            .hidden(Lab.typing(" , ,"),
+                "Users:  , ,",
+                "Names seen: 0",
+                "Distinct: 0",
+                "List: (none)")
+            .hidden(Lab.typing("Zed,zed,ZED,ann,Ann"),
+                "Users: Zed,zed,ZED,ann,Ann",
+                "Names seen: 5",
+                "Distinct: 2",
+                "List: zed, ann"));
     }
 }
