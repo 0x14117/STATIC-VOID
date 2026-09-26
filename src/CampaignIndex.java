@@ -56,6 +56,7 @@ public class CampaignIndex {
         Campaign01Labs.build(byNumber(1));
         Campaign02Labs.build(byNumber(2));
         Campaign03Labs.build(byNumber(3));
+        Campaign04Labs.build(byNumber(4));
     }
 
     private static void declare(int number, String code, String topic, int planned) {
