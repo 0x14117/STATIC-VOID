@@ -1993,5 +1993,1106 @@ public class Campaign05 {
                 + "Ints are copied; arrays are shared. A real copy needs a "
                 + "new array.")
             .next("Next: copying an array properly."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(11), "A Real Copy", 3)
+            .brief(
+                "After mission 10, the analyst wants a working copy that "
+                + "really is separate: change it freely, and the evidence "
+                + "counts stay exactly as collected. That takes a second "
+                + "array with its own slots - and a quick way to print both "
+                + "and prove it.")
+            .willLearn("Copying arrays", "Arrays.toString")
+            .whyUseful(
+                "A true copy lets a program experiment, sort or clean data "
+                + "without destroying the original. Arrays.toString shows a "
+                + "whole array on one line, which makes checking your work "
+                + "- and debugging - far quicker.")
+            .concept("Copying arrays",
+                "A real copy is a NEW array, filled slot by slot:\n"
+                + "\n"
+                + "    int[] copy = new int[original.length];\n"
+                + "    for (int i = 0; i < original.length; i++) {\n"
+                + "        copy[i] = original[i];\n"
+                + "    }\n"
+                + "\n"
+                + "Now there are two arrays. Changing copy[0] leaves "
+                + "original[0] alone.\n"
+                + "\n"
+                + "Java's library does the same in one line. It lives in the "
+                + "class Arrays, which needs an import, like Scanner:\n"
+                + "\n"
+                + "    import java.util.Arrays;\n"
+                + "\n"
+                + "    int[] copy = Arrays.copyOf(original, original.length);\n"
+                + "\n"
+                + "The second argument is the new length. Shorter keeps only "
+                + "the first slots; longer adds default-valued slots at the "
+                + "end - the usual way to 'grow' an array.\n"
+                + "\n"
+                + "Two more from the same class:\n"
+                + "\n"
+                + "    Arrays.toString(a)    \"[3, 0, 7]\" - for printing\n"
+                + "    Arrays.equals(a, b)   same length, same values?\n"
+                + "\n"
+                + "Printing an array directly shows only a code like "
+                + "[I@1b6d3586 - where it is, not what it holds. Use "
+                + "Arrays.toString.")
+            .example(
+                "import java.util.Arrays;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] evidence = {3, 0, 7};",
+                "        int[] work = Arrays.copyOf(evidence, evidence.length);",
+                "        work[0] = 0;",
+                "        System.out.println(\"Evidence: \" + Arrays.toString(evidence));",
+                "        System.out.println(\"Working:  \" + Arrays.toString(work));",
+                "        System.out.println(\"Same array: \" + (work == evidence));",
+                "        int[] longer = Arrays.copyOf(evidence, 5);",
+                "        System.out.println(\"Longer:   \" + Arrays.toString(longer));",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Evidence: [3, 0, 7]",
+                "Working:  [0, 0, 7]",
+                "Same array: false",
+                "Longer:   [3, 0, 7, 0, 0]")
+            .lineByLine(
+                new String[]{"Arrays.copyOf(evidence, evidence.length)",
+                    "A new array, same length, same values."},
+                new String[]{"work[0] = 0;",
+                    "Changes only the copy. Evidence still starts with 3."},
+                new String[]{"Arrays.toString(evidence)",
+                    "The whole array as text: [3, 0, 7]."},
+                new String[]{"Arrays.copyOf(evidence, 5)",
+                    "Two extra slots at the end, holding the default 0."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {5, 6};",
+                    "int[] b = new int[a.length];",
+                    "for (int i = 0; i < a.length; i++) {",
+                    "    b[i] = a[i];",
+                    "}",
+                    "b[1] = 60;",
+                    "System.out.println(a[1] + \" \" + b[1]);")
+                .accept("6 60")
+                .hints("b is a new array.",
+                       "Changing b does not reach a.")
+                .explain(
+                    "6 60. The loop copied the values into a separate array, "
+                    + "so b[1] = 60 leaves a[1] as 6.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "int[] a = {1, 2}; int[] b = {1, 2}; Which is true?")
+                .choices("a == b",
+                         "Arrays.equals(a, b)",
+                         "a.equals(b) compares the values",
+                         "None of them")
+                .accept("2", "b")
+                .hints("== asks 'same array?'.",
+                       "Arrays has a method that compares values.")
+                .explain(
+                    "b. Arrays.equals compares length and every slot. == and "
+                    + "a.equals(b) both only ask whether a and b are the same "
+                    + "array.")
+                .xp(10))
+            .objective(
+                "Keep the evidence safe while cleaning a copy.")
+            .starter(
+                "import java.util.Arrays;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] evidence = {4, -1, 9, -1, 2};",
+                "        // work: a real copy of evidence, the same length",
+                "        for (int i = 0; i < work.length; i++) {",
+                "            if (work[i] < 0) {",
+                "                work[i] = 0;",
+                "            }",
+                "        }",
+                "        System.out.println(Arrays.toString(evidence));",
+                "        System.out.println(Arrays.toString(work));",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare work as a real copy of evidence, using "
+                + "Arrays.copyOf, so cleaning work leaves evidence as it was.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that declares work.")
+                .accept("int[] work = Arrays.copyOf(evidence, evidence.length);",
+                        "int[] work=Arrays.copyOf(evidence, evidence.length);",
+                        "int[] work = Arrays.copyOf(evidence,evidence.length);",
+                        "int[] work = Arrays.copyOf(evidence, 5);")
+                .hints(
+                    "Arrays.copyOf takes the array and the new length.",
+                    "The length should match: evidence.length.",
+                    "int[] work = Arrays.copyOf(evidence, evidence.length);")
+                .solution(
+                    "import java.util.Arrays;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int[] evidence = {4, -1, 9, -1, 2};",
+                    "        int[] work = Arrays.copyOf(evidence, evidence.length);",
+                    "        for (int i = 0; i < work.length; i++) {",
+                    "            if (work[i] < 0) {",
+                    "                work[i] = 0;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(Arrays.toString(evidence));",
+                    "        System.out.println(Arrays.toString(work));",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "copyOf builds a second array with the same five values. "
+                    + "The loop replaces the -1 readings in work only, so "
+                    + "the output is [4, -1, 9, -1, 2] and then "
+                    + "[4, 0, 9, 0, 2].\n"
+                    + "\n"
+                    + "With int[] work = evidence; both lines would show the "
+                    + "cleaned values - and the original readings would be "
+                    + "gone.")
+                .explain(
+                    "int[] work = Arrays.copyOf(evidence, evidence.length);")
+                .xp(15))
+            .mistakes(
+                new String[]{"int[] copy = original;",
+                    "Another name, not a copy (mission 10)."},
+                new String[]{"Printing an array directly",
+                    "Shows [I@... - use Arrays.toString."},
+                new String[]{"Forgetting the import",
+                    "Arrays needs import java.util.Arrays;"})
+            .cyber(
+                "Forensics has a rule: never work on the original. "
+                + "Investigators image a disk and analyse the copy, so the "
+                + "evidence can be shown in court exactly as found. The same "
+                + "habit in code - copy first, clean the copy - means a "
+                + "mistake in the cleaning can always be undone, and the raw "
+                + "data is there to check the result against.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {7, 8, 9};",
+                    "int[] b = java.util.Arrays.copyOf(a, 2);",
+                    "System.out.println(java.util.Arrays.toString(b));")
+                .accept("[7, 8]")
+                .hints("The new length is 2.",
+                       "Only the first two slots are kept.")
+                .explain(
+                    "[7, 8]. A shorter length keeps the first slots and drops "
+                    + "the rest. (java.util.Arrays is the full name, used "
+                    + "here instead of an import.)")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "What does System.out.println(a) show for an int[] a?")
+                .choices("The values, like [1, 2, 3]",
+                         "A code like [I@1b6d3586",
+                         "Nothing",
+                         "It does not compile")
+                .accept("2", "b")
+                .hints("println does not know how to list an array.",
+                       "It shows the type and where the array is.")
+                .explain(
+                    "b. The code means 'int array, at this place'. To see "
+                    + "the values, print Arrays.toString(a).")
+                .xp(10))
+            .recap(
+                "    import java.util.Arrays;\n"
+                + "    Arrays.copyOf(a, a.length)   a real, separate copy\n"
+                + "    Arrays.copyOf(a, n)          shorter or longer copy\n"
+                + "    Arrays.toString(a)           [1, 2, 3]\n"
+                + "    Arrays.equals(a, b)          same values?\n"
+                + "\n"
+                + "Copy first, then change the copy.")
+            .next("Next: finding a value in an array."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(12), "Is It on the List?", 4)
+            .brief(
+                "Before a connection is allowed, the gateway asks one "
+                + "question: is this address on the blocklist? The list is "
+                + "an array; the answer means looking at each entry until "
+                + "one matches - or the list runs out.")
+            .willLearn("Linear search")
+            .whyUseful(
+                "Searching is the most common thing done with an array: "
+                + "is this user on the watchlist, which slot holds this "
+                + "host, does any entry match. The pattern is short, and "
+                + "getting its two exits right is the whole skill.")
+            .concept("Linear search",
+                "A LINEAR SEARCH checks each slot in turn, from the first, "
+                + "and stops at the first match:\n"
+                + "\n"
+                + "    static int indexOf(String[] list, String target) {\n"
+                + "        for (int i = 0; i < list.length; i++) {\n"
+                + "            if (list[i].equals(target)) {\n"
+                + "                return i;       found: stop now\n"
+                + "            }\n"
+                + "        }\n"
+                + "        return -1;              checked all: none\n"
+                + "    }\n"
+                + "\n"
+                + "Two exits, and their places matter:\n"
+                + "\n"
+                + "    return i     INSIDE the if - the first match ends it\n"
+                + "    return -1    AFTER the loop - only once every slot\n"
+                + "                 has been checked and none matched\n"
+                + "\n"
+                + "-1 means 'not found' because it can never be a real "
+                + "index - the same promise String's indexOf makes.\n"
+                + "\n"
+                + "When only yes or no matters, return a boolean instead: "
+                + "true inside the if, false after the loop.\n"
+                + "\n"
+                + "The classic bug is an else inside the loop that returns "
+                + "false (or -1). Then the method gives up after checking "
+                + "only the FIRST slot.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] blocked = {\"10.0.0.66\", \"172.16.4.9\",",
+                "                \"192.168.7.13\"};",
+                "        System.out.println(isBlocked(blocked, \"192.168.7.13\"));",
+                "        System.out.println(isBlocked(blocked, \"10.0.0.5\"));",
+                "        System.out.println(indexOf(blocked, \"172.16.4.9\"));",
+                "    }",
+                "",
+                "    static boolean isBlocked(String[] list, String ip) {",
+                "        for (String entry : list) {",
+                "            if (entry.equals(ip)) {",
+                "                return true;",
+                "            }",
+                "        }",
+                "        return false;",
+                "    }",
+                "",
+                "    static int indexOf(String[] list, String target) {",
+                "        for (int i = 0; i < list.length; i++) {",
+                "            if (list[i].equals(target)) {",
+                "                return i;",
+                "            }",
+                "        }",
+                "        return -1;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "true",
+                "false",
+                "1")
+            .lineByLine(
+                new String[]{"return true;",
+                    "The first match ends the search at once."},
+                new String[]{"return false;",
+                    "Reached only after every entry was checked."},
+                new String[]{"return i;",
+                    "When the position matters too, return the index."},
+                new String[]{"return -1;",
+                    "Never a real index, so it can only mean 'not found'."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] ports = {22, 80, 443, 80};",
+                    "int at = -1;",
+                    "for (int i = 0; i < ports.length; i++) {",
+                    "    if (ports[i] == 80) {",
+                    "        at = i;",
+                    "        break;",
+                    "    }",
+                    "}",
+                    "System.out.println(at);")
+                .accept("1")
+                .hints("break stops the loop at the first match.",
+                       "Where is the first 80?")
+                .explain(
+                    "1. The first 80 is at index 1, and break stops the loop "
+                    + "before it reaches the second 80 at index 3.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] w = {\"guest\", \"root\"};",
+                    "        System.out.println(has(w, \"root\"));",
+                    "    }",
+                    "",
+                    "    static boolean has(String[] list, String t) {",
+                    "        for (String s : list) {",
+                    "            if (s.equals(t)) {",
+                    "                return true;",
+                    "            } else {",
+                    "                return false;",
+                    "            }",
+                    "        }",
+                    "        return false;",
+                    "    }",
+                    "}")
+                .accept("false")
+                .hints("What happens on the very first pass?",
+                       "\"guest\" does not match - and the else returns.")
+                .explain(
+                    "false - although root IS on the list. The else returns "
+                    + "after checking only \"guest\". 'Not found' can only be "
+                    + "decided after the loop.")
+                .xp(20))
+            .objective(
+                "Finish the watchlist search.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] watch = {\"svc_old\", \"temp01\", \"jdoe\"};",
+                "        System.out.println(onWatch(watch, \"jdoe\"));",
+                "        System.out.println(onWatch(watch, \"asmith\"));",
+                "    }",
+                "",
+                "    static boolean onWatch(String[] list, String user) {",
+                "        for (String name : list) {",
+                "            if (name.equals(user)) {",
+                "                return true;",
+                "            }",
+                "        }",
+                "        // the answer when no name matched",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that runs after the loop - once every name "
+                + "has been checked and none matched.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line after the loop.")
+                .accept("return false;")
+                .hints(
+                    "The loop found no match. What is the answer?",
+                    "The method returns a boolean.",
+                    "return false;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] watch = {\"svc_old\", \"temp01\", \"jdoe\"};",
+                    "        System.out.println(onWatch(watch, \"jdoe\"));",
+                    "        System.out.println(onWatch(watch, \"asmith\"));",
+                    "    }",
+                    "",
+                    "    static boolean onWatch(String[] list, String user) {",
+                    "        for (String name : list) {",
+                    "            if (name.equals(user)) {",
+                    "                return true;",
+                    "            }",
+                    "        }",
+                    "        return false;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "jdoe matches on the third pass, so return true ends the "
+                    + "method. asmith matches nothing: the loop finishes, and "
+                    + "only then does return false run. Output: true, then "
+                    + "false.\n"
+                    + "\n"
+                    + "Without that line the method does not compile - Java "
+                    + "insists every path through a non-void method returns "
+                    + "something.")
+                .explain(
+                    "return false; - after the loop, once every name failed.")
+                .xp(15))
+            .mistakes(
+                new String[]{"else { return false; } in the loop",
+                    "Gives up after the first slot."},
+                new String[]{"== to compare the Strings",
+                    "Use equals, or matches are missed."},
+                new String[]{"Returning 0 for 'not found'",
+                    "0 is a real index. Use -1."})
+            .cyber(
+                "Blocklists, watchlists and revoked-certificate lists are "
+                + "all searched this way. The early-exit bug is a security "
+                + "bug: a check that only compares the first entry reports "
+                + "'not blocked' for everything else on the list, and "
+                + "nothing looks wrong until a blocked address gets in. "
+                + "Test a search with a match first, last, in the middle "
+                + "and absent.")
+            .check(new Task(Task.CHOICE,
+                    "Where must 'return -1;' go in a linear search?")
+                .choices("Inside the if",
+                         "In an else inside the loop",
+                         "After the loop",
+                         "Before the loop")
+                .accept("3", "c")
+                .hints("When do you KNOW the value is not there?",
+                       "Only after every slot has been checked.")
+                .explain(
+                    "c. After the loop is the only place every slot has "
+                    + "already been checked. Anywhere earlier decides too "
+                    + "soon.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "To test a search method, which set of cases is best?")
+                .choices("One match in the middle",
+                         "Match at the start, the end, and not present",
+                         "Only a value that is not present",
+                         "The same value three times")
+                .accept("2", "b")
+                .hints("Bugs hide at the edges.",
+                       "And in the 'not found' path.")
+                .explain(
+                    "b. The first slot, the last slot and 'absent' are where "
+                    + "search bugs live: early exits, off-by-one limits and a "
+                    + "wrong 'not found' answer.")
+                .xp(10))
+            .recap(
+                "    for each slot:\n"
+                + "        if it matches: return it (or true)\n"
+                + "    after the loop: return -1 (or false)\n"
+                + "\n"
+                + "Never decide 'not found' inside the loop.")
+            .next("Next: the biggest, the smallest and the average."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(13), "Highest, Lowest, Average", 4)
+            .brief(
+                "The capacity report needs three numbers from a day of "
+                + "response times: the fastest, the slowest and the average. "
+                + "Campaign 04 found a running maximum as values arrived. "
+                + "With the values in an array, all three come from one "
+                + "pass - if they start from the right place.")
+            .willLearn("Max, min and average")
+            .whyUseful(
+                "Summary statistics are how a baseline is described: normal "
+                + "is around the average, and anything far above the "
+                + "maximum of a normal day is worth a look. Getting them "
+                + "right on every input, including awkward ones, matters.")
+            .concept("Max, min and average",
+                "Start the maximum and minimum at the FIRST slot, then "
+                + "compare the rest:\n"
+                + "\n"
+                + "    int max = a[0];\n"
+                + "    int min = a[0];\n"
+                + "    int sum = 0;\n"
+                + "    for (int v : a) {\n"
+                + "        if (v > max) { max = v; }\n"
+                + "        if (v < min) { min = v; }\n"
+                + "        sum += v;\n"
+                + "    }\n"
+                + "    double avg = (double) sum / a.length;\n"
+                + "\n"
+                + "Why a[0] and not 0? Start min at 0 and it stays 0 when "
+                + "every value is bigger. Start max at 0 and it stays 0 when "
+                + "every value is negative. a[0] is a real value, so it is "
+                + "always a fair starting point.\n"
+                + "\n"
+                + "The average needs two cares from Campaign 01:\n"
+                + "\n"
+                + "    (double) sum   or int division drops the fraction\n"
+                + "    a.length > 0   or dividing by 0 (and a[0] crashes)\n"
+                + "\n"
+                + "So guard the empty array FIRST - an empty day has no "
+                + "maximum, and pretending it is 0 would be a lie in the "
+                + "report.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] ms = {120, 95, 310, 88, 142};",
+                "        int max = ms[0];",
+                "        int min = ms[0];",
+                "        int sum = 0;",
+                "        for (int v : ms) {",
+                "            if (v > max) {",
+                "                max = v;",
+                "            }",
+                "            if (v < min) {",
+                "                min = v;",
+                "            }",
+                "            sum += v;",
+                "        }",
+                "        double avg = (double) sum / ms.length;",
+                "        System.out.println(\"Fastest: \" + min + \" ms\");",
+                "        System.out.println(\"Slowest: \" + max + \" ms\");",
+                "        System.out.println(\"Average: \" + avg + \" ms\");",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Fastest: 88 ms",
+                "Slowest: 310 ms",
+                "Average: 151.0 ms")
+            .lineByLine(
+                new String[]{"int max = ms[0];",
+                    "Start from a real value, not from 0."},
+                new String[]{"two separate ifs",
+                    "One value can be checked against both. Neither is an "
+                    + "else of the other."},
+                new String[]{"(double) sum / ms.length",
+                    "755 / 5 as a double: 151.0, fraction kept."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] t = {-4, -9, -2};",
+                    "int max = 0;",
+                    "for (int v : t) {",
+                    "    if (v > max) {",
+                    "        max = v;",
+                    "    }",
+                    "}",
+                    "System.out.println(max);")
+                .accept("0")
+                .hints("Is any value bigger than 0?",
+                       "max never changes.")
+                .explain(
+                    "0 - which is not in the array at all. Every reading is "
+                    + "negative, so none beats the starting 0. Start at t[0] "
+                    + "and the answer is -2.")
+                .xp(15))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {3, 4};",
+                    "int sum = a[0] + a[1];",
+                    "System.out.println(sum / a.length);")
+                .accept("3")
+                .hints("sum is 7, and a.length is 2.",
+                       "Both are ints.")
+                .explain(
+                    "3. int divided by int drops the fraction: 7 / 2 is 3. "
+                    + "(double) sum / a.length gives 3.5.")
+                .xp(15))
+            .objective(
+                "Find the busiest hour's count safely.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(peak(new int[]{14, 3, 41, 9}));",
+                "        System.out.println(peak(new int[]{}));",
+                "    }",
+                "",
+                "    static int peak(int[] hourly) {",
+                "        if (hourly.length == 0) {",
+                "            return -1;",
+                "        }",
+                "        // max: start from the first real value",
+                "        for (int v : hourly) {",
+                "            if (v > max) {",
+                "                max = v;",
+                "            }",
+                "        }",
+                "        return max;",
+                "    }",
+                "}")
+            .yourTask(
+                "Declare max, starting at the first slot of hourly. The "
+                + "guard above it already handles the empty array.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line that declares max.")
+                .accept("int max = hourly[0];",
+                        "int max=hourly[0];")
+                .hints(
+                    "Not 0 - a real value from the array.",
+                    "The first slot is index 0.",
+                    "int max = hourly[0];")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(peak(new int[]{14, 3, 41, 9}));",
+                    "        System.out.println(peak(new int[]{}));",
+                    "    }",
+                    "",
+                    "    static int peak(int[] hourly) {",
+                    "        if (hourly.length == 0) {",
+                    "            return -1;",
+                    "        }",
+                    "        int max = hourly[0];",
+                    "        for (int v : hourly) {",
+                    "            if (v > max) {",
+                    "                max = v;",
+                    "            }",
+                    "        }",
+                    "        return max;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "max begins at 14, and the loop raises it to 41. For "
+                    + "the empty array the guard returns -1 before hourly[0] "
+                    + "is ever read, so there is no crash. Output: 41, then "
+                    + "-1.\n"
+                    + "\n"
+                    + "The order matters: the guard first, then hourly[0]. "
+                    + "Swap them and the empty array crashes.")
+                .explain(
+                    "int max = hourly[0]; - a real value, read after the guard.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Starting max or min at 0",
+                    "Wrong when all values are negative, or all positive."},
+                new String[]{"sum / a.length with ints",
+                    "The fraction is lost. Cast sum to double."},
+                new String[]{"No empty-array guard",
+                    "a[0] crashes, and / 0 has no answer."})
+            .cyber(
+                "Anomaly detection starts with a baseline: the average and "
+                + "the usual range of logins, bytes or requests. A spike far "
+                + "above a normal day's maximum is worth an alert. A wrong "
+                + "baseline hides attacks - a maximum stuck at 0, or an "
+                + "average with its fraction dropped, shifts every threshold "
+                + "built on it. And an empty hour must be reported as empty, "
+                + "not as a quiet zero.")
+            .check(new Task(Task.CHOICE,
+                    "Why start min at a[0] instead of 0?")
+                .choices("It is faster",
+                         "0 may be smaller than every real value",
+                         "a[0] is always the smallest",
+                         "Java requires it")
+                .accept("2", "b")
+                .hints("Try values 5, 8, 3 with min starting at 0.",
+                       "min would stay 0.")
+                .explain(
+                    "b. If every value is above 0, a min starting at 0 never "
+                    + "changes and reports a value that is not in the data.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] a = {2, 3, 3};",
+                    "int sum = 0;",
+                    "for (int v : a) {",
+                    "    sum += v;",
+                    "}",
+                    "System.out.println((double) sum / a.length);")
+                .accept("2.6666666666666665")
+                .hints("sum is 8.",
+                       "8.0 / 3.")
+                .explain(
+                    "2.6666666666666665. The cast keeps the fraction; the "
+                    + "last digit shows the tiny rounding that doubles "
+                    + "always carry (Campaign 02).")
+                .xp(10))
+            .recap(
+                "    guard: if (a.length == 0) ...\n"
+                + "    int max = a[0];  int min = a[0];\n"
+                + "    one pass: compare both, add to sum\n"
+                + "    double avg = (double) sum / a.length\n"
+                + "\n"
+                + "Start from real data; divide as a double.")
+            .next("Next: counting how often each value appears."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(14), "A Tally for Every Hour", 4)
+            .brief(
+                "Are logins happening at 3 a.m.? The login log gives the "
+                + "hour of each one, and the question is how many fell in "
+                + "each of the 24 hours. Twenty-four counter variables would "
+                + "be absurd. One array of 24 counters - with the hour "
+                + "itself as the index - does it in a single line.")
+            .willLearn("Tally arrays")
+            .whyUseful(
+                "A tally array counts how often each value appears, in one "
+                + "pass, however long the data. Hours of the day, status "
+                + "codes, days of the week: whenever the values are small "
+                + "whole numbers, the value can be the index.")
+            .concept("Tally arrays",
+                "Campaign 04 counted ONE kind of thing with one counter. "
+                + "To count MANY kinds at once, use an array of counters and "
+                + "let the value pick the slot:\n"
+                + "\n"
+                + "    int[] perHour = new int[24];   24 counters, all 0\n"
+                + "    for (int h : loginHours) {\n"
+                + "        perHour[h]++;              count this hour\n"
+                + "    }\n"
+                + "\n"
+                + "A login at hour 9 adds 1 to perHour[9]; one at 23 adds 1 "
+                + "to perHour[23]. Afterwards, perHour[3] is the number of "
+                + "3 a.m. logins. The new int[24] starting at all zeros "
+                + "(mission 3) is exactly what a set of counters needs.\n"
+                + "\n"
+                + "The value often needs a small step to become an index:\n"
+                + "\n"
+                + "    status code 404   code / 100   slot 4 (4xx)\n"
+                + "    day 1 to 7        day - 1      slots 0 to 6\n"
+                + "\n"
+                + "One danger: the data now chooses the index. A value "
+                + "outside the range - hour 24, or a corrupt -1 - is an "
+                + "ArrayIndexOutOfBoundsException (mission 7). Data from "
+                + "outside needs a range check before it becomes an "
+                + "index.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] loginHours = {9, 23, 9, 14, 3, 23, 23, 9};",
+                "        int[] perHour = new int[24];",
+                "        for (int h : loginHours) {",
+                "            perHour[h]++;",
+                "        }",
+                "        for (int hour = 0; hour < perHour.length; hour++) {",
+                "            if (perHour[hour] > 0) {",
+                "                System.out.println(\"Hour \" + hour + \": \"",
+                "                        + perHour[hour]);",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Hour 3: 1",
+                "Hour 9: 3",
+                "Hour 14: 1",
+                "Hour 23: 3")
+            .lineByLine(
+                new String[]{"new int[24]",
+                    "One counter for each hour, 0 to 23, all starting at 0."},
+                new String[]{"perHour[h]++;",
+                    "The hour is the index: the login is counted in its own "
+                    + "slot."},
+                new String[]{"if (perHour[hour] > 0)",
+                    "Prints only the hours that had any logins."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] rolls = {2, 0, 2, 1, 2};",
+                    "int[] seen = new int[3];",
+                    "for (int r : rolls) {",
+                    "    seen[r]++;",
+                    "}",
+                    "System.out.println(seen[0] + \" \" + seen[1] + \" \" + seen[2]);")
+                .accept("1 1 3")
+                .hints("Count how many 0s, 1s and 2s there are.",
+                       "Each value adds 1 to its own slot.")
+                .explain(
+                    "1 1 3. One 0, one 1 and three 2s - each counted in the "
+                    + "slot with its own number.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Days are numbered 1 (Monday) to 7 (Sunday). Which line "
+                    + "counts day d in int[] perDay = new int[7]?")
+                .choices("perDay[d]++;",
+                         "perDay[d - 1]++;",
+                         "perDay[d + 1]++;",
+                         "perDay[7]++;")
+                .accept("2", "b")
+                .hints("Seven slots are numbered 0 to 6.",
+                       "Day 7 must land in slot 6.")
+                .explain(
+                    "b. d - 1 turns 1..7 into 0..6. perDay[d] would crash on "
+                    + "Sunday, when d is 7.")
+                .xp(15))
+            .objective(
+                "Tally web responses by their class: 2xx, 3xx, 4xx, 5xx.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        int[] codes = {200, 404, 200, 500, 301, 403, 200};",
+                "        int[] byClass = new int[6];",
+                "        for (int code : codes) {",
+                "            // add 1 to the slot for this code's class",
+                "        }",
+                "        for (int c = 2; c <= 5; c++) {",
+                "            System.out.println(c + \"xx: \" + byClass[c]);",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that adds 1 to the counter for the code's "
+                + "class. The class is the first digit, which is code / 100 "
+                + "(int division).")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line inside the first loop.")
+                .accept("byClass[code / 100]++;",
+                        "byClass[code/100]++;",
+                        "byClass[code / 100] += 1;",
+                        "byClass[code / 100] = byClass[code / 100] + 1;")
+                .hints(
+                    "404 / 100 is 4 in int division.",
+                    "Use that as the index, and add 1.",
+                    "byClass[code / 100]++;")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        int[] codes = {200, 404, 200, 500, 301, 403, 200};",
+                    "        int[] byClass = new int[6];",
+                    "        for (int code : codes) {",
+                    "            byClass[code / 100]++;",
+                    "        }",
+                    "        for (int c = 2; c <= 5; c++) {",
+                    "            System.out.println(c + \"xx: \" + byClass[c]);",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "200 / 100 is 2, 404 / 100 is 4, and so on, so each code "
+                    + "lands in its class's slot: 2xx: 3, 3xx: 1, 4xx: 2, "
+                    + "5xx: 1.\n"
+                    + "\n"
+                    + "The array has 6 slots so that indexes 2 to 5 exist; "
+                    + "slots 0 and 1 are simply never used. A code of 600 or "
+                    + "more would crash it - real log data would need a range "
+                    + "check first.")
+                .explain(
+                    "byClass[code / 100]++; - the class digit is the index.")
+                .xp(20))
+            .mistakes(
+                new String[]{"An array one too small",
+                    "Values 0 to 23 need new int[24]."},
+                new String[]{"Forgetting the offset",
+                    "Values 1 to 7 go in slots 0 to 6: d - 1."},
+                new String[]{"Trusting the data as an index",
+                    "An out-of-range value crashes: check it first."})
+            .cyber(
+                "Tallies turn a flood of events into a picture. Logins per "
+                + "hour show an account used at 3 a.m. when its owner "
+                + "works days. Responses per class show a burst of 4xx - "
+                + "someone probing for pages that do not exist. And because "
+                + "the data picks the index, a crafted or corrupt value is "
+                + "an easy way to crash a naive analyser: validate the range "
+                + "before counting.")
+            .check(new Task(Task.CHOICE,
+                    "Minutes are 0 to 59. How big must a tally array for "
+                    + "minutes be?")
+                .choices("59", "60", "61", "100")
+                .accept("2", "b")
+                .hints("The biggest value must be a valid index.",
+                       "The last index is length - 1.")
+                .explain(
+                    "b. 60 slots are numbered 0 to 59, one for every "
+                    + "possible minute.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "int[] codes = {404, 404, 200, 403};",
+                    "int[] byClass = new int[6];",
+                    "for (int c : codes) {",
+                    "    byClass[c / 100]++;",
+                    "}",
+                    "System.out.println(byClass[4]);")
+                .accept("3")
+                .hints("Which codes start with 4?",
+                       "404, 404 and 403.")
+                .explain(
+                    "3. Three of the codes divide down to 4 - two 404s and "
+                    + "a 403.")
+                .xp(10))
+            .recap(
+                "    int[] tally = new int[range];\n"
+                + "    for (int v : data) {\n"
+                + "        tally[v]++;      (or tally[v - 1], v / 100...)\n"
+                + "    }\n"
+                + "\n"
+                + "The value is the index. Size the array for every value, "
+                + "and range-check data from outside.")
+            .next("Next: two arrays, kept side by side."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(15), "Side by Side", 4)
+            .brief(
+                "The failed-login report has two columns: who, and how many "
+                + "times. Names are Strings and counts are ints, and an "
+                + "array holds only one type. The simplest answer is two "
+                + "arrays, lined up so that the same index means the same "
+                + "account - and knowing its weak spot.")
+            .willLearn("Parallel arrays")
+            .whyUseful(
+                "Parallel arrays keep related facts about each item - a "
+                + "name and a count, a host and a port - using only what you "
+                + "know so far. Their fragility is also the best argument "
+                + "for Campaign 06's classes.")
+            .concept("Parallel arrays",
+                "PARALLEL ARRAYS are two (or more) arrays where the same "
+                + "index describes the same thing:\n"
+                + "\n"
+                + "    String[] users = {\"jsmith\", \"admin\", \"mpatel\"};\n"
+                + "    int[] fails    = {2,        14,      0};\n"
+                + "\n"
+                + "    index 1:   users[1] is admin, fails[1] is 14\n"
+                + "\n"
+                + "One index loop reads both:\n"
+                + "\n"
+                + "    for (int i = 0; i < users.length; i++) {\n"
+                + "        System.out.println(users[i] + \": \" + fails[i]);\n"
+                + "    }\n"
+                + "\n"
+                + "This needs the INDEX loop - an enhanced for over users "
+                + "gives names, but no position to look up the count.\n"
+                + "\n"
+                + "To find the account with the most failures, track the "
+                + "best INDEX, not the best value. The index then answers "
+                + "both questions: who (users[worst]) and how many "
+                + "(fails[worst]).\n"
+                + "\n"
+                + "The rules that keep them in step:\n"
+                + "\n"
+                + "    same length       one entry each, always\n"
+                + "    change together   add, remove, reorder: both arrays\n"
+                + "\n"
+                + "Break either rule and every count after the break belongs "
+                + "to the wrong person - with no error to warn you.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] users = {\"jsmith\", \"admin\", \"mpatel\", \"svc_web\"};",
+                "        int[] fails = {2, 14, 0, 6};",
+                "        for (int i = 0; i < users.length; i++) {",
+                "            if (fails[i] >= 5) {",
+                "                System.out.println(\"Review \" + users[i] + \": \"",
+                "                        + fails[i]);",
+                "            }",
+                "        }",
+                "        int worst = 0;",
+                "        for (int i = 1; i < fails.length; i++) {",
+                "            if (fails[i] > fails[worst]) {",
+                "                worst = i;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Most failures: \" + users[worst]);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "Review admin: 14",
+                "Review svc_web: 6",
+                "Most failures: admin")
+            .lineByLine(
+                new String[]{"users[i] + \": \" + fails[i]",
+                    "The same i reads the name and its count."},
+                new String[]{"int worst = 0;",
+                    "The position of the worst so far, starting with the "
+                    + "first account."},
+                new String[]{"fails[i] > fails[worst]",
+                    "Compare counts, but remember the index."},
+                new String[]{"users[worst]",
+                    "The index finds the name in the other array."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] hosts = {\"web\", \"db\", \"fw\"};",
+                    "int[] ports = {443, 5432, 22};",
+                    "System.out.println(hosts[2] + \":\" + ports[2]);")
+                .accept("fw:22")
+                .hints("Index 2 in both arrays.",
+                       "The third entry of each.")
+                .explain(
+                    "fw:22. Slot 2 of each array describes the same host.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "A new account is added to users, but nobody adds its "
+                    + "count to fails. What happens?")
+                .choices("Java refuses to compile",
+                         "The lengths differ, and a loop to users.length "
+                         + "crashes on fails",
+                         "fails grows by itself",
+                         "Nothing changes")
+                .accept("2", "b")
+                .hints("Arrays never grow by themselves.",
+                       "Which array is shorter now?")
+                .explain(
+                    "b. users is one longer, so the last i is a valid index "
+                    + "for users but one past the end of fails.")
+                .xp(15))
+            .objective(
+                "Track the index of the busiest source address.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String[] sources = {\"10.0.0.4\", \"10.0.0.9\",",
+                "                \"10.0.0.17\", \"10.0.0.23\"};",
+                "        int[] requests = {120, 4800, 95, 310};",
+                "        int top = 0;",
+                "        for (int i = 1; i < requests.length; i++) {",
+                "            // the if: this count beats the one at top",
+                "                top = i;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Busiest: \" + sources[top]);",
+                "        System.out.println(\"Requests: \" + requests[top]);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the if that is true when the count at i is greater "
+                + "than the count at the index top.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the if line.")
+                .accept("if (requests[i] > requests[top]) {",
+                        "if(requests[i] > requests[top]) {",
+                        "if (requests[i] > requests[top]){",
+                        "if (requests[top] < requests[i]) {")
+                .hints(
+                    "Compare two counts from requests.",
+                    "One at i, one at top.",
+                    "if (requests[i] > requests[top]) {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String[] sources = {\"10.0.0.4\", \"10.0.0.9\",",
+                    "                \"10.0.0.17\", \"10.0.0.23\"};",
+                    "        int[] requests = {120, 4800, 95, 310};",
+                    "        int top = 0;",
+                    "        for (int i = 1; i < requests.length; i++) {",
+                    "            if (requests[i] > requests[top]) {",
+                    "                top = i;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(\"Busiest: \" + sources[top]);",
+                    "        System.out.println(\"Requests: \" + requests[top]);",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "top follows the position of the biggest count: it moves "
+                    + "to 1 when 4800 beats 120, and nothing beats 4800 "
+                    + "after that. That one index then reads both arrays: "
+                    + "Busiest: 10.0.0.9, Requests: 4800.\n"
+                    + "\n"
+                    + "Tracking the VALUE 4800 instead would tell you how "
+                    + "many, but not who.")
+                .explain(
+                    "if (requests[i] > requests[top]) { - compare by index.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Tracking the best value",
+                    "You lose who it belonged to. Track the index."},
+                new String[]{"Enhanced for over one array",
+                    "No index, so no way into the other array."},
+                new String[]{"Reordering only one array",
+                    "Every entry after it now belongs to someone else."})
+            .cyber(
+                "Misaligned parallel arrays are a quiet, dangerous bug: the "
+                + "report still prints names and numbers, just the wrong "
+                + "pairs. The 14 failures blamed on mpatel really belong to "
+                + "admin, and the investigation follows the wrong person. "
+                + "It is one reason real tools keep each record's fields "
+                + "together in one object - which is where Campaign 06 "
+                + "begins.")
+            .check(new Task(Task.CHOICE,
+                    "fails is sorted into order, but users is left as it "
+                    + "was. What is the result?")
+                .choices("A compile error",
+                         "A crash",
+                         "Counts paired with the wrong users, silently",
+                         "Both arrays are sorted")
+                .accept("3", "c")
+                .hints("Nothing checks that the arrays still line up.",
+                       "The lengths still match.")
+                .explain(
+                    "c. The lengths still match, so nothing crashes - but "
+                    + "index i no longer means the same account in both.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String[] u = {\"ann\", \"bob\", \"cy\"};",
+                    "int[] n = {5, 9, 7};",
+                    "int best = 0;",
+                    "for (int i = 1; i < n.length; i++) {",
+                    "    if (n[i] > n[best]) {",
+                    "        best = i;",
+                    "    }",
+                    "}",
+                    "System.out.println(u[best]);")
+                .accept("bob")
+                .hints("Which index holds the biggest n?",
+                       "9 is at index 1.")
+                .explain(
+                    "bob. best becomes 1 when 9 beats 5, and 7 does not beat "
+                    + "9. u[1] is bob.")
+                .xp(10))
+            .recap(
+                "    same index = same record\n"
+                + "    loop with i; read users[i] and fails[i]\n"
+                + "    track the best INDEX, then read both arrays\n"
+                + "\n"
+                + "Keep the lengths equal and change both together. "
+                + "Campaign 06 replaces this with objects.")
+            .next("Next: a grid of values - two-dimensional arrays."));
     }
 }
