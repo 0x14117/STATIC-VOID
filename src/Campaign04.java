@@ -4141,5 +4141,1122 @@ public class Campaign04 {
                 + "Strength is key space AND rate - lockouts and limits make "
                 + "even small key spaces slow to exhaust.")
             .next("Next: building a lockout."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(21), "A Lockout Simulator", 5)
+            .brief(
+                "Mission 20 showed why lockout works. Now build one: read a "
+                + "stream of login results, count failures IN A ROW, reset "
+                + "the count on a success, and lock the account at three - "
+                + "after which even a correct password is refused.")
+            .willLearn("Lockout logic")
+            .whyUseful(
+                "A lockout is a small state machine inside a loop: a counter "
+                + "that grows, resets and trips. The same shape powers alert "
+                + "thresholds, circuit breakers and fraud rules.")
+            .concept("Lockout logic",
+                "A lockout needs two pieces of STATE that survive from one "
+                + "pass to the next, declared before the loop:\n"
+                + "\n"
+                + "    int failures = 0;         failures in a row\n"
+                + "    boolean locked = false;   has it tripped?\n"
+                + "\n"
+                + "Each attempt is handled in a fixed order:\n"
+                + "\n"
+                + "    1. locked?    refuse - check this FIRST\n"
+                + "    2. success?   welcome, and failures = 0\n"
+                + "    3. failure?   failures++, and if it reaches\n"
+                + "                  the limit, locked = true\n"
+                + "\n"
+                + "Order matters exactly as in Campaign 03's fail-closed "
+                + "gateway: if the lock were checked AFTER the password, a "
+                + "locked account would still reveal whether each guess was "
+                + "right.\n"
+                + "\n"
+                + "'In a row' is what the reset gives you. Without it, three "
+                + "typos spread over a year would lock someone out. With it, "
+                + "only three failures with no success between them count.\n"
+                + "\n"
+                + "Real systems add a way to unlock - after a timeout, or by "
+                + "an administrator. Here, once locked, the account stays "
+                + "locked for the rest of the run.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int LIMIT = 3;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int failures = 0;",
+                "        boolean locked = false;",
+                "        while (true) {",
+                "            System.out.print(\"Result (ok/fail/end): \");",
+                "            String result = input.nextLine().trim();",
+                "            if (result.equals(\"end\")) {",
+                "                break;",
+                "            }",
+                "            if (locked) {",
+                "                System.out.println(\"  refused: account locked\");",
+                "            } else if (result.equals(\"ok\")) {",
+                "                failures = 0;",
+                "                System.out.println(\"  welcome - failures reset\");",
+                "            } else {",
+                "                failures++;",
+                "                System.out.println(\"  failed in a row: \" + failures);",
+                "                if (failures >= LIMIT) {",
+                "                    locked = true;",
+                "                    System.out.println(\"  LOCKED\");",
+                "                }",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .exampleInput("fail", "fail", "ok", "fail", "fail", "fail", "ok",
+                          "end")
+            .exampleOutput(
+                "Result (ok/fail/end): fail",
+                "  failed in a row: 1",
+                "Result (ok/fail/end): fail",
+                "  failed in a row: 2",
+                "Result (ok/fail/end): ok",
+                "  welcome - failures reset",
+                "Result (ok/fail/end): fail",
+                "  failed in a row: 1",
+                "Result (ok/fail/end): fail",
+                "  failed in a row: 2",
+                "Result (ok/fail/end): fail",
+                "  failed in a row: 3",
+                "  LOCKED",
+                "Result (ok/fail/end): ok",
+                "  refused: account locked",
+                "Result (ok/fail/end): end")
+            .lineByLine(
+                new String[]{"int failures = 0; boolean locked = false;",
+                    "State that lives across passes, declared before the "
+                    + "loop."},
+                new String[]{"if (locked)",
+                    "Checked first: a locked account answers nothing."},
+                new String[]{"failures = 0;",
+                    "A success resets the run of failures."},
+                new String[]{"refused: account locked",
+                    "The correct result after locking is still refused."})
+            .predict(new Task(Task.PREDICT,
+                    "The person types fail, ok, fail, end. What does this "
+                    + "print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "int failures = 0;",
+                    "while (true) {",
+                    "    String r = input.nextLine();",
+                    "    if (r.equals(\"end\")) {",
+                    "        break;",
+                    "    }",
+                    "    if (r.equals(\"ok\")) {",
+                    "        failures = 0;",
+                    "    } else {",
+                    "        failures++;",
+                    "    }",
+                    "}",
+                    "System.out.println(failures);")
+                .input("fail", "ok", "fail", "end")
+                .accept("1")
+                .hints("The ok resets the count.",
+                       "Only the last fail is left.")
+                .explain(
+                    "1. The first fail makes 1, ok resets to 0, the second "
+                    + "fail makes 1 again.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Why must the locked check come BEFORE checking whether "
+                    + "the password was right?")
+                .choices("It is faster",
+                         "Otherwise a locked account still reveals which "
+                         + "guess was right",
+                         "Java requires it",
+                         "So the counter resets")
+                .accept("2", "b")
+                .hints("What would a locked account say to a correct guess?",
+                       "Campaign 03's fail-closed order.")
+                .explain(
+                    "If the password were checked first, a locked account "
+                    + "would still answer 'right' or 'wrong' - and the "
+                    + "lockout would protect nothing.")
+                .xp(15))
+            .objective(
+                "Reset the failure count on a successful login.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int failures = 0;",
+                "        while (true) {",
+                "            String result = input.nextLine().trim();",
+                "            if (result.equals(\"end\")) {",
+                "                break;",
+                "            }",
+                "            if (result.equals(\"ok\")) {",
+                "                // reset the run of failures",
+                "            } else {",
+                "                failures++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Failures in a row: \" + failures);",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that resets the run of failures after a "
+                + "success.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the reset line.")
+                .accept("failures = 0;")
+                .hints(
+                    "'In a row' means a success wipes the count.",
+                    "Set it back to its starting value.",
+                    "failures = 0;")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        int failures = 0;",
+                    "        while (true) {",
+                    "            String result = input.nextLine().trim();",
+                    "            if (result.equals(\"end\")) {",
+                    "                break;",
+                    "            }",
+                    "            if (result.equals(\"ok\")) {",
+                    "                failures = 0;",
+                    "            } else {",
+                    "                failures++;",
+                    "            }",
+                    "        }",
+                    "        System.out.println(\"Failures in a row: \" + failures);",
+                    "    }",
+                    "}")
+                .input("fail", "fail", "ok", "fail", "end")
+                .whyItWorks(
+                    "A success sets the counter back to 0, so only an "
+                    + "unbroken run of failures builds up. For fail, fail, "
+                    + "ok, fail the program prints Failures in a row: 1 - not "
+                    + "3.\n"
+                    + "\n"
+                    + "The reset is what separates 'someone is guessing' from "
+                    + "'someone mistyped once last week'.")
+                .explain(
+                    "failures = 0; - a success ends the run.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Checking the lock last",
+                    "A locked account must refuse before anything else."},
+                new String[]{"No reset on success",
+                    "Old typos add up and lock real users out."},
+                new String[]{"State declared inside the loop",
+                    "It resets every pass and never reaches the limit."})
+            .cyber(
+                "Lockouts have a well-known downside: an attacker who knows "
+                + "user names can lock everyone out on purpose, just by "
+                + "failing three times per account. That is why many systems "
+                + "use temporary lockouts (15 minutes) or growing delays "
+                + "instead of permanent locks, and why they alert the "
+                + "security team when many accounts lock at once - a pattern "
+                + "called password spraying when the attacker spreads a few "
+                + "guesses across many accounts to stay under each limit.")
+            .check(new Task(Task.CHOICE,
+                    "Where must failures and locked be declared?")
+                .choices("Inside the loop", "Before the loop",
+                         "Inside the if", "After the loop")
+                .accept("2", "b")
+                .hints("They must survive from one pass to the next.",
+                       "Mission 3's counter rule.")
+                .explain(
+                    "Before the loop - inside it they would reset every "
+                    + "pass.")
+                .xp(10))
+            .check(new Task(Task.PREDICT,
+                    "The person types fail, fail, fail, fail, end. With a "
+                    + "limit of 3 checked first each pass, what does this "
+                    + "print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "int failures = 0;",
+                    "int refused = 0;",
+                    "while (true) {",
+                    "    String r = input.nextLine();",
+                    "    if (r.equals(\"end\")) {",
+                    "        break;",
+                    "    }",
+                    "    if (failures >= 3) {",
+                    "        refused++;",
+                    "    } else if (!r.equals(\"ok\")) {",
+                    "        failures++;",
+                    "    }",
+                    "}",
+                    "System.out.println(failures + \" \" + refused);")
+                .input("fail", "fail", "fail", "fail", "end")
+                .accept("3 1")
+                .hints("The first three fails count.",
+                       "The fourth arrives after the limit.")
+                .explain(
+                    "3 1. Three failures reach the limit; the fourth attempt "
+                    + "is refused before it is even looked at.")
+                .xp(15))
+            .recap(
+                "Lockout: state before the loop (failures, locked). Each "
+                + "attempt: locked? refuse. Success? reset. Failure? count, "
+                + "and lock at the limit. Check the lock first; reset on "
+                + "success so only failures in a row count.")
+            .next("Next: limiting how fast requests can come."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(22), "Rate Limiting", 6)
+            .brief(
+                "The password-reset API is being hammered: hundreds of "
+                + "requests a minute from one client. Policy: at most 3 "
+                + "requests in each 10-second window; the rest are refused "
+                + "until the next window starts. Time for a rate limiter.")
+            .willLearn("Rate limiting")
+            .whyUseful(
+                "Rate limits are one of the most common controls on the "
+                + "internet: login forms, APIs, password resets, SMS codes. "
+                + "They turn a flood into a trickle without blocking anyone "
+                + "for good.")
+            .concept("Rate limiting",
+                "A FIXED-WINDOW rate limiter splits time into windows of the "
+                + "same length and allows a set number of requests in each.\n"
+                + "\n"
+                + "Which window is a request in? Integer division does it:\n"
+                + "\n"
+                + "    int window = time / 10;\n"
+                + "\n"
+                + "    times 0-9    window 0\n"
+                + "    times 10-19  window 1\n"
+                + "    times 20-29  window 2\n"
+                + "\n"
+                + "The loop keeps two pieces of state: the CURRENT window, and "
+                + "how many requests it has had. For each request:\n"
+                + "\n"
+                + "    1. work out its window\n"
+                + "    2. if it is a NEW window, reset the count to 0\n"
+                + "       and remember the new window\n"
+                + "    3. if the count is below the limit, allow it\n"
+                + "       and count it; otherwise refuse it\n"
+                + "\n"
+                + "Refused requests are NOT counted - a client that keeps "
+                + "retrying cannot push its own count higher, it just waits "
+                + "for the next window.\n"
+                + "\n"
+                + "Fixed windows have a known weakness: a client can send the "
+                + "limit at the very end of one window and again at the very "
+                + "start of the next - double the rate for a moment. "
+                + "Sliding windows smooth that out; they need Campaign 05's "
+                + "collections to remember recent times.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int LIMIT = 3;",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int currentWindow = -1;",
+                "        int count = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Request at second (or -1): \");",
+                "            int time = Integer.parseInt(input.nextLine().trim());",
+                "            if (time == -1) {",
+                "                break;",
+                "            }",
+                "            int window = time / WINDOW_SECONDS;",
+                "            if (window != currentWindow) {",
+                "                currentWindow = window;",
+                "                count = 0;",
+                "            }",
+                "            if (count < LIMIT) {",
+                "                count++;",
+                "                System.out.println(\"  ALLOW\");",
+                "            } else {",
+                "                System.out.println(\"  DENY - try again later\");",
+                "            }",
+                "        }",
+                "    }",
+                "}")
+            .exampleInput("1", "2", "3", "4", "12", "13", "25", "-1")
+            .exampleOutput(
+                "Request at second (or -1): 1",
+                "  ALLOW",
+                "Request at second (or -1): 2",
+                "  ALLOW",
+                "Request at second (or -1): 3",
+                "  ALLOW",
+                "Request at second (or -1): 4",
+                "  DENY - try again later",
+                "Request at second (or -1): 12",
+                "  ALLOW",
+                "Request at second (or -1): 13",
+                "  ALLOW",
+                "Request at second (or -1): 25",
+                "  ALLOW",
+                "Request at second (or -1): -1")
+            .lineByLine(
+                new String[]{"int currentWindow = -1;",
+                    "No window yet: -1 matches no real window."},
+                new String[]{"int window = time / WINDOW_SECONDS;",
+                    "Integer division groups the seconds into windows."},
+                new String[]{"count = 0;",
+                    "A new window starts with a fresh allowance."},
+                new String[]{"DENY - try again later",
+                    "Refused requests are not counted."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "System.out.println(7 / 10 + \" \" + 19 / 10 + \" \" + 20 / 10);")
+                .accept("0 1 2")
+                .hints("Integer division drops the remainder.",
+                       "19 / 10 is 1.")
+                .explain(
+                    "0 1 2 - seconds 7, 19 and 20 fall in windows 0, 1 and "
+                    + "2.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "Why are refused requests NOT added to the count?")
+                .choices("Counting them would crash",
+                         "A client retrying cannot make its own limit worse "
+                         + "- it just waits for the next window",
+                         "Java cannot count refusals",
+                         "It makes the window longer")
+                .accept("2", "b")
+                .hints("What would happen to a retrying client if they "
+                       + "were counted?",
+                       "The count only matters for allowed requests.")
+                .explain(
+                    "The limit is about requests SERVED. Counting refusals "
+                    + "would change nothing for this window, and keeps the "
+                    + "rule simple and predictable.")
+                .xp(15))
+            .objective(
+                "Work out which window a request falls in.")
+            .starter(
+                "public class Main {",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    public static void main(String[] args) {",
+                "        for (int time = 8; time <= 12; time++) {",
+                "            // declare window: which window is this second in?",
+                "            System.out.println(time + \" -> window \" + window);",
+                "        }",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the declaration of window: time divided by "
+                + "WINDOW_SECONDS, as an int.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the declaration.")
+                .accept("int window = time / WINDOW_SECONDS;",
+                        "int window = time/WINDOW_SECONDS;")
+                .hints(
+                    "Integer division groups seconds.",
+                    "Use the constant, not 10.",
+                    "int window = time / WINDOW_SECONDS;")
+                .solution(
+                    "public class Main {",
+                    "    static final int WINDOW_SECONDS = 10;",
+                    "",
+                    "    public static void main(String[] args) {",
+                    "        for (int time = 8; time <= 12; time++) {",
+                    "            int window = time / WINDOW_SECONDS;",
+                    "            System.out.println(time + \" -> window \" + window);",
+                    "        }",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Integer division throws away the remainder, so 8 and 9 "
+                    + "give window 0, and 10, 11 and 12 give window 1. The "
+                    + "boundary between windows falls exactly at 10.\n"
+                    + "\n"
+                    + "Using the constant means changing the window to 60 "
+                    + "seconds is a one-line edit - and every calculation "
+                    + "that depends on it changes together.")
+                .explain(
+                    "int window = time / WINDOW_SECONDS;")
+                .xp(20))
+            .mistakes(
+                new String[]{"Forgetting to reset on a new window",
+                    "The first window's count never goes away."},
+                new String[]{"Counting refused requests",
+                    "Keep the count to requests actually served."},
+                new String[]{"State inside the loop",
+                    "The window and count must survive between requests."})
+            .cyber(
+                "Rate limiting protects login pages from password guessing, "
+                + "SMS and email endpoints from being abused to spam people, "
+                + "and APIs from being scraped or overloaded. It is usually "
+                + "applied per client - per account, per address, or both - "
+                + "and combined with lockouts, since an attacker spreading "
+                + "guesses slowly across many accounts can stay under any "
+                + "single limit.\n"
+                + "\n"
+                + "The fixed-window burst at the boundary is a real, "
+                + "documented weakness, and the reason production limiters "
+                + "often use sliding windows or 'token buckets'.")
+            .check(new Task(Task.CHOICE,
+                    "With 10-second windows and a limit of 3, a client sends "
+                    + "requests at seconds 9, 9, 9, 10, 10, 10. How many are "
+                    + "allowed?")
+                .choices("3", "4", "6", "0")
+                .accept("3", "c")
+                .hints("Second 9 is window 0; second 10 is window 1.",
+                       "Each window allows 3.")
+                .explain(
+                    "All 6 - three in window 0 and three in window 1, within "
+                    + "two seconds. That is the fixed-window boundary burst.")
+                .xp(15))
+            .check(new Task(Task.CHOICE,
+                    "What does a lockout do that a rate limit does not?")
+                .choices("Nothing - they are the same",
+                         "It blocks until something unlocks it; a rate limit "
+                         + "only slows requests down",
+                         "It counts requests",
+                         "It uses integer division")
+                .accept("2", "b")
+                .hints("A rate limit lets requests through again in the "
+                       + "next window.",
+                       "A lockout stays shut.")
+                .explain(
+                    "A lockout stays shut until a timeout or an admin opens "
+                    + "it; a rate limit just spreads requests out over time.")
+                .xp(10))
+            .recap(
+                "Fixed window: window = time / length. New window? reset "
+                + "the count. Under the limit? allow and count. Otherwise "
+                + "deny - without counting. Watch the burst at window "
+                + "boundaries.")
+            .next("Next: a menu that keeps coming back."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(23), "A Menu That Comes Back", 5)
+            .brief(
+                "The analyst console needs a proper menu: show the options, "
+                + "read a choice, do it, and show the menu again - until the "
+                + "analyst picks Exit. This very game works the same way.")
+            .willLearn("Menu loops")
+            .whyUseful(
+                "Menu loops are how interactive tools work: consoles, "
+                + "installers, admin panels. The pattern combines everything "
+                + "so far - do-while, switch, validation and a clean exit.")
+            .concept("Menu loops",
+                "A menu loop shows the choices at least once, so do-while "
+                + "fits:\n"
+                + "\n"
+                + "    String choice;\n"
+                + "    do {\n"
+                + "        printMenu();\n"
+                + "        choice = input.nextLine().trim();\n"
+                + "        switch (choice) {\n"
+                + "            case \"1\" -> showStatus();\n"
+                + "            case \"2\" -> runScan();\n"
+                + "            case \"9\" -> System.out.println(\"Bye\");\n"
+                + "            default -> System.out.println(\"Unknown\");\n"
+                + "        }\n"
+                + "    } while (!choice.equals(\"9\"));\n"
+                + "\n"
+                + "Each piece has a job:\n"
+                + "\n"
+                + "    printMenu()    a method, so the menu is defined once\n"
+                + "    choice         declared BEFORE the do, so the\n"
+                + "                   while can see it (mission 12)\n"
+                + "    switch         one case per option\n"
+                + "    default        anything unexpected is answered,\n"
+                + "                   never ignored or crashed on\n"
+                + "\n"
+                + "Reading the choice as TEXT, not with parseInt, means a "
+                + "typo like x is just 'Unknown option' - not a crash that "
+                + "ends the session.")
+            .example(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String choice;",
+                "        do {",
+                "            printMenu();",
+                "            choice = input.nextLine().trim();",
+                "            switch (choice) {",
+                "                case \"1\" -> System.out.println(\"All systems normal\");",
+                "                case \"2\" -> System.out.println(\"Scan queued\");",
+                "                case \"9\" -> System.out.println(\"Session closed\");",
+                "                default ->",
+                "                    System.out.println(\"Unknown option: \" + choice);",
+                "            }",
+                "        } while (!choice.equals(\"9\"));",
+                "    }",
+                "",
+                "    static void printMenu() {",
+                "        System.out.print(\"1 Status  2 Scan  9 Exit > \");",
+                "    }",
+                "}")
+            .exampleInput("1", "x", "9")
+            .exampleOutput(
+                "1 Status  2 Scan  9 Exit > 1",
+                "All systems normal",
+                "1 Status  2 Scan  9 Exit > x",
+                "Unknown option: x",
+                "1 Status  2 Scan  9 Exit > 9",
+                "Session closed")
+            .lineByLine(
+                new String[]{"String choice;",
+                    "Declared before the do, so the while can use it."},
+                new String[]{"printMenu();",
+                    "The menu is written once, in a method."},
+                new String[]{"default -> ...",
+                    "x is answered, not crashed on."},
+                new String[]{"while (!choice.equals(\"9\"))",
+                    "Round again unless the choice was Exit."})
+            .predict(new Task(Task.PREDICT,
+                    "The person types 2, 2, 9. How many lines does this "
+                    + "print?")
+                .code(
+                    "Scanner input = new Scanner(System.in);",
+                    "String choice;",
+                    "do {",
+                    "    choice = input.nextLine();",
+                    "    if (choice.equals(\"2\")) {",
+                    "        System.out.println(\"Scan queued\");",
+                    "    }",
+                    "} while (!choice.equals(\"9\"));")
+                .input("2", "2", "9")
+                .accept("2", "two")
+                .hints("Each 2 prints one line.",
+                       "9 prints nothing and ends the loop.")
+                .explain(
+                    "2. Two scans queued; the 9 stops the loop without "
+                    + "printing.")
+                .xp(10))
+            .practice(new Task(Task.CHOICE,
+                    "Why read the menu choice as text instead of using "
+                    + "Integer.parseInt?")
+                .choices("Text is faster",
+                         "A typo like x becomes 'Unknown option' instead of "
+                         + "a crash",
+                         "switch cannot use ints",
+                         "Scanner cannot read numbers")
+                .accept("2", "b")
+                .hints("What does parseInt do with x?",
+                       "It throws, and the session ends.")
+                .explain(
+                    "parseInt(\"x\") crashes the program. As text, x falls "
+                    + "into default and the menu comes back.")
+                .xp(10))
+            .objective(
+                "Close the menu loop on Exit.")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        String choice;",
+                "        do {",
+                "            System.out.print(\"1 Status  9 Exit > \");",
+                "            choice = input.nextLine().trim();",
+                "            if (choice.equals(\"1\")) {",
+                "                System.out.println(\"All systems normal\");",
+                "            }",
+                "        // closing line: repeat unless the choice was 9",
+                "        System.out.println(\"Session closed\");",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the closing line of the do-while: go round again "
+                + "while choice is not the text 9.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the closing line.")
+                .accept("} while (!choice.equals(\"9\"));",
+                        "} while(!choice.equals(\"9\"));",
+                        "}while (!choice.equals(\"9\"));",
+                        "} while (!\"9\".equals(choice));")
+                .hints(
+                    "choice is text: use equals.",
+                    "Repeat while it is NOT 9 - and end with a semicolon.",
+                    "} while (!choice.equals(\"9\"));")
+                .solution(
+                    "import java.util.Scanner;",
+                    "",
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        Scanner input = new Scanner(System.in);",
+                    "        String choice;",
+                    "        do {",
+                    "            System.out.print(\"1 Status  9 Exit > \");",
+                    "            choice = input.nextLine().trim();",
+                    "            if (choice.equals(\"1\")) {",
+                    "                System.out.println(\"All systems normal\");",
+                    "            }",
+                    "        } while (!choice.equals(\"9\"));",
+                    "        System.out.println(\"Session closed\");",
+                    "    }",
+                    "}")
+                .input("1", "9")
+                .whyItWorks(
+                    "The body runs first - menu, read, act - and then the "
+                    + "test decides whether to show the menu again. Only 9 "
+                    + "makes !choice.equals(\"9\") false, so everything else, "
+                    + "typos included, brings the menu back.\n"
+                    + "\n"
+                    + "choice was declared before the do, which is what lets "
+                    + "this line see it.")
+                .explain(
+                    "} while (!choice.equals(\"9\")); - with the semicolon.")
+                .xp(20))
+            .mistakes(
+                new String[]{"Declaring choice inside the do",
+                    "The while cannot see it."},
+                new String[]{"No default case",
+                    "Unexpected input should always get an answer."},
+                new String[]{"parseInt on the choice",
+                    "One typo crashes the whole session."})
+            .cyber(
+                "Menus and command loops are an attack surface: every option "
+                + "is a way in. Secure consoles check permissions INSIDE each "
+                + "option (not just when showing the menu), refuse unknown "
+                + "commands explicitly, and never offer a hidden debug option "
+                + "that skips the checks - hidden menu entries in shipped "
+                + "software are a classic backdoor.")
+            .check(new Task(Task.CHOICE,
+                    "Why is do-while the natural loop for a menu?")
+                .choices("It is the fastest loop",
+                         "The menu must be shown at least once before a "
+                         + "choice exists",
+                         "switch only works inside do-while",
+                         "It cannot loop for ever")
+                .accept("2", "b")
+                .hints("What is there to test before the first choice?",
+                       "Mission 11.")
+                .explain(
+                    "The menu must appear before there is any choice to "
+                    + "test - at least one pass.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "The user types 7 in a menu offering 1, 2 and 9. What "
+                    + "should happen?")
+                .choices("The program exits",
+                         "An 'unknown option' message, then the menu again",
+                         "Option 1 runs",
+                         "Nothing - silently ignore it")
+                .accept("2", "b")
+                .hints("The default case.",
+                       "Unexpected input always gets an answer.")
+                .explain(
+                    "default answers it clearly, and the loop shows the menu "
+                    + "again.")
+                .xp(10))
+            .recap(
+                "Menu loop: do { show menu; read choice as text; switch with "
+                + "a default } while (not exit). Declare the choice before "
+                + "the do. Every input, even a typo, gets an answer.")
+            .next("Next: guards inside a loop's condition."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(24), "Guards Inside the Condition", 6)
+            .brief(
+                "The log parser walks along a line until it meets a space, "
+                + "to pull out the first word. Most lines have a space. The "
+                + "one that did not crashed the parser at 3 a.m. The fix is "
+                + "one condition in the right order.")
+            .willLearn("Loop guards")
+            .whyUseful(
+                "Loop conditions often check TWO things: 'is there more "
+                + "input?' and 'is this item interesting?'. Getting their "
+                + "order right is the difference between a loop that stops "
+                + "safely and one that crashes on the edge case.")
+            .concept("Loop guards",
+                "A loop that walks along text until it finds something "
+                + "needs two tests:\n"
+                + "\n"
+                + "    while (i < s.length() && s.charAt(i) != ' ') {\n"
+                + "        i++;\n"
+                + "    }\n"
+                + "\n"
+                + "    i < s.length()       is there a character here?\n"
+                + "    s.charAt(i) != ' '   is it not a space?\n"
+                + "\n"
+                + "&& short-circuits (Campaign 02): if the left side is "
+                + "false, the right side is never evaluated. So when i "
+                + "reaches the end, charAt(i) is never called - no crash.\n"
+                + "\n"
+                + "SWAP them and the loop crashes on any text without a "
+                + "space: at the end, charAt(i) runs first, on a position "
+                + "that does not exist - StringIndexOutOfBoundsException.\n"
+                + "\n"
+                + "The rule is the one from Campaign 02, now inside a loop: "
+                + "the GUARD goes on the left, the USE on the right.\n"
+                + "\n"
+                + "After the loop, i tells you where it stopped: at the first "
+                + "space, or at s.length() if there was none. Either way, "
+                + "s.substring(0, i) is the first word.")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String line = \"FAIL jsmith 10.0.0.7\";",
+                "        System.out.println(\"[\" + firstWord(line) + \"]\");",
+                "        System.out.println(\"[\" + firstWord(\"HEARTBEAT\") + \"]\");",
+                "    }",
+                "",
+                "    static String firstWord(String s) {",
+                "        int i = 0;",
+                "        while (i < s.length() && s.charAt(i) != ' ') {",
+                "            i++;",
+                "        }",
+                "        return s.substring(0, i);",
+                "    }",
+                "}")
+            .exampleOutput(
+                "[FAIL]",
+                "[HEARTBEAT]")
+            .lineByLine(
+                new String[]{"i < s.length()",
+                    "The guard, on the left: is there a character at i?"},
+                new String[]{"s.charAt(i) != ' '",
+                    "Only reached when the guard is true."},
+                new String[]{"firstWord(\"HEARTBEAT\")",
+                    "No space: the guard stops the loop at the end, "
+                    + "safely."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"12ab\";",
+                    "int i = 0;",
+                    "while (i < s.length() && Character.isDigit(s.charAt(i))) {",
+                    "    i++;",
+                    "}",
+                    "System.out.println(i);")
+                .accept("2")
+                .hints("The loop walks while the characters are digits.",
+                       "It stops at the a.")
+                .explain(
+                    "2. It passes 1 and 2 and stops at position 2, the "
+                    + "first non-digit.")
+                .xp(15))
+            .practice(new Task(Task.CHOICE,
+                    "Which condition is safe for text that may have no space "
+                    + "at all?")
+                .choices("s.charAt(i) != ' ' && i < s.length()",
+                         "i < s.length() && s.charAt(i) != ' '",
+                         "s.charAt(i) != ' ' || i < s.length()",
+                         "i <= s.length() && s.charAt(i) != ' '")
+                .accept("2", "b")
+                .hints("The guard must be checked first.",
+                       "And it must stop BEFORE length.")
+                .explain(
+                    "b. The bounds check comes first and short-circuits. a "
+                    + "calls charAt before checking; d allows i to equal "
+                    + "length.")
+                .xp(15))
+            .objective(
+                "Make the first-word loop safe.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        String s = \"HEARTBEAT\";",
+                "        int i = 0;",
+                "        // the while line: stop at the end, or at a space",
+                "            i++;",
+                "        }",
+                "        System.out.println(\"First word: \" + s.substring(0, i));",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the while line: keep going while i is still inside "
+                + "the text AND the character at i is not a space - guard "
+                + "first.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the while line.")
+                .accept("while (i < s.length() && s.charAt(i) != ' ') {",
+                        "while(i < s.length() && s.charAt(i) != ' ') {",
+                        "while (i < s.length() && s.charAt(i) != ' '){")
+                .hints(
+                    "Two conditions joined with &&.",
+                    "The bounds check goes on the LEFT.",
+                    "while (i < s.length() && s.charAt(i) != ' ') {")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        String s = \"HEARTBEAT\";",
+                    "        int i = 0;",
+                    "        while (i < s.length() && s.charAt(i) != ' ') {",
+                    "            i++;",
+                    "        }",
+                    "        System.out.println(\"First word: \" + s.substring(0, i));",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "HEARTBEAT has no space, so the loop walks all the way to "
+                    + "i = 9. There, i < s.length() is false, && stops, and "
+                    + "charAt(9) is never called. The program prints First "
+                    + "word: HEARTBEAT.\n"
+                    + "\n"
+                    + "With the two tests the other way round, this exact "
+                    + "line - the one with no space - is the one that crashes.")
+                .explain(
+                    "Guard first: i < s.length() && s.charAt(i) != ' '")
+                .xp(25))
+            .mistakes(
+                new String[]{"The use before the guard",
+                    "charAt runs on a position that does not exist."},
+                new String[]{"<= s.length() as the guard",
+                    "Lets i reach length, one past the end."},
+                new String[]{"Testing only the typical line",
+                    "The line with no space is the one that breaks."})
+            .cyber(
+                "Parsers that crash on unusual input are a denial-of-service "
+                + "risk: one malformed log line or packet stops the whole "
+                + "pipeline. Fuzzers - tools that feed programs endless "
+                + "strange inputs - find exactly these bugs: the line with no "
+                + "space, the empty line, the enormous line. Guarding every "
+                + "index before using it is what keeps a parser standing.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"\";",
+                    "int i = 0;",
+                    "while (i < s.length() && s.charAt(i) != ' ') {",
+                    "    i++;",
+                    "}",
+                    "System.out.println(\"stopped at \" + i);")
+                .accept("stopped at 0")
+                .hints("The text is empty.",
+                       "0 < 0 is false - and then?")
+                .explain(
+                    "stopped at 0. The guard is false at once, so charAt is "
+                    + "never called on the empty text.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "In  a && b , when is b NOT evaluated?")
+                .choices("When a is true", "When a is false",
+                         "Never - both always run", "When b is false")
+                .accept("2", "b")
+                .hints("If a is false, can the whole thing be true?",
+                       "Short-circuit.")
+                .explain(
+                    "When a is false - the answer is already false, so Java "
+                    + "skips b.")
+                .xp(10))
+            .recap(
+                "    while (i < s.length() && s.charAt(i) != ' ')\n"
+                + "\n"
+                + "Guard on the left, use on the right: && stops before the "
+                + "use when the guard fails. After the loop, the index says "
+                + "where it stopped. Test the line with no match.")
+            .next("Next: building output a piece at a time."));
+
+        // ---------------------------------------------------------------
+        c.add(new Mission(c.missionId(25), "Building Output Piece by Piece", 5)
+            .brief(
+                "The shift report wants a quick bar chart of failed logins "
+                + "per host - web-01 #####, db-02 ## - and a comma-separated "
+                + "list of ports with no stray comma at the end. Both are "
+                + "text built up one piece per pass.")
+            .willLearn("Building output")
+            .whyUseful(
+                "Reports, bars, tables and lists are all built a piece at a "
+                + "time. Doing it cleanly - and without a trailing comma or a "
+                + "missing separator - is a small skill that shows in every "
+                + "tool you write.")
+            .concept("Building output",
+                "A String can be an accumulator too. Start empty, add a piece "
+                + "per pass:\n"
+                + "\n"
+                + "    String bar = \"\";\n"
+                + "    for (int i = 0; i < count; i++) {\n"
+                + "        bar += \"#\";\n"
+                + "    }\n"
+                + "\n"
+                + "SEPARATORS are the fencepost problem again (mission 6): "
+                + "five items need four commas. Two clean ways:\n"
+                + "\n"
+                + "    add a comma BEFORE every item except the first\n"
+                + "        if (i > start) { list += \", \"; }\n"
+                + "        list += i;\n"
+                + "\n"
+                + "    or add after each, and cut the last one off\n"
+                + "\n"
+                + "The first is usually clearer - there is nothing to undo.\n"
+                + "\n"
+                + "Putting the building loop inside a method - bar(count) - "
+                + "gives a reusable piece that main can call once per host.\n"
+                + "\n"
+                + "(Every += creates a new String, because Strings never "
+                + "change. For a few hundred pieces that does not matter; for "
+                + "millions, Java's StringBuilder is faster - a later "
+                + "campaign.)")
+            .example(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"web-01  \" + bar(5) + \" 5\");",
+                "        System.out.println(\"db-02   \" + bar(2) + \" 2\");",
+                "        System.out.println(\"fw-01   \" + bar(8) + \" 8\");",
+                "        String ports = \"\";",
+                "        for (int p = 20; p <= 23; p++) {",
+                "            if (p > 20) {",
+                "                ports += \", \";",
+                "            }",
+                "            ports += p;",
+                "        }",
+                "        System.out.println(\"Ports: \" + ports);",
+                "    }",
+                "",
+                "    static String bar(int count) {",
+                "        String bar = \"\";",
+                "        for (int i = 0; i < count; i++) {",
+                "            bar += \"#\";",
+                "        }",
+                "        return bar;",
+                "    }",
+                "}")
+            .exampleOutput(
+                "web-01  ##### 5",
+                "db-02   ## 2",
+                "fw-01   ######## 8",
+                "Ports: 20, 21, 22, 23")
+            .lineByLine(
+                new String[]{"String bar = \"\";",
+                    "An empty String: the starting value for text."},
+                new String[]{"bar += \"#\";",
+                    "One piece per pass."},
+                new String[]{"if (p > 20) { ports += \", \"; }",
+                    "A separator before every item except the first."})
+            .predict(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"\";",
+                    "for (int i = 1; i <= 3; i++) {",
+                    "    s += i + \"-\";",
+                    "}",
+                    "System.out.println(s);")
+                .accept("1-2-3-")
+                .hints("A dash after every number.",
+                       "Including the last one.")
+                .explain(
+                    "1-2-3- - the separator after every item leaves a stray "
+                    + "one at the end.")
+                .xp(10))
+            .practice(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"\";",
+                    "for (int i = 1; i <= 3; i++) {",
+                    "    if (i > 1) {",
+                    "        s += \"-\";",
+                    "    }",
+                    "    s += i;",
+                    "}",
+                    "System.out.println(s);")
+                .accept("1-2-3")
+                .hints("The dash comes BEFORE each item.",
+                       "Except the first.")
+                .explain(
+                    "1-2-3. Two separators for three items - the fencepost "
+                    + "done right.")
+                .xp(15))
+            .objective(
+                "Build a bar for a failure count.")
+            .starter(
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        System.out.println(\"web-01 \" + bar(5));",
+                "    }",
+                "",
+                "    static String bar(int count) {",
+                "        String bar = \"\";",
+                "        for (int i = 0; i < count; i++) {",
+                "            // add one # to bar",
+                "        }",
+                "        return bar;",
+                "    }",
+                "}")
+            .yourTask(
+                "Write the line that adds one # to bar on each pass.")
+            .mainTask(new Task(Task.WRITE,
+                    "Write the line.")
+                .accept("bar += \"#\";", "bar = bar + \"#\";",
+                        "bar += '#';")
+                .hints(
+                    "A String accumulator.",
+                    "+= joins text on to the end.",
+                    "bar += \"#\";")
+                .solution(
+                    "public class Main {",
+                    "    public static void main(String[] args) {",
+                    "        System.out.println(\"web-01 \" + bar(5));",
+                    "    }",
+                    "",
+                    "    static String bar(int count) {",
+                    "        String bar = \"\";",
+                    "        for (int i = 0; i < count; i++) {",
+                    "            bar += \"#\";",
+                    "        }",
+                    "        return bar;",
+                    "    }",
+                    "}")
+                .whyItWorks(
+                    "Each of the five passes joins one # on to the end, so "
+                    + "bar(5) returns ##### and the program prints web-01 "
+                    + "#####.\n"
+                    + "\n"
+                    + "Because bar is a method, one line per host draws the "
+                    + "whole chart - and bar(0) returns an empty String, "
+                    + "which is exactly right for a host with no failures.")
+                .explain(
+                    "bar += \"#\"; - one piece per pass.")
+                .xp(20))
+            .mistakes(
+                new String[]{"A separator after every item",
+                    "Leaves a stray one at the end."},
+                new String[]{"Starting the String as null",
+                    "Start with \"\" - the empty String."},
+                new String[]{"Printing inside the loop",
+                    "Build first, print once - the result can be reused."})
+            .cyber(
+                "Building output piece by piece is where escaping bugs creep "
+                + "in. When a report joins user-supplied values into CSV, a "
+                + "value containing a comma breaks the columns; into HTML, a "
+                + "value containing < can inject markup. Each piece added to "
+                + "output should pass through the right sanitiser for the "
+                + "destination - Campaign 03's forLog, in miniature, applied "
+                + "on every pass.")
+            .check(new Task(Task.PREDICT,
+                    "What does this print?")
+                .code(
+                    "String s = \"\";",
+                    "for (int i = 0; i < 4; i++) {",
+                    "    s += (i % 2 == 0) ? \"#\" : \".\";",
+                    "}",
+                    "System.out.println(s);")
+                .accept("#.#.")
+                .hints("Even i adds #, odd adds .",
+                       "i goes 0 to 3.")
+                .explain(
+                    "#.#. - the conditional operator picks each piece.")
+                .xp(10))
+            .check(new Task(Task.CHOICE,
+                    "How many separators does a list of 6 items need?")
+                .choices("6", "5", "7", "It depends on the items")
+                .accept("2", "b")
+                .hints("Between items, not after them.",
+                       "Fenceposts.")
+                .explain(
+                    "5 - one between each pair of neighbours.")
+                .xp(10))
+            .recap(
+                "A String accumulator starts at \"\" and grows with += each "
+                + "pass. Separators go BETWEEN items: add one before every "
+                + "item except the first. Put building loops in methods and "
+                + "print once.")
+            .next("Next: tracing a loop on paper."));
     }
 }
