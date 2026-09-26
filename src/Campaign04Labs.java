@@ -2231,5 +2231,688 @@ public class Campaign04Labs {
                 "Message: rhythm 42",
                 "Short: rhythm 42",
                 "Saved: 0 characters"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(21), "Rate Limiter", Lab.BIG)
+            .stretch()
+            .after("C04-M022")
+            .brief(
+                "The password-reset endpoint needs its limiter: at most 3 "
+                + "requests in each 10-second window. Requests arrive as "
+                + "timestamps. Some clients send times that go backwards - "
+                + "those are refused outright. At the end, report the "
+                + "totals.")
+            .practises("Fixed-window rate limiting", "State across passes", "Rejecting out-of-order input")
+            .spec(
+                "Repeatedly prompt Request at second (or -1): and read a whole number. -1 ends the input.",
+                "windowOf(time) returns time / 10. A new window resets the allowance.",
+                "A time earlier than the previous accepted time prints REJECTED - out of order and is not counted anywhere else.",
+                "Otherwise, if the window has had fewer than 3 allowed requests, print ALLOW and count it; if not, print DENY. Denied requests do not use up the allowance.",
+                "Finish with Allowed: <a>  Denied: <d>  Rejected: <r> (two spaces between).")
+            .needsMethod("static int windowOf(int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int LIMIT = 3;",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // the limiter loop, then the totals",
+                "    }",
+                "",
+                "    // declare windowOf(int time) here",
+                "}")
+            .hints(
+                "State before the loop: the current window (start -1), the "
+                + "count in it, the last accepted time (start -1), and three "
+                + "totals.",
+                "Order in the body: read; -1 breaks; out of order? reject "
+                + "and continue; then the window check; then allow or deny.",
+                "A new window: if (windowOf(time) != current) { current = "
+                + "windowOf(time); count = 0; }",
+                "Remember to update the last accepted time for every request "
+                + "that is not rejected.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int LIMIT = 3;",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int current = -1;",
+                "        int count = 0;",
+                "        int last = -1;",
+                "        int allowed = 0;",
+                "        int denied = 0;",
+                "        int rejected = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Request at second (or -1): \");",
+                "            int time = Integer.parseInt(input.nextLine().trim());",
+                "            if (time == -1) {",
+                "                break;",
+                "            }",
+                "            if (time < last) {",
+                "                System.out.println(\"REJECTED - out of order\");",
+                "                rejected++;",
+                "                continue;",
+                "            }",
+                "            last = time;",
+                "            if (windowOf(time) != current) {",
+                "                current = windowOf(time);",
+                "                count = 0;",
+                "            }",
+                "            if (count < LIMIT) {",
+                "                count++;",
+                "                allowed++;",
+                "                System.out.println(\"ALLOW\");",
+                "            } else {",
+                "                denied++;",
+                "                System.out.println(\"DENY\");",
+                "            }",
+                "        }",
+                "        System.out.println(\"Allowed: \" + allowed",
+                "                + \"  Denied: \" + denied",
+                "                + \"  Rejected: \" + rejected);",
+                "    }",
+                "",
+                "    static int windowOf(int time) {",
+                "        return time / WINDOW_SECONDS;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Six variables carry state from one pass to the next, all "
+                + "declared before the loop. Each request goes through the "
+                + "checks in a fixed order: end of input, out of order, new "
+                + "window, then the allowance. Refusing out-of-order times "
+                + "first stops a client from sending an old timestamp to "
+                + "land in a window that has already been reset.\n"
+                + "\n"
+                + "The hidden tests hit the window boundary - seconds 9 and "
+                + "10 are in different windows - and a burst of requests "
+                + "all in the same second, which is exactly the traffic a "
+                + "limiter exists to slow down.")
+            .sample(Lab.typing("1", "2", "3", "4", "12", "13", "25", "-1"),
+                "Request at second (or -1): 1",
+                "ALLOW",
+                "Request at second (or -1): 2",
+                "ALLOW",
+                "Request at second (or -1): 3",
+                "ALLOW",
+                "Request at second (or -1): 4",
+                "DENY",
+                "Request at second (or -1): 12",
+                "ALLOW",
+                "Request at second (or -1): 13",
+                "ALLOW",
+                "Request at second (or -1): 25",
+                "ALLOW",
+                "Request at second (or -1): -1",
+                "Allowed: 6  Denied: 1  Rejected: 0")
+            .hidden(Lab.typing("-1"),
+                "Request at second (or -1): -1",
+                "Allowed: 0  Denied: 0  Rejected: 0")
+            .hidden(Lab.typing("9", "9", "9", "9", "10", "10", "-1"),
+                "Request at second (or -1): 9",
+                "ALLOW",
+                "Request at second (or -1): 9",
+                "ALLOW",
+                "Request at second (or -1): 9",
+                "ALLOW",
+                "Request at second (or -1): 9",
+                "DENY",
+                "Request at second (or -1): 10",
+                "ALLOW",
+                "Request at second (or -1): 10",
+                "ALLOW",
+                "Request at second (or -1): -1",
+                "Allowed: 5  Denied: 1  Rejected: 0")
+            .hidden(Lab.typing("20", "5", "21", "-1"),
+                "Request at second (or -1): 20",
+                "ALLOW",
+                "Request at second (or -1): 5",
+                "REJECTED - out of order",
+                "Request at second (or -1): 21",
+                "ALLOW",
+                "Request at second (or -1): -1",
+                "Allowed: 2  Denied: 0  Rejected: 1")
+            .hidden(Lab.typing("0", "0", "0", "0", "0", "0", "-1"),
+                "Request at second (or -1): 0",
+                "ALLOW",
+                "Request at second (or -1): 0",
+                "ALLOW",
+                "Request at second (or -1): 0",
+                "ALLOW",
+                "Request at second (or -1): 0",
+                "DENY",
+                "Request at second (or -1): 0",
+                "DENY",
+                "Request at second (or -1): 0",
+                "DENY",
+                "Request at second (or -1): -1",
+                "Allowed: 3  Denied: 3  Rejected: 0"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(22), "Lockout Time Calculator", Lab.BIG)
+            .stretch()
+            .after("C04-M020")
+            .brief(
+                "The badge-system review needs numbers, not opinions. For a "
+                + "PIN of a given length and a lockout policy, work out how "
+                + "many PINs are possible, and the WORST-CASE time to try "
+                + "them all with the lockout in place - the figure that "
+                + "tells the review whether the policy is good enough.")
+            .practises("Product accumulators", "long arithmetic", "Rounding up with integers")
+            .spec(
+                "Prompt PIN length (1-8):, Tries per lockout (1-10): and Lockout minutes (1-1440):, reading whole numbers. Any value out of range prints INVALID POLICY and stops.",
+                "keySpace(length) returns 10 multiplied together length times, as a long.",
+                "periodsNeeded(space, tries) returns how many lockout periods are needed to try every PIN, rounding UP: (space + tries - 1) / tries.",
+                "Print Possible PINs: <space>, Lockout periods: <periods>, and Worst case: <minutes> minutes (about <days> days), where minutes is periods times the lockout minutes and days is minutes / 1440.")
+            .needsMethod("static long keySpace(int)")
+            .needsMethod("static long periodsNeeded(long, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read and check the policy, then calculate",
+                "    }",
+                "",
+                "    // keySpace(int length) and periodsNeeded(long space, int tries)",
+                "}")
+            .hints(
+                "keySpace is a product accumulator: long space = 1; then "
+                + "multiply by 10 once per digit.",
+                "Integer division rounds DOWN. Adding tries - 1 before "
+                + "dividing makes it round UP: 10 PINs at 3 tries needs 4 "
+                + "periods, not 3.",
+                "Keep minutes and days as long - they get big.",
+                "Validate all three inputs before any arithmetic.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"PIN length (1-8): \");",
+                "        int length = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Tries per lockout (1-10): \");",
+                "        int tries = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Lockout minutes (1-1440): \");",
+                "        int lockMinutes = Integer.parseInt(input.nextLine().trim());",
+                "        if (length < 1 || length > 8 || tries < 1 || tries > 10",
+                "                || lockMinutes < 1 || lockMinutes > 1440) {",
+                "            System.out.println(\"INVALID POLICY\");",
+                "            return;",
+                "        }",
+                "        long space = keySpace(length);",
+                "        long periods = periodsNeeded(space, tries);",
+                "        long minutes = periods * lockMinutes;",
+                "        System.out.println(\"Possible PINs: \" + space);",
+                "        System.out.println(\"Lockout periods: \" + periods);",
+                "        System.out.println(\"Worst case: \" + minutes",
+                "                + \" minutes (about \" + minutes / 1440 + \" days)\");",
+                "    }",
+                "",
+                "    static long keySpace(int length) {",
+                "        long space = 1;",
+                "        for (int i = 0; i < length; i++) {",
+                "            space *= 10;",
+                "        }",
+                "        return space;",
+                "    }",
+                "",
+                "    static long periodsNeeded(long space, int tries) {",
+                "        return (space + tries - 1) / tries;",
+                "    }",
+                "}")
+            .walkthrough(
+                "keySpace is mission 20's product accumulator: each digit "
+                + "multiplies the possibilities by ten, in a long because an "
+                + "8-digit PIN already has 100 million. periodsNeeded rounds "
+                + "UP with a classic integer trick - adding tries - 1 before "
+                + "dividing - because a final, partly used lockout period "
+                + "still has to be waited out.\n"
+                + "\n"
+                + "The numbers make the policy argument for you: a 4-digit "
+                + "PIN with 3 tries per 30-minute lockout takes about 69 "
+                + "days in the worst case, while a 6-digit PIN with the same "
+                + "policy takes around 19 years. Length and lockout together "
+                + "are what make a short secret acceptable.")
+            .sample(Lab.typing("4", "3", "30"),
+                "PIN length (1-8): 4",
+                "Tries per lockout (1-10): 3",
+                "Lockout minutes (1-1440): 30",
+                "Possible PINs: 10000",
+                "Lockout periods: 3334",
+                "Worst case: 100020 minutes (about 69 days)")
+            .hidden(Lab.typing("6", "3", "30"),
+                "PIN length (1-8): 6",
+                "Tries per lockout (1-10): 3",
+                "Lockout minutes (1-1440): 30",
+                "Possible PINs: 1000000",
+                "Lockout periods: 333334",
+                "Worst case: 10000020 minutes (about 6944 days)")
+            .hidden(Lab.typing("2", "10", "5"),
+                "PIN length (1-8): 2",
+                "Tries per lockout (1-10): 10",
+                "Lockout minutes (1-1440): 5",
+                "Possible PINs: 100",
+                "Lockout periods: 10",
+                "Worst case: 50 minutes (about 0 days)")
+            .hidden(Lab.typing("8", "5", "1440"),
+                "PIN length (1-8): 8",
+                "Tries per lockout (1-10): 5",
+                "Lockout minutes (1-1440): 1440",
+                "Possible PINs: 100000000",
+                "Lockout periods: 20000000",
+                "Worst case: 28800000000 minutes (about 20000000 days)")
+            .hidden(Lab.typing("9", "3", "30"),
+                "PIN length (1-8): 9",
+                "Tries per lockout (1-10): 3",
+                "Lockout minutes (1-1440): 30",
+                "INVALID POLICY")
+            .hidden(Lab.typing("4", "0", "30"),
+                "PIN length (1-8): 4",
+                "Tries per lockout (1-10): 0",
+                "Lockout minutes (1-1440): 30",
+                "INVALID POLICY"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(23), "Log Scanner", Lab.BIG)
+            .after("C04-M028")
+            .brief(
+                "The overnight authentication log needs a first pass before "
+                + "the analysts arrive. Each line is RESULT USER ADDRESS. "
+                + "Skip the noise, count what matters, flag failures from "
+                + "outside the network, and report the longest run of "
+                + "failures in a row.")
+            .practises("A scanner loop", "Validating each record", "Tracking a streak")
+            .spec(
+                "Repeatedly prompt > and read the line, trimmed, until END.",
+                "isNoise(line): blank, or starting with #. Noise is skipped silently.",
+                "isWellFormed(line): exactly two spaces, no two side by side, and a first word of OK or FAIL. Other lines print MALFORMED: <line> and are counted as malformed.",
+                "isExternal(ip): true unless the address starts with 10. or 192.168. A FAIL from an external address prints FLAG: <line>.",
+                "Track the longest run of FAIL lines in a row (an OK ends a run; noise and malformed lines do not).",
+                "Finish with OK: <n>  FAIL: <n>  Malformed: <n>, then Longest failure run: <n>.")
+            .needsMethod("static boolean isNoise(String)")
+            .needsMethod("static boolean isWellFormed(String)")
+            .needsMethod("static boolean isExternal(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // the scanner loop, then the summary",
+                "    }",
+                "",
+                "    // isNoise, isWellFormed, isExternal",
+                "}")
+            .hints(
+                "Count spaces without a loop, or with one: the number of "
+                + "spaces is line.length() - line.replace(\" \", \"\").length().",
+                "The address is everything after the last space: "
+                + "line.substring(line.lastIndexOf(\" \") + 1).",
+                "Two variables for streaks: the current run, and the longest "
+                + "so far. FAIL: run++ and update the longest. OK: run = 0.",
+                "Order in the body: END, noise, well-formed, then count and "
+                + "classify.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int ok = 0;",
+                "        int fail = 0;",
+                "        int malformed = 0;",
+                "        int run = 0;",
+                "        int longest = 0;",
+                "        while (true) {",
+                "            System.out.print(\"> \");",
+                "            String line = input.nextLine().trim();",
+                "            if (line.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            if (isNoise(line)) {",
+                "                continue;",
+                "            }",
+                "            if (!isWellFormed(line)) {",
+                "                System.out.println(\"MALFORMED: \" + line);",
+                "                malformed++;",
+                "                continue;",
+                "            }",
+                "            if (line.startsWith(\"OK \")) {",
+                "                ok++;",
+                "                run = 0;",
+                "                continue;",
+                "            }",
+                "            fail++;",
+                "            run++;",
+                "            longest = Math.max(longest, run);",
+                "            String ip = line.substring(line.lastIndexOf(\" \") + 1);",
+                "            if (isExternal(ip)) {",
+                "                System.out.println(\"FLAG: \" + line);",
+                "            }",
+                "        }",
+                "        System.out.println(\"OK: \" + ok + \"  FAIL: \" + fail",
+                "                + \"  Malformed: \" + malformed);",
+                "        System.out.println(\"Longest failure run: \" + longest);",
+                "    }",
+                "",
+                "    static boolean isNoise(String line) {",
+                "        return line.isEmpty() || line.startsWith(\"#\");",
+                "    }",
+                "",
+                "    static boolean isWellFormed(String line) {",
+                "        int spaces = line.length() - line.replace(\" \", \"\").length();",
+                "        if (spaces != 2 || line.contains(\"  \")) {",
+                "            return false;",
+                "        }",
+                "        return line.startsWith(\"OK \") || line.startsWith(\"FAIL \");",
+                "    }",
+                "",
+                "    static boolean isExternal(String ip) {",
+                "        return !ip.startsWith(\"10.\") && !ip.startsWith(\"192.168.\");",
+                "    }",
+                "}")
+            .walkthrough(
+                "The loop body is a sequence of filters, each with a "
+                + "continue: stop at END, drop noise, report and drop "
+                + "malformed lines, handle OK. Whatever is left is a "
+                + "well-formed FAIL, so the rest of the body can trust its "
+                + "shape - which is what makes the substring safe.\n"
+                + "\n"
+                + "The streak uses two variables: run is the current run of "
+                + "failures, reset by an OK; longest is the best seen, kept "
+                + "with Math.max. Noise and malformed lines leave the run "
+                + "alone, so a comment between two failures does not hide a "
+                + "streak - an attacker cannot break up the pattern by "
+                + "slipping junk lines into the log.")
+            .sample(Lab.typing("# night", "OK jsmith 10.0.0.7", "FAIL admin 203.0.113.9",
+                               "FAIL admin 203.0.113.9", "OK admin 10.0.0.2", "END"),
+                "> # night",
+                "> OK jsmith 10.0.0.7",
+                "> FAIL admin 203.0.113.9",
+                "FLAG: FAIL admin 203.0.113.9",
+                "> FAIL admin 203.0.113.9",
+                "FLAG: FAIL admin 203.0.113.9",
+                "> OK admin 10.0.0.2",
+                "> END",
+                "OK: 2  FAIL: 2  Malformed: 0",
+                "Longest failure run: 2")
+            .hidden(Lab.typing("END"),
+                "> END",
+                "OK: 0  FAIL: 0  Malformed: 0",
+                "Longest failure run: 0")
+            .hidden(Lab.typing("FAIL a 10.0.0.1", "", "FAIL a 192.168.1.5",
+                               "# x", "FAIL a 10.0.0.9", "END"),
+                "> FAIL a 10.0.0.1",
+                ">",
+                "> FAIL a 192.168.1.5",
+                "> # x",
+                "> FAIL a 10.0.0.9",
+                "> END",
+                "OK: 0  FAIL: 3  Malformed: 0",
+                "Longest failure run: 3")
+            .hidden(Lab.typing("LOGIN jsmith 10.0.0.7", "FAIL  bob 1.2.3.4",
+                               "FAIL bob", "OK bob 1.2.3.4", "END"),
+                "> LOGIN jsmith 10.0.0.7",
+                "MALFORMED: LOGIN jsmith 10.0.0.7",
+                "> FAIL  bob 1.2.3.4",
+                "MALFORMED: FAIL  bob 1.2.3.4",
+                "> FAIL bob",
+                "MALFORMED: FAIL bob",
+                "> OK bob 1.2.3.4",
+                "> END",
+                "OK: 1  FAIL: 0  Malformed: 3",
+                "Longest failure run: 0")
+            .hidden(Lab.typing("FAIL eve 198.51.100.4", "OK eve 198.51.100.4",
+                               "FAIL eve 198.51.100.4", "END"),
+                "> FAIL eve 198.51.100.4",
+                "FLAG: FAIL eve 198.51.100.4",
+                "> OK eve 198.51.100.4",
+                "> FAIL eve 198.51.100.4",
+                "FLAG: FAIL eve 198.51.100.4",
+                "> END",
+                "OK: 1  FAIL: 2  Malformed: 0",
+                "Longest failure run: 1"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(24), "Firewall Range Report", Lab.BIG)
+            .stretch()
+            .after("C04-M029")
+            .brief(
+                "The quarterly audit asks: across a range of ports, which "
+                + "does the edge firewall actually ALLOW? The rules are "
+                + "fixed; the range is typed in. Report the allowed ports as "
+                + "a tidy list, and how many out of how many.")
+            .practises("Range checks", "First-match rules", "Building a list with separators")
+            .spec(
+                "Prompt First port: and Last port: and read whole numbers. Both must be 1 to 65535, first must not be more than last, and the range may cover at most 200 ports; otherwise print INVALID RANGE.",
+                "isAllowed(port), first match wins: 23 and 445 are denied; 22, 80 and 443 are allowed; 8000 to 8099 are allowed; everything else is denied.",
+                "Print Allowed: followed by the allowed ports separated by comma and space - or Allowed: none. Then Ports allowed: <a> of <n>.")
+            .needsMethod("static boolean isAllowed(int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read and check the range, then audit it",
+                "    }",
+                "",
+                "    // declare isAllowed(int port) here",
+                "}")
+            .hints(
+                "The range size is last - first + 1 - the fencepost count.",
+                "isAllowed is a list of ifs that return, explicit denies "
+                + "first, ending with return false.",
+                "Build the list with mission 25's pattern: a separator before "
+                + "every item except the first - if (count > 0).",
+                "If nothing was allowed, the list is still empty at the end: "
+                + "print none instead.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"First port: \");",
+                "        int first = Integer.parseInt(input.nextLine().trim());",
+                "        System.out.print(\"Last port: \");",
+                "        int last = Integer.parseInt(input.nextLine().trim());",
+                "        if (first < 1 || last > 65535 || first > last",
+                "                || last - first + 1 > 200) {",
+                "            System.out.println(\"INVALID RANGE\");",
+                "            return;",
+                "        }",
+                "        String list = \"\";",
+                "        int count = 0;",
+                "        for (int port = first; port <= last; port++) {",
+                "            if (isAllowed(port)) {",
+                "                if (count > 0) {",
+                "                    list += \", \";",
+                "                }",
+                "                list += port;",
+                "                count++;",
+                "            }",
+                "        }",
+                "        String shown = count == 0 ? \"none\" : list;",
+                "        System.out.println(\"Allowed: \" + shown);",
+                "        int size = last - first + 1;",
+                "        System.out.println(\"Ports allowed: \" + count + \" of \" + size);",
+                "    }",
+                "",
+                "    static boolean isAllowed(int port) {",
+                "        if (port == 23 || port == 445) {",
+                "            return false;",
+                "        }",
+                "        if (port == 22 || port == 80 || port == 443) {",
+                "            return true;",
+                "        }",
+                "        return port >= 8000 && port <= 8099;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The loop asks the rules about every port in the range and "
+                + "builds the answer as it goes. Denies are checked first, so "
+                + "a later, broader allow rule could never open 23 or 445 by "
+                + "accident; anything no rule mentions falls to the final "
+                + "false - default deny.\n"
+                + "\n"
+                + "The 200-port limit is not about the firewall; it is about "
+                + "the tool. A loop driven by typed input needs a sensible "
+                + "cap, or a range of 1 to 65535 would print a 300-kilobyte "
+                + "line. The hidden tests cover a range with nothing allowed, "
+                + "a single port, and a reversed range.")
+            .sample(Lab.typing("20", "30"),
+                "First port: 20",
+                "Last port: 30",
+                "Allowed: 22",
+                "Ports allowed: 1 of 11")
+            .hidden(Lab.typing("8095", "8105"),
+                "First port: 8095",
+                "Last port: 8105",
+                "Allowed: 8095, 8096, 8097, 8098, 8099",
+                "Ports allowed: 5 of 11")
+            .hidden(Lab.typing("440", "446"),
+                "First port: 440",
+                "Last port: 446",
+                "Allowed: 443",
+                "Ports allowed: 1 of 7")
+            .hidden(Lab.typing("100", "120"),
+                "First port: 100",
+                "Last port: 120",
+                "Allowed: none",
+                "Ports allowed: 0 of 21")
+            .hidden(Lab.typing("443", "443"),
+                "First port: 443",
+                "Last port: 443",
+                "Allowed: 443",
+                "Ports allowed: 1 of 1")
+            .hidden(Lab.typing("30", "20"),
+                "First port: 30",
+                "Last port: 20",
+                "INVALID RANGE")
+            .hidden(Lab.typing("1", "1000"),
+                "First port: 1",
+                "Last port: 1000",
+                "INVALID RANGE"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(25), "Run-Length Encoder", Lab.BIG)
+            .stretch()
+            .after("C04-M025")
+            .brief(
+                "Log shippers compress repetitive data before sending it. The "
+                + "simplest scheme, run-length encoding, writes each run of "
+                + "the same character once, followed by its length: "
+                + "aaabcc becomes a3b1c2. Build the encoder - a loop that "
+                + "tracks where each run starts and ends.")
+            .practises("Tracking runs in a loop", "Building output", "Comparing sizes")
+            .spec(
+                "Prompt Data: and read the line exactly as typed. It will not contain digits.",
+                "encode(text) returns, for each run of identical characters, the character followed by the run's length. Empty text encodes to empty text.",
+                "Print Encoded: <encoded>, then Original: <n> chars  Encoded: <m> chars, then Smaller: yes or Smaller: no.")
+            .needsMethod("static String encode(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Data: \");",
+                "        String text = input.nextLine();",
+                "        // encode and compare",
+                "    }",
+                "",
+                "    // declare encode(String text) here",
+                "}")
+            .hints(
+                "Walk with an index i. At each run's start, remember the "
+                + "character, then move a second index j forward while the "
+                + "characters still match.",
+                "The inner loop needs a guard: while (j < text.length() && "
+                + "text.charAt(j) == c).",
+                "The run length is j - i. Add c and the length to the result, "
+                + "then continue from i = j.",
+                "Use a while loop for i, because i jumps by a whole run, not "
+                + "by one.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Data: \");",
+                "        String text = input.nextLine();",
+                "        String encoded = encode(text);",
+                "        System.out.println(\"Encoded: \" + encoded);",
+                "        System.out.println(\"Original: \" + text.length()",
+                "                + \" chars  Encoded: \" + encoded.length() + \" chars\");",
+                "        boolean smaller = encoded.length() < text.length();",
+                "        System.out.println(\"Smaller: \" + (smaller ? \"yes\" : \"no\"));",
+                "    }",
+                "",
+                "    static String encode(String text) {",
+                "        String result = \"\";",
+                "        int i = 0;",
+                "        while (i < text.length()) {",
+                "            char c = text.charAt(i);",
+                "            int j = i;",
+                "            while (j < text.length() && text.charAt(j) == c) {",
+                "                j++;",
+                "            }",
+                "            result += c + \"\" + (j - i);",
+                "            i = j;",
+                "        }",
+                "        return result;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Two indexes do the work: i marks the start of a run, and the "
+                + "inner loop pushes j forward to the first different "
+                + "character. The run's length is j - i, and the outer loop "
+                + "jumps straight to j - so every character is looked at "
+                + "once, even with a loop inside a loop. The inner loop's "
+                + "guard comes first (mission 24), so the last run ends "
+                + "safely at the end of the text.\n"
+                + "\n"
+                + "c + \"\" + (j - i) forces text joining; c + (j - i) alone "
+                + "would ADD the character's code to the number. The size "
+                + "comparison is the honest part: run-length encoding only "
+                + "helps repetitive data, and makes varied text twice as "
+                + "long.")
+            .sample(Lab.typing("aaaaabbbcccccccc"),
+                "Data: aaaaabbbcccccccc",
+                "Encoded: a5b3c8",
+                "Original: 16 chars  Encoded: 6 chars",
+                "Smaller: yes")
+            .hidden(Lab.typing(""),
+                "Data:",
+                "Encoded:",
+                "Original: 0 chars  Encoded: 0 chars",
+                "Smaller: no")
+            .hidden(Lab.typing("abc"),
+                "Data: abc",
+                "Encoded: a1b1c1",
+                "Original: 3 chars  Encoded: 6 chars",
+                "Smaller: no")
+            .hidden(Lab.typing("zzzzzzzzzzzz"),
+                "Data: zzzzzzzzzzzz",
+                "Encoded: z12",
+                "Original: 12 chars  Encoded: 3 chars",
+                "Smaller: yes")
+            .hidden(Lab.typing("aabba"),
+                "Data: aabba",
+                "Encoded: a2b2a1",
+                "Original: 5 chars  Encoded: 6 chars",
+                "Smaller: no"));
     }
 }
