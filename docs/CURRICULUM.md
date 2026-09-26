@@ -17,7 +17,7 @@ each one. Built items are marked; everything else is the plan.
 | Selection: Boolean operators & expressions | 02 CONDITIONAL | built |
 | If, if-else, else if & switch-case | 02 CONDITIONAL | built |
 | Methods, parameters and the stack | 03 METHODS | built |
-| Iteration: while, for, do-while, break | 04 LOOP//CONTROL | missions built |
+| Iteration: while, for, do-while, break | 04 LOOP//CONTROL | built |
 | Collections: raw arrays and ArrayList | 05 COLLECTIONS | planned |
 | Classes: composite types, members, constructors | 06 OBJECTS | planned |
 | Exceptions & event handling: try, catch, finally | 07 EXCEPTIONS | planned |
@@ -501,7 +501,7 @@ source contains the answers as typed text.
 | L29 | Checksum Digit | MEDIUM | S |
 | L30 | Security Toolkit | CAPSTONE | C |
 
-### 04 LOOP//CONTROL: 30 labs
+### 04 LOOP//CONTROL: 30 labs (built)
 
 | Lab | Title | Size | Tier |
 |---|---|---|---|

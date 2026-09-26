@@ -2914,5 +2914,743 @@ public class Campaign04Labs {
                 "Encoded: a2b2a1",
                 "Original: 5 chars  Encoded: 6 chars",
                 "Smaller: no"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(26), "Hex Dump", Lab.BIG)
+            .stretch()
+            .after("C04-M025")
+            .brief(
+                "Forensic analysts read data as a HEX DUMP: every byte as two "
+                + "hexadecimal digits, eight to a line, with the position of "
+                + "the first byte on the left. Build a hex dumper for typed "
+                + "text - hexadecimal digits and all, worked out by hand.")
+            .practises("Converting to hexadecimal", "Loops with a line break every n items", "Helper methods")
+            .spec(
+                "Prompt Text: and read the line exactly as typed. It will contain ordinary keyboard characters only.",
+                "hexDigit(v) returns the hex digit for 0 to 15: 0-9, then a-f. hexByte(v) returns a value from 0 to 255 as two hex digits. hexOffset(n) returns n as four hex digits.",
+                "Print the dump eight bytes per line: <offset>: then each byte as two hex digits, separated by single spaces. Each character's byte value is (int) of the character.",
+                "Finish with <n> bytes. Empty text prints (no data) instead of any dump lines, then 0 bytes.")
+            .needsMethod("static char hexDigit(int)")
+            .needsMethod("static String hexByte(int)")
+            .needsMethod("static String hexOffset(int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String DIGITS = \"0123456789abcdef\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Text: \");",
+                "        String text = input.nextLine();",
+                "        // dump it",
+                "    }",
+                "",
+                "    // hexDigit, hexByte, hexOffset",
+                "}")
+            .hints(
+                "hexDigit is one line with the DIGITS constant:  return "
+                + "DIGITS.charAt(v);",
+                "A byte's two hex digits are v / 16 and v % 16. 'H' is 72: "
+                + "72 / 16 = 4, 72 % 16 = 8, so 48.",
+                "hexOffset: four digits, from the left, are n / 4096, then "
+                + "(n / 256) % 16, then (n / 16) % 16, then n % 16.",
+                "Start a new line whenever i % 8 == 0 - print the offset "
+                + "then. Add a space between bytes, not before the first on "
+                + "a line.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final String DIGITS = \"0123456789abcdef\";",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Text: \");",
+                "        String text = input.nextLine();",
+                "        if (text.isEmpty()) {",
+                "            System.out.println(\"(no data)\");",
+                "        }",
+                "        String line = \"\";",
+                "        for (int i = 0; i < text.length(); i++) {",
+                "            if (i % 8 == 0) {",
+                "                if (i > 0) {",
+                "                    System.out.println(line);",
+                "                }",
+                "                line = hexOffset(i) + \":\";",
+                "            }",
+                "            line += \" \" + hexByte((int) text.charAt(i));",
+                "        }",
+                "        if (!text.isEmpty()) {",
+                "            System.out.println(line);",
+                "        }",
+                "        System.out.println(text.length() + \" bytes\");",
+                "    }",
+                "",
+                "    static char hexDigit(int v) {",
+                "        return DIGITS.charAt(v);",
+                "    }",
+                "",
+                "    static String hexByte(int v) {",
+                "        return \"\" + hexDigit(v / 16) + hexDigit(v % 16);",
+                "    }",
+                "",
+                "    static String hexOffset(int n) {",
+                "        return \"\" + hexDigit(n / 4096) + hexDigit((n / 256) % 16)",
+                "                + hexDigit((n / 16) % 16) + hexDigit(n % 16);",
+                "    }",
+                "}")
+            .walkthrough(
+                "Hexadecimal is base 16: each digit is 0 to 15, and two "
+                + "digits cover a byte, 0 to 255. Dividing by 16 gives the "
+                + "first digit and the remainder gives the second - the same "
+                + "/ and % split as hours and minutes, with 16 instead of "
+                + "60. The DIGITS constant turns a number into its digit.\n"
+                + "\n"
+                + "The line-building loop starts a new line every eighth "
+                + "byte, printing the previous line first, and prints the "
+                + "last, possibly short, line after the loop. \"\" + at the "
+                + "start of hexByte makes + join chars as text rather than "
+                + "add their codes. Real dump tools show sixteen bytes and a "
+                + "text column, but the arithmetic is exactly this.")
+            .sample(Lab.typing("Hello, world"),
+                "Text: Hello, world",
+                "0000: 48 65 6c 6c 6f 2c 20 77",
+                "0008: 6f 72 6c 64",
+                "12 bytes")
+            .hidden(Lab.typing(""),
+                "Text:",
+                "(no data)",
+                "0 bytes")
+            .hidden(Lab.typing("ABCDEFGH"),
+                "Text: ABCDEFGH",
+                "0000: 41 42 43 44 45 46 47 48",
+                "8 bytes")
+            .hidden(Lab.typing("0123456789 ~!"),
+                "Text: 0123456789 ~!",
+                "0000: 30 31 32 33 34 35 36 37",
+                "0008: 38 39 20 7e 21",
+                "13 bytes"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(27), "Pattern Printer", Lab.MEDIUM)
+            .stretch()
+            .after("C04-M015")
+            .brief(
+                "Nested loops draw shapes, and shapes are the fastest way to "
+                + "see whether your loop bounds are right - one pass too many "
+                + "and the picture is visibly wrong. Draw a diamond of any "
+                + "size.")
+            .practises("Nested loops", "Loop bounds from a formula", "A repeat helper")
+            .spec(
+                "Prompt Size (1-9): and read a whole number. Anything else: INVALID SIZE.",
+                "repeat(c, times) returns the character c repeated times times, built with a loop.",
+                "Draw a diamond: for rows 1 up to size, then size - 1 back down to 1, print size - row spaces followed by 2 x row - 1 stars.")
+            .needsMethod("static String repeat(char, int)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Size (1-9): \");",
+                "        int size = Integer.parseInt(input.nextLine().trim());",
+                "        // validate, then draw",
+                "    }",
+                "",
+                "    // declare repeat(char c, int times) here",
+                "}")
+            .hints(
+                "repeat builds a String: start with \"\" and add c, times "
+                + "times.",
+                "One line of the diamond:  repeat(' ', size - row) + "
+                + "repeat('*', 2 * row - 1)",
+                "Two loops: row from 1 up to size, then row from size - 1 "
+                + "down to 1.",
+                "Check size 1 by hand: one star, no spaces.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Size (1-9): \");",
+                "        int size = Integer.parseInt(input.nextLine().trim());",
+                "        if (size < 1 || size > 9) {",
+                "            System.out.println(\"INVALID SIZE\");",
+                "            return;",
+                "        }",
+                "        for (int row = 1; row <= size; row++) {",
+                "            String spaces = repeat(' ', size - row);",
+                "            System.out.println(spaces + repeat('*', 2 * row - 1));",
+                "        }",
+                "        for (int row = size - 1; row >= 1; row--) {",
+                "            String spaces = repeat(' ', size - row);",
+                "            System.out.println(spaces + repeat('*', 2 * row - 1));",
+                "        }",
+                "    }",
+                "",
+                "    static String repeat(char c, int times) {",
+                "        String result = \"\";",
+                "        for (int i = 0; i < times; i++) {",
+                "            result += c;",
+                "        }",
+                "        return result;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Each row is described by formulas in row: size - row spaces "
+                + "and 2 x row - 1 stars. The growing half counts up and the "
+                + "shrinking half counts down from size - 1, so the widest "
+                + "row is not drawn twice. repeat holds the inner loop, "
+                + "which keeps the nested loop readable.\n"
+                + "\n"
+                + "Drawing shapes is a debugging trick worth keeping: when a "
+                + "loop's bounds are off by one, a picture shows it at once, "
+                + "where a column of numbers might not.")
+            .sample(Lab.typing("3"),
+                "Size (1-9): 3",
+                "  *",
+                " ***",
+                "*****",
+                " ***",
+                "  *")
+            .hidden(Lab.typing("1"),
+                "Size (1-9): 1",
+                "*")
+            .hidden(Lab.typing("5"),
+                "Size (1-9): 5",
+                "    *",
+                "   ***",
+                "  *****",
+                " *******",
+                "*********",
+                " *******",
+                "  *****",
+                "   ***",
+                "    *")
+            .hidden(Lab.typing("10"),
+                "Size (1-9): 10",
+                "INVALID SIZE"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(28), "Collatz Tracker", Lab.MEDIUM)
+            .stretch()
+            .after("C04-M026")
+            .brief(
+                "A famous unsolved puzzle makes excellent tracing practice: "
+                + "halve an even number, turn an odd one into 3n + 1, and "
+                + "repeat until you reach 1. Nobody has proved it always gets "
+                + "there - but it has for every number ever tried. Count the "
+                + "steps and find the highest value on the way.")
+            .practises("Loops with an unknown number of passes", "long to avoid overflow", "Tracking a maximum")
+            .spec(
+                "Prompt Start (1-1000000): and read a whole number. Anything else: INVALID.",
+                "next(n) returns n / 2 for even n and 3n + 1 for odd n, as a long.",
+                "steps(n) counts how many next steps it takes to reach 1. peak(n) returns the largest value reached, including n itself.",
+                "Print Steps: <s> and Peak: <p>.")
+            .needsMethod("static long next(long)")
+            .needsMethod("static int steps(long)")
+            .needsMethod("static long peak(long)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Start (1-1000000): \");",
+                "        int start = Integer.parseInt(input.nextLine().trim());",
+                "        // validate, then report steps and peak",
+                "    }",
+                "",
+                "    // next, steps, peak",
+                "}")
+            .hints(
+                "next is one conditional:  return n % 2 == 0 ? n / 2 : 3 * n "
+                + "+ 1;",
+                "steps: while (n != 1) { n = next(n); count++; }",
+                "peak: the same loop, keeping Math.max of every value - "
+                + "starting with n itself.",
+                "Use long: some starting values below a million climb past "
+                + "an int's limit on the way.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Start (1-1000000): \");",
+                "        int start = Integer.parseInt(input.nextLine().trim());",
+                "        if (start < 1 || start > 1000000) {",
+                "            System.out.println(\"INVALID\");",
+                "            return;",
+                "        }",
+                "        System.out.println(\"Steps: \" + steps(start));",
+                "        System.out.println(\"Peak: \" + peak(start));",
+                "    }",
+                "",
+                "    static long next(long n) {",
+                "        return n % 2 == 0 ? n / 2 : 3 * n + 1;",
+                "    }",
+                "",
+                "    static int steps(long n) {",
+                "        int count = 0;",
+                "        while (n != 1) {",
+                "            n = next(n);",
+                "            count++;",
+                "        }",
+                "        return count;",
+                "    }",
+                "",
+                "    static long peak(long n) {",
+                "        long highest = n;",
+                "        while (n != 1) {",
+                "            n = next(n);",
+                "            highest = Math.max(highest, n);",
+                "        }",
+                "        return highest;",
+                "    }",
+                "}")
+            .walkthrough(
+                "The loop has no counter to bound it - it stops only when n "
+                + "reaches 1, which is exactly the part nobody has proved "
+                + "will always happen. For every start below a million it "
+                + "does, which is why the input is capped: a loop whose end "
+                + "is not guaranteed should never be handed arbitrary input.\n"
+                + "\n"
+                + "27 is the classic example: 111 steps, climbing to 9232 "
+                + "before falling. Some starts below a million climb above 2 "
+                + "billion on the way, which is why next works in long - an "
+                + "int would overflow to a negative number and the loop "
+                + "might never reach 1 at all. The hidden tests include one "
+                + "of those.")
+            .sample(Lab.typing("27"),
+                "Start (1-1000000): 27",
+                "Steps: 111",
+                "Peak: 9232")
+            .hidden(Lab.typing("1"),
+                "Start (1-1000000): 1",
+                "Steps: 0",
+                "Peak: 1")
+            .hidden(Lab.typing("16"),
+                "Start (1-1000000): 16",
+                "Steps: 4",
+                "Peak: 16")
+            .hidden(Lab.typing("113383"),
+                "Start (1-1000000): 113383",
+                "Steps: 247",
+                "Peak: 2482111348")
+            .hidden(Lab.typing("0"),
+                "Start (1-1000000): 0",
+                "INVALID"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(29), "Binary Converter", Lab.MEDIUM)
+            .stretch()
+            .after("C04-M019")
+            .brief(
+                "File permissions, network masks and feature flags are all "
+                + "stored as binary. Build a converter both ways: decimal to "
+                + "binary by repeated division, and binary to decimal by "
+                + "repeated doubling - with validation, because users will "
+                + "type 102 and call it binary.")
+            .practises("Repeated division", "Repeated doubling", "Validating digit by digit")
+            .spec(
+                "Prompt Mode (to/from): and read it, trimmed. to converts decimal to binary; from converts binary to decimal; anything else prints INVALID MODE and stops.",
+                "For to: prompt Decimal: and read a whole number from 0 to 1000000 (otherwise INVALID NUMBER). toBinary(n) returns its binary digits, with 0 giving 0. Print Binary: <digits>.",
+                "For from: prompt Binary: and read the line, trimmed. isBinary(text) is true for 1 to 20 characters that are all 0 or 1 (otherwise INVALID BINARY). fromBinary(text) returns the value. Print Decimal: <value>.")
+            .needsMethod("static String toBinary(int)")
+            .needsMethod("static boolean isBinary(String)")
+            .needsMethod("static int fromBinary(String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Mode (to/from): \");",
+                "        String mode = input.nextLine().trim();",
+                "        // choose a direction, read, validate, convert",
+                "    }",
+                "",
+                "    // toBinary, isBinary, fromBinary",
+                "}")
+            .hints(
+                "toBinary: while n > 0, the last binary digit is n % 2; put "
+                + "it at the FRONT of the result, then n = n / 2. Handle 0 "
+                + "on its own.",
+                "fromBinary: start at 0; for each character, value = value "
+                + "* 2 + the digit (1 for '1', 0 for '0').",
+                "isBinary is an 'all' search: start true, and one character "
+                + "that is not '0' or '1' makes it false.",
+                "Check the length in isBinary too - 20 digits keeps the value "
+                + "inside an int.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        System.out.print(\"Mode (to/from): \");",
+                "        String mode = input.nextLine().trim();",
+                "        if (mode.equals(\"to\")) {",
+                "            System.out.print(\"Decimal: \");",
+                "            int n = Integer.parseInt(input.nextLine().trim());",
+                "            if (n < 0 || n > 1000000) {",
+                "                System.out.println(\"INVALID NUMBER\");",
+                "            } else {",
+                "                System.out.println(\"Binary: \" + toBinary(n));",
+                "            }",
+                "        } else if (mode.equals(\"from\")) {",
+                "            System.out.print(\"Binary: \");",
+                "            String text = input.nextLine().trim();",
+                "            if (!isBinary(text)) {",
+                "                System.out.println(\"INVALID BINARY\");",
+                "            } else {",
+                "                System.out.println(\"Decimal: \" + fromBinary(text));",
+                "            }",
+                "        } else {",
+                "            System.out.println(\"INVALID MODE\");",
+                "        }",
+                "    }",
+                "",
+                "    static String toBinary(int n) {",
+                "        if (n == 0) {",
+                "            return \"0\";",
+                "        }",
+                "        String digits = \"\";",
+                "        while (n > 0) {",
+                "            digits = (n % 2) + digits;",
+                "            n = n / 2;",
+                "        }",
+                "        return digits;",
+                "    }",
+                "",
+                "    static boolean isBinary(String text) {",
+                "        if (text.isEmpty() || text.length() > 20) {",
+                "            return false;",
+                "        }",
+                "        for (int i = 0; i < text.length(); i++) {",
+                "            char c = text.charAt(i);",
+                "            if (c != '0' && c != '1') {",
+                "                return false;",
+                "            }",
+                "        }",
+                "        return true;",
+                "    }",
+                "",
+                "    static int fromBinary(String text) {",
+                "        int value = 0;",
+                "        for (int i = 0; i < text.length(); i++) {",
+                "            value = value * 2 + (text.charAt(i) == '1' ? 1 : 0);",
+                "        }",
+                "        return value;",
+                "    }",
+                "}")
+            .walkthrough(
+                "Division by 2 peels binary digits off the RIGHT end of a "
+                + "number, so each new digit goes on the front of the result. "
+                + "Going the other way, each new digit read from the left "
+                + "doubles everything so far and adds itself - the same way "
+                + "you read 345 as ((3 x 10) + 4) x 10 + 5, but in base 2.\n"
+                + "\n"
+                + "isBinary is an 'all' search that returns false at the "
+                + "first bad character. Unix permissions are the everyday "
+                + "use: 7 is 111 - read, write and execute - and 5 is 101, "
+                + "read and execute but no write. The hidden tests include "
+                + "0, which has no digits to peel off and needs its own "
+                + "case.")
+            .sample(Lab.typing("to", "45"),
+                "Mode (to/from): to",
+                "Decimal: 45",
+                "Binary: 101101")
+            .hidden(Lab.typing("to", "0"),
+                "Mode (to/from): to",
+                "Decimal: 0",
+                "Binary: 0")
+            .hidden(Lab.typing("from", "101101"),
+                "Mode (to/from): from",
+                "Binary: 101101",
+                "Decimal: 45")
+            .hidden(Lab.typing("from", "102"),
+                "Mode (to/from): from",
+                "Binary: 102",
+                "INVALID BINARY")
+            .hidden(Lab.typing("to", "7"),
+                "Mode (to/from): to",
+                "Decimal: 7",
+                "Binary: 111")
+            .hidden(Lab.typing("from", "0"),
+                "Mode (to/from): from",
+                "Binary: 0",
+                "Decimal: 0")
+            .hidden(Lab.typing("sideways"),
+                "Mode (to/from): sideways",
+                "INVALID MODE"));
+
+        // ---------------------------------------------------------------
+        c.addLab(new Lab(c.labId(30), "Lockout Simulator", Lab.CAPSTONE)
+            .after("C04-M030")
+            .brief(
+                "CAPSTONE. Before the new login policy goes live, the "
+                + "security team wants to replay a stream of login events "
+                + "through it and see every decision. The policy combines "
+                + "a rate limit, a temporary lockout and strict input "
+                + "checks - each piece from this campaign, now working "
+                + "together in one loop.")
+            .practises("State across many passes", "Fixed-window rate limiting", "Temporary lockouts", "Validating every record", "A decision method")
+            .spec(
+                "Repeatedly prompt Event: and read the line, trimmed, until END. An event is <second> <result>: 1 to 7 digits, one space, then ok or fail. parseTime(event) returns the second, or -1 if the event is not in that form. Anything else prints MALFORMED.",
+                "An event earlier than the previous accepted event prints OUT OF ORDER. Malformed and out-of-order events change nothing else.",
+                "Rate limit first: at most 5 accepted attempts per 10-second window (window = second / 10). Over the limit prints RATE LIMITED and changes nothing else.",
+                "Then the lockout: 3 fails in a row lock the account for 60 seconds from the third fail, printing DENY - locked for 60s. While locked, every attempt prints LOCKED until <second>. When the lock has expired, the fail count starts again from 0.",
+                "Otherwise ok prints ALLOW and resets the fails; fail prints DENY (<n> of 3).",
+                "handle(second, result) makes the decision after the format check and returns the text to print. Finish with Allowed: <a>  Denied: <d>  Limited: <l>  Rejected: <r> - Denied counts DENY and LOCKED; Rejected counts MALFORMED and OUT OF ORDER.")
+            .needsMethod("static int parseTime(String)")
+            .needsMethod("static String handle(int, String)")
+            .starter(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX_FAILS = 3;",
+                "    static final int LOCK_SECONDS = 60;",
+                "    static final int RATE_LIMIT = 5;",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    // the policy's state lives here, as static fields",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        // read events until END, print each decision, then totals",
+                "    }",
+                "",
+                "    // parseTime(String event) and handle(int second, String result)",
+                "}")
+            .hints(
+                "State that lasts for the whole run belongs in static "
+                + "fields: fails, lockedUntil (-1 when not locked), the last "
+                + "accepted second, the current window and its count.",
+                "parseTime: exactly one space, the part before it 1 to 7 "
+                + "digits, the part after it ok or fail - otherwise -1. main "
+                + "calls it first and prints MALFORMED on -1.",
+                "handle's order: out of order; rate limit (new window resets "
+                + "the count; at the limit, RATE LIMITED without counting); "
+                + "lock expiry (reset); still locked; then ok or fail.",
+                "A lock starts at the third fail: lockedUntil = second + "
+                + "LOCK_SECONDS, and fails goes back to 0.",
+                "main can count the totals from the text handle returns: "
+                + "startsWith(\"ALLOW\"), startsWith(\"RATE\"), "
+                + "startsWith(\"OUT\"), and everything else is denied.")
+            .solution(
+                "import java.util.Scanner;",
+                "",
+                "public class Main {",
+                "    static final int MAX_FAILS = 3;",
+                "    static final int LOCK_SECONDS = 60;",
+                "    static final int RATE_LIMIT = 5;",
+                "    static final int WINDOW_SECONDS = 10;",
+                "",
+                "    static int fails = 0;",
+                "    static int lockedUntil = -1;",
+                "    static int last = -1;",
+                "    static int window = -1;",
+                "    static int inWindow = 0;",
+                "",
+                "    public static void main(String[] args) {",
+                "        Scanner input = new Scanner(System.in);",
+                "        int allowed = 0;",
+                "        int denied = 0;",
+                "        int limited = 0;",
+                "        int rejected = 0;",
+                "        while (true) {",
+                "            System.out.print(\"Event: \");",
+                "            String event = input.nextLine().trim();",
+                "            if (event.equals(\"END\")) {",
+                "                break;",
+                "            }",
+                "            int second = parseTime(event);",
+                "            if (second == -1) {",
+                "                System.out.println(\"MALFORMED\");",
+                "                rejected++;",
+                "                continue;",
+                "            }",
+                "            String result = event.substring(event.indexOf(\" \") + 1);",
+                "            String decision = handle(second, result);",
+                "            System.out.println(decision);",
+                "            if (decision.startsWith(\"ALLOW\")) {",
+                "                allowed++;",
+                "            } else if (decision.startsWith(\"RATE\")) {",
+                "                limited++;",
+                "            } else if (decision.startsWith(\"OUT\")) {",
+                "                rejected++;",
+                "            } else {",
+                "                denied++;",
+                "            }",
+                "        }",
+                "        System.out.println(\"Allowed: \" + allowed",
+                "                + \"  Denied: \" + denied",
+                "                + \"  Limited: \" + limited",
+                "                + \"  Rejected: \" + rejected);",
+                "    }",
+                "",
+                "    static int parseTime(String event) {",
+                "        int space = event.indexOf(\" \");",
+                "        if (space < 1 || space != event.lastIndexOf(\" \")) {",
+                "            return -1;",
+                "        }",
+                "        String time = event.substring(0, space);",
+                "        String result = event.substring(space + 1);",
+                "        if (time.length() > 7 || !time.matches(\"[0-9]+\")) {",
+                "            return -1;",
+                "        }",
+                "        if (!result.equals(\"ok\") && !result.equals(\"fail\")) {",
+                "            return -1;",
+                "        }",
+                "        return Integer.parseInt(time);",
+                "    }",
+                "",
+                "    static String handle(int second, String result) {",
+                "        if (second < last) {",
+                "            return \"OUT OF ORDER\";",
+                "        }",
+                "        last = second;",
+                "        if (second / WINDOW_SECONDS != window) {",
+                "            window = second / WINDOW_SECONDS;",
+                "            inWindow = 0;",
+                "        }",
+                "        if (inWindow >= RATE_LIMIT) {",
+                "            return \"RATE LIMITED\";",
+                "        }",
+                "        inWindow++;",
+                "        if (lockedUntil != -1 && second >= lockedUntil) {",
+                "            lockedUntil = -1;",
+                "            fails = 0;",
+                "        }",
+                "        if (lockedUntil != -1) {",
+                "            return \"LOCKED until \" + lockedUntil;",
+                "        }",
+                "        if (result.equals(\"ok\")) {",
+                "            fails = 0;",
+                "            return \"ALLOW\";",
+                "        }",
+                "        fails++;",
+                "        if (fails >= MAX_FAILS) {",
+                "            lockedUntil = second + LOCK_SECONDS;",
+                "            fails = 0;",
+                "            return \"DENY - locked for \" + LOCK_SECONDS + \"s\";",
+                "        }",
+                "        return \"DENY (\" + fails + \" of \" + MAX_FAILS + \")\";",
+                "    }",
+                "}")
+            .walkthrough(
+                "The policy's memory - fails, the lock, the last time, the "
+                + "window and its count - lives in static fields, so handle "
+                + "can be called once per event and remember everything "
+                + "between calls. main only reads, filters and counts; handle "
+                + "only decides. That split is Campaign 03's toolkit shape, "
+                + "now inside a loop.\n"
+                + "\n"
+                + "ORDER is the whole design. Bad records are refused before "
+                + "they can touch any state. The rate limit comes before the "
+                + "lockout, so a flood of attempts during a lock does not "
+                + "even reach the lockout logic. The lock is checked before "
+                + "the password result, so a locked account answers LOCKED "
+                + "to a correct password too, and learns nothing. And an "
+                + "expired lock clears itself before the check - a temporary "
+                + "lock, not a permanent one.\n"
+                + "\n"
+                + "The hidden tests replay streams built to probe each rule: "
+                + "the third fail, an ok during a lock, the first second "
+                + "after the lock ends, a sixth attempt in one window, and "
+                + "events that are malformed or out of order. This is how "
+                + "security teams test a policy before it protects real "
+                + "accounts.")
+            .sample(Lab.typing("1 fail", "2 fail", "3 ok", "11 fail", "12 fail", "13 fail",
+                               "20 ok", "80 ok", "END"),
+                "Event: 1 fail",
+                "DENY (1 of 3)",
+                "Event: 2 fail",
+                "DENY (2 of 3)",
+                "Event: 3 ok",
+                "ALLOW",
+                "Event: 11 fail",
+                "DENY (1 of 3)",
+                "Event: 12 fail",
+                "DENY (2 of 3)",
+                "Event: 13 fail",
+                "DENY - locked for 60s",
+                "Event: 20 ok",
+                "LOCKED until 73",
+                "Event: 80 ok",
+                "ALLOW",
+                "Event: END",
+                "Allowed: 2  Denied: 6  Limited: 0  Rejected: 0")
+            .hidden(Lab.typing("END"),
+                "Event: END",
+                "Allowed: 0  Denied: 0  Limited: 0  Rejected: 0")
+            .hidden(Lab.typing("5 fail", "6 fail", "7 fail", "66 ok", "67 ok", "END"),
+                "Event: 5 fail",
+                "DENY (1 of 3)",
+                "Event: 6 fail",
+                "DENY (2 of 3)",
+                "Event: 7 fail",
+                "DENY - locked for 60s",
+                "Event: 66 ok",
+                "LOCKED until 67",
+                "Event: 67 ok",
+                "ALLOW",
+                "Event: END",
+                "Allowed: 1  Denied: 4  Limited: 0  Rejected: 0")
+            .hidden(Lab.typing("0 ok", "1 ok", "2 ok", "3 ok", "4 ok", "5 ok", "10 ok", "END"),
+                "Event: 0 ok",
+                "ALLOW",
+                "Event: 1 ok",
+                "ALLOW",
+                "Event: 2 ok",
+                "ALLOW",
+                "Event: 3 ok",
+                "ALLOW",
+                "Event: 4 ok",
+                "ALLOW",
+                "Event: 5 ok",
+                "RATE LIMITED",
+                "Event: 10 ok",
+                "ALLOW",
+                "Event: END",
+                "Allowed: 6  Denied: 0  Limited: 1  Rejected: 0")
+            .hidden(Lab.typing("10 ok", "9 ok", "10 OK", "ten ok", "10  ok", "12345678 ok",
+                               "11 fail", "END"),
+                "Event: 10 ok",
+                "ALLOW",
+                "Event: 9 ok",
+                "OUT OF ORDER",
+                "Event: 10 OK",
+                "MALFORMED",
+                "Event: ten ok",
+                "MALFORMED",
+                "Event: 10  ok",
+                "MALFORMED",
+                "Event: 12345678 ok",
+                "MALFORMED",
+                "Event: 11 fail",
+                "DENY (1 of 3)",
+                "Event: END",
+                "Allowed: 1  Denied: 1  Limited: 0  Rejected: 5")
+            .hidden(Lab.typing("100 fail", "101 fail", "102 fail", "150 fail", "161 fail",
+                               "162 fail", "END"),
+                "Event: 100 fail",
+                "DENY (1 of 3)",
+                "Event: 101 fail",
+                "DENY (2 of 3)",
+                "Event: 102 fail",
+                "DENY - locked for 60s",
+                "Event: 150 fail",
+                "LOCKED until 162",
+                "Event: 161 fail",
+                "LOCKED until 162",
+                "Event: 162 fail",
+                "DENY (1 of 3)",
+                "Event: END",
+                "Allowed: 0  Denied: 6  Limited: 0  Rejected: 0"));
     }
 }
